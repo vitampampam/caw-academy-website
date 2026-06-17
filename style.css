@@ -31,7 +31,7 @@
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth; overflow-x:clip}
 body{margin:0; color:var(--ink);
   background:
     radial-gradient(1200px 620px at 82% -8%, rgba(87,94,207,.12), transparent 60%),
@@ -152,39 +152,6 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .ipad-bz{width:150px; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:22px; padding:8px; box-shadow:var(--shadow-lg)}
 .ipad-bz img{display:block; width:100%; border-radius:13px}
 @media (max-width:980px){ .dev + .dev{margin-left:-22px} }
-@media (max-width:560px){
-  .lineup{transform:scale(.72)}
-  .device-stage{min-height:0; margin-top:8px; padding:4px 0 22px}
-  .wrap{padding:0 18px}
-  section{padding:40px 0}
-  .stats{padding:18px 14px}
-}
-@media (max-width:400px){ .lineup{transform:scale(.62)} }
-
-/* mobile: turn card rows into horizontal swipe carousels (next card peeks) */
-@media (max-width:560px){
-  .props, .tracks, .grid, .gallery{
-    display:flex; flex-wrap:nowrap; overflow-x:auto; gap:14px;
-    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-    margin:0 -18px; padding:4px 18px 16px; scrollbar-width:none;
-  }
-  .props::-webkit-scrollbar, .tracks::-webkit-scrollbar,
-  .grid::-webkit-scrollbar, .gallery::-webkit-scrollbar{ display:none; height:0 }
-  .props > *, .tracks > *, .grid > *, .gallery > *{
-    flex:0 0 82%; max-width:82%; scroll-snap-align:center;
-  }
-  .gcol{ scroll-snap-align:center; }
-}
-
-/* mobile: collapse the header to logo + "Get the app" only (no overlap) */
-@media (max-width:640px){
-  .nav{padding:12px 18px}
-  .brand{font-size:20px; gap:8px}
-  .brand img{width:26px; height:26px}
-  .nav .links a:not(.cta){display:none}
-  .nav .links a.cta{margin-left:0; white-space:nowrap; padding:9px 16px}
-}
-
 /* ---------- credibility ribbon -------------------------------------------- */
 .ribbon{position:relative; z-index:2; display:flex; flex-wrap:wrap; justify-content:center; gap:14px 30px;
   max-width:var(--maxw); margin:-6px auto 0; padding:18px 24px 6px; color:var(--muted)}
@@ -427,3 +394,37 @@ footer .foot-links a:first-child{margin-left:0}
   .reveal{transition:none; opacity:1; transform:none}
   html{scroll-behavior:auto}
 }
+
+/* =================== MOBILE OVERRIDES — kept last so they win the cascade ============ */
+/* header collapses to logo + "Get the app" */
+@media (max-width:640px){
+  .nav{padding:12px 18px}
+  .brand{font-size:20px; gap:8px}
+  .brand img{width:26px; height:26px}
+  .nav .links a:not(.cta){display:none}
+  .nav .links a.cta{margin-left:0; white-space:nowrap; padding:9px 16px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  section{padding:38px 0}
+  /* tighter hero, no big empty gap under the device lineup */
+  .hero-grid{padding:14px 18px 4px}
+  .hero h1{font-size:clamp(30px,8.5vw,40px); margin:10px 0 14px}
+  .hero .lede{font-size:16px}
+  .device-stage{min-height:0; margin-top:2px; padding:2px 0 6px}
+  .lineup{transform:scale(.64)}
+  .hero-cta{justify-content:center}
+  .stats{padding:18px 14px}
+  /* card rows become edge-to-edge horizontal swipe carousels (next card peeks) */
+  .props, .tracks, .grid, .gallery{
+    display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
+    overflow-x:auto; gap:14px; margin:0 -18px; padding:6px 18px 14px;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .props::-webkit-scrollbar, .tracks::-webkit-scrollbar,
+  .grid::-webkit-scrollbar, .gallery::-webkit-scrollbar{ display:none }
+  .props > *, .tracks > *, .grid > *, .gallery > *{
+    flex:0 0 84%; width:84%; max-width:84%; scroll-snap-align:center;
+  }
+}
+@media (max-width:400px){ .lineup{transform:scale(.56)} }
