@@ -464,25 +464,11 @@ footer .foot-links a:first-child{margin-left:0}
   .hero .lede{font-size:15.5px}
   .lede-full{display:none}
   .lede-short{display:block}
-  /* device family: bigger iPhone in front; MacBook from the left and iPad from
-     the right, both behind it at full strength (no dimming, no blur) */
-  .device-stage{min-height:0; margin-top:0; padding:6px 0 6px}
-  .lineup{position:relative; width:100%; min-height:436px;
-    display:flex; align-items:flex-end; justify-content:center; zoom:1; transform:none}
-  .dev + .dev{margin-left:0}
-  .dlabel{display:none}
-  /* iPhone — bigger, front, centred */
-  .dev.iphone{position:relative; z-index:3}
-  .dev.iphone .pscale{--s:.64 !important}
-  .dev.ipad, .dev.mac{display:block; pointer-events:none}
-  /* MacBook — comes in from the left, behind the iPhone */
-  .dev.mac{position:absolute; left:50%; bottom:0; transform:translateX(calc(-100% + 42px));
-    width:auto; z-index:1}
-  .dev.mac .macbook{width:286px}
-  /* iPad — comes in from the right, behind the iPhone */
-  .dev.ipad{position:absolute; left:50%; bottom:0; transform:translateX(32px);
-    width:auto; z-index:2}
-  .dev.ipad .ipad-bz{width:134px}
+  /* hero: the very same three-device fan as desktop (iPhone · iPad · MacBook),
+     just scaled down to fit the phone. zoom shrinks the layout too, so the fan
+     never pushes the page sideways. */
+  .device-stage{min-height:0; margin-top:2px; padding:2px 0 28px}
+  .lineup{zoom:.60; transform:none}
   /* lighter cards */
   .card{padding:20px 18px}
   .card .ico{width:42px; height:42px; margin-bottom:12px}
@@ -504,4 +490,6 @@ footer .foot-links a:first-child{margin-left:0}
   .stat .l{font-size:11.5px}
   .ribbon{gap:10px 20px; padding:14px 18px 4px}
   .ribbon span{font-size:12.5px}
+  /* less dead space under the disclaimer at the very bottom */
+  footer{padding:26px 0 16px}
 }
