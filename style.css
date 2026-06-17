@@ -413,7 +413,7 @@ footer .foot-links a:first-child{margin-left:0}
 }
 @media (max-width:560px){
   .wrap{padding:0 18px}
-  section{padding:38px 0}
+  section{padding:26px 0}
   /* hero: fit the screen — no sideways overflow, no big gap */
   .hero-grid{padding:14px 18px 4px}
   .hero h1{font-size:clamp(26px,7.5vw,40px); margin:10px 0 14px; overflow-wrap:break-word}
@@ -426,14 +426,14 @@ footer .foot-links a:first-child{margin-left:0}
   /* card rows become edge-to-edge horizontal swipe carousels (next card peeks) */
   .props, .tracks, .grid, .gallery{
     display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
-    overflow-x:auto; gap:14px; margin:0 -18px; padding:6px 18px 14px;
+    overflow-x:auto; gap:10px; margin:0 -18px; padding:4px 18px 10px;
     scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none;
   }
   .props::-webkit-scrollbar, .tracks::-webkit-scrollbar,
   .grid::-webkit-scrollbar, .gallery::-webkit-scrollbar{ display:none }
   /* keep cards fully visible & still — no reveal/hover vertical jitter while swiping */
   .props > *, .tracks > *, .grid > *, .gallery > *{
-    flex:0 0 84%; width:84%; max-width:84%; scroll-snap-align:center;
+    flex:0 0 78%; width:78%; max-width:78%; scroll-snap-align:center;
     opacity:1; transform:none; transition:box-shadow .2s ease, border-color .2s ease;
   }
   .card:hover, .prop:hover, .track:hover{ transform:none }
@@ -456,7 +456,7 @@ footer .foot-links a:first-child{margin-left:0}
 @media (max-width:560px){
   body{font-size:16px}
   .eyebrow{font-size:11.5px; letter-spacing:1.2px; padding:6px 12px}
-  .section-head{margin:0 auto 22px}
+  .section-head{margin:0 auto 14px}
   .section-head h2{font-size:clamp(22px,6.4vw,28px)}
   .section-head p{font-size:15px; max-width:36ch}
   /* hero: one clear iPhone instead of the cramped 3-device cluster */
@@ -464,24 +464,25 @@ footer .foot-links a:first-child{margin-left:0}
   .hero .lede{font-size:15.5px}
   .lede-full{display:none}
   .lede-short{display:block}
-  /* device family: sharp iPhone in front, faded iPad + larger MacBook behind */
+  /* device family: bigger iPhone in front; MacBook from the left and iPad from
+     the right, both behind it at full strength (no dimming, no blur) */
   .device-stage{min-height:0; margin-top:0; padding:6px 0 6px}
-  .lineup{position:relative; width:100%; min-height:432px;
+  .lineup{position:relative; width:100%; min-height:436px;
     display:flex; align-items:flex-end; justify-content:center; zoom:1; transform:none}
   .dev + .dev{margin-left:0}
   .dlabel{display:none}
-  /* iPhone — sharp, front, centred */
+  /* iPhone — bigger, front, centred */
   .dev.iphone{position:relative; z-index:3}
-  .dev.iphone .pscale{--s:.58 !important}
-  /* MacBook — largest, centred behind, lifted so its screen peeks above the iPhone */
+  .dev.iphone .pscale{--s:.64 !important}
   .dev.ipad, .dev.mac{display:block; pointer-events:none}
-  .dev.mac{position:absolute; left:50%; bottom:188px; transform:translateX(-50%);
-    width:auto; z-index:1; opacity:.45; filter:blur(.5px)}
-  .dev.mac .macbook{width:300px}
-  /* iPad — medium, peeking from behind on the right */
-  .dev.ipad{position:absolute; left:50%; bottom:0; transform:translateX(56px);
-    width:auto; z-index:2; opacity:.7}
-  .dev.ipad .ipad-bz{width:148px}
+  /* MacBook — comes in from the left, behind the iPhone */
+  .dev.mac{position:absolute; left:50%; bottom:0; transform:translateX(calc(-100% + 42px));
+    width:auto; z-index:1}
+  .dev.mac .macbook{width:286px}
+  /* iPad — comes in from the right, behind the iPhone */
+  .dev.ipad{position:absolute; left:50%; bottom:0; transform:translateX(32px);
+    width:auto; z-index:2}
+  .dev.ipad .ipad-bz{width:134px}
   /* lighter cards */
   .card{padding:20px 18px}
   .card .ico{width:42px; height:42px; margin-bottom:12px}
