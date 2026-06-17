@@ -105,8 +105,12 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
   background:radial-gradient(circle, rgba(244,81,30,.14), transparent 70%); animation:drift2 24s ease-in-out infinite}
 @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
 @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,-30px)}}
-.hero-grid{position:relative; z-index:1; display:grid; grid-template-columns:1.08fr .92fr; gap:40px; align-items:center;
+.hero-grid{position:relative; z-index:1; display:grid; grid-template-columns:1.08fr .92fr;
+  grid-template-areas:"copy device" "cta device"; column-gap:40px; row-gap:0; align-items:center;
   max-width:var(--maxw); margin:0 auto; padding:34px 24px 52px}
+.hero-copy{grid-area:copy; align-self:end}
+.device-stage{grid-area:device}
+.hero-cta{grid-area:cta; align-self:start; margin-top:2px}
 .hero h1{font-family:var(--serif); font-weight:600; font-size:clamp(36px,5.4vw,62px);
   line-height:1.03; letter-spacing:-.6px; margin:18px 0 16px}
 .hero h1 em{font-family:var(--sans); font-style:normal; font-weight:800; color:var(--indigo); letter-spacing:-.02em}
@@ -383,9 +387,11 @@ footer .foot-links a:first-child{margin-left:0}
 @media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} }
 /* tablets & below: hero stacks to a single centered column */
 @media (max-width:1024px){
-  .hero-grid{grid-template-columns:1fr; gap:8px; text-align:center; padding-bottom:24px}
+  .hero-grid{grid-template-columns:1fr; grid-template-areas:"copy" "device" "cta";
+    row-gap:8px; text-align:center; padding-bottom:24px}
+  .hero-copy{align-self:auto}
+  .hero-cta{align-self:auto; justify-content:center; margin-top:18px}
   .hero .lede{margin-left:auto; margin-right:auto}
-  .hero-cta{justify-content:center}
   .hero .eyebrow{margin:0 auto}
   .device-stage{min-height:560px; margin-top:16px}
 }
@@ -436,6 +442,16 @@ footer .foot-links a:first-child{margin-left:0}
 }
 @media (max-width:400px){ .lineup{zoom:.56} }
 
+/* ===== mobile: store badges stay side-by-side (never stack vertically) ===== */
+@media (max-width:560px){
+  .hero-cta, .badges{flex-wrap:nowrap; gap:8px; justify-content:center}
+  .store-badge{flex:1 1 0; min-width:0; padding:8px 10px; gap:8px; justify-content:center}
+  .store-badge .logo{width:21px; height:21px}
+  .store-badge .tx{min-width:0}
+  .store-badge .tx small{font-size:8.5px; letter-spacing:.2px; white-space:nowrap}
+  .store-badge .tx b{font-size:13.5px; white-space:nowrap}
+}
+
 /* ===== mobile polish: lighter type, single-iPhone hero, tighter cards ===== */
 @media (max-width:560px){
   body{font-size:16px}
@@ -448,11 +464,24 @@ footer .foot-links a:first-child{margin-left:0}
   .hero .lede{font-size:15.5px}
   .lede-full{display:none}
   .lede-short{display:block}
-  .dev.ipad, .dev.mac{display:none}
-  .dev.iphone .pscale{--s:.62 !important}
-  .lineup{zoom:1; transform:none}
+  /* device family: sharp iPhone in front, faded iPad + larger MacBook behind */
+  .device-stage{min-height:0; margin-top:0; padding:6px 0 6px}
+  .lineup{position:relative; width:100%; min-height:432px;
+    display:flex; align-items:flex-end; justify-content:center; zoom:1; transform:none}
+  .dev + .dev{margin-left:0}
   .dlabel{display:none}
-  .device-stage{min-height:0; margin-top:0; padding:4px 0 2px}
+  /* iPhone — sharp, front, centred */
+  .dev.iphone{position:relative; z-index:3}
+  .dev.iphone .pscale{--s:.58 !important}
+  /* MacBook — largest, centred behind, lifted so its screen peeks above the iPhone */
+  .dev.ipad, .dev.mac{display:block; pointer-events:none}
+  .dev.mac{position:absolute; left:50%; bottom:188px; transform:translateX(-50%);
+    width:auto; z-index:1; opacity:.45; filter:blur(.5px)}
+  .dev.mac .macbook{width:300px}
+  /* iPad — medium, peeking from behind on the right */
+  .dev.ipad{position:absolute; left:50%; bottom:0; transform:translateX(56px);
+    width:auto; z-index:2; opacity:.7}
+  .dev.ipad .ipad-bz{width:148px}
   /* lighter cards */
   .card{padding:20px 18px}
   .card .ico{width:42px; height:42px; margin-bottom:12px}
