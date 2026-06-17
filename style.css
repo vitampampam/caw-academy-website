@@ -161,6 +161,30 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 }
 @media (max-width:400px){ .lineup{transform:scale(.62)} }
 
+/* mobile: turn card rows into horizontal swipe carousels (next card peeks) */
+@media (max-width:560px){
+  .props, .tracks, .grid, .gallery{
+    display:flex; flex-wrap:nowrap; overflow-x:auto; gap:14px;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    margin:0 -18px; padding:4px 18px 16px; scrollbar-width:none;
+  }
+  .props::-webkit-scrollbar, .tracks::-webkit-scrollbar,
+  .grid::-webkit-scrollbar, .gallery::-webkit-scrollbar{ display:none; height:0 }
+  .props > *, .tracks > *, .grid > *, .gallery > *{
+    flex:0 0 82%; max-width:82%; scroll-snap-align:center;
+  }
+  .gcol{ scroll-snap-align:center; }
+}
+
+/* mobile: collapse the header to logo + "Get the app" only (no overlap) */
+@media (max-width:640px){
+  .nav{padding:12px 18px}
+  .brand{font-size:20px; gap:8px}
+  .brand img{width:26px; height:26px}
+  .nav .links a:not(.cta){display:none}
+  .nav .links a.cta{margin-left:0; white-space:nowrap; padding:9px 16px}
+}
+
 /* ---------- credibility ribbon -------------------------------------------- */
 .ribbon{position:relative; z-index:2; display:flex; flex-wrap:wrap; justify-content:center; gap:14px 30px;
   max-width:var(--maxw); margin:-6px auto 0; padding:18px 24px 6px; color:var(--muted)}
