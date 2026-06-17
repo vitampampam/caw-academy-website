@@ -434,3 +434,41 @@ footer .foot-links a:first-child{margin-left:0}
   .gcol:hover .phone{ transform:scale(var(--s)) }
 }
 @media (max-width:400px){ .lineup{zoom:.56} }
+
+/* ===== mobile polish: lighter type, single-iPhone hero, tighter cards ===== */
+@media (max-width:560px){
+  body{font-size:16px}
+  .eyebrow{font-size:11.5px; letter-spacing:1.2px; padding:6px 12px}
+  .section-head{margin:0 auto 22px}
+  .section-head h2{font-size:clamp(22px,6.4vw,28px)}
+  .section-head p{font-size:15px; max-width:36ch}
+  /* hero: one clear iPhone instead of the cramped 3-device cluster */
+  .hero h1{font-size:clamp(26px,8vw,36px); margin:8px 0 12px}
+  .hero .lede{font-size:15.5px}
+  .dev.ipad, .dev.mac{display:none}
+  .dev.iphone .pscale{--s:.62 !important}
+  .lineup{zoom:1; transform:none}
+  .dlabel{display:none}
+  .device-stage{min-height:0; margin-top:0; padding:4px 0 2px}
+  /* lighter cards */
+  .card{padding:20px 18px}
+  .card .ico{width:42px; height:42px; margin-bottom:12px}
+  .card h3{font-size:16.5px; font-weight:700}
+  .card p{font-size:14px}
+  .prop{padding:22px 20px}
+  .prop h3{font-size:18px}
+  .prop p{font-size:14.5px}
+  .track{padding:20px}
+  .track h3{font-size:17px}
+  .track > p{font-size:13px}
+  .track li{font-size:13px}
+  .faq summary{font-size:15.5px; padding:15px 18px}
+  .faq .ans{font-size:14.5px; padding:0 18px 16px}
+  .cta-band{padding:40px 22px}
+  .cta-band h2{font-size:clamp(24px,7vw,30px)}
+  .chips span{font-size:14px; padding:11px 14px}
+  .stat .n{font-size:clamp(22px,7vw,28px)}
+  .stat .l{font-size:11.5px}
+  .ribbon{gap:10px 20px; padding:14px 18px 4px}
+  .ribbon span{font-size:12.5px}
+}
