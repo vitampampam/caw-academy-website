@@ -407,12 +407,13 @@ footer .foot-links a:first-child{margin-left:0}
 @media (max-width:560px){
   .wrap{padding:0 18px}
   section{padding:38px 0}
-  /* tighter hero, no big empty gap under the device lineup */
+  /* hero: fit the screen — no sideways overflow, no big gap */
   .hero-grid{padding:14px 18px 4px}
-  .hero h1{font-size:clamp(30px,8.5vw,40px); margin:10px 0 14px}
-  .hero .lede{font-size:16px}
-  .device-stage{min-height:0; margin-top:2px; padding:2px 0 6px}
-  .lineup{transform:scale(.64)}
+  .hero h1{font-size:clamp(26px,7.5vw,40px); margin:10px 0 14px; overflow-wrap:break-word}
+  .hero .lede{font-size:16px; max-width:100%}
+  .device-stage{min-height:0; margin-top:2px; padding:2px 0 8px}
+  /* zoom (not transform) shrinks the lineup's LAYOUT too, so it can't push the page wide */
+  .lineup{zoom:.64; transform:none}
   .hero-cta{justify-content:center}
   .stats{padding:18px 14px}
   /* card rows become edge-to-edge horizontal swipe carousels (next card peeks) */
@@ -423,8 +424,13 @@ footer .foot-links a:first-child{margin-left:0}
   }
   .props::-webkit-scrollbar, .tracks::-webkit-scrollbar,
   .grid::-webkit-scrollbar, .gallery::-webkit-scrollbar{ display:none }
+  /* keep cards fully visible & still — no reveal/hover vertical jitter while swiping */
   .props > *, .tracks > *, .grid > *, .gallery > *{
     flex:0 0 84%; width:84%; max-width:84%; scroll-snap-align:center;
+    opacity:1; transform:none; transition:box-shadow .2s ease, border-color .2s ease;
   }
+  .card:hover, .prop:hover, .track:hover{ transform:none }
+  .gcol .phone{ transition:none }
+  .gcol:hover .phone{ transform:scale(var(--s)) }
 }
-@media (max-width:400px){ .lineup{transform:scale(.56)} }
+@media (max-width:400px){ .lineup{zoom:.56} }
