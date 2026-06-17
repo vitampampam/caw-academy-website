@@ -111,6 +111,7 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
   line-height:1.03; letter-spacing:-.6px; margin:18px 0 16px}
 .hero h1 em{font-family:var(--sans); font-style:normal; font-weight:800; color:var(--indigo); letter-spacing:-.02em}
 .hero .lede{font-size:clamp(16px,1.55vw,19px); color:var(--ink-soft); max-width:40ch; margin:0 0 26px}
+.lede-short{display:none}
 .hero-cta{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
 .hero-note{margin-top:16px; font-size:13.5px; color:var(--muted)}
 .platforms{display:flex; gap:18px; margin-top:20px; color:var(--muted); font-size:13px; font-weight:700}
@@ -445,6 +446,8 @@ footer .foot-links a:first-child{margin-left:0}
   /* hero: one clear iPhone instead of the cramped 3-device cluster */
   .hero h1{font-size:clamp(26px,8vw,36px); margin:8px 0 12px}
   .hero .lede{font-size:15.5px}
+  .lede-full{display:none}
+  .lede-short{display:block}
   .dev.ipad, .dev.mac{display:none}
   .dev.iphone .pscale{--s:.62 !important}
   .lineup{zoom:1; transform:none}
