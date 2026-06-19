@@ -561,3 +561,19 @@ footer .foot-links a:first-child{margin-left:0}
 .faq-toggle:hover{transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:var(--indigo-3)}
 .faq-toggle .chev{width:18px; height:18px; transition:transform .25s}
 .faq-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+
+/* ============================ GALLERY — iPad frames ============================ */
+.gpad{width:210px; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:22px;
+  padding:9px; box-shadow:var(--shadow-lg); cursor:zoom-in;
+  transition:transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease}
+.gpad img{display:block; width:100%; border-radius:13px}
+.gcol:hover .gpad{transform:scale(1.06); box-shadow:0 50px 100px rgba(38,44,120,.32)}
+@media (max-width:520px){ .gpad{width:180px} }
+
+/* Hero iPhone: show the full screenshot within its frame (no crop) */
+.lineup .phone .shot{object-fit:contain}
+
+@media (prefers-reduced-motion: reduce){
+  .gpad{transition:none}
+  .gcol:hover .gpad{transform:none}
+}

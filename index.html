@@ -92,8 +92,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
-<link rel="preload" as="image" href="screens/home.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
@@ -128,7 +128,7 @@
       <div class="dev iphone" tabindex="0" aria-label="CAW Academy on iPhone">
         <div class="pscale" style="--s:.28">
         <div class="phone" aria-hidden="true">
-          <img class="shot" src="screens/home.png" alt="CAW Academy home screen"
+          <img class="shot" src="screens/hero-iphone.png" alt="CAW Academy home screen on iPhone"
                onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
           <div class="scr">
             <div class="island"></div>
@@ -194,11 +194,11 @@
         <span class="dlabel">iPhone</span>
       </div>
       <div class="dev ipad" aria-hidden="true" tabindex="0" aria-label="CAW Academy on iPad">
-        <div class="ipad-bz"><img src="screens/ipad.png" alt="CAW Academy on iPad" loading="lazy"></div>
+        <div class="ipad-bz"><img src="screens/hero-ipad.png" alt="CAW Academy on iPad" loading="lazy"></div>
         <span class="dlabel">iPad</span>
       </div>
       <div class="dev mac" aria-hidden="true" tabindex="0" aria-label="CAW Academy on Mac">
-        <div class="macbook"><div class="lid"><img src="screens/mac.png" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
+        <div class="macbook"><div class="lid"><img src="screens/hero-mac.png" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
         <span class="dlabel">MacBook</span>
       </div>
       </div>
@@ -433,47 +433,23 @@
     <div class="gallery">
 
       <div class="gcol reveal">
-        <div class="pscale" style="--s:.62">
-          <div class="phone" aria-hidden="true">
-            <img class="shot" loading="lazy" src="screens/lesson.png" alt="CAW Academy Part-M lesson screen explaining Airworthiness Directives"
-                 onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
-            <div class="scr ph"><div class="ph-in"><div class="ph-logo">CAW</div><div class="ph-code">Lesson</div><div class="ph-t">screen preview</div></div></div>
-          </div>
-        </div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.png" alt="CAW Academy dashboard on iPad listing every EASA course"></div>
+        <div class="gcap"><b>Every course in one place</b><span>Browse all 14 courses and pick up exactly where you left off.</span></div>
+      </div>
+
+      <div class="gcol reveal">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.png" alt="CAW Academy lesson on iPad explaining Part-M data for modifications and repairs"></div>
         <div class="gcap"><b>Lessons that explain it</b><span>Every rule broken down point by point, with the reference built in.</span></div>
       </div>
 
       <div class="gcol reveal">
-        <div class="pscale" style="--s:.62">
-          <div class="phone" aria-hidden="true">
-            <img class="shot" loading="lazy" src="screens/flashcards.png" alt="EASA flashcards for continuing-airworthiness revision"
-                 onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
-            <div class="scr ph"><div class="ph-in"><div class="ph-logo">CAW</div><div class="ph-code">Flashcards</div><div class="ph-t">screen preview</div></div></div>
-          </div>
-        </div>
-        <div class="gcap"><b>Flashcards that lock it in</b><span>Flip, then rate your recall — the app focuses on what you keep missing.</span></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.png" alt="CAW Academy quiz on iPad showing instant feedback and the answer explanation"></div>
+        <div class="gcap"><b>Quizzes with instant feedback</b><span>Answer, then see the correct answer explained — so it actually sticks.</span></div>
       </div>
 
       <div class="gcol reveal">
-        <div class="pscale" style="--s:.62">
-          <div class="phone" aria-hidden="true">
-            <img class="shot" loading="lazy" src="screens/quiz.png" alt="Timed EASA mock exam screen with multiple-choice questions"
-                 onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
-            <div class="scr ph"><div class="ph-in"><div class="ph-logo">CAW</div><div class="ph-code">Quiz</div><div class="ph-t">screen preview</div></div></div>
-          </div>
-        </div>
-        <div class="gcap"><b>Quizzes &amp; mock exams</b><span>Per-lesson quizzes plus a timed Exam Mode with a 75% pass mark.</span></div>
-      </div>
-
-      <div class="gcol reveal">
-        <div class="pscale" style="--s:.62">
-          <div class="phone" aria-hidden="true">
-            <img class="shot" loading="lazy" src="screens/glossary.png" alt="EASA glossary and full-text search screen"
-                 onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
-            <div class="scr ph"><div class="ph-in"><div class="ph-logo">CAW</div><div class="ph-code">Glossary</div><div class="ph-t">screen preview</div></div></div>
-          </div>
-        </div>
-        <div class="gcap"><b>Search &amp; glossary</b><span>Find any EASA term or concept across every course in seconds.</span></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.png" alt="CAW Academy timed mock exam on iPad with a live timer and question navigator"></div>
+        <div class="gcap"><b>Timed mock exams</b><span>Exam-style sittings with a live timer and a 75% pass mark.</span></div>
       </div>
 
     </div>
@@ -693,10 +669,10 @@
     var lbimg = lb.querySelector('img');
     function open(src, alt){ lbimg.src = src; lbimg.alt = alt || ''; lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
     function close(){ lb.classList.remove('open'); document.body.style.overflow = ''; lbimg.removeAttribute('src'); }
-    document.querySelectorAll('.gcol .pscale').forEach(function(p){
+    document.querySelectorAll('.gcol .gpad').forEach(function(p){
       p.setAttribute('role','button'); p.setAttribute('tabindex','0');
       p.setAttribute('aria-label','View this screen full size');
-      function go(){ var img = p.querySelector('img.shot'); if (img) open(img.currentSrc || img.src, img.alt); }
+      function go(){ var img = p.querySelector('img'); if (img) open(img.currentSrc || img.src, img.alt); }
       p.addEventListener('click', go);
       p.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     });
