@@ -563,11 +563,14 @@ footer .foot-links a:first-child{margin-left:0}
 .faq-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
 
 /* ============================ GALLERY — iPad frames ============================ */
-.gpad{width:210px; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:22px;
+.gpad{width:210px; position:relative; z-index:1; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:22px;
   padding:9px; box-shadow:var(--shadow-lg); cursor:zoom-in;
-  transition:transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease}
+  transition:transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease, filter .35s ease}
 .gpad img{display:block; width:100%; border-radius:13px}
-.gcol:hover .gpad{transform:scale(1.06); box-shadow:0 50px 100px rgba(38,44,120,.32)}
+/* Hover-to-focus, like the hero lineup: the iPad you point at grows, the rest ease back. */
+.gallery:hover .gpad, .gallery:focus-within .gpad{transform:scale(.96); filter:saturate(.94) brightness(.99)}
+.gcol:hover .gpad, .gcol:focus-within .gpad{transform:scale(1.13); filter:none; z-index:5;
+  box-shadow:0 50px 100px rgba(38,44,120,.32)}
 @media (max-width:520px){ .gpad{width:180px} }
 
 /* Hero iPhone: show the full screenshot within its frame (no crop) */
@@ -575,5 +578,5 @@ footer .foot-links a:first-child{margin-left:0}
 
 @media (prefers-reduced-motion: reduce){
   .gpad{transition:none}
-  .gcol:hover .gpad{transform:none}
+  .gallery:hover .gpad, .gcol:hover .gpad, .gcol:focus-within .gpad{transform:none; filter:none}
 }
