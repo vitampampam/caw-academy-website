@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CAW Academy — EASA airworthiness training, made learnable</title>
-<meta name="description" content="Learn EASA airworthiness the easy way. Initial and continuing airworthiness — Part-21, Part-M, Part-CAMO, Part-145, AMP development, the Airworthiness Review (ARC), Maintenance Economics and more. Plain-language lessons built on real-world experience and case studies, with flashcards and timed mock exams for iPhone, iPad and Mac.">
+<meta name="description" content="EASA airworthiness, made learnable. Initial and continuing airworthiness — Part-21, Part-M, Part-CAMO, Part-145, AMP development, the Airworthiness Review (ARC), Maintenance Economics and more. Plain-language lessons built on real-world experience and case studies, with flashcards and timed mock exams for iPhone, iPad and Mac.">
 <meta name="keywords" content="EASA training, EASA Part-M, Part-CAMO, Part-145, Part-21, continuing airworthiness, initial airworthiness, airworthiness review, ARC, AMP development, aircraft maintenance programme, maintenance economics, technical asset value, aircraft leasing, Part-66, Part-147, aviation training, CAMO, human factors, EWIS, fuel tank safety, EASA Easy Access Rules">
 <meta name="theme-color" content="#3E44B5">
 <meta property="og:title" content="CAW Academy — EASA airworthiness, made learnable">
@@ -93,7 +93,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <link rel="preload" as="image" href="screens/home.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 
@@ -103,6 +103,7 @@
     <a class="hide-sm" href="#why">Why</a>
     <a class="hide-sm" href="#inside">Inside</a>
     <a href="#curriculum">Curriculum</a>
+    <a class="hide-sm" href="#reviews">Reviews</a>
     <a class="nav-right" href="#faq">FAQ</a>
   </div>
 </nav>
@@ -256,14 +257,14 @@
   <section id="why">
     <div class="section-head reveal">
       <span class="eyebrow">Why CAW Academy</span>
-      <h2>Built to make hard regulations easy</h2>
+      <h2>Built to make hard regulations clear</h2>
       <p>Written by people who work in airworthiness, for people who need to know it cold —
          on the job and in the exam room.</p>
     </div>
     <div class="props">
       <div class="prop reveal">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-        <h3>Easy to learn</h3>
+        <h3>Clear and structured</h3>
         <p>Dense rules turned into clear, structured lessons — plain English, one idea at a
            time, with the official reference always a tap away. No legalese, no overwhelm.</p>
       </div>
@@ -536,10 +537,65 @@
     </div>
   </section>
 
+  <!-- ============================ REVIEWS ============================ -->
+  <!-- NOTE: these are PLACEHOLDER reviews and a placeholder rating/count.
+       Replace with genuine reviews (and real App Store figures) before publishing.
+       Do not add aggregateRating structured data until the ratings are real. -->
+  <section id="reviews">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Reviews</span>
+      <h2>What airworthiness professionals say</h2>
+      <p>Feedback from the hangar floor, the CAMO office and the exam hall.</p>
+    </div>
+
+    <div class="reviews-bar reveal">
+      <button class="reviews-summary" id="reviewsToggle" aria-expanded="true" aria-controls="reviewsCarousel">
+        <span class="stars" aria-hidden="true">★★★★★</span>
+        <span class="rsum-rating">4.9</span>
+        <span class="rsum-count">· <span id="reviewsCount">120</span>+ reviews</span>
+        <svg class="rsum-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="sr-only">Show or hide reviews</span>
+      </button>
+    </div>
+
+    <div class="reviews-carousel reveal" id="reviewsCarousel">
+      <button class="rev-arrow rev-prev" type="button" aria-label="Previous review">&#8249;</button>
+      <div class="rev-track" id="revTrack" role="list">
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Finally a study tool that explains the <em>why</em> behind the regs, not just the article number. The Part-M and CAMO lessons map straight onto my day job."</p>
+          <div class="rev-author">— Continuing-airworthiness engineer, CAMO</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"The timed mock exams and flashcards got me through my Part-66 module. The instant explanation after every question is what makes it stick."</p>
+          <div class="rev-author">— Part-66 / Part-147 student</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Plain-language lessons I can finish on a break and use the same afternoon. The ARC and AMP-development courses are spot on."</p>
+          <div class="rev-author">— Airworthiness review staff</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Works fully offline in the hangar, no account, no ads. Exactly what a busy Part-145 team needs for quick reference and revision."</p>
+          <div class="rev-author">— Part-145 certifying technician</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"The Maintenance Economics course is hard to find anywhere else. It finally made asset value and lease-return conditions click for me."</p>
+          <div class="rev-author">— Technical asset manager</div>
+        </article>
+      </div>
+      <button class="rev-arrow rev-next" type="button" aria-label="Next review">&#8250;</button>
+      <div class="rev-dots" id="revDots" role="group" aria-label="Choose a review"></div>
+    </div>
+  </section>
+
   <!-- ============================ CTA ============================ -->
   <section class="reveal" id="get">
     <div class="cta-band">
-      <h2>Study airworthiness the easy way</h2>
+      <h2>Study airworthiness with clarity</h2>
       <div class="badges" style="justify-content:center">
         <a class="store-badge" href="#" aria-disabled="true" aria-label="App Store — coming soon">
           <svg class="logo" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 1.6c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.8-.8 2-1.4 2.8-1.4zM19 17c-.5 1.1-.8 1.6-1.4 2.6-.9 1.3-2.1 3-3.6 3-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.5.9c-1.5 0-2.6-1.5-3.5-2.9C1.5 16.5 1.2 12 2.7 9.7 3.8 8 5.5 7 7.1 7c1.3 0 2.2.9 3.4.9 1.1 0 1.8-.9 3.4-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.8 1.2 7.9z"/></svg>
@@ -640,6 +696,68 @@
     });
     lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb-close')) close(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  })();
+
+  // reviews carousel — swipe / arrows / dots, auto-advance, click-to-toggle
+  (function(){
+    var track = document.getElementById('revTrack');
+    if (!track) return;
+    var carousel = document.getElementById('reviewsCarousel');
+    var cards = Array.prototype.slice.call(track.children);
+    var dotsWrap = document.getElementById('revDots');
+    var prev = carousel.querySelector('.rev-prev');
+    var next = carousel.querySelector('.rev-next');
+    var reduceM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    cards.forEach(function(_, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Go to review ' + (i + 1));
+      b.addEventListener('click', function(){ scrollToIndex(i); });
+      dotsWrap.appendChild(b);
+    });
+    var dots = Array.prototype.slice.call(dotsWrap.children);
+
+    function step(){ return cards.length > 1 ? (cards[1].offsetLeft - cards[0].offsetLeft) : track.clientWidth; }
+    function currentIndex(){ return Math.round(track.scrollLeft / (step() || 1)); }
+    function scrollToIndex(i){
+      i = Math.max(0, Math.min(cards.length - 1, i));
+      track.scrollTo({ left: i * step(), behavior: reduceM ? 'auto' : 'smooth' });
+    }
+    function setDots(){
+      var idx = currentIndex();
+      dots.forEach(function(d, i){ d.setAttribute('aria-current', i === idx ? 'true' : 'false'); });
+    }
+    setDots();
+    track.addEventListener('scroll', function(){ requestAnimationFrame(setDots); }, { passive: true });
+    if (prev) prev.addEventListener('click', function(){ scrollToIndex(currentIndex() - 1); });
+    if (next) next.addEventListener('click', function(){ scrollToIndex(currentIndex() + 1); });
+
+    var timer = null;
+    function start(){
+      if (reduceM || carousel.classList.contains('collapsed')) return;
+      stop();
+      timer = setInterval(function(){
+        var i = currentIndex();
+        scrollToIndex(i + 1 >= cards.length ? 0 : i + 1);
+      }, 5500);
+    }
+    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+    carousel.addEventListener('pointerenter', stop);
+    carousel.addEventListener('pointerleave', start);
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+    start();
+
+    var toggle = document.getElementById('reviewsToggle');
+    if (toggle) {
+      toggle.addEventListener('click', function(){
+        var open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        carousel.classList.toggle('collapsed', open);
+        if (open) { stop(); } else { setDots(); start(); }
+      });
+    }
   })();
 </script>
 </body>
