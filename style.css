@@ -321,7 +321,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .gallery{display:flex; gap:22px; justify-content:center; align-items:flex-start; flex-wrap:wrap}
 .gcol{display:flex; flex-direction:column; align-items:center; gap:16px}
 .gcap{text-align:center; max-width:210px}
-.gcap b{display:block; font-size:16px; font-weight:800; color:var(--ink)}
+.gcap b{display:block; font-size:16px; font-weight:800; color:var(--muted)}
 .gcap span{font-size:13px; color:var(--muted)}
 
 
