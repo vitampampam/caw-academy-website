@@ -93,7 +93,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <link rel="preload" as="image" href="screens/home.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 
@@ -486,7 +486,7 @@
       <h2>Good to know</h2>
       <p>The essentials before you start. Anything else — <a href="support.html">we're happy to help</a>.</p>
     </div>
-    <div class="faq">
+    <div class="faq" id="faqList">
       <details class="reveal" open>
         <summary>Is CAW Academy an official EASA product?
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
@@ -516,24 +516,30 @@
           revision for <strong>Part-66</strong> and <strong>Part-147</strong> students sitting the EASA
           regulation modules, alongside working CAMO and maintenance professionals.</div>
       </details>
-      <details class="reveal">
+      <details class="reveal faq-extra">
         <summary>Does it work offline?
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
         <div class="ans">Yes. Once installed, every lesson, flashcard and quiz works fully offline — ideal for
           studying in the hangar, on the road or in the air.</div>
       </details>
-      <details class="reveal">
+      <details class="reveal faq-extra">
         <summary>Which devices are supported?
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
         <div class="ans">iPhone, iPad and Mac. Your progress syncs across your own devices through your
           Apple Account, so you can pick up exactly where you left off.</div>
       </details>
-      <details class="reveal">
+      <details class="reveal faq-extra">
         <summary>Is my data private?
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
         <div class="ans">Yes. No account is required, there are no ads or third-party trackers, and your study
           data stays on your device. See our <a href="privacy.html">Privacy Policy</a> for the detail.</div>
       </details>
+    </div>
+    <div class="faq-more-wrap reveal">
+      <button class="faq-toggle" id="faqToggle" type="button" aria-expanded="false" aria-controls="faqList">
+        <span class="faq-toggle-label">Show all FAQs</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
     </div>
   </section>
 
@@ -696,6 +702,20 @@
     });
     lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb-close')) close(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  })();
+
+  // FAQ — reveal the secondary questions on demand
+  (function(){
+    var t = document.getElementById('faqToggle');
+    if (!t) return;
+    var list = document.getElementById('faqList');
+    var label = t.querySelector('.faq-toggle-label');
+    t.addEventListener('click', function(){
+      var open = t.getAttribute('aria-expanded') === 'true';
+      t.setAttribute('aria-expanded', String(!open));
+      list.classList.toggle('show-all', !open);
+      if (label) label.textContent = open ? 'Show all FAQs' : 'Show fewer';
+    });
   })();
 
   // reviews carousel — swipe / arrows / dots, auto-advance, click-to-toggle
