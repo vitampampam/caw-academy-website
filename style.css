@@ -549,3 +549,15 @@ footer .foot-links a:first-child{margin-left:0}
 .rev-dots button{width:8px; height:8px; padding:0; border:0; border-radius:999px;
   background:var(--line); cursor:pointer; transition:width .25s, background .25s}
 .rev-dots button[aria-current="true"]{background:var(--indigo); width:22px}
+
+/* ============================ FAQ — show all toggle ============================ */
+.faq-extra{display:none}
+.faq.show-all .faq-extra{display:block}
+.faq-more-wrap{display:flex; justify-content:center; margin-top:18px}
+.faq-toggle{display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:999px;
+  background:#fff; border:1px solid var(--line); box-shadow:var(--shadow-sm);
+  font-family:var(--sans); font-weight:700; font-size:15px; color:var(--indigo); cursor:pointer;
+  transition:transform .2s, box-shadow .2s, border-color .2s}
+.faq-toggle:hover{transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:var(--indigo-3)}
+.faq-toggle .chev{width:18px; height:18px; transition:transform .25s}
+.faq-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
