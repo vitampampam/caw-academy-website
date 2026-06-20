@@ -702,11 +702,14 @@
       prev.disabled = g.scrollLeft <= 2;
       next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
     }
+    function center(){ g.scrollLeft = Math.max(0, (g.scrollWidth - g.clientWidth) / 2); }
     prev.addEventListener('click', function(){ g.scrollBy({ left: -stepBy(), behavior: 'smooth' }); });
     next.addEventListener('click', function(){ g.scrollBy({ left: stepBy(), behavior: 'smooth' }); });
     g.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    update();
+    window.addEventListener('resize', function(){ center(); update(); });
+    // Start centered so the first and last screens peek (and it reads as scrollable).
+    requestAnimationFrame(function(){ center(); update(); });
+    window.addEventListener('load', function(){ center(); update(); });
   })();
 
   // FAQ — reveal the secondary questions on demand
