@@ -320,7 +320,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 /* gallery */
 /* One-row carousel: the screens scroll horizontally with snap; the next card peeks. */
 .gallery-wrap{position:relative; max-width:var(--maxw); margin:0 auto; padding:0 24px}
-.gallery{display:flex; gap:44px; justify-content:flex-start; align-items:flex-start; flex-wrap:nowrap;
+.gallery{display:flex; gap:16px; justify-content:flex-start; align-items:flex-start; flex-wrap:nowrap;
   overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:6px; padding:26px 6px 30px;
   -webkit-overflow-scrolling:touch; scrollbar-width:none}
 .gallery::-webkit-scrollbar{display:none}
@@ -404,14 +404,12 @@ footer .foot-links a:first-child{margin-left:0}
 /* responsive */
 /* narrow-desktop band: scale the lineup so it never clips its column */
 /* the 5%-smaller "default scale" is a desktop preference only — phones/tablets render full size */
-@media (min-width:1025px){ body{zoom:0.95} }
+@media (min-width:1025px){ body{zoom:0.95} .gallery{gap:44px} }
 @media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} }
 /* roomy desktops: enlarge the device lineup a touch (transform keeps the grid intact) */
 @media (min-width:1241px){ .lineup{transform:scale(1.18)} }
 /* tablets & below: hero stacks to a single centered column */
 @media (max-width:1024px){
-  /* tighter gallery spacing on tablets / narrow screens (desktop keeps 44px) */
-  .gallery{gap:18px}
   .hero-grid{grid-template-columns:1fr; grid-template-areas:"copy" "device" "cta";
     row-gap:8px; text-align:center; padding-bottom:24px}
   .hero-copy{align-self:auto}
