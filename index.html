@@ -432,33 +432,37 @@
       <p>Real screens from the app — lessons that explain the rule, quizzes with instant
          feedback, and timed mock exams that prove you're ready.</p>
     </div>
-    <div class="gallery">
+    <div class="gallery-wrap reveal">
+      <button class="gnav gprev" type="button" aria-label="Show previous screens">&#8249;</button>
+      <div class="gallery">
 
-      <div class="gcol reveal">
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.png?v=2" alt="CAW Academy dashboard on iPad listing every EASA course, grouped by initial and continuing airworthiness"></div>
         <div class="gcap"><b>Every course in one place</b></div>
       </div>
 
-      <div class="gcol reveal">
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.png?v=2" alt="CAW Academy lesson on iPad explaining a Part-21 design-management-system change, with detailed explanation, examples and common findings"></div>
         <div class="gcap"><b>Lessons that explain it</b></div>
       </div>
 
-      <div class="gcol reveal">
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.png?v=2" alt="CAW Academy quiz on iPad showing instant feedback with the correct answer highlighted and explained"></div>
         <div class="gcap"><b>Quizzes with instant feedback</b></div>
       </div>
 
-      <div class="gcol reveal">
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.png?v=2" alt="CAW Academy timed mock exam on iPad with a live timer, question navigator and unanswered-question tracker"></div>
         <div class="gcap"><b>Timed mock exams</b></div>
       </div>
 
-      <div class="gcol reveal">
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-5.png?v=2" alt="CAW Academy Stats on iPad with a To review list of the lessons whose questions you missed"></div>
         <div class="gcap"><b>Track progress &amp; revisit misses</b></div>
       </div>
 
+      </div>
+      <button class="gnav gnext" type="button" aria-label="Show more screens">&#8250;</button>
     </div>
   </section>
 
@@ -685,6 +689,24 @@
     });
     lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb-close')) close(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  })();
+
+  // "A look inside" gallery — horizontal carousel arrows
+  (function(){
+    var g = document.querySelector('#inside .gallery');
+    var prev = document.querySelector('#inside .gprev');
+    var next = document.querySelector('#inside .gnext');
+    if (!g || !prev || !next) return;
+    function stepBy(){ var c = g.querySelector('.gcol'); return (c ? c.getBoundingClientRect().width + 22 : 232) * 1.5; }
+    function update(){
+      prev.disabled = g.scrollLeft <= 2;
+      next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
+    }
+    prev.addEventListener('click', function(){ g.scrollBy({ left: -stepBy(), behavior: 'smooth' }); });
+    next.addEventListener('click', function(){ g.scrollBy({ left: stepBy(), behavior: 'smooth' }); });
+    g.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
   })();
 
   // FAQ — reveal the secondary questions on demand

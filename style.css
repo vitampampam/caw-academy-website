@@ -318,8 +318,23 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
 
 /* gallery */
-.gallery{display:flex; gap:22px; justify-content:center; align-items:flex-start; flex-wrap:wrap}
-.gcol{display:flex; flex-direction:column; align-items:center; gap:16px}
+/* One-row carousel: the screens scroll horizontally with snap; the next card peeks. */
+.gallery-wrap{position:relative; max-width:var(--maxw); margin:0 auto; padding:0 24px}
+.gallery{display:flex; gap:22px; justify-content:flex-start; align-items:flex-start; flex-wrap:nowrap;
+  overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:6px; padding:26px 6px 30px;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none}
+.gallery::-webkit-scrollbar{display:none}
+.gcol{display:flex; flex-direction:column; align-items:center; gap:16px; flex:0 0 auto; scroll-snap-align:center}
+/* prev/next arrows (desktop; touch devices swipe natively) */
+.gnav{position:absolute; top:45%; transform:translateY(-50%); z-index:6;
+  width:46px; height:46px; border-radius:50%; border:1px solid var(--line);
+  background:rgba(255,255,255,.94); color:var(--ink); font:600 26px/1 var(--sans); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; padding-bottom:2px;
+  box-shadow:0 8px 24px rgba(20,22,60,.16); transition:transform .15s ease, opacity .2s ease}
+.gnav:hover{transform:translateY(-50%) scale(1.08)}
+.gprev{left:4px} .gnext{right:4px}
+.gnav:disabled{opacity:.3; cursor:default; pointer-events:none}
+@media (max-width:640px){ .gallery-wrap{padding:0} .gnav{display:none} }
 .gcap{text-align:center; max-width:210px}
 .gcap b{display:block; font-size:16px; font-weight:800; color:var(--muted)}
 .gcap span{font-size:13px; color:var(--muted)}
