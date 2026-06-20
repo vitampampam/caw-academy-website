@@ -461,6 +461,9 @@ footer .foot-links a:first-child{margin-left:0}
     flex:0 0 78%; width:78%; max-width:78%; scroll-snap-align:center;
     opacity:1; transform:none; transition:box-shadow .2s ease, border-color .2s ease;
   }
+  /* gallery on phones: tighter gap, first screen anchored left (not centered) */
+  .gallery{gap:6px}
+  .gallery > *{scroll-snap-align:start}
   .card:hover, .prop:hover, .track:hover{ transform:none }
   .gcol .phone{ transition:none }
   .gcol:hover .phone{ transform:scale(var(--s)) }

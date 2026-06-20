@@ -94,7 +94,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 
@@ -702,7 +702,8 @@
       prev.disabled = g.scrollLeft <= 2;
       next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
     }
-    function center(){ g.scrollLeft = Math.max(0, (g.scrollWidth - g.clientWidth) / 2); }
+    // Center only on desktop (first & last peek); phones start on the first screen.
+    function center(){ if (window.innerWidth >= 1025) g.scrollLeft = Math.max(0, (g.scrollWidth - g.clientWidth) / 2); }
     prev.addEventListener('click', function(){ g.scrollBy({ left: -stepBy(), behavior: 'smooth' }); });
     next.addEventListener('click', function(){ g.scrollBy({ left: stepBy(), behavior: 'smooth' }); });
     g.addEventListener('scroll', update, { passive: true });
