@@ -410,6 +410,8 @@ footer .foot-links a:first-child{margin-left:0}
 @media (min-width:1241px){ .lineup{transform:scale(1.18)} }
 /* tablets & below: hero stacks to a single centered column */
 @media (max-width:1024px){
+  /* tighter gallery spacing on tablets / narrow screens (desktop keeps 44px) */
+  .gallery{gap:18px}
   .hero-grid{grid-template-columns:1fr; grid-template-areas:"copy" "device" "cta";
     row-gap:8px; text-align:center; padding-bottom:24px}
   .hero-copy{align-self:auto}
