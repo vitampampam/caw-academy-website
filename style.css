@@ -320,7 +320,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 /* gallery */
 /* One-row carousel: the screens scroll horizontally with snap; the next card peeks. */
 .gallery-wrap{position:relative; max-width:var(--maxw); margin:0 auto; padding:0 24px}
-.gallery{display:flex; gap:22px; justify-content:flex-start; align-items:flex-start; flex-wrap:nowrap;
+.gallery{display:flex; gap:44px; justify-content:flex-start; align-items:flex-start; flex-wrap:nowrap;
   overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:6px; padding:26px 6px 30px;
   -webkit-overflow-scrolling:touch; scrollbar-width:none}
 .gallery::-webkit-scrollbar{display:none}

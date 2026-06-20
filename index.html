@@ -697,7 +697,7 @@
     var prev = document.querySelector('#inside .gprev');
     var next = document.querySelector('#inside .gnext');
     if (!g || !prev || !next) return;
-    function stepBy(){ var c = g.querySelector('.gcol'); return (c ? c.getBoundingClientRect().width + 22 : 232) * 1.5; }
+    function stepBy(){ var c = g.querySelector('.gcol'); return (c ? c.getBoundingClientRect().width + 44 : 254) * 1.5; }
     function update(){
       prev.disabled = g.scrollLeft <= 2;
       next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
