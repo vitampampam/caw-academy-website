@@ -118,7 +118,7 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .hero h1{font-family:var(--serif); font-weight:600; font-size:clamp(36px,5.4vw,62px);
   line-height:1.03; letter-spacing:-.6px; margin:18px 0 16px}
 .hero h1 em{font-family:var(--sans); font-style:normal; font-weight:800; color:var(--indigo); letter-spacing:-.02em}
-.hero .lede{font-size:clamp(16px,1.55vw,19px); color:var(--ink-soft); max-width:40ch; margin:0 0 26px}
+.hero .lede{font-size:clamp(16px,1.4vw,17px); color:var(--ink-soft); max-width:40ch; margin:0 0 26px}
 .lede-short{display:none}
 .hero-cta{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
 .hero-note{margin-top:16px; font-size:13.5px; color:var(--muted)}
@@ -416,10 +416,11 @@ footer .foot-links a:first-child{margin-left:0}
 @media (max-width:1024px){
   .hero-grid{grid-template-columns:1fr; grid-template-areas:"copy" "device" "cta";
     row-gap:8px; text-align:center; padding-bottom:24px}
-  .hero-copy{align-self:auto}
+  /* copy reads left-aligned (device lineup + CTA stay centered) */
+  .hero-copy{align-self:auto; text-align:left}
   .hero-cta{align-self:auto; justify-content:center; margin-top:18px}
-  .hero .lede{margin-left:auto; margin-right:auto}
-  .hero .eyebrow{margin:0 auto}
+  .hero .lede{margin-left:0; margin-right:0}
+  .hero .eyebrow{margin:0}
   .device-stage{min-height:560px; margin-top:16px}
 }
 @media (prefers-reduced-motion:reduce){
