@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account — CAW Academy</title>
+<meta name="theme-color" content="#3E44B5">
+<meta name="robots" content="noindex"><!-- account area: keep out of search -->
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Scoped styles for the account area, built on the site's CSS variables. */
+  .acct-wrap{max-width:520px; margin:48px auto 80px; padding:0 20px}
+  .acct-card{background:#fff; border:1px solid var(--line); border-radius:18px;
+    padding:26px 24px; box-shadow:var(--shadow-md)}
+  .acct-card h1{font-family:var(--serif); font-weight:600; font-size:30px; margin:0 0 6px}
+  .acct-sub{color:var(--muted); margin:0 0 22px; font-size:15px}
+  .acct-tabs{display:flex; gap:8px; margin-bottom:18px}
+  .acct-tab{flex:1; padding:10px 0; text-align:center; border-radius:11px; cursor:pointer;
+    font-weight:700; font-size:15px; border:1px solid var(--line); background:#fff; color:var(--ink-soft)}
+  .acct-tab.active{background:var(--indigo); color:#fff; border-color:var(--indigo)}
+  .acct-field{display:block; width:100%; box-sizing:border-box; margin:0 0 12px; padding:12px 14px;
+    border:1px solid var(--line); border-radius:11px; font:inherit; font-size:16px; color:var(--ink)}
+  .acct-field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .acct-btn{width:100%; border:0; cursor:pointer; font:inherit; font-weight:700; font-size:16px;
+    padding:13px 0; border-radius:12px; background:var(--ink); color:#fff}
+  .acct-btn:disabled{opacity:.55; cursor:not-allowed}
+  .acct-btn.secondary{background:#fff; color:var(--indigo); border:1px solid var(--line)}
+  .acct-row{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:15px}
+  .acct-row span:first-child{color:var(--muted)}
+  .acct-row span:last-child{font-weight:700; color:var(--ink)}
+  .acct-note{font-size:13px; color:var(--muted); margin-top:14px; line-height:1.5}
+  .acct-msg{font-size:14px; margin:10px 0; padding:10px 12px; border-radius:10px}
+  .acct-msg.err{background:#FDECEC; color:#B3261E}
+  .acct-msg.ok{background:#E7F4E8; color:#2E7D32}
+  .acct-section-title{font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--muted); margin:22px 0 10px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
+  <div class="links">
+    <a href="index.html#curriculum">Curriculum</a>
+    <a href="support.html">Support</a>
+  </div>
+</nav>
+
+<main class="acct-wrap">
+  <div class="acct-card">
+    <h1>Your account</h1>
+    <p class="acct-sub">Sign in to manage your licence. Your study progress stays on your device.</p>
+
+    <div id="banner"></div>
+
+    <!-- Signed-out view -->
+    <section id="signedOut">
+      <div class="acct-tabs">
+        <div class="acct-tab active" id="tabSignIn">Sign in</div>
+        <div class="acct-tab" id="tabRegister">Create account</div>
+      </div>
+      <form id="authForm" autocomplete="on">
+        <input class="acct-field" type="email" id="email" placeholder="Email" autocomplete="email" required>
+        <input class="acct-field" type="password" id="password" placeholder="Password (10+ characters)" autocomplete="current-password" minlength="10" required>
+        <div id="authMsg"></div>
+        <button class="acct-btn" type="submit" id="authSubmit">Sign in</button>
+      </form>
+    </section>
+
+    <!-- Signed-in view -->
+    <section id="signedIn" class="hidden">
+      <div class="acct-row"><span>Email</span><span id="meEmail">—</span></div>
+      <div class="acct-row"><span>Plan</span><span id="mePlan">—</span></div>
+      <div class="acct-row"><span>Access</span><span id="meAccess">—</span></div>
+
+      <div class="acct-section-title">Buy full access</div>
+      <button class="acct-btn" id="buyBtn">Purchase full access</button>
+
+      <div class="acct-section-title">Redeem a licence code</div>
+      <input class="acct-field" id="redeemCode" placeholder="XXXX-XXXX-XXXX-XXXX">
+      <button class="acct-btn secondary" id="redeemBtn">Redeem</button>
+
+      <div id="actionMsg"></div>
+
+      <div class="acct-section-title">&nbsp;</div>
+      <button class="acct-btn secondary" id="signOutBtn">Sign out</button>
+    </section>
+
+    <p class="acct-note">
+      An individual licence purchased here unlocks the courses on the web and macOS apps.
+      In the iPhone / iPad app, purchases are made through the App Store; organisation
+      licences are unlocked with a redeem code.
+    </p>
+  </div>
+</main>
+
+<footer class="foot-center">
+  <div class="wrap">
+    <nav class="foot-nav">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+    </nav>
+    <div class="disclaim">
+      © <span id="yr">2026</span> CAW Academy. An independent study aid —
+      <strong>not affiliated with or endorsed by EASA</strong>.
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── Configuration — FILL BEFORE GOING LIVE ──────────────────────────────
+  var API_BASE = "https://api.caw-academy.com";          // licensing service base URL
+  var PRICE_ID = "price_REPLACE_ME";                      // Stripe Price ID for full access
+  // ────────────────────────────────────────────────────────────────────────
+
+  var LS_ACCESS = "caw.accessToken";
+  var LS_REFRESH = "caw.refreshToken";
+
+  var $ = function (id) { return document.getElementById(id); };
+  document.getElementById("yr").textContent = new Date().getFullYear();
+
+  var registerMode = false;
+
+  // ── Token storage ───────────────────────────────────────────────────────
+  function getAccess() { return localStorage.getItem(LS_ACCESS); }
+  function getRefresh() { return localStorage.getItem(LS_REFRESH); }
+  function storeBundle(b) {
+    if (b.accessToken) localStorage.setItem(LS_ACCESS, b.accessToken);
+    if (b.refreshToken) localStorage.setItem(LS_REFRESH, b.refreshToken);
+  }
+  function clearTokens() {
+    localStorage.removeItem(LS_ACCESS);
+    localStorage.removeItem(LS_REFRESH);
+  }
+
+  // ── HTTP helpers ─────────────────────────────────────────────────────────
+  function request(method, path, body, accessToken) {
+    var headers = { "Accept": "application/json" };
+    if (accessToken) headers["Authorization"] = "Bearer " + accessToken;
+    var opts = { method: method, headers: headers };
+    if (body) { headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+    return fetch(API_BASE + path, opts).then(function (res) {
+      return res.text().then(function (text) {
+        var json = text ? JSON.parse(text) : {};
+        if (!res.ok) {
+          var msg = (json && json.error && json.error.message) || "Something went wrong.";
+          var err = new Error(msg); err.status = res.status; throw err;
+        }
+        return json;
+      });
+    });
+  }
+
+  // Authenticated request with one transparent refresh-on-401 retry.
+  function authed(method, path, body) {
+    var token = getAccess();
+    return request(method, path, body, token).catch(function (err) {
+      if (err.status !== 401) throw err;
+      var refresh = getRefresh();
+      if (!refresh) throw err;
+      return request("POST", "/v1/auth/refresh", { refreshToken: refresh }, null).then(function (bundle) {
+        storeBundle(bundle);
+        return request(method, path, body, bundle.accessToken);
+      });
+    });
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────
+  function showMessage(elId, text, kind) {
+    var el = $(elId);
+    el.innerHTML = text ? '<div class="acct-msg ' + kind + '">' + text + "</div>" : "";
+  }
+
+  function describePlan(plan) {
+    return plan === "org" ? "Organisation"
+      : plan === "individual" ? "Individual"
+      : plan === "mixed" ? "Individual + organisation"
+      : "No active licence";
+  }
+  function describeAccess(courses) {
+    if (!courses || courses.length === 0) return "Free courses only";
+    if (courses.indexOf("__all__") !== -1) return "All courses";
+    return courses.length + (courses.length === 1 ? " course" : " courses");
+  }
+
+  function renderSignedIn(me) {
+    $("signedOut").classList.add("hidden");
+    $("signedIn").classList.remove("hidden");
+    $("meEmail").textContent = (me.user && me.user.email) || "—";
+    $("mePlan").textContent = describePlan(me.plan);
+    $("meAccess").textContent = describeAccess(me.courses);
+  }
+  function renderSignedOut() {
+    $("signedIn").classList.add("hidden");
+    $("signedOut").classList.remove("hidden");
+  }
+
+  // ── Tab switching ──────────────────────────────────────────────────────
+  $("tabSignIn").addEventListener("click", function () { setMode(false); });
+  $("tabRegister").addEventListener("click", function () { setMode(true); });
+  function setMode(register) {
+    registerMode = register;
+    $("tabSignIn").classList.toggle("active", !register);
+    $("tabRegister").classList.toggle("active", register);
+    $("authSubmit").textContent = register ? "Create account" : "Sign in";
+    $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
+    showMessage("authMsg", "", "err");
+  }
+
+  // ── Auth submit ────────────────────────────────────────────────────────
+  $("authForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = $("email").value.trim();
+    var password = $("password").value;
+    var btn = $("authSubmit");
+    btn.disabled = true;
+    showMessage("authMsg", "", "err");
+    var path = registerMode ? "/v1/auth/register" : "/v1/auth/login";
+    request("POST", path, { email: email, password: password }, null)
+      .then(function (bundle) {
+        storeBundle(bundle);
+        $("password").value = "";
+        return loadMe();
+      })
+      .catch(function (err) { showMessage("authMsg", err.message, "err"); })
+      .finally(function () { btn.disabled = false; });
+  });
+
+  // ── Buy ────────────────────────────────────────────────────────────────
+  $("buyBtn").addEventListener("click", function () {
+    var btn = $("buyBtn");
+    btn.disabled = true;
+    showMessage("actionMsg", "", "err");
+    authed("POST", "/v1/billing/checkout", { priceId: PRICE_ID })
+      .then(function (res) { if (res.url) window.location.href = res.url; })
+      .catch(function (err) { showMessage("actionMsg", err.message, "err"); btn.disabled = false; });
+  });
+
+  // ── Redeem ─────────────────────────────────────────────────────────────
+  $("redeemBtn").addEventListener("click", function () {
+    var code = $("redeemCode").value.trim();
+    if (!code) return;
+    var btn = $("redeemBtn");
+    btn.disabled = true;
+    showMessage("actionMsg", "", "err");
+    authed("POST", "/v1/licenses/redeem", { code: code })
+      .then(function () {
+        $("redeemCode").value = "";
+        showMessage("actionMsg", "Code redeemed. Your courses are now unlocked.", "ok");
+        return loadMe();
+      })
+      .catch(function (err) { showMessage("actionMsg", err.message, "err"); })
+      .finally(function () { btn.disabled = false; });
+  });
+
+  // ── Sign out ───────────────────────────────────────────────────────────
+  $("signOutBtn").addEventListener("click", function () {
+    var refresh = getRefresh();
+    var done = function () { clearTokens(); renderSignedOut(); };
+    if (refresh) {
+      request("POST", "/v1/auth/logout", { refreshToken: refresh }, null).then(done, done);
+    } else { done(); }
+  });
+
+  // ── Load profile ───────────────────────────────────────────────────────
+  function loadMe() {
+    if (!getAccess() && !getRefresh()) { renderSignedOut(); return Promise.resolve(); }
+    return authed("GET", "/v1/me", null)
+      .then(renderSignedIn)
+      .catch(function () { clearTokens(); renderSignedOut(); });
+  }
+
+  // ── Purchase return banner ──────────────────────────────────────────────
+  (function purchaseBanner() {
+    var params = new URLSearchParams(window.location.search);
+    var p = params.get("purchase");
+    if (p === "success") showMessage("banner", "Thanks — your purchase is confirmed. It may take a moment to appear.", "ok");
+    else if (p === "cancelled") showMessage("banner", "Checkout cancelled. No charge was made.", "err");
+  })();
+
+  // Init.
+  setMode(false);
+  loadMe();
+})();
+</script>
+</body>
+</html>
