@@ -55,7 +55,7 @@
 <main class="acct-wrap">
   <div class="acct-card">
     <h1>Your account</h1>
-    <p class="acct-sub">Sign in to manage your licence. Your study progress stays on your device.</p>
+    <p class="acct-sub">Sign in to manage your account and licence. We never store your study data — only your account and which courses your licence unlocks.</p>
 
     <div id="banner"></div>
 
@@ -71,6 +71,9 @@
         <div id="authMsg"></div>
         <button class="acct-btn" type="submit" id="authSubmit">Sign in</button>
       </form>
+      <p style="text-align:center;margin:14px 0 0">
+        <a href="#" id="forgotLink" style="font-size:14px">Forgot password?</a>
+      </p>
     </section>
 
     <!-- Signed-in view -->
@@ -79,8 +82,11 @@
       <div class="acct-row"><span>Plan</span><span id="mePlan">—</span></div>
       <div class="acct-row"><span>Access</span><span id="meAccess">—</span></div>
 
-      <div class="acct-section-title">Buy full access</div>
-      <button class="acct-btn" id="buyBtn">Purchase full access</button>
+      <!-- Web "Buy" is hidden until there's a web/desktop place to use a web
+           purchase (no web course player yet) and Stripe is live. The element is
+           kept (hidden) so account.js can keep its handler without erroring. -->
+      <div class="acct-section-title hidden">Buy full access</div>
+      <button class="acct-btn hidden" id="buyBtn">Purchase full access</button>
 
       <div class="acct-section-title">Redeem a licence code</div>
       <input class="acct-field" id="redeemCode" placeholder="XXXX-XXXX-XXXX-XXXX">
@@ -93,9 +99,10 @@
     </section>
 
     <p class="acct-note">
-      An individual licence purchased here unlocks the courses on the web and macOS apps.
-      In the iPhone / iPad app, purchases are made through the App Store; organisation
-      licences are unlocked with a redeem code.
+      Sign in to manage your account and redeem an <strong>organisation licence code</strong> —
+      your courses then unlock in the CAW Academy app (iPhone, iPad, Mac and Android) once
+      you're signed in. Individual purchases are made inside the app via the App Store or
+      Google Play.
     </p>
   </div>
 </main>

@@ -126,6 +126,22 @@
       .finally(function () { btn.disabled = false; });
   });
 
+  // ── Forgot password ──────────────────────────────────────────────────────
+  $("forgotLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    var email = $("email").value.trim();
+    if (!email) {
+      showMessage("authMsg", "Enter your email above first, then tap Forgot password.", "err");
+      $("email").focus();
+      return;
+    }
+    request("POST", "/v1/auth/forgot-password", { email: email }, false)
+      .then(function () {
+        showMessage("authMsg", "If that email has an account, a reset link is on its way.", "ok");
+      })
+      .catch(function (err) { showMessage("authMsg", err.message, "err"); });
+  });
+
   // ── Buy ────────────────────────────────────────────────────────────────
   $("buyBtn").addEventListener("click", function () {
     var btn = $("buyBtn");

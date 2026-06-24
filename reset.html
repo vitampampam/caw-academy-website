@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset password — CAW Academy</title>
+<meta name="theme-color" content="#3E44B5">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://api.caw-academy.com; form-action 'self'">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="style.css">
+<style>
+  .acct-wrap{max-width:520px; margin:48px auto 80px; padding:0 20px}
+  .acct-card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:26px 24px; box-shadow:var(--shadow-md)}
+  .acct-card h1{font-family:var(--serif); font-weight:600; font-size:30px; margin:0 0 6px}
+  .acct-sub{color:var(--muted); margin:0 0 22px; font-size:15px}
+  .acct-field{display:block; width:100%; box-sizing:border-box; margin:0 0 12px; padding:12px 14px; border:1px solid var(--line); border-radius:11px; font:inherit; font-size:16px; color:var(--ink)}
+  .acct-field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .acct-btn{width:100%; border:0; cursor:pointer; font:inherit; font-weight:700; font-size:16px; padding:13px 0; border-radius:12px; background:var(--ink); color:#fff}
+  .acct-btn:disabled{opacity:.55; cursor:not-allowed}
+  .acct-msg{font-size:14px; margin:10px 0; padding:10px 12px; border-radius:10px}
+  .acct-msg.err{background:#FDECEC; color:#B3261E}
+  .acct-msg.ok{background:#E7F4E8; color:#2E7D32}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
+</nav>
+
+<main class="acct-wrap">
+  <div class="acct-card">
+    <h1>Reset your password</h1>
+    <p class="acct-sub">Choose a new password for your CAW Academy account.</p>
+
+    <div id="banner"></div>
+
+    <form id="resetForm">
+      <input class="acct-field" type="password" id="password" placeholder="New password (10+ characters)" autocomplete="new-password" minlength="10" required>
+      <input class="acct-field" type="password" id="confirm" placeholder="Confirm new password" autocomplete="new-password" minlength="10" required>
+      <div id="msg"></div>
+      <button class="acct-btn" type="submit" id="submit">Set new password</button>
+    </form>
+
+    <p id="done" class="hidden" style="margin-top:16px">
+      Your password has been updated. You can now <a href="account.html">sign in</a>.
+    </p>
+  </div>
+</main>
+
+<footer class="foot-center">
+  <div class="wrap">
+    <nav class="foot-nav">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+    </nav>
+    <div class="disclaim">© <span id="yr">2026</span> CAW Academy.</div>
+  </div>
+</footer>
+
+<script src="reset.js" defer></script>
+</body>
+</html>
