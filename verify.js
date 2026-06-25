@@ -59,7 +59,6 @@
       ["Course", data.courseTitle || "—"],
       ["Issued", data.issuedAt ? new Date(data.issuedAt).toLocaleDateString() : "—"]
     ];
-    if (typeof data.examScore === "number") rows.push(["Exam score", data.examScore + "%"]);
     rows.forEach(function (r) {
       var row = document.createElement("div");
       row.className = "result-row";
