@@ -593,7 +593,7 @@
   <style>
     .hero{overflow:visible}
     .faq-toggle, .faq-toggle:hover{color:var(--ink)}
-    .section-head{max-width:1100px}
+    .section-head{max-width:var(--maxw)}
     .foot-center .disclaim{max-width:130ch}
     .section-head p{max-width:900px}
     .hero-bottom{max-width:var(--maxw); margin:-14px auto 0; padding:0 24px 30px}
@@ -619,7 +619,7 @@
     }
     /* 6-card sections: even 3 x 2 grid (not an unbalanced 4 + 2) */
     @media (min-width:920px){
-      #features .grid, #organisations .grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:980px; margin-left:auto; margin-right:auto}
+      #features .grid, #organisations .grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:var(--maxw); margin-left:auto; margin-right:auto}
       #features .grid .card, #organisations .grid .card{max-width:none}
     }
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}

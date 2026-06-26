@@ -247,7 +247,7 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 
 /* ---------- generic sections ---------------------------------------------- */
 section{padding:48px 0}
-.section-head{max-width:980px; margin:0 auto 34px; text-align:center}
+.section-head{max-width:var(--maxw); margin:0 auto 34px; text-align:center}
 .section-head .eyebrow{margin:0 auto 16px}
 h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); line-height:1.08; letter-spacing:-.5px; margin:0 0 12px}
 .section-head h2{text-wrap:pretty}
@@ -278,7 +278,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .card p{margin:0; color:var(--muted); font-size:14.5px; line-height:1.6}
 
 /* audience chips */
-.chips{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:860px; margin:0 auto}
+.chips{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:var(--maxw); margin:0 auto}
 .chips span{display:flex; align-items:center; justify-content:center; gap:9px; background:var(--card); border:1px solid var(--line);
   border-radius:999px; padding:12px 16px; font-size:15px; font-weight:600; color:var(--ink-soft); box-shadow:var(--shadow-sm);
   transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease}
@@ -345,7 +345,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 
 
 /* FAQ */
-.faq{max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:12px}
+.faq{max-width:var(--maxw); margin:0 auto; display:flex; flex-direction:column; gap:12px}
 .faq details{background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-sm); overflow:hidden; transition:box-shadow .2s}
 .faq details[open]{box-shadow:var(--shadow-md)}
 .faq summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:16px;
