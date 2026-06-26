@@ -102,13 +102,26 @@
 <nav class="nav" id="nav">
   <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
   <div class="links">
-    <a href="#organisations">For teams</a>
+    <a class="hide-sm" href="#organisations">For teams</a>
     <a class="hide-sm" href="#curriculum">Curriculum</a>
     <a class="hide-sm" href="#faq">FAQ</a>
-    <a class="nav-right btn btn-dark" href="#contact" style="padding:8px 16px; font-size:14px">Book a demo</a>
+    <a class="cta" href="#contact">Book a demo</a>
     <a class="nav-li" href="https://www.linkedin.com/company/caw-academy/" target="_blank" rel="noopener" aria-label="CAW Academy on LinkedIn"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.5C0 23.2.8 24 1.77 24h20.45C23.2 24 24 23.2 24 22.24V1.74C24 .78 23.2 0 22.22 0z"/></svg></a>
   </div>
 </nav>
+
+<!-- App-store badges are "coming soon": a matched, on-brand pair, no fake hover. -->
+<style>
+  .store-badge{background:#161B43}
+  .store-badge.soon{opacity:1}
+  .store-badge[aria-disabled="true"]{cursor:default; opacity:.92}
+  .store-badge[aria-disabled="true"]:hover{transform:none; box-shadow:var(--shadow-sm); background:#161B43}
+  .store-badge .tx small{opacity:.78}
+  /* App-availability strip beneath the hero */
+  .hero-apps{text-align:center; padding:4px 24px 2px; max-width:var(--maxw); margin:0 auto}
+  .hero-apps-note{display:block; color:var(--muted); font-size:13px; margin-bottom:12px}
+  .hero-apps-badges{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+</style>
 
 <!-- ============================ HERO ============================ -->
 <header class="hero">
@@ -121,6 +134,13 @@
         ready when an exam matters.</p>
       <p class="lede lede-short">From initial to continuing airworthiness — the fast, confident way to
         master the regulations and take your expertise to the next level.</p>
+      <div class="hero-cta" style="margin-top:26px">
+        <a class="btn btn-dark" href="#contact">Book a demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="#contact">Start a free trial</a>
+      </div>
+      <p class="hero-sub-note" style="margin:14px 0 0; color:var(--muted); font-size:13.5px">
+        Licensed for organisations, with a free trial.</p>
     </div>
 
     <!-- interactive device lineup: iPhone · iPad · Mac (hover to focus) -->
@@ -207,22 +227,19 @@
       </div>
     </div>
 
-    <div class="hero-cta">
-      <a class="btn btn-dark" href="#contact">Book a demo
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a class="btn btn-ghost" href="#contact">Start a free trial</a>
-    </div>
-    <p class="hero-sub-note" style="margin:14px 0 0; color:var(--muted); font-size:13.5px">
-      Licensed for organisations, with a free trial. iPhone, iPad &amp; Mac apps coming soon
-      <span class="soon-txt">· Android to follow</span>.</p>
-    <div class="hero-cta" style="margin-top:14px">
+  </div>
+
+  <!-- App availability strip: sits beneath the hero, apps still coming soon. -->
+  <div class="hero-apps">
+    <span class="hero-apps-note">Native apps coming soon — iPhone, iPad &amp; Mac<span class="soon-txt"> · Android to follow</span></span>
+    <div class="hero-apps-badges">
       <a class="store-badge" id="appstore" href="#" aria-disabled="true" aria-label="App Store — coming soon">
         <svg class="logo" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 1.6c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.8-.8 2-1.4 2.8-1.4zM19 17c-.5 1.1-.8 1.6-1.4 2.6-.9 1.3-2.1 3-3.6 3-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.5.9c-1.5 0-2.6-1.5-3.5-2.9C1.5 16.5 1.2 12 2.7 9.7 3.8 8 5.5 7 7.1 7c1.3 0 2.2.9 3.4.9 1.1 0 1.8-.9 3.4-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.8 1.2 7.9z"/></svg>
         <span class="tx"><small>Coming soon on the</small><b>App Store</b></span>
       </a>
-      <a class="store-badge soon" href="#" aria-disabled="true" aria-label="Google Play — planned">
+      <a class="store-badge" href="#" aria-disabled="true" aria-label="Google Play — coming soon">
         <svg class="logo" viewBox="0 0 24 24"><path d="M3.6 2.2c-.3.2-.5.6-.5 1.1v17.4c0 .5.2.9.5 1.1l.1.1L13 12.1v-.2L3.6 2.2z" fill="#00C3FF"/><path d="M16.5 15.5 13 12.1v-.2l3.5-3.4.1.1 4.2 2.4c1.2.7 1.2 1.8 0 2.5l-4.3 2.4z" fill="#FFCE00"/><path d="M16.6 15.4 13 11.9 3.6 21.8c.4.4 1 .5 1.8.1l11.2-6.5z" fill="#FF3D47"/><path d="M16.6 8.6 5.4 2.1C4.6 1.7 4 1.8 3.6 2.2L13 11.9l3.6-3.3z" fill="#00D26A"/></svg>
-        <span class="tx"><small>Planned for</small><b>Google Play</b></span>
+        <span class="tx"><small>Coming soon on</small><b>Google Play</b></span>
       </a>
     </div>
   </div>
@@ -352,34 +369,6 @@
     </div>
   </section>
 
-  <!-- ============================ EXPERIENCE ============================ -->
-  <section id="experience">
-    <div class="section-head center reveal">
-      <span class="eyebrow">From the field, not a textbook</span>
-      <h2>Learn it the way it actually works</h2>
-      <p>CAW Academy distils years of real continuing-airworthiness practice — the
-         decisions, the pitfalls and the "why" behind the rule — into lessons you can
-         finish on a coffee break and use the same afternoon.</p>
-    </div>
-    <div class="grid">
-      <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7z"/></svg></div>
-        <h3>Written by practitioners</h3>
-        <p>Real CAMO and maintenance experience, not theory alone.</p>
-      </div>
-      <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <h3>Case studies throughout</h3>
-        <p>See how each rule plays out on a real fleet and task.</p>
-      </div>
-      <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <h3>Made for busy people</h3>
-        <p>Short, focused lessons that fit around shift work.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- ============================ CURRICULUM ============================ -->
   <section id="curriculum">
     <div class="section-head reveal">
@@ -472,29 +461,11 @@
            iPad and Mac with one Apple Account.</p>
       </div>
       <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
-        <h3>Daily study reminder</h3>
-        <p>Set a reminder and a gentle nudge keeps your streak going. It's a local
-           notification — private to your device, nothing sent to us.</p>
-      </div>
-      <div class="card reveal">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.2 13.5L7 22l5-3 5 3-1.2-8.5"/></svg></div>
         <h3>Verifiable certificates</h3>
         <p>Complete a course and pass the timed mock exam to earn a certificate with a unique number
            and QR code — confirmable on our <a href="verify.html">public registry</a>. Audit-ready
            evidence of completed study.</p>
-      </div>
-      <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="12" height="16" rx="2"/><rect x="16.5" y="9" width="5" height="11" rx="1.5"/><path d="M7 19h3"/></svg></div>
-        <h3>Learn on the go</h3>
-        <p>Study anywhere — on your iPhone or iPad, between tasks or on the move. Bite-size
-           lessons made for the spare minutes in a shift.</p>
-      </div>
-      <div class="card reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Private &amp; offline</h3>
-        <p>Everything works fully offline. Your study data stays on
-           your device.</p>
       </div>
     </div>
   </section>
@@ -725,9 +696,9 @@
           <svg class="logo" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 1.6c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.8-.8 2-1.4 2.8-1.4zM19 17c-.5 1.1-.8 1.6-1.4 2.6-.9 1.3-2.1 3-3.6 3-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.5.9c-1.5 0-2.6-1.5-3.5-2.9C1.5 16.5 1.2 12 2.7 9.7 3.8 8 5.5 7 7.1 7c1.3 0 2.2.9 3.4.9 1.1 0 1.8-.9 3.4-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.8 1.2 7.9z"/></svg>
           <span class="tx"><small>Coming soon on the</small><b>App Store</b></span>
         </a>
-        <a class="store-badge soon" href="#" aria-disabled="true" aria-label="Google Play — planned">
+        <a class="store-badge" href="#" aria-disabled="true" aria-label="Google Play — coming soon">
           <svg class="logo" viewBox="0 0 24 24"><path d="M3.6 2.2c-.3.2-.5.6-.5 1.1v17.4c0 .5.2.9.5 1.1l.1.1L13 12.1v-.2L3.6 2.2z" fill="#00C3FF"/><path d="M16.5 15.5 13 12.1v-.2l3.5-3.4.1.1 4.2 2.4c1.2.7 1.2 1.8 0 2.5l-4.3 2.4z" fill="#FFCE00"/><path d="M16.6 15.4 13 11.9 3.6 21.8c.4.4 1 .5 1.8.1l11.2-6.5z" fill="#FF3D47"/><path d="M16.6 8.6 5.4 2.1C4.6 1.7 4 1.8 3.6 2.2L13 11.9l3.6-3.3z" fill="#00D26A"/></svg>
-          <span class="tx"><small>Planned for</small><b>Google Play</b></span>
+          <span class="tx"><small>Coming soon on</small><b>Google Play</b></span>
         </a>
       </div>
     </div>
