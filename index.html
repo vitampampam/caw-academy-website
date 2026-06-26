@@ -612,6 +612,10 @@
       .hero .lede{display:none}                 /* drop the "Plain-language EASA…" caption on phones */
       .btn.open-trial svg{display:none}         /* no arrow on the trial buttons on phones */
       .cta-band h2{font-size:clamp(20px,5.6vw,24px)}  /* smaller "Equip your team…" heading */
+      /* keep only the top (hero) "Request a free trial" button; drop the mid-page repeats */
+      .btn.open-trial{display:none}
+      .hero-bottom .btn.open-trial{display:flex}
+      .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
     }
     /* 6-card sections: even 3 x 2 grid (not an unbalanced 4 + 2) */
     @media (min-width:920px){
