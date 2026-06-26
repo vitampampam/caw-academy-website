@@ -548,7 +548,7 @@ footer .foot-links a:first-child{margin-left:0}
 .reviews-summary .rsum-chev{width:18px; height:18px; color:var(--indigo); transition:transform .25s}
 .reviews-summary[aria-expanded="false"] .rsum-chev{transform:rotate(-90deg)}
 
-.reviews-carousel{position:relative; max-width:980px; margin:0 auto}
+.reviews-carousel{position:relative; max-width:var(--maxw); margin:0 auto}
 .reviews-carousel.collapsed{display:none}
 .rev-track{display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch; padding:6px 4px 14px; scrollbar-width:none}
