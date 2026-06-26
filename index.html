@@ -617,6 +617,11 @@
       .hero-bottom .btn.open-trial{display:flex}
       .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
     }
+    @media (max-width:560px){
+      /* match the trial button's gutter to .wrap (18px on phones) so it's the
+         same width as the stats/chips/card blocks, not inset by the 24px default */
+      .hero-bottom{padding-left:18px; padding-right:18px}
+    }
     /* Card sections fill the page column with even, full-width cells (so the
        "Why", "For organisations" and "Features" rows all align edge-to-edge). */
     @media (min-width:920px){
