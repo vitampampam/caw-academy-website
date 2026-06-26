@@ -617,10 +617,11 @@
       .hero-bottom .btn.open-trial{display:flex}
       .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
     }
-    /* 6-card sections: even 3 x 2 grid (not an unbalanced 4 + 2) */
+    /* Card sections fill the page column with even, full-width cells (so the
+       "Why", "For organisations" and "Features" rows all align edge-to-edge). */
     @media (min-width:920px){
-      #features .grid, #organisations .grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:var(--maxw); margin-left:auto; margin-right:auto}
-      #features .grid .card, #organisations .grid .card{max-width:none}
+      #features .grid, #organisations .grid, #why .props{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:var(--maxw); margin-left:auto; margin-right:auto}
+      #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
     }
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
