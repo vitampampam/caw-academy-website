@@ -601,6 +601,12 @@
     /* "Request a free trial" buttons: full width of their container, everywhere */
     .btn.open-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
     .btn.open-trial:hover{color:var(--ink)}
+    /* When the hero stacks (single column), the store badges sit in the cta slot
+       directly above the trial button, so cancel the button's pull-up margin and
+       add a clear gap — otherwise the badges and the button clash. */
+    @media (max-width:1024px){
+      .hero-bottom{margin-top:18px}
+    }
     /* Mobile-only hero/footer trims */
     @media (max-width:640px){
       .hero .lede{display:none}                 /* drop the "Plain-language EASA…" caption on phones */
