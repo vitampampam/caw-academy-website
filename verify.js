@@ -63,6 +63,9 @@
     if (form) form.classList.add("hidden");
     var sub = document.querySelector("#certSection .acct-sub");
     if (sub) sub.textContent = "Certificate details from the registry.";
+    // The QR view shows the details, so replace the manual-mode privacy note.
+    var note = document.querySelector("#certSection .acct-note");
+    if (note) note.textContent = "These details come from the certificate you scanned. A certificate confirms in-app study only; it is not an EASA qualification.";
     showMessage("msg", "Checking…", "ok");
     fetch(API_BASE + "/v1/certificates/lookup?token=" + encodeURIComponent(cert))
       .then(function (res) {
