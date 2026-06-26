@@ -105,7 +105,7 @@
     <a class="hide-sm" href="#organisations">For teams</a>
     <a class="hide-sm" href="#curriculum">Curriculum</a>
     <a class="hide-sm" href="#faq">FAQ</a>
-    <a class="cta" href="#contact">Free trial</a>
+    <a class="cta open-trial" href="#">Free trial</a>
     <a class="nav-li" href="https://www.linkedin.com/company/caw-academy/" target="_blank" rel="noopener" aria-label="CAW Academy on LinkedIn"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.5C0 23.2.8 24 1.77 24h20.45C23.2 24 24 23.2 24 22.24V1.74C24 .78 23.2 0 22.22 0z"/></svg></a>
   </div>
 </nav>
@@ -122,7 +122,7 @@
       <p class="lede lede-short">From initial to continuing airworthiness — the fast, confident way to
         master the regulations and take your expertise to the next level.</p>
       <div class="hero-cta" style="margin-top:26px">
-        <a class="btn btn-dark" href="#contact">Request a free trial
+        <a class="btn btn-dark open-trial" href="#">Request a free trial
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <p class="hero-sub-note" style="margin:14px 0 0; color:var(--muted); font-size:13.5px">
@@ -315,7 +315,7 @@
       organisation's approved training.
     </p>
     <div class="reveal" style="text-align:center">
-      <a class="btn btn-dark" href="#contact">Request a free trial
+      <a class="btn btn-dark open-trial" href="#">Request a free trial
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
   </section>
@@ -523,7 +523,7 @@
         <div class="ans">CAW Academy is <strong>licensed for organisations</strong> — your team gets all
           20 courses under a single agreement, with a <strong>free trial</strong> to evaluate it first.
           Individual in-app purchases for private learners are planned for a later stage. There are no
-          ads, on any plan. <a href="#contact">Contact us for a demonstration or a free trial.</a></div>
+          ads, on any plan. <a class="open-trial" href="#">Request a free trial.</a></div>
       </details>
       <details class="reveal">
         <summary>Is it useful for Part-66 / Part-147 exam preparation?
@@ -615,54 +615,31 @@
     </div>
   </section>
 
-  <!-- scoped styles: wider section intros (long sub-headlines don't squeeze) + contact form -->
+  <!-- scoped styles: wider section intros + the free-trial modal/form -->
   <style>
     .section-head{max-width:1040px}
     .section-head p{max-width:760px}
-    #contact .contact-form{max-width:640px; margin:0 auto; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:26px; box-shadow:var(--shadow-sm)}
-    #contact .cf-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
-    #contact .cf-row > *{flex:1 1 240px}
-    #contact input, #contact textarea{width:100%; box-sizing:border-box; font:inherit; font-size:15.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
-    #contact textarea{display:block; margin-bottom:14px; resize:vertical}
-    #contact input:focus, #contact textarea:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
-    #contact .hp{position:absolute; left:-9999px}
-    #contact .cf-submit{width:100%; justify-content:center; border:0; cursor:pointer}
-    #contact .cf-msg{margin:0 0 14px; padding:12px 14px; border-radius:10px; font-size:14px}
-    #contact .cf-msg.ok{background:#E7F4E8; color:var(--success)}
-    #contact .cf-msg.err{background:#FDECEC; color:#B3261E}
-    #contact .cf-fine{margin:14px 0 0; color:var(--muted); font-size:12.5px; text-align:center; line-height:1.5}
+    .trial-modal{position:fixed; inset:0; z-index:200; display:none}
+    .trial-modal.open{display:block}
+    .trial-backdrop{position:absolute; inset:0; background:rgba(11,18,56,.55)}
+    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:6vh auto; background:var(--card); border-radius:var(--radius-lg); padding:30px 28px; box-shadow:var(--shadow-lg); max-height:88vh; overflow:auto}
+    .trial-dialog h2{margin:0 0 6px; font-size:26px}
+    .trial-dialog .tsub{color:var(--ink-soft); font-size:15px; margin:0 0 20px}
+    .trial-close{position:absolute; top:12px; right:14px; width:34px; height:34px; border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1; color:var(--muted); cursor:pointer}
+    .trial-close:hover{color:var(--ink)}
+    body.modal-open{overflow:hidden}
+    .contact-form .cf-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+    .contact-form .cf-row > *{flex:1 1 220px}
+    .contact-form input, .contact-form textarea{width:100%; box-sizing:border-box; font:inherit; font-size:15.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+    .contact-form textarea{display:block; margin-bottom:14px; resize:vertical}
+    .contact-form input:focus, .contact-form textarea:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+    .contact-form .hp{position:absolute; left:-9999px}
+    .contact-form .cf-submit{width:100%; justify-content:center; border:0; cursor:pointer}
+    .cf-msg{margin:0 0 14px; padding:12px 14px; border-radius:10px; font-size:14px}
+    .cf-msg.ok{background:#E7F4E8; color:var(--success)}
+    .cf-msg.err{background:#FDECEC; color:#B3261E}
+    .cf-fine{margin:14px 0 0; color:var(--muted); font-size:12.5px; text-align:center; line-height:1.5}
   </style>
-
-  <!-- ============================ CONTACT ============================ -->
-  <section id="contact" class="reveal">
-    <div class="section-head center">
-      <span class="eyebrow">Get started</span>
-      <h2>Request a free trial</h2>
-      <p>Tell us about your team and we'll arrange a walkthrough and set up a trial licence.
-         We usually reply within one working day.</p>
-    </div>
-    <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
-      <!-- For clean B2B routing, create a dedicated Web3Forms key (web3forms.com) pointing
-           at a sales inbox and replace the value below. This reuses the app's feedback relay. -->
-      <input type="hidden" name="access_key" value="25d49d43-0f4c-4a88-9a37-7fb44bc1f979">
-      <input type="hidden" name="subject" value="CAW Academy — free-trial enquiry">
-      <input type="hidden" name="from_name" value="CAW Academy website">
-      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <div class="cf-row">
-        <input name="name" placeholder="Your name" autocomplete="name" required>
-        <input name="organisation" placeholder="Organisation" autocomplete="organization" required>
-      </div>
-      <div class="cf-row">
-        <input type="email" name="email" placeholder="Work email" autocomplete="email" required>
-        <input name="team_size" placeholder="Approx. team size (optional)">
-      </div>
-      <textarea name="message" rows="4" placeholder="What would you like — a demo, a trial, or specific courses (Part-145, CAMO, EWIS…)?"></textarea>
-      <div id="cfMsg" class="cf-msg" hidden></div>
-      <button class="btn btn-dark cf-submit" type="submit">Request a demo or free trial</button>
-      <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
-        details. See our <a href="privacy.html">Privacy Policy</a>.</p>
-    </form>
-  </section>
 
   <!-- ============================ CTA ============================ -->
   <section class="reveal" id="get">
@@ -671,7 +648,7 @@
       <p style="margin:0 auto 22px; max-width:560px; opacity:.92">Licensed for organisations, with a free
         trial. See it in a quick walkthrough and roll it out across your team.</p>
       <div style="display:flex; justify-content:center; margin-bottom:18px">
-        <a class="btn btn-light" href="#contact">Request a free trial
+        <a class="btn btn-light open-trial" href="#">Request a free trial
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <div class="badges" style="justify-content:center">
@@ -687,6 +664,37 @@
     </div>
   </section>
 
+</div>
+
+<!-- Free-trial enquiry popup: opened by any "Request a free trial" button -->
+<div class="trial-modal" id="trialModal" aria-hidden="true">
+  <div class="trial-backdrop" data-close></div>
+  <div class="trial-dialog" role="dialog" aria-modal="true" aria-labelledby="trialTitle">
+    <button class="trial-close" type="button" aria-label="Close" data-close>&times;</button>
+    <h2 id="trialTitle">Request a free trial</h2>
+    <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
+    <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+      <!-- For clean B2B routing, create a dedicated Web3Forms key (web3forms.com) pointing
+           at a sales inbox and replace the value below. This reuses the app's feedback relay. -->
+      <input type="hidden" name="access_key" value="25d49d43-0f4c-4a88-9a37-7fb44bc1f979">
+      <input type="hidden" name="subject" value="CAW Academy — free-trial enquiry">
+      <input type="hidden" name="from_name" value="CAW Academy website">
+      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="cf-row">
+        <input name="name" placeholder="Your name" autocomplete="name" required>
+        <input name="organisation" placeholder="Organisation" autocomplete="organization" required>
+      </div>
+      <div class="cf-row">
+        <input type="email" name="email" placeholder="Work email" autocomplete="email" required>
+        <input name="team_size" placeholder="Approx. team size (optional)">
+      </div>
+      <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
+      <div id="cfMsg" class="cf-msg" hidden></div>
+      <button class="btn btn-dark cf-submit" type="submit">Send request</button>
+      <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
+        details. See our <a href="privacy.html">Privacy Policy</a>.</p>
+    </form>
+  </div>
 </div>
 
 <!-- lightbox: tap a screenshot to view it full size -->
@@ -876,10 +884,32 @@
   })();
 </script>
 <script>
-  // Demo / free-trial enquiry form -> Web3Forms relay (same service as the app's
-  // feedback). Submits via fetch with inline success; no page reload.
+  // Free-trial popup + Web3Forms enquiry relay (same service as the app's feedback).
   (function () {
+    var modal = document.getElementById('trialModal');
     var form = document.getElementById('contactForm');
+
+    function openModal(e) {
+      if (e) e.preventDefault();
+      if (!modal) return;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      var first = modal.querySelector('input[name="name"]');
+      if (first) setTimeout(function () { first.focus(); }, 60);
+    }
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+    document.querySelectorAll('.open-trial').forEach(function (b) { b.addEventListener('click', openModal); });
+    if (modal) {
+      modal.querySelectorAll('[data-close]').forEach(function (c) { c.addEventListener('click', closeModal); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+    }
+
     if (!form) return;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -902,12 +932,12 @@
         } else {
           msg.className = 'cf-msg err';
           msg.textContent = 'Something went wrong. Please email support@caw-academy.com.';
-          btn.disabled = false; btn.textContent = 'Request a demo or free trial';
+          btn.disabled = false; btn.textContent = 'Send request';
         }
       }).catch(function () {
         msg.hidden = false; msg.className = 'cf-msg err';
         msg.textContent = "Couldn't reach the server. Please email support@caw-academy.com.";
-        btn.disabled = false; btn.textContent = 'Request a demo or free trial';
+        btn.disabled = false; btn.textContent = 'Send request';
       });
     });
   })();
