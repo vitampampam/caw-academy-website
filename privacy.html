@@ -54,11 +54,14 @@
     signed in it is saved to your account. You can change or delete it any time in the app.</p>
 
     <p><strong>Certificate registry.</strong> Each course-completion certificate carries a
-    unique number issued by our server, so it can be confirmed as genuine. We keep a record
-    of issued certificates — the number, course, date and the holder name printed on it.
-    Our public verification page only confirms whether a given number and name match and
-    shows the course and date; it never displays anyone's name or lets anyone look people
-    up. This record is deleted when you delete your account.</p>
+    unique number issued by our server, plus a QR code, so it can be confirmed as genuine.
+    We keep a record of issued certificates — the number, course, date and the holder name
+    printed on it. There are two ways to verify, by design: typing a <strong>number and
+    name</strong> only confirms whether they match (it never displays anyone's details or
+    lets anyone look people up); <strong>scanning the QR code</strong> on a certificate you
+    are holding shows that certificate's details (name, course, date, score), because you
+    already have the certificate in front of you. The QR link uses a random, unguessable
+    token. This record is deleted when you delete your account.</p>
 
     <h2>Information that leaves your device</h2>
     <p><strong>Feedback.</strong> If you use the in-app feedback form, the message you

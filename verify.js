@@ -1,8 +1,10 @@
 /* CAW Academy — public verification page.
- *  - With ?token=...  : confirms an email address (from a verification email).
- *  - Otherwise         : verifies a certificate (number + printed name) against
- *                        the public registry, which returns only a yes/no match
- *                        plus course + date — never anyone's name. */
+ *  - With ?token=... : confirms an email address (from a verification email).
+ *  - With ?cert=...  : QR scan from a certificate — the token is unguessable, so
+ *                      the holder is presenting the certificate; we show the FULL
+ *                      details (name, course, date, score) and "genuine".
+ *  - Otherwise       : manual check (number + printed name) — returns only a
+ *                      yes/no match, never anyone's name. */
 (function () {
   "use strict";
 
@@ -44,29 +46,61 @@
     return;
   }
 
-  // ── Certificate-verification mode ────────────────────────────────────────
+  // Renders a labelled detail row into the result box.
+  function addRow(el, label, value) {
+    var row = document.createElement("div");
+    row.className = "result-row";
+    var a = document.createElement("span"); a.textContent = label;
+    var b = document.createElement("span"); b.textContent = value;
+    row.appendChild(a); row.appendChild(b);
+    el.appendChild(row);
+  }
+
+  // ── QR-token mode (scanned from a certificate): show full details ────────
+  var cert = new URLSearchParams(window.location.search).get("cert");
+  if (cert) {
+    var form = $("verifyForm");
+    if (form) form.classList.add("hidden");
+    var sub = document.querySelector("#certSection .acct-sub");
+    if (sub) sub.textContent = "Certificate details from the registry.";
+    showMessage("msg", "Checking…", "ok");
+    fetch(API_BASE + "/v1/certificates/lookup?token=" + encodeURIComponent(cert))
+      .then(function (res) {
+        return res.text().then(function (t) {
+          var data = t ? JSON.parse(t) : {};
+          if (!res.ok) throw new Error("Lookup failed.");
+          var el = $("result");
+          el.textContent = "";
+          if (!data.valid) {
+            showMessage("msg", "This certificate could not be found. It may have been revoked.", "err");
+            el.classList.add("hidden");
+            return;
+          }
+          showMessage("msg", "Genuine CAW Academy certificate.", "ok");
+          el.classList.remove("hidden");
+          addRow(el, "Name", data.holderName || "—");
+          addRow(el, "Course", data.courseTitle || "—");
+          addRow(el, "Certificate No.", data.number || "—");
+          addRow(el, "Issued", data.issuedAt ? new Date(data.issuedAt).toLocaleDateString() : "—");
+          if (typeof data.examScore === "number") addRow(el, "Exam score", data.examScore + "%");
+        });
+      })
+      .catch(function () {
+        showMessage("msg", "Couldn't reach the server. Please try again.", "err");
+      });
+    return;
+  }
+
+  // ── Manual certificate-verification mode (number + name) ─────────────────
   function renderResult(data) {
     var el = $("result");
     el.textContent = "";
-    el.classList.remove("hidden");
+    el.classList.add("hidden");   // no details are shown - just the match result
     if (!data.valid) {
       showMessage("msg", "No matching certificate. Check the number and the exact name printed on it.", "err");
-      el.classList.add("hidden");
       return;
     }
-    showMessage("msg", "Certificate verified.", "ok");
-    var rows = [
-      ["Course", data.courseTitle || "—"],
-      ["Issued", data.issuedAt ? new Date(data.issuedAt).toLocaleDateString() : "—"]
-    ];
-    rows.forEach(function (r) {
-      var row = document.createElement("div");
-      row.className = "result-row";
-      var a = document.createElement("span"); a.textContent = r[0];
-      var b = document.createElement("span"); b.textContent = r[1];
-      row.appendChild(a); row.appendChild(b);
-      el.appendChild(row);
-    });
+    showMessage("msg", "Certificate verified — this number and name match a genuine CAW Academy certificate.", "ok");
   }
 
   $("verifyForm").addEventListener("submit", function (e) {
