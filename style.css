@@ -423,6 +423,13 @@ footer .foot-links a:first-child{margin-left:0}
   .hero .eyebrow{margin:0}
   .device-stage{min-height:560px; margin-top:16px}
 }
+/* iPad / tablet range: the stacked hero's 3-device fan is otherwise unscaled here
+   (scaling only existed for >=1025px and <=560px), so it overflowed the column and
+   got clipped. zoom shrinks the layout too, so it fits the single column cleanly. */
+@media (min-width:561px) and (max-width:1024px){
+  .lineup{zoom:.78; transform:none}
+  .device-stage{min-height:0; margin-top:10px; padding:6px 0 18px}
+}
 @media (prefers-reduced-motion:reduce){
   .phone.floaty{animation:none}
   .hero::before,.hero::after{animation:none}
