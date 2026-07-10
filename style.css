@@ -115,6 +115,10 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .hero-copy{grid-area:copy; align-self:end}
 .device-stage{grid-area:device}
 .hero-cta{grid-area:cta; align-self:start; margin-top:2px}
+/* store badges drop to sit level with the iPhone/iPad/Mac captions (desktop only).
+   The captions sit ~127px below the device-stage centre; the lineup's transform:scale
+   shifts them visually, so the lift differs per desktop band (see media queries). */
+.hero-apps{grid-area:cta; align-self:end; display:flex; gap:12px; align-items:center; margin-bottom:var(--badge-lift,45px)}
 .hero h1{font-family:var(--serif); font-weight:600; font-size:clamp(36px,5.4vw,62px);
   line-height:1.03; letter-spacing:-.6px; margin:18px 0 16px}
 .hero h1 em{font-family:var(--sans); font-style:normal; font-weight:800; color:var(--indigo); letter-spacing:-.02em}
@@ -409,9 +413,9 @@ footer .foot-links a:first-child{margin-left:0}
 /* narrow-desktop band: scale the lineup so it never clips its column */
 /* the 5%-smaller "default scale" is a desktop preference only — phones/tablets render full size */
 @media (min-width:1025px){ body{zoom:0.95} .gallery{gap:44px} }
-@media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} }
+@media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} .hero-apps{--badge-lift:66px} }
 /* roomy desktops: enlarge the device lineup a touch (transform keeps the grid intact) */
-@media (min-width:1241px){ .lineup{transform:scale(1.18)} }
+@media (min-width:1241px){ .lineup{transform:scale(1.18)} .hero-apps{--badge-lift:26px} }
 /* tablets & below: hero stacks to a single centered column */
 @media (max-width:1024px){
   .hero-grid{grid-template-columns:1fr; grid-template-areas:"copy" "device" "cta";
@@ -419,6 +423,8 @@ footer .foot-links a:first-child{margin-left:0}
   /* copy reads left-aligned (device lineup + CTA stay centered) */
   .hero-copy{align-self:auto; text-align:left}
   .hero-cta{align-self:auto; justify-content:center; margin-top:18px}
+  /* stacked hero: badges sit under the devices, no caption-alignment lift */
+  .hero-apps{align-self:auto; justify-content:center; margin-bottom:0}
   .hero .lede{margin-left:0; margin-right:0}
   .hero .eyebrow{margin:0}
   .device-stage{min-height:560px; margin-top:16px}
@@ -487,7 +493,7 @@ footer .foot-links a:first-child{margin-left:0}
 
 /* ===== mobile: store badges stay side-by-side (never stack vertically) ===== */
 @media (max-width:560px){
-  .hero-cta, .badges{flex-wrap:nowrap; gap:8px; justify-content:center}
+  .hero-cta, .badges, .hero-apps{flex-wrap:nowrap; gap:8px; justify-content:center}
   .store-badge{flex:1 1 0; min-width:0; padding:8px 10px; gap:8px; justify-content:center}
   .store-badge .logo{width:21px; height:21px}
   .store-badge .tx{min-width:0}
