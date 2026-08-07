@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team admin — CAW Academy</title>
+<meta name="theme-color" content="#3E44B5">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self' https://api.caw-academy.com; form-action 'self'">
+<link rel="icon" href="favicon.ico">
+<style>
+  /* Self-contained brand styling — mirrors website/style.css tokens so the portal
+     works on any origin (admin subdomain OR /admin/ subfolder) with no external deps. */
+  @font-face{ font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Inter-Variable.woff2") format("woff2"); }
+  @font-face{ font-family:"Fraunces"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Fraunces-Variable.woff2") format("woff2"); }
+  :root{
+    --indigo:#3E44B5; --indigo-2:#575ECF; --indigo-3:#8A8FE6; --indigo-soft:#E6E7FB;
+    --amber:#FB8C00; --amber-soft:#FFF3E0;
+    --ink:#0B1238; --ink-soft:#3A3F63; --muted:#5E6488;
+    --bg:#F5F6FB; --card:#FFFFFF; --line:#E4E6F3;
+    --success:#2E7D32; --success-soft:#E7F4E8; --err:#B3261E; --err-soft:#FDECEC;
+    --shadow-sm:0 1px 2px rgba(16,22,68,.05), 0 6px 18px rgba(16,22,68,.05);
+    --shadow-md:0 12px 34px rgba(16,22,68,.10), 0 2px 8px rgba(16,22,68,.06);
+    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.6; letter-spacing:-.01em;
+    background:
+      radial-gradient(1100px 620px at 88% -6%, rgba(62,68,181,.08), transparent 60%),
+      radial-gradient(900px 520px at -8% 6%, rgba(244,81,30,.06), transparent 55%), var(--bg);
+    min-height:100vh;}
+  a{color:var(--indigo); text-decoration:none}
+
+  .nav{display:flex; align-items:center; justify-content:space-between; max-width:1080px; margin:0 auto; padding:18px 24px}
+  .brand{display:inline-flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:600; font-size:23px; color:var(--ink)}
+  .brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm)}
+  .brand span{color:var(--indigo)}
+  .nav .who{font-size:14px; color:var(--muted)}
+  .nav .who b{color:var(--ink-soft); font-weight:700}
+
+  .wrap{max-width:1080px; margin:18px auto 90px; padding:0 24px}
+  .signin-wrap{max-width:460px; margin:56px auto 90px; padding:0 20px}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:var(--shadow-md)}
+  .card + .card{margin-top:20px}
+  h1{font-family:var(--serif); font-weight:600; font-size:30px; margin:0 0 6px}
+  h2{font-family:var(--serif); font-weight:600; font-size:21px; margin:0 0 14px}
+  .sub{color:var(--muted); margin:0 0 20px; font-size:15px}
+  label.lbl{display:block; font-size:13px; font-weight:700; color:var(--ink-soft); margin:0 0 5px}
+
+  .field{display:block; width:100%; margin:0 0 12px; padding:11px 13px; border:1px solid var(--line);
+    border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#fff}
+  .field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+  select.field{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+    background-position:calc(100% - 18px) 18px, calc(100% - 13px) 18px; background-size:5px 5px,5px 5px; background-repeat:no-repeat; padding-right:34px}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:0; cursor:pointer; font:inherit;
+    font-weight:700; font-size:15px; padding:12px 18px; border-radius:12px; background:var(--ink); color:#fff}
+  .btn:disabled{opacity:.55; cursor:not-allowed}
+  .btn-cta{background:linear-gradient(135deg,#FB8C00,#F4511E)}
+  .btn-ghost{background:#fff; color:var(--ink-soft); border:1px solid var(--line); padding:7px 12px; font-size:13px; font-weight:700}
+  .btn-ghost:hover{border-color:var(--indigo-3); color:var(--indigo)}
+  .btn-danger{background:#fff; color:var(--err); border:1px solid var(--line); padding:7px 12px; font-size:13px; font-weight:700}
+  .btn-danger:hover{border-color:var(--err); background:var(--err-soft)}
+
+  .msg{font-size:14px; margin:12px 0; padding:11px 13px; border-radius:10px}
+  .msg.err{background:var(--err-soft); color:var(--err)}
+  .msg.ok{background:var(--success-soft); color:var(--success)}
+
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:0 14px}
+  .assign-grid{display:grid; grid-template-columns:1.3fr 1.3fr .9fr .7fr auto; gap:0 12px; align-items:end}
+  .assign-grid .cell{min-width:0}
+  @media (max-width:820px){ .assign-grid{grid-template-columns:1fr 1fr} .row2{grid-template-columns:1fr} }
+
+  /* Roster */
+  .member{border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-top:14px; background:#fff}
+  .member-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .member-name{font-weight:700; font-size:16px}
+  .member-email{color:var(--muted); font-size:13.5px}
+  .role-pill{font-size:11px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--indigo);
+    background:var(--indigo-soft); padding:3px 8px; border-radius:999px}
+  .alist{margin:12px 0 0; padding:0; list-style:none}
+  .aitem{display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--line); flex-wrap:wrap}
+  .aitem .course{font-weight:600; flex:1 1 220px; min-width:0}
+  .aitem .course small{display:block; color:var(--muted); font-weight:400; font-size:12px}
+  .aitem .meta{color:var(--muted); font-size:13px; white-space:nowrap}
+  .aitem .actions{display:flex; gap:8px; margin-left:auto}
+  .pill{font-size:12px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap}
+  .pill.done{background:var(--success-soft); color:var(--success)}
+  .pill.overdue{background:var(--err-soft); color:var(--err)}
+  .pill.due_soon{background:var(--amber-soft); color:#B25E00}
+  .pill.upcoming{background:var(--indigo-soft); color:var(--indigo)}
+  .nextup{font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.4px; margin-left:2px}
+  .certs{margin-top:10px; font-size:13px; color:var(--muted)}
+  .certs b{color:var(--ink-soft)}
+  .empty{color:var(--muted); font-size:14px; padding:8px 0}
+  .note{font-size:13px; color:var(--muted); margin-top:16px; line-height:1.5}
+  .hidden{display:none}
+
+  /* Inline edit editor */
+  .editor{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; padding:10px; background:var(--bg); border-radius:10px}
+  .editor .field{margin:0; width:auto}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="logo-header.png" alt="" width="30" height="30">CAW <span>Academy</span></a>
+  <div class="who" id="who"></div>
+</nav>
+
+<!-- Sign in -->
+<main class="signin-wrap" id="signinView">
+  <div class="card">
+    <h1>Team admin</h1>
+    <p class="sub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
+    <form id="authForm" autocomplete="on">
+      <label class="lbl" for="email">Work email</label>
+      <input class="field" id="email" type="email" autocomplete="username" required>
+      <label class="lbl" for="password">Password</label>
+      <input class="field" id="password" type="password" autocomplete="current-password" required>
+      <div id="authMsg"></div>
+      <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
+    </form>
+    <p class="note">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
+  </div>
+</main>
+
+<!-- Not an admin -->
+<main class="signin-wrap hidden" id="deniedView">
+  <div class="card">
+    <h1>Not an administrator</h1>
+    <p class="sub" id="deniedMsg">This account is not set up as an organisation administrator.</p>
+    <button class="btn btn-ghost" id="deniedSignOut">Sign out</button>
+  </div>
+</main>
+
+<!-- Dashboard -->
+<main class="wrap hidden" id="dashView">
+  <div class="card">
+    <div class="member-head" style="margin-bottom:2px">
+      <div>
+        <h2 style="margin:0" id="orgName">Your organisation</h2>
+        <div class="member-email" id="orgDomains"></div>
+      </div>
+      <button class="btn btn-ghost" id="signOutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Assign a course</h2>
+    <p class="sub">Set a deadline and an optional sequence number. Sequence is a soft order with a “next up” marker — nothing is locked for the learner.</p>
+    <form id="assignForm">
+      <div class="assign-grid">
+        <div class="cell">
+          <label class="lbl" for="who2">Assign to</label>
+          <select class="field" id="who2"></select>
+        </div>
+        <div class="cell">
+          <label class="lbl" for="course">Course</label>
+          <select class="field" id="course"></select>
+        </div>
+        <div class="cell">
+          <label class="lbl" for="deadline">Deadline</label>
+          <input class="field" id="deadline" type="date" required>
+        </div>
+        <div class="cell">
+          <label class="lbl" for="sequence">Sequence</label>
+          <input class="field" id="sequence" type="number" min="0" max="9999" value="0">
+        </div>
+        <div class="cell">
+          <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
+        </div>
+      </div>
+      <div id="assignMsg"></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="member-head" style="margin-bottom:6px">
+      <h2 style="margin:0">Team roster</h2>
+      <button class="btn btn-ghost" id="reloadBtn">Reload</button>
+    </div>
+    <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Overdue items are shown in red.</p>
+    <div id="roster"></div>
+  </div>
+</main>
+
+<script src="admin.js" defer></script>
+</body>
+</html>
