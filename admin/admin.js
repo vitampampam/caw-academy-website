@@ -19,6 +19,18 @@
   var accessToken = null; // in-memory only; never persisted.
   var $ = function (id) { return document.getElementById(id); };
 
+  // Stable per-browser id so repeat portal sign-ins reuse one server session row
+  // instead of piling up. Browser sessions are exempt from the device cap server-side
+  // (they deliver no offline content); this just keeps them tidy. Falls back to a
+  // per-page id if localStorage is unavailable.
+  function deviceId() {
+    try {
+      var k = "caw_admin_device_id", v = localStorage.getItem(k);
+      if (!v) { v = "web-admin-" + (Math.random().toString(36).slice(2) + Date.now().toString(36)); localStorage.setItem(k, v); }
+      return v;
+    } catch (e) { return "web-admin-session"; }
+  }
+
   // Course catalogue for the assign picker. Mirrors server COURSE_KEYS
   // (src/domain/courses.ts) — keep in sync when courses are added/renamed. The
   // roster falls back to the raw key for anything not listed here.
@@ -161,28 +173,118 @@
   }
   function fmtDate(iso) { return iso ? new Date(iso).toLocaleDateString() : "—"; }
 
-  // ── Course + member selects ───────────────────────────────────────────────
-  function populateCourseSelect() {
-    var sel = $("course"); sel.textContent = "";
-    var groups = {};
-    COURSES.forEach(function (c) {
-      if (!groups[c[2]]) {
-        var og = document.createElement("optgroup"); og.label = c[2];
-        groups[c[2]] = og; sel.appendChild(og);
-      }
-      var o = document.createElement("option"); o.value = c[0]; o.textContent = c[1];
-      groups[c[2]].appendChild(o);
-    });
+  // ── Multi-select checklists (members + courses) ───────────────────────────
+  // Selection state kept in Sets so members/courses can be toggled independently.
+  var selectedUserIds = {};   // userId -> true
+  var selectedCourses = {};   // courseKey -> true
+  var CATALOGUE_INDEX = {};   // courseKey -> catalogue position (for default sequencing)
+  COURSES.forEach(function (c, i) { CATALOGUE_INDEX[c[0]] = i; });
+
+  function updateMemberCount() {
+    var n = Object.keys(selectedUserIds).length;
+    $("memCount").textContent = n + " selected";
   }
-  function populateMemberSelect(members) {
-    var sel = $("who2"); sel.textContent = "";
-    var all = document.createElement("option");
-    all.value = "*"; all.textContent = "Whole organisation (" + members.length + ")";
-    sel.appendChild(all);
+  function updateCourseCount() {
+    var n = Object.keys(selectedCourses).length;
+    $("courseCount").textContent = n + " selected";
+  }
+
+  // Build the members checklist from the roster. "Select all" toggles every member.
+  function renderMemberChecklist(members) {
+    var list = $("memList"); list.textContent = "";
+    // Drop any previously-selected ids that are no longer members.
+    var present = {}; members.forEach(function (m) { present[m.userId] = true; });
+    Object.keys(selectedUserIds).forEach(function (id) { if (!present[id]) delete selectedUserIds[id]; });
+
     members.forEach(function (m) {
-      var o = document.createElement("option");
-      o.value = m.userId; o.textContent = fullName(m) + " · " + m.email;
-      sel.appendChild(o);
+      var rowEl = document.createElement("label"); rowEl.className = "ms-row";
+      var cb = document.createElement("input"); cb.type = "checkbox";
+      cb.checked = !!selectedUserIds[m.userId];
+      cb.addEventListener("change", function () {
+        if (cb.checked) selectedUserIds[m.userId] = true; else delete selectedUserIds[m.userId];
+        syncMemAll(members); updateMemberCount();
+      });
+      var txt = document.createElement("span");
+      var name = document.createElement("span"); name.textContent = fullName(m);
+      var sub = document.createElement("span"); sub.className = "sub"; sub.textContent = "  " + m.email;
+      txt.appendChild(name); txt.appendChild(sub);
+      rowEl.appendChild(cb); rowEl.appendChild(txt);
+      list.appendChild(rowEl);
+    });
+    syncMemAll(members); updateMemberCount();
+  }
+
+  function syncMemAll(members) {
+    var all = $("memAll");
+    var n = members.length, sel = 0;
+    members.forEach(function (m) { if (selectedUserIds[m.userId]) sel++; });
+    all.checked = n > 0 && sel === n;
+    all.indeterminate = sel > 0 && sel < n;
+  }
+
+  // Build the courses checklist, grouped by framework, each group with a select-all.
+  function renderCourseChecklist() {
+    var list = $("courseList"); list.textContent = "";
+    var order = ["EASA", "UK CAA", "UAE GCAA", "FAA"];
+    order.forEach(function (grp) {
+      var inGroup = COURSES.filter(function (c) { return c[2] === grp; });
+      if (!inGroup.length) return;
+
+      var head = document.createElement("label"); head.className = "ms-group";
+      head.dataset.group = grp;
+      var gcb = document.createElement("input"); gcb.type = "checkbox";
+      gcb.addEventListener("change", function () {
+        inGroup.forEach(function (c) {
+          if (gcb.checked) selectedCourses[c[0]] = true; else delete selectedCourses[c[0]];
+        });
+        renderCourseChecklist(); updateCourseCount();
+      });
+      head.appendChild(gcb);
+      head.appendChild(document.createTextNode(grp));
+      list.appendChild(head);
+
+      var selInGroup = 0;
+      inGroup.forEach(function (c) {
+        var rowEl = document.createElement("label"); rowEl.className = "ms-row";
+        rowEl.dataset.key = c[0]; rowEl.dataset.label = c[1].toLowerCase();
+        var cb = document.createElement("input"); cb.type = "checkbox";
+        cb.checked = !!selectedCourses[c[0]];
+        if (cb.checked) selInGroup++;
+        cb.addEventListener("change", function () {
+          if (cb.checked) selectedCourses[c[0]] = true; else delete selectedCourses[c[0]];
+          renderCourseChecklist(); updateCourseCount();
+        });
+        var t = document.createElement("span"); t.textContent = c[1];
+        rowEl.appendChild(cb); rowEl.appendChild(t);
+        list.appendChild(rowEl);
+      });
+      gcb.checked = selInGroup === inGroup.length;
+      gcb.indeterminate = selInGroup > 0 && selInGroup < inGroup.length;
+    });
+    applyCourseFilter();
+    updateCourseCount();
+  }
+
+  // Hide course rows (and empty group headers) not matching the filter text.
+  function applyCourseFilter() {
+    var q = ($("courseSearch").value || "").trim().toLowerCase();
+    var rows = $("courseList").querySelectorAll(".ms-row[data-key]");
+    var groupHasVisible = {};
+    rows.forEach(function (r) {
+      var match = !q || r.dataset.label.indexOf(q) !== -1 || r.dataset.key.indexOf(q) !== -1;
+      r.style.display = match ? "" : "none";
+    });
+    // Group headers: show only if that group has a visible row.
+    var heads = $("courseList").querySelectorAll(".ms-group");
+    // Recompute visibility per group by walking siblings.
+    heads.forEach(function (h) {
+      var grp = h.dataset.group, anyVisible = false;
+      COURSES.forEach(function (c) {
+        if (c[2] !== grp) return;
+        var row = $("courseList").querySelector('.ms-row[data-key="' + c[0] + '"]');
+        if (row && row.style.display !== "none") anyVisible = true;
+      });
+      h.style.display = anyVisible ? "" : "none";
     });
   }
 
@@ -325,11 +427,11 @@
       var e = document.createElement("div"); e.className = "empty";
       e.textContent = "No members found for your organisation yet. Members appear here once they create an account with a work email on your organisation's domain.";
       root.appendChild(e);
-      populateMemberSelect(members);
+      renderMemberChecklist(members);
       return;
     }
     members.forEach(function (m) { root.appendChild(renderMember(m)); });
-    populateMemberSelect(members);
+    renderMemberChecklist(members);
   }
 
   function loadRoster() {
@@ -338,31 +440,62 @@
     });
   }
 
-  // ── Assign form ───────────────────────────────────────────────────────────
+  // ── Assign form (multi-member × multi-course fan-out) ─────────────────────
+  // "Select all" members toggle.
+  $("memAll").addEventListener("change", function () {
+    var on = $("memAll").checked;
+    $("memList").querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = on; cb.dispatchEvent(new Event("change"));
+    });
+  });
+  $("courseSearch").addEventListener("input", applyCourseFilter);
+  $("courseClear").addEventListener("click", function () {
+    selectedCourses = {}; renderCourseChecklist(); updateCourseCount();
+  });
+
   $("assignForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    var who = $("who2").value;
-    var courseKey = $("course").value;
+    var userIds = Object.keys(selectedUserIds);
+    var courseKeys = Object.keys(selectedCourses);
     var dateVal = $("deadline").value;
-    var sequence = Number($("sequence").value || 0);
+    var startSeq = Number($("sequence").value || 0);
+    if (!userIds.length) { showMessage("assignMsg", "Select at least one member.", "err"); return; }
+    if (!courseKeys.length) { showMessage("assignMsg", "Select at least one course.", "err"); return; }
     if (!dateVal) { showMessage("assignMsg", "Pick a deadline.", "err"); return; }
-    var body = {
-      courseKey: courseKey,
-      deadline: new Date(dateVal + "T23:59:59").toISOString(),
-      sequence: sequence
-    };
-    if (who === "*") body.allMembers = true; else body.userId = who;
+
+    // Default sequence = catalogue order: sort the selected courses by their
+    // catalogue position, then number them startSeq, startSeq+1, … so the learner's
+    // "next up" follows the catalogue. Every selected member gets the same plan.
+    courseKeys.sort(function (a, b) { return (CATALOGUE_INDEX[a] || 0) - (CATALOGUE_INDEX[b] || 0); });
+    var deadlineISO = new Date(dateVal + "T23:59:59").toISOString();
+
+    var jobs = [];
+    userIds.forEach(function (uid) {
+      courseKeys.forEach(function (ck, i) {
+        jobs.push({ userId: uid, courseKey: ck, sequence: startSeq + i });
+      });
+    });
 
     var btn = $("assignBtn"); btn.disabled = true;
-    showMessage("assignMsg", "", "err");
-    authed("POST", "/v1/org/assignments", body)
-      .then(function (res) {
-        var n = (res.assignments || []).length;
-        showMessage("assignMsg", "Assigned " + labelFor(courseKey) + " to " + n + (n === 1 ? " member." : " members."), "ok");
-        return loadRoster();
-      })
-      .catch(function (err) { showMessage("assignMsg", err.message, "err"); })
-      .finally(function () { btn.disabled = false; });
+    showMessage("assignMsg", "Assigning " + jobs.length + " …", "ok");
+
+    Promise.allSettled(jobs.map(function (j) {
+      return authed("POST", "/v1/org/assignments", {
+        courseKey: j.courseKey, deadline: deadlineISO, sequence: j.sequence, userId: j.userId
+      });
+    })).then(function (results) {
+      var ok = 0, fail = 0, firstErr = "";
+      results.forEach(function (r) {
+        if (r.status === "fulfilled") ok++;
+        else { fail++; if (!firstErr) firstErr = (r.reason && r.reason.message) || "Some assignments failed."; }
+      });
+      var msg = "Assigned " + courseKeys.length + " course" + (courseKeys.length === 1 ? "" : "s") +
+                " to " + userIds.length + " member" + (userIds.length === 1 ? "" : "s") +
+                " (" + ok + " assignment" + (ok === 1 ? "" : "s") + ").";
+      if (fail) { showMessage("assignMsg", msg + " " + fail + " failed: " + firstErr, "err"); }
+      else { showMessage("assignMsg", msg, "ok"); }
+      return loadRoster();
+    }).finally(function () { btn.disabled = false; });
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
@@ -374,7 +507,7 @@
     var password = $("password").value;
     var btn = $("authSubmit"); btn.disabled = true;
     showMessage("authMsg", "", "err");
-    request("POST", "/v1/auth/login", { email: email, password: password }, false)
+    request("POST", "/v1/auth/login", { email: email, password: password, device: { id: deviceId(), name: "Team admin portal" } }, false)
       .then(function (b) { accessToken = b.accessToken || null; $("password").value = ""; return enter(); })
       .catch(function (err) { showMessage("authMsg", err.message, "err"); })
       .finally(function () { btn.disabled = false; });
@@ -394,7 +527,7 @@
       $("orgName").textContent = ctx.orgName || "Your organisation";
       $("orgDomains").textContent = (ctx.domains || []).join(", ");
       $("who").textContent = "";
-      populateCourseSelect();
+      renderCourseChecklist();
       // default the deadline to two weeks out for convenience
       var d = new Date(Date.now() + 14 * 86400000);
       $("deadline").value = d.toISOString().slice(0, 10);
