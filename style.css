@@ -415,6 +415,9 @@ footer .foot-links a:first-child{margin-left:0}
 /* narrow-desktop band: scale the lineup so it never clips its column */
 /* the 5%-smaller "default scale" is a desktop preference only — phones/tablets render full size */
 @media (min-width:1025px){ body{zoom:0.95} .gallery{gap:44px} }
+/* tablets (iPad portrait): the desktop 5%-down doesn't apply here, so text/cards read
+   larger than intended. A matching gentle scale-down keeps the whole page consistent. */
+@media (min-width:561px) and (max-width:1024px){ body{zoom:0.9} }
 @media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} .hero-apps{--badge-lift:66px} }
 /* roomy desktops: enlarge the device lineup a touch (transform keeps the grid intact) */
 @media (min-width:1241px){ .lineup{transform:scale(1.18)} .hero-apps{--badge-lift:26px} }
@@ -540,8 +543,9 @@ footer .foot-links a:first-child{margin-left:0}
   .track h3{font-size:17px}
   .track > p{font-size:13px}
   .track li{font-size:13px}
-  .faq summary{font-size:15.5px; padding:15px 18px}
-  .faq .ans{font-size:14.5px; padding:0 18px 16px}
+  .faq summary{font-size:15px; line-height:1.35; padding:14px 16px; gap:12px}
+  .faq summary .chev{width:20px; height:20px}
+  .faq .ans{font-size:14px; padding:0 16px 15px}
   .cta-band{padding:40px 22px}
   .cta-band h2{font-size:clamp(24px,7vw,30px)}
   /* align the dots in a column, nudged inward from the edge toward the centre */
