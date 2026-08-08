@@ -187,10 +187,17 @@
   function updateMemberCount() {
     var n = Object.keys(selectedUserIds).length;
     $("memCount").textContent = n + " selected";
+    updateAssignEnabled();
   }
   function updateCourseCount() {
     var n = Object.keys(selectedCourses).length;
     $("courseCount").textContent = n + " selected";
+    updateAssignEnabled();
+  }
+  // Enable Assign only when at least one member AND one course are selected.
+  function updateAssignEnabled() {
+    var btn = $("assignBtn"); if (!btn) return;
+    btn.disabled = !(Object.keys(selectedUserIds).length && Object.keys(selectedCourses).length);
   }
 
   // Build the members checklist from the roster. "Select all" toggles every member.
