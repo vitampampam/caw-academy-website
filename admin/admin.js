@@ -179,6 +179,10 @@
   var selectedCourses = {};   // courseKey -> true
   var CATALOGUE_INDEX = {};   // courseKey -> catalogue position (for default sequencing)
   COURSES.forEach(function (c, i) { CATALOGUE_INDEX[c[0]] = i; });
+  var FRAMEWORKS = ["EASA", "UK CAA", "UAE GCAA", "FAA"];
+  // Collapsed-by-framework state so the admin can filter courses by framework. Default
+  // all collapsed (compact 4-row list); the admin expands the framework(s) they want.
+  var collapsedGroups = {}; FRAMEWORKS.forEach(function (g) { collapsedGroups[g] = true; });
 
   function updateMemberCount() {
     var n = Object.keys(selectedUserIds).length;
@@ -222,69 +226,83 @@
     all.indeterminate = sel > 0 && sel < n;
   }
 
-  // Build the courses checklist, grouped by framework, each group with a select-all.
+  // Build the courses checklist, grouped by framework. Each group header is
+  // collapsible (click to expand/collapse) so the admin can filter by framework, and
+  // carries a select-all checkbox + a selected/total count.
   function renderCourseChecklist() {
     var list = $("courseList"); list.textContent = "";
-    var order = ["EASA", "UK CAA", "UAE GCAA", "FAA"];
-    order.forEach(function (grp) {
+    FRAMEWORKS.forEach(function (grp) {
       var inGroup = COURSES.filter(function (c) { return c[2] === grp; });
       if (!inGroup.length) return;
+      var selInGroup = inGroup.filter(function (c) { return selectedCourses[c[0]]; }).length;
 
-      var head = document.createElement("label"); head.className = "ms-group";
+      var head = document.createElement("div"); head.className = "ms-group";
       head.dataset.group = grp;
+
+      // Select-all checkbox for the group (independent of collapse).
       var gcb = document.createElement("input"); gcb.type = "checkbox";
+      gcb.checked = selInGroup === inGroup.length;
+      gcb.indeterminate = selInGroup > 0 && selInGroup < inGroup.length;
+      gcb.addEventListener("click", function (e) { e.stopPropagation(); });
       gcb.addEventListener("change", function () {
         inGroup.forEach(function (c) {
           if (gcb.checked) selectedCourses[c[0]] = true; else delete selectedCourses[c[0]];
         });
-        renderCourseChecklist(); updateCourseCount();
+        renderCourseChecklist(); updateCourseCount(); updateScheduleHint();
       });
-      head.appendChild(gcb);
-      head.appendChild(document.createTextNode(grp));
+
+      // Disclosure chevron + name + count; clicking the header toggles collapse.
+      var chev = document.createElement("span"); chev.className = "ms-chev";
+      chev.textContent = collapsedGroups[grp] ? "▸" : "▾"; // ▸ / ▾
+      var name = document.createElement("span"); name.className = "ms-gname"; name.textContent = grp;
+      var count = document.createElement("span"); count.className = "ms-gcount";
+      count.textContent = selInGroup > 0 ? "(" + selInGroup + "/" + inGroup.length + ")" : "(" + inGroup.length + ")";
+
+      head.appendChild(gcb); head.appendChild(chev); head.appendChild(name); head.appendChild(count);
+      head.addEventListener("click", function () {
+        collapsedGroups[grp] = !collapsedGroups[grp];
+        renderCourseChecklist();
+      });
       list.appendChild(head);
 
-      var selInGroup = 0;
       inGroup.forEach(function (c) {
         var rowEl = document.createElement("label"); rowEl.className = "ms-row";
-        rowEl.dataset.key = c[0]; rowEl.dataset.label = c[1].toLowerCase();
+        rowEl.dataset.key = c[0]; rowEl.dataset.label = c[1].toLowerCase(); rowEl.dataset.group = grp;
         var cb = document.createElement("input"); cb.type = "checkbox";
         cb.checked = !!selectedCourses[c[0]];
-        if (cb.checked) selInGroup++;
         cb.addEventListener("change", function () {
           if (cb.checked) selectedCourses[c[0]] = true; else delete selectedCourses[c[0]];
-          renderCourseChecklist(); updateCourseCount();
+          renderCourseChecklist(); updateCourseCount(); updateScheduleHint();
         });
         var t = document.createElement("span"); t.textContent = c[1];
         rowEl.appendChild(cb); rowEl.appendChild(t);
         list.appendChild(rowEl);
       });
-      gcb.checked = selInGroup === inGroup.length;
-      gcb.indeterminate = selInGroup > 0 && selInGroup < inGroup.length;
     });
     applyCourseFilter();
     updateCourseCount();
   }
 
-  // Hide course rows (and empty group headers) not matching the filter text.
+  // Row visibility combines the framework collapse state with the filter text: while a
+  // filter is typed, matches show even inside collapsed groups (and that group's chevron
+  // reads as open); with no filter, rows show only for expanded groups.
   function applyCourseFilter() {
     var q = ($("courseSearch").value || "").trim().toLowerCase();
-    var rows = $("courseList").querySelectorAll(".ms-row[data-key]");
-    var groupHasVisible = {};
-    rows.forEach(function (r) {
+    var groupHasMatch = {};
+    $("courseList").querySelectorAll(".ms-row[data-key]").forEach(function (r) {
+      var grp = r.dataset.group;
       var match = !q || r.dataset.label.indexOf(q) !== -1 || r.dataset.key.indexOf(q) !== -1;
-      r.style.display = match ? "" : "none";
+      var show = match && (q ? true : !collapsedGroups[grp]);
+      r.style.display = show ? "" : "none";
+      if (match) groupHasMatch[grp] = true;
     });
-    // Group headers: show only if that group has a visible row.
-    var heads = $("courseList").querySelectorAll(".ms-group");
-    // Recompute visibility per group by walking siblings.
-    heads.forEach(function (h) {
-      var grp = h.dataset.group, anyVisible = false;
-      COURSES.forEach(function (c) {
-        if (c[2] !== grp) return;
-        var row = $("courseList").querySelector('.ms-row[data-key="' + c[0] + '"]');
-        if (row && row.style.display !== "none") anyVisible = true;
-      });
-      h.style.display = anyVisible ? "" : "none";
+    // Headers: hidden only if a filter excludes the whole group; chevron reflects the
+    // effective open/closed state (a filter forces the group open).
+    $("courseList").querySelectorAll(".ms-group").forEach(function (h) {
+      var grp = h.dataset.group;
+      h.style.display = (!q || groupHasMatch[grp]) ? "" : "none";
+      var chev = h.querySelector(".ms-chev");
+      if (chev) chev.textContent = (q ? !!groupHasMatch[grp] : !collapsedGroups[grp]) ? "▾" : "▸";
     });
   }
 
@@ -450,38 +468,90 @@
   });
   $("courseSearch").addEventListener("input", applyCourseFilter);
   $("courseClear").addEventListener("click", function () {
-    selectedCourses = {}; renderCourseChecklist(); updateCourseCount();
+    selectedCourses = {}; renderCourseChecklist(); updateCourseCount(); updateScheduleHint();
   });
+  $("deadline").addEventListener("change", updateScheduleHint);
+  $("monthsApart").addEventListener("input", updateScheduleHint);
+
+  // Add whole months to a date, clamping day-of-month overflow (e.g. 31 Jan +1mo -> 28/29 Feb).
+  function addMonths(date, n) {
+    var d = new Date(date.getTime());
+    var day = d.getDate();
+    d.setMonth(d.getMonth() + n);
+    if (d.getDate() < day) d.setDate(0); // rolled into the next month -> clamp to last day
+    return d;
+  }
+
+  // The selected courses in catalogue order, each with its computed deadline: the
+  // first at the picked date, each subsequent one `monthsApart` months later (0 = all
+  // share the same deadline). Returns [] if the inputs aren't ready.
+  function courseDeadlines() {
+    var keys = Object.keys(selectedCourses);
+    var dateVal = $("deadline").value;
+    if (!keys.length || !dateVal) return [];
+    keys.sort(function (a, b) { return (CATALOGUE_INDEX[a] || 0) - (CATALOGUE_INDEX[b] || 0); });
+    var base = new Date(dateVal + "T23:59:59");
+    var monthsApart = Math.max(0, Math.floor(Number($("monthsApart").value || 0)));
+    return keys.map(function (ck, i) { return { courseKey: ck, index: i, date: addMonths(base, i * monthsApart) }; });
+  }
+
+  var DAY_MS = 86400000;
+  function fmtShort(d) { return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); }
+
+  // Live preview under the form: how many courses, first/last deadline, and roughly how
+  // long per course — with a warning when that's tight (< ~3 weeks each).
+  function updateScheduleHint() {
+    var el = $("scheduleHint"); if (!el) return;
+    var plan = courseDeadlines();
+    if (!plan.length) { el.textContent = ""; el.style.color = ""; return; }
+    var n = plan.length;
+    var last = plan[n - 1].date;
+    var perCourseDays = Math.round((last.getTime() - Date.now()) / DAY_MS / n);
+    var txt = n + " course" + (n === 1 ? "" : "s") + " · first due " + fmtShort(plan[0].date);
+    if (n > 1) txt += ", last due " + fmtShort(last);
+    if (n > 1) txt += " · ~" + Math.max(0, perCourseDays) + " days each";
+    if (perCourseDays < 21) {
+      txt += "  — that's tight; consider a later deadline or more months apart.";
+      el.style.color = "var(--err)";
+    } else {
+      el.style.color = "";
+    }
+    el.textContent = txt;
+  }
 
   $("assignForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var userIds = Object.keys(selectedUserIds);
-    var courseKeys = Object.keys(selectedCourses);
-    var dateVal = $("deadline").value;
+    var plan = courseDeadlines();
     var startSeq = Number($("sequence").value || 0);
     if (!userIds.length) { showMessage("assignMsg", "Select at least one member.", "err"); return; }
-    if (!courseKeys.length) { showMessage("assignMsg", "Select at least one course.", "err"); return; }
-    if (!dateVal) { showMessage("assignMsg", "Pick a deadline.", "err"); return; }
+    if (!plan.length) { showMessage("assignMsg", "Select at least one course and a first deadline.", "err"); return; }
 
-    // Default sequence = catalogue order: sort the selected courses by their
-    // catalogue position, then number them startSeq, startSeq+1, … so the learner's
-    // "next up" follows the catalogue. Every selected member gets the same plan.
-    courseKeys.sort(function (a, b) { return (CATALOGUE_INDEX[a] || 0) - (CATALOGUE_INDEX[b] || 0); });
-    var deadlineISO = new Date(dateVal + "T23:59:59").toISOString();
+    // Warn (allow override) if the schedule is too short — under ~3 weeks per course.
+    var n = plan.length;
+    var perCourseDays = Math.round((plan[n - 1].date.getTime() - Date.now()) / DAY_MS / n);
+    if (perCourseDays < 21) {
+      if (!window.confirm("This schedule gives about " + Math.max(0, perCourseDays) +
+        " days per course for " + n + " course" + (n === 1 ? "" : "s") +
+        " — that may be too short. Assign anyway?")) return;
+    }
 
+    // Each member gets the same plan: sequence follows catalogue order; deadlines are
+    // staggered per courseDeadlines().
     var jobs = [];
     userIds.forEach(function (uid) {
-      courseKeys.forEach(function (ck, i) {
-        jobs.push({ userId: uid, courseKey: ck, sequence: startSeq + i });
+      plan.forEach(function (p) {
+        jobs.push({ userId: uid, courseKey: p.courseKey, sequence: startSeq + p.index, deadline: p.date.toISOString() });
       });
     });
+    var courseCount = plan.length;
 
     var btn = $("assignBtn"); btn.disabled = true;
     showMessage("assignMsg", "Assigning " + jobs.length + " …", "ok");
 
     Promise.allSettled(jobs.map(function (j) {
       return authed("POST", "/v1/org/assignments", {
-        courseKey: j.courseKey, deadline: deadlineISO, sequence: j.sequence, userId: j.userId
+        courseKey: j.courseKey, deadline: j.deadline, sequence: j.sequence, userId: j.userId
       });
     })).then(function (results) {
       var ok = 0, fail = 0, firstErr = "";
@@ -489,7 +559,7 @@
         if (r.status === "fulfilled") ok++;
         else { fail++; if (!firstErr) firstErr = (r.reason && r.reason.message) || "Some assignments failed."; }
       });
-      var msg = "Assigned " + courseKeys.length + " course" + (courseKeys.length === 1 ? "" : "s") +
+      var msg = "Assigned " + courseCount + " course" + (courseCount === 1 ? "" : "s") +
                 " to " + userIds.length + " member" + (userIds.length === 1 ? "" : "s") +
                 " (" + ok + " assignment" + (ok === 1 ? "" : "s") + ").";
       if (fail) { showMessage("assignMsg", msg + " " + fail + " failed: " + firstErr, "err"); }
@@ -528,10 +598,10 @@
       $("orgDomains").textContent = (ctx.domains || []).join(", ");
       $("who").textContent = "";
       renderCourseChecklist();
-      // default the deadline to two weeks out for convenience
-      var d = new Date(Date.now() + 14 * 86400000);
-      $("deadline").value = d.toISOString().slice(0, 10);
+      // Default the first deadline to one month out (matches the monthly cadence).
+      $("deadline").value = addMonths(new Date(), 1).toISOString().slice(0, 10);
       $("deadline").min = new Date().toISOString().slice(0, 10);
+      updateScheduleHint();
       show("dashView");
       return loadRoster();
     }).catch(function (err) {

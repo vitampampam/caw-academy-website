@@ -88,11 +88,20 @@
   .ms-row input{width:16px; height:16px; accent-color:var(--indigo); flex:none}
   .ms-row .sub{color:var(--muted); font-size:12px}
   .ms-group{font-size:11px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--indigo);
-    padding:8px 12px 4px; display:flex; align-items:center; gap:8px}
-  .ms-group input{width:15px; height:15px; accent-color:var(--indigo)}
+    padding:9px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    border-top:1px solid var(--line)}
+  .ms-group:first-child{border-top:0}
+  .ms-group:hover{background:var(--indigo-soft)}
+  .ms-group input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
+  .ms-chev{width:12px; font-size:11px; color:var(--muted)}
+  .ms-gname{flex:1 1 auto}
+  .ms-gcount{color:var(--muted); font-weight:700; text-transform:none; letter-spacing:0}
   .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; font-size:12px; cursor:pointer; padding:0}
-  .assign-foot{display:grid; grid-template-columns:1fr 1fr auto; gap:0 12px; align-items:end; margin-top:14px}
+  .assign-foot{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:12px; align-items:end; margin-top:14px}
+  .assign-foot .field{width:100%}
   @media (max-width:820px){ .assign-foot{grid-template-columns:1fr 1fr} }
+  /* Phones: stack every field + the button, each full width. */
+  @media (max-width:560px){ .assign-foot{grid-template-columns:1fr} .assign-foot .btn{width:100%} }
 
   /* Roster */
   .member{border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-top:14px; background:#fff}
@@ -171,7 +180,7 @@
 
   <div class="card">
     <h2>Assign courses</h2>
-    <p class="sub">Pick one or more members and one or more courses, set a deadline, and assign. Courses are ordered by the catalogue and numbered automatically (a soft “next up” order — nothing is locked for the learner).</p>
+    <p class="sub">Pick one or more members and one or more courses, then assign. Courses follow the catalogue order, and deadlines are staggered by the “Months apart” interval from the first deadline (set it to 0 for one shared deadline). The order is a soft “next up” hint — nothing is locked for the learner.</p>
     <form id="assignForm">
       <div class="ms-grid">
         <div>
@@ -199,8 +208,12 @@
       </div>
       <div class="assign-foot">
         <div>
-          <label class="lbl" for="deadline">Deadline</label>
+          <label class="lbl" for="deadline">First deadline</label>
           <input class="field" id="deadline" type="date" required>
+        </div>
+        <div>
+          <label class="lbl" for="monthsApart">Months apart</label>
+          <input class="field" id="monthsApart" type="number" min="0" max="24" value="1">
         </div>
         <div>
           <label class="lbl" for="sequence">Start sequence at</label>
@@ -210,6 +223,7 @@
           <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
         </div>
       </div>
+      <div class="hint" id="scheduleHint" style="margin-top:8px"></div>
       <div id="assignMsg"></div>
     </form>
   </div>
