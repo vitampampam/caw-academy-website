@@ -435,6 +435,14 @@ footer .foot-links a:first-child{margin-left:0}
 @media (min-width:561px) and (max-width:1024px){
   .lineup{zoom:.78; transform:none}
   .device-stage{min-height:0; margin-top:10px; padding:6px 0 18px}
+  /* Tablet portrait: centre the whole stacked hero so the copy doesn't sit
+     left-aligned beside centred devices (which read as unbalanced), and cap the
+     heading so it isn't oversized in this width range. */
+  .hero-grid{padding:26px 32px 32px; row-gap:6px}
+  .hero-copy{text-align:center}
+  .hero h1{font-size:clamp(34px,4.6vw,46px); margin-bottom:14px}
+  .hero .lede{margin-left:auto; margin-right:auto; max-width:56ch}
+  .hero .eyebrow{margin-left:auto; margin-right:auto}
 }
 @media (prefers-reduced-motion:reduce){
   .phone.floaty{animation:none}
