@@ -107,7 +107,9 @@
   .assign-foot{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);
     gap:12px; align-items:end; margin-top:14px}
   .assign-foot .field{width:100%}
-  .assign-foot .btn{width:100%; height:44px}
+  /* Match the button's box to the input fields (same vertical padding + a 1px border)
+     so, bottom-aligned, its height lines up exactly with the adjacent cells. */
+  .assign-foot .btn{width:100%; padding:11px 18px; font-size:15px; line-height:1.2; border:1px solid transparent}
   /* Tablets: three inputs in an even row, with a full-width Assign button on its own
      row below (avoids the button floating auto-width in a half cell). */
   @media (min-width:561px) and (max-width:1024px){
