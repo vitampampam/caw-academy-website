@@ -323,6 +323,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li{display:flex; gap:9px; font-size:13.5px; color:var(--ink-soft); line-height:1.4}
 .track li svg{width:16px; height:16px; flex:0 0 auto; margin-top:2px; color:var(--indigo)}
 .track li b{font-weight:800; color:var(--ink)}
+.track-note{max-width:var(--maxw); margin:22px auto 0; text-align:center; color:var(--muted); font-size:14px; line-height:1.6}
 @media (max-width:1000px){ .tracks{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
 
