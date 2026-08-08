@@ -445,7 +445,7 @@ footer .foot-links a:first-child{margin-left:0}
    (scaling only existed for >=1025px and <=560px), so it overflowed the column and
    got clipped. zoom shrinks the layout too, so it fits the single column cleanly. */
 @media (min-width:561px) and (max-width:1024px){
-  .lineup{zoom:.78; transform:none}
+  .lineup{zoom:.92; transform:none}
   .device-stage{min-height:0; margin-top:10px; padding:6px 0 18px}
   /* Tablet portrait: centre the whole stacked hero so the copy doesn't sit
      left-aligned beside centred devices (which read as unbalanced), and cap the
