@@ -106,7 +106,9 @@
   .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; font-size:12px; cursor:pointer; padding:0}
   .assign-foot{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);
     gap:12px; align-items:end; margin-top:14px}
-  .assign-foot .field{width:100%}
+  /* Drop the field's default 12px bottom margin here, or the button (no margin) ends up
+     lower than the input's visible box when bottom-aligned. */
+  .assign-foot .field{width:100%; margin:0}
   /* Match the button's box to the input fields (same vertical padding + a 1px border)
      so, bottom-aligned, its height lines up exactly with the adjacent cells. */
   .assign-foot .btn{width:100%; padding:11px 18px; font-size:15px; line-height:1.2; border:1px solid transparent}
@@ -270,6 +272,9 @@
           <input class="field" id="sequence" type="number" min="0" max="9999" value="0">
         </div>
         <div>
+          <!-- invisible spacer label so this cell matches the labelled input cells and
+               the button lines up with the "Start sequence at" field -->
+          <label class="lbl" aria-hidden="true" style="visibility:hidden">Assign</label>
           <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
         </div>
       </div>
