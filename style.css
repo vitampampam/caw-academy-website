@@ -325,9 +325,8 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li b{font-weight:800; color:var(--ink)}
 .fw-note{max-width:940px; margin:26px auto 0; background:var(--card); border:1px solid var(--line);
   border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px; text-align:center}
-.fw-note-lead{display:inline-block; background:linear-gradient(135deg,var(--indigo),var(--indigo-2)); color:#fff;
-  font-family:var(--serif); font-weight:600; font-size:17px; padding:10px 22px; border-radius:999px;
-  box-shadow:var(--shadow-sm); margin-bottom:16px}
+.fw-note-lead{display:inline-block; background:var(--grouped); color:var(--ink-soft); border:1px solid var(--line);
+  font-family:var(--serif); font-weight:600; font-size:14.5px; padding:7px 18px; border-radius:999px; margin-bottom:16px}
 .fw-pills{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:12px}
 .fw-pill{display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border:1px solid var(--line);
   border-radius:999px; background:var(--bg); font-size:14px; color:var(--muted); white-space:nowrap}
