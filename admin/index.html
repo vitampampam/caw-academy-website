@@ -106,7 +106,13 @@
   .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; font-size:12px; cursor:pointer; padding:0}
   .assign-foot{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:12px; align-items:end; margin-top:14px}
   .assign-foot .field{width:100%}
-  @media (max-width:820px){ .assign-foot{grid-template-columns:1fr 1fr} }
+  /* Tablets: three inputs in an even row, with a full-width Assign button on its own
+     row below (avoids the button floating auto-width in a half cell). */
+  @media (min-width:561px) and (max-width:1024px){
+    .assign-foot{grid-template-columns:repeat(3,1fr)}
+    .assign-foot > div:last-child{grid-column:1 / -1}
+    .assign-foot .btn{width:100%}
+  }
   /* Phones: stack every field + the button, each full width. */
   @media (max-width:560px){ .assign-foot{grid-template-columns:1fr} .assign-foot .btn{width:100%} }
 
