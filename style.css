@@ -323,7 +323,14 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li{display:flex; gap:9px; font-size:13.5px; color:var(--ink-soft); line-height:1.4}
 .track li svg{width:16px; height:16px; flex:0 0 auto; margin-top:2px; color:var(--indigo)}
 .track li b{font-weight:800; color:var(--ink)}
-.track-note{max-width:var(--maxw); margin:22px auto 0; text-align:center; color:var(--muted); font-size:14px; line-height:1.6}
+.fw-note{max-width:940px; margin:26px auto 0; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px; text-align:center}
+.fw-note-lead{font-family:var(--serif); font-weight:600; font-size:19px; color:var(--ink); margin-bottom:14px}
+.fw-pills{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:12px}
+.fw-pill{display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border:1px solid var(--line);
+  border-radius:999px; background:var(--bg); font-size:14px; color:var(--muted); white-space:nowrap}
+.fw-pill b{color:var(--ink); font-weight:800}
+.fw-note-sub{margin:0 auto; max-width:660px; color:var(--muted); font-size:13.5px; line-height:1.55}
 @media (max-width:1000px){ .tracks{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
 
