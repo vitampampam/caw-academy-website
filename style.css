@@ -325,12 +325,19 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li b{font-weight:800; color:var(--ink)}
 .fw-note{max-width:940px; margin:26px auto 0; background:var(--card); border:1px solid var(--line);
   border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px; text-align:center}
-.fw-note-lead{font-family:var(--serif); font-weight:600; font-size:19px; color:var(--ink); margin-bottom:14px}
+.fw-note-lead{display:inline-block; background:linear-gradient(135deg,var(--indigo),var(--indigo-2)); color:#fff;
+  font-family:var(--serif); font-weight:600; font-size:17px; padding:10px 22px; border-radius:999px;
+  box-shadow:var(--shadow-sm); margin-bottom:16px}
 .fw-pills{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:12px}
 .fw-pill{display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border:1px solid var(--line);
   border-radius:999px; background:var(--bg); font-size:14px; color:var(--muted); white-space:nowrap}
 .fw-pill b{color:var(--ink); font-weight:800}
 .fw-note-sub{margin:0 auto; max-width:660px; color:var(--muted); font-size:13.5px; line-height:1.55}
+/* Phones: keep the four framework pills as a clean 2×2 grid (two per row). */
+@media (max-width:560px){
+  .fw-pills{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+  .fw-pill{justify-content:center; white-space:normal; font-size:13px; padding:8px 10px}
+}
 @media (max-width:1000px){ .tracks{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
 
