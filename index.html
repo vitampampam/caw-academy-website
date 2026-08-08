@@ -645,10 +645,10 @@
       .ribbon{display:grid; grid-template-columns:repeat(2,auto); justify-content:center; gap:12px 30px; padding:16px 24px 4px}
       /* "Who it's for" pills: two per row so each label fits on one line. */
       .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
-      /* Card sections: clean, even 2-up grid (not the wide flex-wrap). */
+      /* Card sections: even 2-up grid that fills the full width, like the curriculum
+         tracks (no narrow max-width cap). */
       #features .grid, #organisations .grid, #why .props{
-        display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;
-        max-width:680px; margin-left:auto; margin-right:auto}
+        display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
       #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
     }
     /* Mobile-only hero/footer trims */
