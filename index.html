@@ -327,6 +327,12 @@
         <p>Recall-rated flashcards and a timed Exam Mode with a 75% pass mark and attempt
            history. Practise until it sticks, then walk in knowing you're ready.</p>
       </div>
+      <div class="prop reveal">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Synced &amp; yours to keep</h3>
+        <p>Progress, highlights and notes follow you across iPhone, iPad and Mac — and you
+           can export your notes to a file to share or keep.</p>
+      </div>
     </div>
   </section>
 
@@ -335,6 +341,7 @@
     <div class="section-head reveal">
       <span class="eyebrow">The curriculum</span>
       <h2>The whole airworthiness picture in one app</h2>
+      <p>Available across the EASA, UK CAA, UAE GCAA and FAA frameworks — 75+ courses, from a free operating-framework orientation to specialist modules.</p>
     </div>
     <div class="tracks">
       <div class="track reveal">
@@ -362,6 +369,8 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Technical asset value</b> — maintenance status across the lifecycle</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft &amp; Engine Leasing</b> — lease deals, delivery, redelivery &amp; records</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Engine &amp; LLP Asset Management</b> — engines &amp; life-limited parts as high-value assets</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft Recycling &amp; End-of-Life</b> — teardown, parts &amp; records at retirement</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Offshore Registries &amp; Article 83bis</b> — cross-border registration &amp; oversight transfer</span></li>
         </ul>
       </div>
       <div class="track reveal">
@@ -652,6 +661,8 @@
     @media (min-width:1025px){
       #features .grid, #organisations .grid, #why .props{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:var(--maxw); margin-left:auto; margin-right:auto}
       #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
+      /* Why has four value props — one clean row on desktop. */
+      #why .props{grid-template-columns:repeat(4,minmax(0,1fr))}
     }
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
