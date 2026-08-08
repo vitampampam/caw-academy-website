@@ -323,7 +323,7 @@
     var course = document.createElement("div"); course.className = "course";
     course.appendChild(document.createTextNode(labelFor(a.courseKey)));
     if (isNextUp) {
-      var nx = document.createElement("span"); nx.className = "nextup"; nx.textContent = " Next up";
+      var nx = document.createElement("span"); nx.className = "nextup"; nx.textContent = " Next due";
       course.appendChild(nx);
     }
     var small = document.createElement("small");
