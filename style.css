@@ -425,7 +425,7 @@ footer .foot-links a:first-child{margin-left:0}
 /* tablets (iPad portrait): the desktop 5%-down doesn't apply here, so text/cards read
    larger than intended. A matching gentle scale-down keeps the whole page consistent. */
 @media (min-width:561px) and (max-width:1024px){ body{zoom:0.9} }
-@media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(.86)} .hero-apps{--badge-lift:66px} }
+@media (min-width:1025px) and (max-width:1240px){ .lineup{transform:scale(1.06)} .hero-apps{--badge-lift:44px} }
 /* roomy desktops: enlarge the device lineup a touch (transform keeps the grid intact) */
 @media (min-width:1241px){ .lineup{transform:scale(1.18)} .hero-apps{--badge-lift:26px} }
 /* tablets & below: hero stacks to a single centered column */
