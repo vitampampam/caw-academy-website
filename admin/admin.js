@@ -324,8 +324,19 @@
     return span;
   }
 
-  function assignmentItem(a, isNextUp) {
+  function assignmentItem(a, isNextUp, selected, onToggle) {
     var li = document.createElement("li"); li.className = "aitem";
+
+    // Per-assignment tick for bulk removal. Selection state lives in the member's
+    // `selected` map (keyed by assignment id) so ticks survive re-renders within a card.
+    var pick = document.createElement("input"); pick.type = "checkbox";
+    pick.className = "apick"; pick.checked = !!selected[a.id];
+    pick.setAttribute("aria-label", "Select " + labelFor(a.courseKey) + " for removal");
+    pick.addEventListener("change", function () {
+      if (pick.checked) selected[a.id] = true; else delete selected[a.id];
+      onToggle();
+    });
+    li.appendChild(pick);
 
     var course = document.createElement("div"); course.className = "course";
     course.appendChild(document.createTextNode(labelFor(a.courseKey)));
@@ -402,6 +413,29 @@
       .catch(function (err) { alert(err.message); });
   }
 
+  // Bulk removal: delete every assignment in `list` (one DELETE each — the API has no
+  // batch route), then refresh the roster once. Reports any that failed.
+  function removeAssignments(list, memberName) {
+    if (!list.length) return;
+    var msg = list.length === 1
+      ? "Remove the assignment “" + labelFor(list[0].courseKey) + "”?"
+      : "Remove " + list.length + " assignments from " + memberName + "?\n\n"
+        + list.map(function (a) { return "• " + labelFor(a.courseKey); }).join("\n");
+    if (!window.confirm(msg)) return;
+    var failed = [];
+    var chain = Promise.resolve();
+    list.forEach(function (a) {
+      chain = chain.then(function () {
+        return authed("DELETE", "/v1/org/assignments/" + encodeURIComponent(a.id), null)
+          .catch(function () { failed.push(labelFor(a.courseKey)); });
+      });
+    });
+    chain.then(function () {
+      if (failed.length) alert("Could not remove: " + failed.join(", "));
+      loadRoster();
+    });
+  }
+
   function renderMember(m) {
     var card = document.createElement("div"); card.className = "member";
 
@@ -426,8 +460,44 @@
       var e = document.createElement("div"); e.className = "empty"; e.textContent = "No assignments yet.";
       card.appendChild(e);
     } else {
+      // Per-card selection state + a bulk toolbar (select-all + Remove selected).
+      var selected = {};
+      var bulk = document.createElement("div"); bulk.className = "abulk";
+      var allLbl = document.createElement("label"); allLbl.className = "abulk-all";
+      var allCb = document.createElement("input"); allCb.type = "checkbox";
+      allLbl.appendChild(allCb);
+      allLbl.appendChild(document.createTextNode(" Select all"));
+      var delSel = document.createElement("button");
+      delSel.className = "btn-danger"; delSel.type = "button"; delSel.textContent = "Remove selected";
+      delSel.disabled = true;
+      var cnt = document.createElement("span"); cnt.className = "abulk-count";
+      bulk.appendChild(allLbl); bulk.appendChild(delSel); bulk.appendChild(cnt);
+
       var ul = document.createElement("ul"); ul.className = "alist";
-      m.assignments.forEach(function (a) { ul.appendChild(assignmentItem(a, a.id === nextUpId)); });
+
+      function refreshBulk() {
+        var n = Object.keys(selected).length, total = m.assignments.length;
+        delSel.disabled = !n;
+        cnt.textContent = n ? (n + " selected") : "";
+        allCb.checked = n === total && n > 0;
+        allCb.indeterminate = n > 0 && n < total;
+      }
+      allCb.addEventListener("change", function () {
+        m.assignments.forEach(function (a) {
+          if (allCb.checked) selected[a.id] = true; else delete selected[a.id];
+        });
+        ul.querySelectorAll("input.apick").forEach(function (cb) { cb.checked = allCb.checked; });
+        refreshBulk();
+      });
+      delSel.addEventListener("click", function () {
+        var chosen = m.assignments.filter(function (a) { return selected[a.id]; });
+        removeAssignments(chosen, fullName(m));
+      });
+
+      m.assignments.forEach(function (a) {
+        ul.appendChild(assignmentItem(a, a.id === nextUpId, selected, refreshBulk));
+      });
+      card.appendChild(bulk);
       card.appendChild(ul);
     }
 
