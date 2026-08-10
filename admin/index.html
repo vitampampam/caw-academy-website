@@ -302,6 +302,16 @@
     <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Overdue items are shown in red.</p>
     <div id="roster"></div>
   </div>
+
+  <div class="card">
+    <div class="member-head" style="margin-bottom:6px">
+      <h2 style="margin:0">Your signed-in devices</h2>
+      <button class="btn btn-ghost" id="devicesReload">Reload</button>
+    </div>
+    <p class="sub" style="margin-bottom:4px">Native app sessions signed in on <b>your</b> account (this admin portal is not counted toward the device limit). Sign out any you no longer use to free a device slot.</p>
+    <div id="devicesMsg"></div>
+    <div id="devices"></div>
+  </div>
 </main>
 
 <script src="admin.js" defer></script>

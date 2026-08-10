@@ -172,6 +172,59 @@
     return n || m.email;
   }
   function fmtDate(iso) { return iso ? new Date(iso).toLocaleDateString() : "—"; }
+  function fmtDateTime(iso) { return iso ? new Date(iso).toLocaleString() : "—"; }
+
+  // ── Your signed-in devices ────────────────────────────────────────────────
+  // Lists the admin's OWN native app sessions (the ones that count toward the
+  // per-account device limit). The server already excludes this web portal
+  // session, so signing a device out here frees a slot for the mobile app.
+  function loadDevices() {
+    var host = $("devices"); host.textContent = "Loading…";
+    return authed("GET", "/v1/me/devices", null).then(function (r) {
+      renderDevices(r && r.devices ? r.devices : []);
+    }).catch(function (err) {
+      host.textContent = "";
+      showMessage("devicesMsg", err.message || "Couldn't load your devices.", "err");
+    });
+  }
+
+  function renderDevices(devices) {
+    var host = $("devices"); host.textContent = "";
+    if (!devices.length) {
+      var e = document.createElement("div"); e.className = "empty";
+      e.textContent = "No app devices are signed in on your account.";
+      host.appendChild(e); return;
+    }
+    devices.forEach(function (d) {
+      var card = document.createElement("div"); card.className = "member";
+      var head = document.createElement("div"); head.className = "member-head";
+      var left = document.createElement("div");
+      var name = document.createElement("div"); name.className = "member-name";
+      name.textContent = d.deviceName || "Unknown device";
+      var meta = document.createElement("div"); meta.className = "member-email";
+      meta.textContent = "Last used " + fmtDateTime(d.lastUsedAt) + " · signed in " + fmtDate(d.createdAt);
+      left.appendChild(name); left.appendChild(meta);
+
+      var btn = document.createElement("button");
+      btn.className = "btn btn-danger"; btn.type = "button"; btn.textContent = "Sign out";
+      btn.addEventListener("click", function () {
+        if (!window.confirm("Sign out \"" + (d.deviceName || "this device") + "\"? It frees a device slot; that device will need to sign in again.")) return;
+        btn.disabled = true;
+        showMessage("devicesMsg", "", "ok");
+        authed("DELETE", "/v1/me/devices/" + encodeURIComponent(d.id), null).then(function () {
+          showMessage("devicesMsg", "Device signed out — a slot is now free.", "ok");
+          return loadDevices();
+        }).catch(function (err) {
+          btn.disabled = false;
+          showMessage("devicesMsg", err.message || "Couldn't sign out that device.", "err");
+        });
+      });
+
+      head.appendChild(left); head.appendChild(btn);
+      card.appendChild(head);
+      host.appendChild(card);
+    });
+  }
 
   // ── Multi-select checklists (members + courses) ───────────────────────────
   // Selection state kept in Sets so members/courses can be toggled independently.
@@ -646,6 +699,7 @@
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
+  $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   $("authForm").addEventListener("submit", function (e) {
@@ -680,6 +734,7 @@
       $("deadline").min = new Date().toISOString().slice(0, 10);
       updateScheduleHint();
       show("dashView");
+      loadDevices();
       return loadRoster();
     }).catch(function (err) {
       if (err.status === 403) {
