@@ -314,7 +314,7 @@
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
         <h3>Clear and structured</h3>
         <p>Dense rules turned into clear, structured lessons — plain English, one idea at a
-           time, with the official reference always a tap away. No legalese, no overwhelm.</p>
+           time, with the official reference always a tap away. No dense legal wording, nothing to wade through.</p>
       </div>
       <div class="prop reveal">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13l2 2 4-4"/></svg></div>
@@ -349,6 +349,7 @@
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-21</b> — design &amp; production organisations, certification</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Certification Specifications (CS)</b> — the airworthiness codes</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Familiarisation for CAMO</b> — Part-21 &amp; CS for CAMO staff</span></li>
         </ul>
       </div>
       <div class="track reveal">
@@ -364,9 +365,7 @@
       <div class="track reveal">
         <span class="badge">Asset value</span>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Maintenance Economics</b> — cost, value &amp; the technical asset</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Cost management</b> — benchmarking &amp; reducing operating cost</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Technical asset value</b> — maintenance status across the lifecycle</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Maintenance Economics &amp; Cost Management</b> — cost, benchmarking, technical-asset value across the lifecycle</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft &amp; Engine Leasing</b> — lease deals, delivery, redelivery &amp; records</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Engine &amp; LLP Asset Management</b> — engines &amp; life-limited parts as high-value assets</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft Recycling &amp; End-of-Life</b> — teardown, parts &amp; records at retirement</span></li>
@@ -735,7 +734,9 @@
     .cf-msg{margin:0 0 14px; padding:12px 14px; border-radius:10px; font-size:14px}
     .cf-msg.ok{background:#DCF1DD; color:#14532D; font-weight:600}
     .cf-msg.err{background:#FCE3E3; color:#991B1B; font-weight:600}
-    .cf-fine{margin:14px 0 0; color:var(--muted); font-size:12.5px; text-align:center; line-height:1.5}
+    .cf-alt{margin:12px 0 0; text-align:center; font-size:13.5px; color:var(--ink-soft)}
+    .cf-alt a{color:var(--indigo); font-weight:700}
+    .cf-fine{margin:10px 0 0; color:var(--muted); font-size:12.5px; text-align:center; line-height:1.5}
   </style>
 
   <!-- ============================ CTA ============================ -->
@@ -784,6 +785,7 @@
       <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
       <div id="cfMsg" class="cf-msg" hidden></div>
       <button class="btn btn-dark cf-submit" type="submit">Send request</button>
+      <p class="cf-alt">Prefer email? Write to <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a> to request a quote.</p>
       <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
         details. See our <a href="privacy.html">Privacy Policy</a>.</p>
     </form>
@@ -792,9 +794,11 @@
 
 <!-- lightbox: tap a screenshot to view it full size -->
 <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="App screenshot">
-  <button class="lb-close" type="button" aria-label="Close">&times;</button>
   <button class="lb-nav lb-prev" type="button" aria-label="Previous screen">&#8249;</button>
-  <div class="lb-frame"><img src="" alt=""></div>
+  <div class="lb-frame">
+    <button class="lb-close" type="button" aria-label="Close">&times;</button>
+    <img src="" alt="">
+  </div>
   <button class="lb-nav lb-next" type="button" aria-label="Next screen">&#8250;</button>
 </div>
 
