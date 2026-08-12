@@ -452,28 +452,48 @@
       <div class="gallery">
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.png?v=2" alt="CAW Academy dashboard on iPad listing every course across EASA, UK CAA, UAE GCAA and FAA, grouped by initial and continuing airworthiness"></div>
-        <div class="gcap"><b>Every course in one place</b></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.jpg?v=4" alt="CAW Academy dashboard on iPad with the framework picker open — EASA, UK CAA, UAE GCAA and FAA — showing the full course list, a Continue card and course-progress bars"></div>
+        <div class="gcap"><b>Pick your framework</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.png?v=2" alt="CAW Academy lesson on iPad explaining a Part-21 design-management-system change, with detailed explanation, examples and common findings"></div>
-        <div class="gcap"><b>Lessons that explain it</b></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.jpg?v=4" alt="CAW Academy lesson on iPad with sentences highlighted and the selection menu open — Highlight, Note, Bookmark and Copy"></div>
+        <div class="gcap"><b>Highlight, note &amp; bookmark</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.png?v=2" alt="CAW Academy quiz on iPad showing instant feedback with the correct answer highlighted and explained"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.jpg?v=4" alt="CAW Academy full-text search on iPad finding TCAS 7.1 across lessons, with the matching lesson and a context snippet"></div>
+        <div class="gcap"><b>Search every lesson</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.jpg?v=4" alt="CAW Academy built-in glossary on iPad defining an acronym — CDCCL, Critical Design Configuration Control Limitations"></div>
+        <div class="gcap"><b>Glossary for every acronym</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-5.jpg?v=4" alt="CAW Academy flashcards on iPad — card 1 of 125 with a tap-to-reveal answer and Need review or Got it controls"></div>
+        <div class="gcap"><b>Flashcards to make it stick</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-8.jpg?v=4" alt="CAW Academy quiz on iPad showing instant feedback — the correct answer marked green, the chosen wrong answer red, and an explanation of why"></div>
         <div class="gcap"><b>Quizzes with instant feedback</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.png?v=2" alt="CAW Academy assessment on iPad with a live timer, question navigator and unanswered-question tracker"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-6.jpg?v=4" alt="CAW Academy timed assessment on iPad with a countdown timer, a question navigator and an unanswered-question tracker"></div>
         <div class="gcap"><b>Timed assessments</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-5.png?v=3" alt="CAW Academy exam review on iPad marking each answer right or wrong, with the correct answer, an explanation and a link to study the source lesson"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-9.jpg?v=4" alt="CAW Academy exam review on iPad marking each answer right or wrong, with the correct answer, an explanation and a link to study the source lesson"></div>
         <div class="gcap"><b>Review every answer &amp; the why</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-7.jpg?v=4" alt="CAW Academy export screen on iPad sharing your highlights and notes as a PDF or Markdown file, selectable by course"></div>
+        <div class="gcap"><b>Export your notes</b></div>
       </div>
 
       </div>
@@ -691,6 +711,13 @@
     .contact-form .cf-row > *{flex:1 1 220px}
     .contact-form input, .contact-form textarea{width:100%; box-sizing:border-box; font:inherit; font-size:15.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
     .contact-form textarea{display:block; margin-bottom:14px; resize:vertical}
+    .contact-form .cf-fw{border:1px solid var(--line); border-radius:12px; padding:8px 14px 14px; margin:0 0 14px; min-width:0}
+    .contact-form .cf-fw legend{padding:0 6px; font-size:12.5px; font-weight:700; color:var(--muted)}
+    .contact-form .cf-fw-opts{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+    .contact-form .cf-fw label{display:flex; align-items:center; gap:8px; font-size:14.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 12px; cursor:pointer}
+    .contact-form .cf-fw label:hover{border-color:var(--indigo-3)}
+    .contact-form .cf-fw label:has(input:checked){border-color:var(--indigo-3); background:var(--indigo-soft)}
+    .contact-form .cf-fw input{width:auto; margin:0; accent-color:var(--indigo)}
     .contact-form input:focus, .contact-form textarea:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
     .contact-form .hp{position:absolute; left:-9999px}
     .contact-form .cf-submit{width:100%; justify-content:center; border:0; cursor:pointer}
@@ -729,8 +756,20 @@
       </div>
       <div class="cf-row">
         <input type="email" name="email" placeholder="Work email" autocomplete="email" required>
+        <input name="position" placeholder="Your position / role" autocomplete="organization-title" required>
+      </div>
+      <div class="cf-row">
         <input name="team_size" placeholder="Approx. team size (optional)">
       </div>
+      <fieldset class="cf-fw">
+        <legend>Which framework(s) do you need?</legend>
+        <div class="cf-fw-opts">
+          <label><input type="checkbox" name="frameworks" value="EASA"><span><span class="fw-flag" aria-hidden="true">🇪🇺</span> EASA</span></label>
+          <label><input type="checkbox" name="frameworks" value="UK CAA"><span><span class="fw-flag" aria-hidden="true">🇬🇧</span> UK CAA</span></label>
+          <label><input type="checkbox" name="frameworks" value="UAE GCAA"><span><span class="fw-flag" aria-hidden="true">🇦🇪</span> UAE GCAA</span></label>
+          <label><input type="checkbox" name="frameworks" value="FAA"><span><span class="fw-flag" aria-hidden="true">🇺🇸</span> FAA</span></label>
+        </div>
+      </fieldset>
       <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
       <div id="cfMsg" class="cf-msg" hidden></div>
       <button class="btn btn-dark cf-submit" type="submit">Send request</button>
@@ -961,9 +1000,18 @@
       var btn = form.querySelector('.cf-submit');
       var msg = document.getElementById('cfMsg');
       if (form.botcheck && form.botcheck.checked) return;   // honeypot
+      var msgEl = document.getElementById('cfMsg');
+      var picked = Array.prototype.map.call(
+        form.querySelectorAll('input[name="frameworks"]:checked'), function (c) { return c.value; });
+      if (!picked.length) {
+        msgEl.hidden = false; msgEl.className = 'cf-msg err';
+        msgEl.textContent = 'Please choose at least one framework (EASA, UK CAA, UAE GCAA or FAA).';
+        return;
+      }
       btn.disabled = true; btn.textContent = 'Sending…';
       var data = {};
       new FormData(form).forEach(function (v, k) { data[k] = v; });
+      data.frameworks = picked.join(', ');   // checkboxes → one readable field
       fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },

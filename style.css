@@ -323,7 +323,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li{display:flex; gap:9px; font-size:13.5px; color:var(--ink-soft); line-height:1.4}
 .track li svg{width:16px; height:16px; flex:0 0 auto; margin-top:2px; color:var(--indigo)}
 .track li b{font-weight:800; color:var(--ink)}
-.fw-note{max-width:940px; margin:26px auto 0; background:var(--card); border:1px solid var(--line);
+.fw-note{margin:26px auto 0; background:var(--card); border:1px solid var(--line);
   border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px; text-align:center}
 .fw-note-lead{display:block; background:#E1E4F0; color:var(--ink); border:1px solid #CFD4E6;
   font-family:var(--serif); font-weight:600; font-size:15px; padding:9px 18px; border-radius:999px; margin-bottom:16px}
