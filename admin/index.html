@@ -154,6 +154,11 @@
   .empty{color:var(--muted); font-size:14px; padding:8px 0}
   .note{font-size:13px; color:var(--muted); margin-top:16px; line-height:1.5}
   .hidden{display:none}
+  /* Sign in / Create account tabs */
+  .tabs{display:flex; gap:8px; margin:0 0 18px}
+  .tab{flex:1; padding:10px 0; text-align:center; border-radius:11px; cursor:pointer;
+    font-weight:700; font-size:15px; border:1px solid var(--line); background:#fff; color:var(--ink-soft)}
+  .tab.active{background:var(--indigo); color:#fff; border-color:var(--indigo)}
 
   /* Inline edit editor */
   .editor{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; padding:10px; background:var(--bg); border-radius:10px}
@@ -206,17 +211,28 @@
 <!-- Sign in -->
 <main class="signin-wrap" id="signinView">
   <div class="card">
-    <h1>Team admin</h1>
-    <p class="sub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
+    <h1 id="authTitle">Team admin</h1>
+    <p class="sub" id="authSub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
+    <div class="tabs">
+      <div class="tab active" id="tabSignIn">Sign in</div>
+      <div class="tab" id="tabRegister">Create admin account</div>
+    </div>
     <form id="authForm" autocomplete="on">
+      <div id="regNames" class="hidden">
+        <label class="lbl" for="firstName">First name</label>
+        <input class="field" id="firstName" type="text" autocomplete="given-name">
+        <label class="lbl" for="lastName">Last name</label>
+        <input class="field" id="lastName" type="text" autocomplete="family-name">
+      </div>
       <label class="lbl" for="email">Work email</label>
       <input class="field" id="email" type="email" autocomplete="username" required>
       <label class="lbl" for="password">Password</label>
       <input class="field" id="password" type="password" autocomplete="current-password" required>
+      <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
     </form>
-    <p class="note">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
+    <p class="note" id="portalNote">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
   </div>
 </main>
 

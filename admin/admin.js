@@ -701,14 +701,47 @@
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
   $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
+  // ── Auth (Sign in / Create admin account tabs) ─────────────────────────────
+  var registerMode = false;
+  $("tabSignIn").addEventListener("click", function () { setMode(false); });
+  $("tabRegister").addEventListener("click", function () { setMode(true); });
+  function setMode(register) {
+    registerMode = register;
+    $("tabSignIn").classList.toggle("active", !register);
+    $("tabRegister").classList.toggle("active", register);
+    $("authSubmit").textContent = register ? "Create admin account" : "Sign in";
+    $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
+    $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
+    $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
+    $("portalNote").classList.toggle("hidden", register);
+    $("authTitle").textContent = register ? "Create admin account" : "Team admin";
+    $("authSub").textContent = register
+      ? "Create an administrator account for your organisation to manage its team, course assignments and deadlines."
+      : "Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.";
+    showMessage("authMsg", "", "err");
+  }
+
   $("authForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var email = $("email").value.trim();
     var password = $("password").value;
-    var btn = $("authSubmit"); btn.disabled = true;
+    var btn = $("authSubmit");
     showMessage("authMsg", "", "err");
-    request("POST", "/v1/auth/login", { email: email, password: password, device: { id: deviceId(), name: "Team admin portal" } }, false)
+    var body = { email: email, password: password, device: { id: deviceId(), name: "Team admin portal" } };
+    var path = "/v1/auth/login";
+    if (registerMode) {
+      var firstName = $("firstName").value.trim();
+      var lastName = $("lastName").value.trim();
+      if (!firstName || !lastName) {
+        showMessage("authMsg", "Enter your first and last name to create an account.", "err");
+        return;
+      }
+      body.firstName = firstName;
+      body.lastName = lastName;
+      path = "/v1/auth/register";
+    }
+    btn.disabled = true;
+    request("POST", path, body, false)
       .then(function (b) { accessToken = b.accessToken || null; $("password").value = ""; return enter(); })
       .catch(function (err) { showMessage("authMsg", err.message, "err"); })
       .finally(function () { btn.disabled = false; });
