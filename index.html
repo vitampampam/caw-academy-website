@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=35">
+<link rel="stylesheet" href="style.css?v=36">
 </head>
 <body>
 
@@ -711,11 +711,13 @@
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
     .trial-backdrop{position:absolute; inset:0; background:rgba(11,18,56,.55)}
-    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:6vh auto; background:var(--card); border-radius:var(--radius-lg); padding:30px 28px; box-shadow:var(--shadow-lg); max-height:88vh; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none}
-    .trial-dialog::-webkit-scrollbar{width:0; height:0; display:none}
+    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:4vh auto; background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); max-height:94vh; overflow:hidden; display:flex; flex-direction:column}
+    /* The dialog itself doesn't scroll — the body does — so the close button stays put. */
+    .trial-body{overflow-y:auto; padding:30px 28px; scrollbar-width:none; -ms-overflow-style:none}
+    .trial-body::-webkit-scrollbar{width:0; height:0; display:none}
     .trial-dialog h2{margin:0 0 6px; font-size:26px}
     .trial-dialog .tsub{color:var(--ink-soft); font-size:15px; margin:0 0 20px}
-    .trial-close{position:absolute; top:12px; right:14px; width:34px; height:34px; border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1; color:var(--muted); cursor:pointer}
+    .trial-close{position:absolute; top:12px; right:14px; z-index:2; width:34px; height:34px; border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1; color:var(--muted); cursor:pointer}
     .trial-close:hover{color:var(--ink)}
     body.modal-open{overflow:hidden}
     .contact-form .cf-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
@@ -743,7 +745,7 @@
   <!-- ============================ CTA ============================ -->
   <section class="reveal" id="get">
     <div class="cta-band">
-      <h2>Equip your team with airworthiness expertise</h2>
+      <h2><img class="cta-icon" src="logo-header.png?v=4" alt="" width="48" height="48">Equip your team with airworthiness expertise</h2>
       <a class="btn btn-light open-trial cta-trial" href="#">Request a free trial
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
@@ -756,6 +758,7 @@
   <div class="trial-backdrop" data-close></div>
   <div class="trial-dialog" role="dialog" aria-modal="true" aria-labelledby="trialTitle">
     <button class="trial-close" type="button" aria-label="Close" data-close>&times;</button>
+    <div class="trial-body">
     <h2 id="trialTitle">Request a free trial</h2>
     <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
     <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
@@ -788,10 +791,11 @@
       <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
       <div id="cfMsg" class="cf-msg" hidden></div>
       <button class="btn btn-dark cf-submit" type="submit">Send request</button>
-      <p class="cf-alt">Prefer email? Write to <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a> to request a quote.</p>
+      <p class="cf-alt">Prefer email? Write to <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a>.</p>
       <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
         details. See our <a href="privacy.html">Privacy Policy</a>.</p>
     </form>
+    </div>
   </div>
 </div>
 
