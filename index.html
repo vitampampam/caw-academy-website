@@ -917,15 +917,14 @@
       prev.disabled = g.scrollLeft <= 2;
       next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
     }
-    // Center only on desktop (first & last peek); phones start on the first screen.
-    function center(){ if (window.innerWidth >= 1025) g.scrollLeft = Math.max(0, (g.scrollWidth - g.clientWidth) / 2); }
+    // Start at the very first screen (flush left) so it's the obvious one to open first.
+    function toStart(){ g.scrollLeft = 0; }
     prev.addEventListener('click', function(){ g.scrollBy({ left: -stepBy(), behavior: 'smooth' }); });
     next.addEventListener('click', function(){ g.scrollBy({ left: stepBy(), behavior: 'smooth' }); });
     g.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', function(){ center(); update(); });
-    // Start centered so the first and last screens peek (and it reads as scrollable).
-    requestAnimationFrame(function(){ center(); update(); });
-    window.addEventListener('load', function(){ center(); update(); });
+    window.addEventListener('resize', update);
+    requestAnimationFrame(function(){ toStart(); update(); });
+    window.addEventListener('load', function(){ toStart(); update(); });
   })();
 
   // FAQ — reveal the secondary questions on demand
