@@ -343,7 +343,8 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 /* Phones: keep the four framework pills as a clean 2×2 grid (two per row). */
 @media (max-width:560px){
   .fw-pills{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
-  .fw-pill{justify-content:center; white-space:normal; font-size:13px; padding:8px 10px}
+  .fw-pill{justify-content:center; white-space:nowrap; font-size:13px; padding:8px 10px}
+  .fw-flag{display:none}   /* phones: drop the flag for room (kept on iPad/desktop) */
 }
 @media (max-width:1000px){ .tracks{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
