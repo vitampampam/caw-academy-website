@@ -140,10 +140,12 @@
       .then(function (bundle) {
         accessToken = bundle.accessToken || null; // refresh token is in the cookie
         $("password").value = "";
-        return loadMe();
+        window.location.href = "/admin/";          // land on the team admin dashboard
       })
-      .catch(function (err) { showMessage("authMsg", err.message, "err"); })
-      .finally(function () { btn.disabled = false; });
+      .catch(function (err) {
+        showMessage("authMsg", err.message, "err");
+        btn.disabled = false;
+      });
   });
 
   // ── Forgot password ──────────────────────────────────────────────────────
