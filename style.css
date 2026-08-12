@@ -331,6 +331,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .fw-pill{display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border:1px solid var(--line);
   border-radius:999px; background:var(--bg); font-size:14px; color:var(--muted); white-space:nowrap}
 .fw-pill b{color:var(--ink); font-weight:800}
+.fw-flag{font-size:15px; line-height:1; margin-right:-2px}
 .fw-note-sub{margin:0 auto; max-width:660px; color:var(--muted); font-size:13.5px; line-height:1.55}
 /* Phones: keep the four framework pills as a clean 2×2 grid (two per row). */
 @media (max-width:560px){
