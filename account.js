@@ -108,6 +108,11 @@
     ["regNames", "regCode", "regNote"].forEach(function (id) {
       $(id).classList.toggle("hidden", !register);
     });
+    // Heading + subtitle follow the mode.
+    $("acctTitle").textContent = register ? "Create your account" : "Your account";
+    $("acctSub").textContent = register
+      ? "Create an admin account for your organisation to manage its licence and seats."
+      : "Sign in to manage your account, redeem an organisation licence code, and see which courses it unlocks in the CAW Academy app. We never store your study data.";
     showMessage("authMsg", "", "err");
   }
 
