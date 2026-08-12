@@ -46,10 +46,7 @@
 
 <nav class="nav" id="nav">
   <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
-  <div class="links">
-    <a href="index.html#curriculum">Curriculum</a>
-    <a href="support.html">Support</a>
-  </div>
+  <div class="links"></div>
 </nav>
 
 <main class="acct-wrap">
@@ -66,8 +63,14 @@
         <div class="acct-tab" id="tabRegister">Create account</div>
       </div>
       <form id="authForm" autocomplete="on">
+        <div id="regNames" class="hidden">
+          <input class="acct-field" type="text" id="firstName" placeholder="First name" autocomplete="given-name">
+          <input class="acct-field" type="text" id="lastName" placeholder="Last name" autocomplete="family-name">
+        </div>
         <input class="acct-field" type="email" id="email" placeholder="Email" autocomplete="email" required>
         <input class="acct-field" type="password" id="password" placeholder="Password (10+ characters)" autocomplete="current-password" minlength="10" required>
+        <input class="acct-field hidden" type="text" id="regCode" placeholder="Access code (optional)" autocomplete="off">
+        <p id="regNote" class="acct-note hidden">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain, or enter an access code we've issued. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
         <div id="authMsg"></div>
         <button class="acct-btn" type="submit" id="authSubmit">Sign in</button>
       </form>

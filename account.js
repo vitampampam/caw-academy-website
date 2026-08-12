@@ -104,6 +104,10 @@
     $("tabRegister").classList.toggle("active", register);
     $("authSubmit").textContent = register ? "Create account" : "Sign in";
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
+    // Register-only fields: name (required by the API) + optional org access code, and the org-only note.
+    ["regNames", "regCode", "regNote"].forEach(function (id) {
+      $(id).classList.toggle("hidden", !register);
+    });
     showMessage("authMsg", "", "err");
   }
 
@@ -113,10 +117,23 @@
     var email = $("email").value.trim();
     var password = $("password").value;
     var btn = $("authSubmit");
-    btn.disabled = true;
     showMessage("authMsg", "", "err");
+    var body = { email: email, password: password };
+    if (registerMode) {
+      var firstName = $("firstName").value.trim();
+      var lastName = $("lastName").value.trim();
+      var code = $("regCode").value.trim();
+      if (!firstName || !lastName) {
+        showMessage("authMsg", "Enter your first and last name to create an account.", "err");
+        return;
+      }
+      body.firstName = firstName;
+      body.lastName = lastName;
+      if (code) body.code = code;   // optional B2B seat code for personal-email sign-ups
+    }
+    btn.disabled = true;
     var path = registerMode ? "/v1/auth/register" : "/v1/auth/login";
-    request("POST", path, { email: email, password: password }, false)
+    request("POST", path, body, false)
       .then(function (bundle) {
         accessToken = bundle.accessToken || null; // refresh token is in the cookie
         $("password").value = "";
