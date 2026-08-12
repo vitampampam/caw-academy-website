@@ -282,12 +282,12 @@
       <div class="card">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
         <h3>Onboard new hires faster</h3>
-        <p>New hires up to speed on the core Parts in days, self-paced.</p>
+        <p>New hires up to speed on all the regulations they need to know, in days, self-paced.</p>
       </div>
       <div class="card">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
         <h3>Manage seats &amp; track progress</h3>
-        <p>Assign seats, set completion deadlines and monitor each learner's progress — restrict by email domain, one agreement.</p>
+        <p>Assign seats, set completion deadlines and monitor each learner's progress — restrict by email domain.</p>
       </div>
       <div class="card">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0M1 1l22 22" opacity=".0"/><path d="M5 19l-2 2M19 19l2 2"/></svg></div>
@@ -496,6 +496,16 @@
         <div class="gcap"><b>Export your notes</b></div>
       </div>
 
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-10.jpg?v=4" alt="CAW Academy Courses due on iPad listing training assigned by the company admin, each with a due date and Upcoming status"></div>
+        <div class="gcap"><b>Deadlines set by your admin</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-11.jpg?v=4" alt="CAW Academy What's new feed on iPad showing regulatory and content updates, filterable by type and framework"></div>
+        <div class="gcap"><b>Always current with the rules</b></div>
+      </div>
+
       </div>
       <button class="gnav gnext" type="button" aria-label="Show more screens">&#8250;</button>
     </div>
@@ -701,7 +711,8 @@
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
     .trial-backdrop{position:absolute; inset:0; background:rgba(11,18,56,.55)}
-    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:6vh auto; background:var(--card); border-radius:var(--radius-lg); padding:30px 28px; box-shadow:var(--shadow-lg); max-height:88vh; overflow:auto}
+    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:6vh auto; background:var(--card); border-radius:var(--radius-lg); padding:30px 28px; box-shadow:var(--shadow-lg); max-height:88vh; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none}
+    .trial-dialog::-webkit-scrollbar{width:0; height:0; display:none}
     .trial-dialog h2{margin:0 0 6px; font-size:26px}
     .trial-dialog .tsub{color:var(--ink-soft); font-size:15px; margin:0 0 20px}
     .trial-close{position:absolute; top:12px; right:14px; width:34px; height:34px; border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1; color:var(--muted); cursor:pointer}
