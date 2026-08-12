@@ -655,6 +655,10 @@
     /* "Request a free trial" buttons: full width of their container, everywhere */
     .btn.open-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
     .btn.open-trial:hover{color:var(--ink)}
+    /* Closing CTA-band button: compact dark pill, centred, shown on every breakpoint */
+    #get .cta-band .cta-trial{display:inline-flex; width:auto; color:#fff; margin:20px auto 0}
+    #get .cta-band .cta-trial:hover{color:#fff}
+    @media (max-width:640px){ #get .cta-band .cta-trial{display:inline-flex} #get .cta-band .cta-trial svg{display:inline} }
     /* When the hero stacks (single column), the store badges sit in the cta slot
        directly above the trial button, so cancel the button's pull-up margin and
        add a clear gap — otherwise the badges and the button clash. */
@@ -743,6 +747,8 @@
   <section class="reveal" id="get">
     <div class="cta-band">
       <h2>Equip your team with airworthiness expertise</h2>
+      <a class="btn btn-dark open-trial cta-trial" href="#">Request a free trial
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
   </section>
 

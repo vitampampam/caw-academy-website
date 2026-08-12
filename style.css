@@ -419,7 +419,7 @@ footer .foot-links a:first-child{margin-left:0}
 .lightbox .lb-frame{position:relative; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:34px; padding:14px;
   box-shadow:var(--shadow-lg); display:inline-block; line-height:0; max-width:92vw}
 .lightbox .lb-frame img{display:block; width:auto; height:auto; max-height:82vh; max-width:min(520px,86vw); border-radius:20px}
-.lb-close{position:absolute; top:-14px; right:-14px; z-index:3; width:40px; height:40px; border-radius:50%; cursor:pointer;
+.lb-close{position:absolute; top:-22px; right:-22px; z-index:3; width:40px; height:40px; border-radius:50%; cursor:pointer;
   background:#23264c; border:1px solid rgba(255,255,255,.32); color:#fff; font-size:22px; line-height:1;
   display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.35); transition:background .2s ease}
 .lb-close:hover{background:rgba(255,255,255,.3)}
