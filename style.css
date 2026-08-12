@@ -290,7 +290,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 
 /* audience chips */
 .chips{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:var(--maxw); margin:0 auto}
-.chips span{display:flex; align-items:center; justify-content:center; gap:9px; background:var(--card); border:1px solid var(--line);
+.chips span{display:flex; align-items:center; justify-content:flex-start; gap:9px; background:var(--card); border:1px solid var(--line);
   border-radius:999px; padding:12px 16px; font-size:15px; font-weight:600; color:var(--ink-soft); box-shadow:var(--shadow-sm);
   transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease}
 @media (max-width:720px){ .chips{grid-template-columns:repeat(2,1fr)} }
@@ -329,7 +329,7 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li{display:flex; gap:9px; font-size:13.5px; color:var(--ink-soft); line-height:1.4}
 .track li svg{width:16px; height:16px; flex:0 0 auto; margin-top:2px; color:var(--indigo)}
 .track li b{font-weight:800; color:var(--ink)}
-.fw-note{margin:26px auto 0; text-align:center}
+.fw-note{margin:40px auto 0; text-align:center}
 .fw-note .eyebrow{margin:0 auto 16px}
 .fw-note-card{background:var(--card); border:1px solid var(--line);
   border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px}
