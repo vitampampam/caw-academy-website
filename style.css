@@ -375,10 +375,12 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .gprev{left:4px} .gnext{right:4px}
 .gnav:disabled{opacity:.3; cursor:default; pointer-events:none}
 @media (max-width:640px){ .gallery-wrap{padding:0} .gnav{display:none} }
-.gcap{text-align:center; max-width:230px}
-.gcap b{display:inline-block; font-size:14.5px; font-weight:600; color:var(--ink-soft);
-  background:#fff; border:1px solid var(--line); box-shadow:var(--shadow-sm);
-  padding:8px 16px; border-radius:999px}
+.gcap{text-align:center; max-width:none}
+/* Uniform caption pills: same box whether the label is one line or two. */
+.gcap b{display:flex; align-items:center; justify-content:center; width:210px; min-height:52px; box-sizing:border-box;
+  text-align:center; font-size:14px; font-weight:600; line-height:1.25; color:var(--ink-soft);
+  background:#fff; border:1px solid var(--line); box-shadow:var(--shadow-sm); padding:8px 16px; border-radius:16px}
+@media (max-width:520px){ .gcap b{width:180px; min-height:46px} }
 .gcap span{font-size:13px; color:var(--muted)}
 
 
