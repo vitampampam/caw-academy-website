@@ -18,7 +18,9 @@
   .acct-card{background:#fff; border:1px solid var(--line); border-radius:18px;
     padding:26px 24px; box-shadow:var(--shadow-md)}
   .acct-card h1{font-family:var(--serif); font-weight:600; font-size:30px; margin:0 0 6px}
-  .acct-sub{color:var(--muted); margin:0 0 22px; font-size:15px}
+  .acct-sub{color:var(--muted); margin:0 0 10px; font-size:15px}
+  /* Neutralise the global section{padding:48px 0} for the account card's sections. */
+  .acct-card section{padding:0}
   .acct-tabs{display:flex; gap:8px; margin-bottom:18px}
   .acct-tab{flex:1; padding:10px 0; text-align:center; border-radius:11px; cursor:pointer;
     font-weight:700; font-size:15px; border:1px solid var(--line); background:#fff; color:var(--ink-soft)}
