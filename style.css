@@ -347,6 +347,10 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
   .fw-flag{display:none}   /* phones: flag replaced by a dot (kept on iPad/desktop) */
   .fw-pill::before{content:""; width:6px; height:6px; border-radius:50%; flex:0 0 auto; background:var(--indigo)}
 }
+/* iPad: pull the flag closer to the authority name in the framework pills */
+@media (min-width:561px) and (max-width:1024px){
+  .fw-flag{margin-right:-2px}
+}
 @media (max-width:1000px){ .tracks{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:560px){ .tracks{grid-template-columns:1fr} }
 
