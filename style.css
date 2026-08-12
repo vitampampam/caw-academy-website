@@ -414,7 +414,10 @@ footer .foot-links a:first-child{margin-left:0}
 .lightbox{position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
   background:rgba(11,18,56,.74); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); padding:24px}
 .lightbox.open{display:flex}
-.lightbox img{max-height:92vh; max-width:min(420px,92vw); width:auto; border-radius:32px; box-shadow:var(--shadow-lg); display:block}
+/* Enlarged screen keeps its iPad frame (matches .gpad bezel, scaled up) */
+.lightbox .lb-frame{background:linear-gradient(160deg,#23264c,#0e1030); border-radius:34px; padding:14px;
+  box-shadow:var(--shadow-lg); display:inline-block; line-height:0; max-width:92vw}
+.lightbox .lb-frame img{display:block; width:auto; height:auto; max-height:82vh; max-width:min(520px,86vw); border-radius:20px}
 .lb-close{position:absolute; top:18px; right:22px; width:44px; height:44px; border-radius:50%; cursor:pointer;
   background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.32); color:#fff; font-size:24px; line-height:1;
   display:flex; align-items:center; justify-content:center; transition:background .2s ease}
