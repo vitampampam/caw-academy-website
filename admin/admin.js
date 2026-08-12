@@ -714,6 +714,7 @@
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
     $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
     $("portalNote").classList.toggle("hidden", register);
+    $("forgotRow").classList.toggle("hidden", register);   // forgot-password only for sign-in
     $("authTitle").textContent = register ? "Create admin account" : "Team admin";
     $("authSub").textContent = register
       ? "Create an administrator account for your organisation to manage its team, course assignments and deadlines."
@@ -745,6 +746,20 @@
       .then(function (b) { accessToken = b.accessToken || null; $("password").value = ""; return enter(); })
       .catch(function (err) { showMessage("authMsg", err.message, "err"); })
       .finally(function () { btn.disabled = false; });
+  });
+
+  // ── Forgot password ────────────────────────────────────────────────────────
+  $("forgotLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    var email = $("email").value.trim();
+    if (!email) {
+      showMessage("authMsg", "Enter your email above first, then tap Forgot password.", "err");
+      $("email").focus();
+      return;
+    }
+    request("POST", "/v1/auth/forgot-password", { email: email }, false)
+      .then(function () { showMessage("authMsg", "If that email has an account, a reset link is on its way.", "ok"); })
+      .catch(function (err) { showMessage("authMsg", err.message, "err"); });
   });
 
   function signOut() {
