@@ -102,7 +102,8 @@
 <nav class="nav" id="nav">
   <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
   <div class="links">
-    <a class="hide-sm" href="#reviews">Reviews</a>
+    <!-- Reviews link hidden until real reviews exist -->
+    <a class="hide-sm" href="#reviews" hidden>Reviews</a>
     <a class="hide-sm" href="#curriculum">Curriculum</a>
     <a class="hide-sm" href="#faq">FAQ</a>
     <a class="nav-li" href="https://www.linkedin.com/company/caw-academy/" target="_blank" rel="noopener" aria-label="CAW Academy on LinkedIn"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.5C0 23.2.8 24 1.77 24h20.45C23.2 24 24 23.2 24 22.24V1.74C24 .78 23.2 0 22.22 0z"/></svg></a>
@@ -558,10 +559,12 @@
   </section>
 
   <!-- ============================ REVIEWS ============================ -->
-  <!-- NOTE: these are PLACEHOLDER reviews and a placeholder rating/count.
-       Replace with genuine reviews (and real App Store figures) before publishing.
-       Do not add aggregateRating structured data until the ratings are real. -->
-  <section id="reviews">
+  <!-- NOTE: HIDDEN until real reviews exist. These are PLACEHOLDER reviews and a
+       placeholder rating/count. To restore: remove the `hidden` attribute below (and
+       the `hidden` on the nav "Reviews" link), then replace the placeholder cards with
+       genuine reviews and real App Store figures. Do not add aggregateRating structured
+       data until the ratings are real. -->
+  <section id="reviews" hidden>
     <div class="section-head center reveal">
       <span class="eyebrow">Reviews</span>
       <h2>What airworthiness professionals say</h2>
@@ -865,6 +868,8 @@
   (function(){
     var track = document.getElementById('revTrack');
     if (!track) return;
+    var sec = document.getElementById('reviews');
+    if (sec && sec.hidden) return; // reviews section hidden until real reviews exist
     var carousel = document.getElementById('reviewsCarousel');
     var cards = Array.prototype.slice.call(track.children);
     var dotsWrap = document.getElementById('revDots');
