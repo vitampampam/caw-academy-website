@@ -105,7 +105,7 @@
     $("authSubmit").textContent = register ? "Create account" : "Sign in";
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
     // Register-only fields: name (required by the API) + optional org access code, and the org-only note.
-    ["regNames", "regCode", "regNote"].forEach(function (id) {
+    ["regNames", "regNote"].forEach(function (id) {
       $(id).classList.toggle("hidden", !register);
     });
     // Heading + subtitle follow the mode.
@@ -127,14 +127,12 @@
     if (registerMode) {
       var firstName = $("firstName").value.trim();
       var lastName = $("lastName").value.trim();
-      var code = $("regCode").value.trim();
       if (!firstName || !lastName) {
         showMessage("authMsg", "Enter your first and last name to create an account.", "err");
         return;
       }
       body.firstName = firstName;
       body.lastName = lastName;
-      if (code) body.code = code;   // optional B2B seat code for personal-email sign-ups
     }
     btn.disabled = true;
     var path = registerMode ? "/v1/auth/register" : "/v1/auth/login";
