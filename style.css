@@ -68,6 +68,12 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .nav .links a.cta{margin-left:22px; background:var(--ink); color:#fff; padding:9px 18px; border-radius:11px;
   box-shadow:var(--shadow-sm); transition:transform .15s, box-shadow .2s}
 .nav .links a.cta:hover{transform:translateY(-1px); box-shadow:var(--shadow-md); color:#fff}
+/* Utility links (verify certificate, admin login) — a distinct group after the marketing nav */
+.nav .links .nav-sep{display:inline-block; width:1px; height:20px; background:var(--line); margin-left:22px}
+.nav .links a.nav-util{color:var(--muted); font-weight:600}
+.nav .links a.nav-util:hover{color:var(--indigo)}
+.nav .links a.nav-ghost{margin-left:16px; padding:7px 14px; border:1px solid var(--line); border-radius:10px; color:var(--ink-soft); transition:border-color .15s, color .15s}
+.nav .links a.nav-ghost:hover{border-color:var(--indigo-3); color:var(--indigo)}
 /* LinkedIn icon link in the header */
 .nav .links a.nav-li{display:inline-flex; align-items:center; margin-left:18px; padding:3px; color:var(--ink-soft)}
 .nav .links a.nav-li:hover{color:var(--indigo)}
@@ -323,12 +329,12 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
 .track li{display:flex; gap:9px; font-size:13.5px; color:var(--ink-soft); line-height:1.4}
 .track li svg{width:16px; height:16px; flex:0 0 auto; margin-top:2px; color:var(--indigo)}
 .track li b{font-weight:800; color:var(--ink)}
-.fw-note{margin:26px auto 0; background:var(--card); border:1px solid var(--line);
-  border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px; text-align:center}
-.fw-note-lead{display:block; background:#E1E4F0; color:var(--ink); border:1px solid #CFD4E6;
-  font-family:var(--serif); font-weight:600; font-size:15px; padding:9px 18px; border-radius:999px; margin-bottom:16px}
+.fw-note{margin:26px auto 0; text-align:center}
+.fw-note .eyebrow{margin:0 auto 16px}
+.fw-note-card{background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px 24px}
 /* Pills stretch full card width so they align with the title pill and the caption below. */
-.fw-pills{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:0 0 12px}
+.fw-pills{display:flex; flex-wrap:nowrap; gap:14px; justify-content:stretch; margin:0 0 12px}
 .fw-pill{flex:1 1 0; min-width:0; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:8px 15px; border:1px solid var(--line);
   border-radius:999px; background:var(--bg); font-size:14px; color:var(--muted); white-space:nowrap}
 .fw-pill b{color:var(--ink); font-weight:800}
