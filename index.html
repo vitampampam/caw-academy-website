@@ -912,8 +912,13 @@
     if (!g || !prev || !next) return;
     function stepBy(){ var c = g.querySelector('.gcol'); return (c ? c.getBoundingClientRect().width + 44 : 254) * 1.5; }
     function update(){
-      prev.disabled = g.scrollLeft <= 2;
-      next.disabled = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
+      var atStart = g.scrollLeft <= 2;
+      var atEnd = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
+      prev.disabled = atStart;
+      next.disabled = atEnd;
+      // Fade the edge that still has screens beyond it, hiding any cut-off device frame.
+      g.classList.toggle('fade-l', !atStart);
+      g.classList.toggle('fade-r', !atEnd);
     }
     // Start at the very first screen (flush left) so it's the obvious one to open first.
     function toStart(){ g.scrollLeft = 0; }

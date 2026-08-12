@@ -348,6 +348,15 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(27px,3.5vw,40px); 
   overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:6px; padding:26px 6px 30px;
   -webkit-overflow-scrolling:touch; scrollbar-width:none}
 .gallery::-webkit-scrollbar{display:none}
+/* Soften any partly-visible device frame at the scrollable edges (a cut-off frame looks broken).
+   Driven by JS: fade only the side that has more screens beyond it, so the first screen stays
+   crisp at the start and the last stays crisp at the end. */
+.gallery.fade-r:not(.fade-l){-webkit-mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 96px),transparent 100%);
+  mask-image:linear-gradient(to right,#000 0,#000 calc(100% - 96px),transparent 100%)}
+.gallery.fade-l:not(.fade-r){-webkit-mask-image:linear-gradient(to right,transparent 0,#000 96px,#000 100%);
+  mask-image:linear-gradient(to right,transparent 0,#000 96px,#000 100%)}
+.gallery.fade-l.fade-r{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 96px,#000 calc(100% - 96px),transparent 100%);
+  mask-image:linear-gradient(to right,transparent 0,#000 96px,#000 calc(100% - 96px),transparent 100%)}
 .gcol{display:flex; flex-direction:column; align-items:center; gap:16px; flex:0 0 auto; scroll-snap-align:start}
 /* prev/next arrows (desktop; touch devices swipe natively) */
 .gnav{position:absolute; top:45%; transform:translateY(-50%); z-index:6;
@@ -419,7 +428,7 @@ footer .foot-links a:first-child{margin-left:0}
 .lightbox .lb-frame{position:relative; background:linear-gradient(160deg,#23264c,#0e1030); border-radius:34px; padding:14px;
   box-shadow:var(--shadow-lg); display:inline-block; line-height:0; max-width:92vw}
 .lightbox .lb-frame img{display:block; width:auto; height:auto; max-height:82vh; max-width:min(520px,86vw); border-radius:20px}
-.lb-close{position:absolute; top:-22px; right:-22px; z-index:3; width:40px; height:40px; border-radius:50%; cursor:pointer;
+.lb-close{position:absolute; top:-52px; right:-4px; z-index:3; width:40px; height:40px; border-radius:50%; cursor:pointer;
   background:#23264c; border:1px solid rgba(255,255,255,.32); color:#fff; font-size:22px; line-height:1;
   display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.35); transition:background .2s ease}
 .lb-close:hover{background:rgba(255,255,255,.3)}
