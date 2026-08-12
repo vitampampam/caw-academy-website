@@ -3,339 +3,1088 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Team admin — CAW Academy</title>
+<title>CAW Academy — Airworthiness made learnable | EASA, UK CAA, UAE GCAA &amp; FAA training</title>
+<meta name="description" content="Airworthiness made learnable across the EASA, UK CAA, UAE GCAA and FAA frameworks. Initial and continuing airworthiness — Part-21, Part-M, Part-CAMO, Part-145, 14 CFR (Parts 21, 43, 65, 121/135), AMP development, the Airworthiness Review (ARC), Maintenance Economics, Aircraft Leasing and more. Plain-language lessons built on real-world experience and case studies, with flashcards and assessments for iPhone, iPad and Mac.">
+<meta name="keywords" content="EASA training, UK CAA training, UAE GCAA training, FAA training, 14 CFR, Part-M, Part-CAMO, Part-145, Part-21, continuing airworthiness, initial airworthiness, airworthiness review, ARC, AMP development, aircraft maintenance programme, maintenance economics, technical asset value, aircraft leasing, offshore registries, Article 83 bis, Bermuda register, Cayman register, Aruba P4, San Marino T7, Isle of Man, Part-66, Part-147, aviation training, CAMO, human factors, EWIS, fuel tank safety, EASA Easy Access Rules">
 <meta name="theme-color" content="#3E44B5">
-<meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self' https://api.caw-academy.com; form-action 'self'">
-<link rel="icon" href="favicon.ico">
-<style>
-  /* Self-contained brand styling — mirrors website/style.css tokens so the portal
-     works on any origin (admin subdomain OR /admin/ subfolder) with no external deps. */
-  @font-face{ font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Inter-Variable.woff2") format("woff2"); }
-  @font-face{ font-family:"Fraunces"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Fraunces-Variable.woff2") format("woff2"); }
-  :root{
-    --indigo:#3E44B5; --indigo-2:#575ECF; --indigo-3:#8A8FE6; --indigo-soft:#E6E7FB;
-    --amber:#FB8C00; --amber-soft:#FFF3E0;
-    --ink:#0B1238; --ink-soft:#3A3F63; --muted:#5E6488;
-    --bg:#F5F6FB; --card:#FFFFFF; --line:#E4E6F3;
-    --success:#2E7D32; --success-soft:#E7F4E8; --err:#B3261E; --err-soft:#FDECEC;
-    --shadow-sm:0 1px 2px rgba(16,22,68,.05), 0 6px 18px rgba(16,22,68,.05);
-    --shadow-md:0 12px 34px rgba(16,22,68,.10), 0 2px 8px rgba(16,22,68,.06);
-    --serif:"Fraunces",Georgia,"Times New Roman",serif;
-    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  *{box-sizing:border-box}
-  /* Stop iOS Safari from auto-inflating text (a common "fonts look too big" cause). */
-  html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
-  body{margin:0; color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.6; letter-spacing:-.01em;
-    background:
-      radial-gradient(1100px 620px at 88% -6%, rgba(62,68,181,.08), transparent 60%),
-      radial-gradient(900px 520px at -8% 6%, rgba(244,81,30,.06), transparent 55%), var(--bg);
-    min-height:100vh;}
-  a{color:var(--indigo); text-decoration:none}
-
-  .nav{display:flex; align-items:center; justify-content:space-between; max-width:1080px; margin:0 auto; padding:18px 24px}
-  .brand{display:inline-flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:600; font-size:23px; color:var(--ink)}
-  .brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm)}
-  .brand span{color:var(--indigo)}
-  .nav .who{font-size:14px; color:var(--muted)}
-  .brand-group{display:flex; align-items:center; gap:12px}
-  .admin-badge{display:inline-flex; align-items:center; font-size:11px; font-weight:800; letter-spacing:.5px;
-    text-transform:uppercase; color:var(--indigo); background:var(--indigo-soft); padding:5px 11px; border-radius:999px}
-  .nav .who b{color:var(--ink-soft); font-weight:700}
-
-  .wrap{max-width:1080px; margin:18px auto 90px; padding:0 24px}
-  .signin-wrap{max-width:460px; margin:24px auto 48px; padding:0 20px}
-  /* Compact spacing so the taller "Create admin account" card fits without scrolling */
-  #signinView .sub{margin-bottom:16px}
-  #signinView label.lbl{margin-bottom:4px}
-  #signinView .field{margin-bottom:10px}
-  #signinView .tabs{margin-bottom:14px}
-
-  .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px; box-shadow:var(--shadow-md)}
-  .card + .card{margin-top:20px}
-  h1{font-family:var(--serif); font-weight:600; font-size:30px; margin:0 0 6px}
-  h2{font-family:var(--serif); font-weight:600; font-size:21px; margin:0 0 14px}
-  .sub{color:var(--muted); margin:0 0 20px; font-size:15px}
-  label.lbl{display:block; font-size:13px; font-weight:700; color:var(--ink-soft); margin:0 0 5px}
-
-  .field{display:block; width:100%; margin:0 0 12px; padding:11px 13px; border:1px solid var(--line);
-    border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#fff}
-  .field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
-  /* iOS Safari centres a date input's value and lets it grow tall; left-align it and
-     normalise height so it matches the number/text fields. */
-  input[type="date"].field{-webkit-appearance:none; appearance:none; text-align:left; min-height:44px; line-height:1.2}
-  input[type="date"]::-webkit-date-and-time-value{text-align:left; margin:0}
-  input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
-  select.field{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
-    background-position:calc(100% - 18px) 18px, calc(100% - 13px) 18px; background-size:5px 5px,5px 5px; background-repeat:no-repeat; padding-right:34px}
-
-  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:0; cursor:pointer; font:inherit;
-    font-weight:700; font-size:15px; padding:12px 18px; border-radius:12px; background:var(--ink); color:#fff}
-  .btn:disabled{opacity:.55; cursor:not-allowed}
-  .btn-cta{background:linear-gradient(135deg,#FB8C00,#F4511E)}
-  .btn-ghost{background:#fff; color:var(--ink-soft); border:1px solid var(--line); padding:7px 12px; font-size:13px; font-weight:700}
-  .btn-ghost:hover{border-color:var(--indigo-3); color:var(--indigo)}
-  .btn-danger{background:#fff; color:var(--err); border:1px solid var(--line); padding:7px 12px; font-size:13px; font-weight:700}
-  .btn-danger:hover{border-color:var(--err); background:var(--err-soft)}
-
-  .msg{font-size:14px; margin:12px 0; padding:11px 13px; border-radius:10px}
-  .msg.err{background:var(--err-soft); color:var(--err)}
-  .msg.ok{background:var(--success-soft); color:var(--success)}
-
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:0 14px}
-  .assign-grid{display:grid; grid-template-columns:1.3fr 1.3fr .9fr .7fr auto; gap:0 12px; align-items:end}
-  .assign-grid .cell{min-width:0}
-  @media (max-width:820px){ .assign-grid{grid-template-columns:1fr 1fr} .row2{grid-template-columns:1fr} }
-
-  /* Multi-select checklist boxes (members + courses) */
-  .ms-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-  @media (max-width:820px){ .ms-grid{grid-template-columns:1fr} }
-  .ms{border:1px solid var(--line); border-radius:12px; background:#fff; overflow:hidden}
-  .ms-tools{display:flex; align-items:center; gap:10px; padding:9px 12px; border-bottom:1px solid var(--line); background:#FAFAFE}
-  .ms-tools .grow{flex:1; min-width:0}
-  .ms-count{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap}
-  .ms-search{width:100%; border:1px solid var(--line); border-radius:8px; padding:7px 10px; font:inherit; font-size:14px}
-  .ms-search:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
-  .ms-list{max-height:260px; overflow-y:auto; padding:4px 0}
-  .ms-row{display:flex; align-items:center; gap:10px; padding:7px 12px; font-size:14px; cursor:pointer}
-  .ms-row:hover{background:var(--indigo-soft)}
-  .ms-row input{width:16px; height:16px; accent-color:var(--indigo); flex:none}
-  .ms-row .sub{color:var(--muted); font-size:12px}
-  .ms-group{font-size:11px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--indigo);
-    padding:9px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
-    border-top:1px solid var(--line)}
-  .ms-group:first-child{border-top:0}
-  .ms-group:hover{background:var(--indigo-soft)}
-  .ms-group input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
-  .ms-chev{width:12px; font-size:11px; color:var(--muted)}
-  .ms-gname{flex:1 1 auto}
-  .ms-gcount{color:var(--muted); font-weight:700; text-transform:none; letter-spacing:0}
-  .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; font-size:12px; cursor:pointer; padding:0}
-  .assign-foot{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);
-    gap:12px; align-items:end; margin-top:14px}
-  /* Drop the field's default 12px bottom margin here, or the button (no margin) ends up
-     lower than the input's visible box when bottom-aligned. */
-  .assign-foot .field{width:100%; margin:0}
-  /* Match the button's box to the input fields (same vertical padding + a 1px border)
-     so, bottom-aligned, its height lines up exactly with the adjacent cells. */
-  .assign-foot .btn{width:100%; padding:11px 18px; font-size:15px; line-height:1.2; border:1px solid transparent}
-  /* Tablets: three inputs in an even row, with a full-width Assign button on its own
-     row below (avoids the button floating auto-width in a half cell). */
-  @media (min-width:561px) and (max-width:1024px){
-    .assign-foot{grid-template-columns:repeat(3,1fr)}
-    .assign-foot > div:last-child{grid-column:1 / -1}
-    .assign-foot .btn{width:100%}
-  }
-  /* Phones: stack every field + the button, each full width. */
-  @media (max-width:560px){ .assign-foot{grid-template-columns:1fr} .assign-foot .btn{width:100%} }
-
-  /* Roster */
-  .member{border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-top:14px; background:#fff}
-  .member-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
-  .member-name{font-weight:700; font-size:16px}
-  .member-email{color:var(--muted); font-size:13.5px}
-  .role-pill{font-size:11px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--indigo);
-    background:var(--indigo-soft); padding:3px 8px; border-radius:999px}
-  .alist{margin:12px 0 0; padding:0; list-style:none}
-  .abulk{display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap}
-  .abulk-all{display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer}
-  .abulk-all input{width:16px; height:16px; accent-color:var(--indigo); flex:none}
-  .abulk-count{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap}
-  .aitem input.apick{width:16px; height:16px; accent-color:var(--indigo); flex:none}
-  .aitem{display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--line); flex-wrap:wrap}
-  .aitem .course{font-weight:600; flex:1 1 220px; min-width:0}
-  .aitem .course small{display:block; color:var(--muted); font-weight:400; font-size:12px}
-  .aitem .meta{color:var(--muted); font-size:13px; white-space:nowrap}
-  .aitem .actions{display:flex; gap:8px; margin-left:auto}
-  .pill{font-size:12px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap}
-  .pill.done{background:var(--success-soft); color:var(--success)}
-  .pill.overdue{background:var(--err-soft); color:var(--err)}
-  .pill.due_soon{background:var(--amber-soft); color:#B25E00}
-  .pill.upcoming{background:var(--indigo-soft); color:var(--indigo)}
-  .nextup{font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.4px; margin-left:2px}
-  .certs{margin-top:10px; font-size:13px; color:var(--muted)}
-  .certs b{color:var(--ink-soft)}
-  .empty{color:var(--muted); font-size:14px; padding:8px 0}
-  .note{font-size:13px; color:var(--muted); margin-top:16px; line-height:1.5}
-  .hidden{display:none}
-  /* Sign in / Create account tabs */
-  .tabs{display:flex; gap:8px; margin:0 0 18px}
-  .tab{flex:1; padding:10px 0; text-align:center; border-radius:11px; cursor:pointer;
-    font-weight:700; font-size:15px; border:1px solid var(--line); background:#fff; color:var(--ink-soft)}
-  .tab.active{background:var(--indigo); color:#fff; border-color:var(--indigo)}
-
-  /* Inline edit editor */
-  .editor{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; padding:10px; background:var(--bg); border-radius:10px}
-  .editor .field{margin:0; width:auto}
-
-  /* Phones: a cohesive smaller scale — tighter spacing, right-sized fonts and
-     buttons, and 16px inputs so iOS doesn't zoom the page on focus. */
-  @media (max-width:560px){
-    body{font-size:15px}
-    .nav{padding:11px 14px}
-    .brand{font-size:19px}
-    .brand img{width:26px; height:26px}
-    .wrap{padding:0 12px; margin:10px auto 56px}
-    .signin-wrap{margin:28px auto 56px; padding:0 12px}
-    .card{padding:16px 14px; border-radius:14px}
-    .card + .card{margin-top:12px}
-    h1{font-size:22px}
-    h2{font-size:17px}
-    /* Smaller, tighter instruction/description text on phones. */
-    .sub{font-size:12.5px; line-height:1.45; margin-bottom:12px}
-    .hint{font-size:11.5px; line-height:1.4}
-    label.lbl{font-size:12px}
-    /* 16px inputs prevent iOS auto-zoom on focus (keeps the layout from "jumping"). */
-    .field, select.field, .ms-search{font-size:16px; padding:10px 12px}
-    .btn{font-size:16px; padding:13px 16px}
-    .btn-ghost, .btn-danger{font-size:12.5px; padding:7px 11px}
-    .ms-grid{gap:12px}
-    .ms-tools{padding:8px 10px}
-    .ms-list{max-height:200px}
-    .ms-row{padding:8px 12px; font-size:14px}
-    .ms-group{padding:9px 10px}
-    .member{padding:13px 14px; margin-top:10px}
-    .member-name{font-size:15px}
-    .member-email{font-size:12px}
-    .pill{font-size:11px}
-    .result-row{font-size:14px}
-  }
-</style>
+<meta property="og:title" content="CAW Academy — Airworthiness made learnable">
+<meta property="og:description" content="Initial &amp; continuing airworthiness training built on real-world experience and case studies. Lessons, flashcards and assessments on iPhone, iPad and Mac.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://caw-academy.com">
+<meta property="og:image" content="https://caw-academy.com/og.png?v=4">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CAW Academy — Airworthiness made learnable">
+<meta name="twitter:description" content="Initial & continuing airworthiness training built on real-world experience and case studies, for iPhone, iPad and Mac.">
+<meta name="twitter:image" content="https://caw-academy.com/og.png?v=4">
+<link rel="canonical" href="https://caw-academy.com/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://caw-academy.com/#org",
+      "name": "CAW Academy",
+      "url": "https://caw-academy.com/",
+      "logo": "https://caw-academy.com/icon-512.png",
+      "email": "support@caw-academy.com",
+      "sameAs": [ "https://www.linkedin.com/company/caw-academy/" ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "CAW Academy",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "iOS, iPadOS, macOS",
+      "description": "Airworthiness training for continuing-airworthiness professionals and their teams, spanning the EASA, UK CAA, UAE GCAA and FAA frameworks: initial and continuing airworthiness lessons, flashcards, assessments and verifiable certificates across 75+ courses. Licensed for organisations, with a free trial.",
+      "keywords": "EASA training, UK CAA training, UAE GCAA training, FAA training, 14 CFR, Part-M, Part-CAMO, Part-145, Part-21, continuing airworthiness, airworthiness review (ARC), AMP development, maintenance economics, technical asset value, aircraft leasing, Part-66, aviation training",
+      "url": "https://caw-academy.com/",
+      "image": "https://caw-academy.com/og.png",
+      "publisher": { "@id": "https://caw-academy.com/#org" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is CAW Academy an official EASA, UK CAA, GCAA or FAA product?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It is an independent study aid, not affiliated with or endorsed by EASA, the UK CAA, the GCAA or the FAA. It is aligned with the applicable EASA, UK CAA, GCAA and FAA rules but is not an official publication and not a substitute for the official regulations or your organisation's procedures." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which subjects and frameworks does CAW Academy cover?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Courses span four regulatory frameworks — EASA, UK CAA, UAE GCAA and FAA — across the full airworthiness lifecycle: Part-21 and 14 CFR Part 21 (initial airworthiness), Part-M and Part-CAMO (continuing-airworthiness management), Part-145 and 14 CFR Part 145 maintenance, 14 CFR Part 43/65 and Part 121/135 air-carrier maintenance, Airworthiness Directives, AMP development, the Airworthiness Review (ARC), plus Maintenance Economics, Aircraft & Engine Leasing, Fleet Reliability & Availability, Engine & LLP asset management, Offshore Registries & Article 83 bis, Aircraft Recycling, Human Factors, SMS, EWIS and Fuel Tank Safety." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do we get CAW Academy for our team?",
+      "acceptedAnswer": { "@type": "Answer", "text": "CAW Academy is licensed for organisations — teams get all 75+ courses for their people under a single agreement, with a free trial to evaluate it first. Individual in-app purchases are planned for a later stage. Contact us for a demonstration or a free trial." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it useful for Part-66 / Part-147 exam preparation?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The recall-rated flashcards and assessments (75% pass mark) make it strong revision for Part-66 and Part-147 students sitting the EASA regulation modules, alongside working CAMO and maintenance professionals." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work offline?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Once installed, every lesson, flashcard and quiz works fully offline — ideal for studying in the hangar, on the road or in the air." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which devices are supported?",
+      "acceptedAnswer": { "@type": "Answer", "text": "iPhone, iPad and Mac. Your progress syncs across your own devices through your Apple Account, so you can pick up exactly where you left off." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data private?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. There are no ads or third-party trackers. Signed out, your study data stays on your device; signed in with a licence, it syncs to your account so it follows you across devices. See our Privacy Policy for the detail." }
+    }
+  ]
+}
+</script>
+<link rel="icon" href="/favicon.ico?v=4" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
+<link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
+<link rel="stylesheet" href="style.css?v=38">
 </head>
 <body>
 
-<nav class="nav">
-  <div class="brand-group">
-    <a class="brand" href="/"><img src="logo-header.png" alt="" width="30" height="30">CAW <span>Academy</span></a>
-    <span class="admin-badge">Team admin</span>
+<nav class="nav" id="nav">
+  <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
+  <div class="links">
+    <a class="nav-util nav-ghost" href="verify.html">Verify a certificate</a>
+    <a class="nav-util nav-ghost" href="/admin/">Admin login</a>
   </div>
-  <div class="who" id="who"></div>
 </nav>
 
-<!-- Sign in -->
-<main class="signin-wrap" id="signinView">
-  <div class="card">
-    <h1 id="authTitle">Team admin</h1>
-    <p class="sub" id="authSub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
-    <div class="tabs">
-      <div class="tab active" id="tabSignIn">Sign in</div>
-      <div class="tab" id="tabRegister">Create admin account</div>
+<!-- ============================ HERO ============================ -->
+<header class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <h1>Airworthiness made <em>learnable</em></h1>
+      <p class="lede">Plain-language airworthiness training across the EASA, UK CAA, UAE GCAA and FAA frameworks — built for teams, from beginners to industry leaders.</p>
     </div>
-    <form id="authForm" autocomplete="on">
-      <div id="regNames" class="hidden">
-        <label class="lbl" for="firstName">First name</label>
-        <input class="field" id="firstName" type="text" autocomplete="given-name">
-        <label class="lbl" for="lastName">Last name</label>
-        <input class="field" id="lastName" type="text" autocomplete="family-name">
-      </div>
-      <label class="lbl" for="email">Work email</label>
-      <input class="field" id="email" type="email" autocomplete="username" required>
-      <label class="lbl" for="password">Password</label>
-      <input class="field" id="password" type="password" autocomplete="current-password" required>
-      <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
-      <div id="authMsg"></div>
-      <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
-      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><a href="#" id="forgotLink" style="font-size:14px">Forgot password?</a></p>
-    </form>
-    <p class="note" id="portalNote">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
-  </div>
-</main>
 
-<!-- Not an admin -->
-<main class="signin-wrap hidden" id="deniedView">
-  <div class="card">
-    <h1>Not an administrator</h1>
-    <p class="sub" id="deniedMsg">This account is not set up as an organisation administrator.</p>
-    <button class="btn btn-ghost" id="deniedSignOut">Sign out</button>
-  </div>
-</main>
-
-<!-- Dashboard -->
-<main class="wrap hidden" id="dashView">
-  <div class="card">
-    <div class="member-head" style="margin-bottom:2px">
-      <div>
-        <h2 style="margin:0" id="orgName">Your organisation</h2>
-        <div class="member-email" id="orgDomains"></div>
-      </div>
-      <button class="btn btn-ghost" id="signOutBtn">Sign out</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Assign courses</h2>
-    <p class="sub">Pick one or more members and one or more courses, then assign. Courses follow the catalogue order, and deadlines are staggered by the “Months apart” interval from the first deadline (set it to 0 for one shared deadline). The order is a soft “next due” hint — nothing is locked for the learner.</p>
-    <form id="assignForm">
-      <div class="ms-grid">
-        <div>
-          <label class="lbl">Members</label>
-          <div class="ms">
-            <div class="ms-tools">
-              <label class="ms-row" style="padding:0" for="memAll"><input type="checkbox" id="memAll"> <b>Select all</b></label>
-              <span class="grow"></span>
-              <span class="ms-count" id="memCount">0 selected</span>
+    <!-- interactive device lineup: iPhone · iPad · Mac (hover to focus) -->
+    <div class="device-stage">
+      <div class="glow"></div>
+      <div class="glow amber"></div>
+      <div class="lineup">
+      <div class="dev iphone" tabindex="0" aria-label="CAW Academy on iPhone">
+        <div class="pscale" style="--s:.28">
+        <div class="phone" aria-hidden="true">
+          <img class="shot" src="screens/hero-iphone.png" alt="CAW Academy home screen on iPhone"
+               onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
+          <div class="scr">
+            <div class="island"></div>
+            <div class="sb"><span>11:34</span><span class="rt"><svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4C5.5 2.4 3.3 3.3 1.7 5l1.1 1.1C4.1 4.8 5.9 4 8 4s3.9.8 5.2 2.1L14.3 5C12.7 3.3 10.5 2.4 8 2.4zM8 6c-1.3 0-2.6.5-3.5 1.5l1.1 1.1C6.4 7.9 7.1 7.5 8 7.5s1.6.4 2.4 1.1l1.1-1.1C10.6 6.5 9.3 6 8 6zm0 3.3l1.5 1.5L8 12l-1.5-1.2z"/></svg><span class="bat"></span></span></div>
+            <div class="nbar">
+              <span class="title">CAW Academy</span>
+              <span class="tools">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 0-2 2z"/><path d="M9 8h6"/></svg>
+              </span>
             </div>
-            <div class="ms-list" id="memList"></div>
+            <div class="body">
+              <div class="hb">
+                <div class="t">Airworthiness &amp; Technical Asset Management</div>
+                <div class="s">Airworthiness, maintenance economics &amp; technical asset value — expert lessons, flashcards and assessments.</div>
+              </div>
+              <div class="cc">
+                <div class="k">CONTINUE</div>
+                <div class="v">Findings</div>
+                <div class="r"><span>Part-M · M.A.619</span><span class="res">Resume <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+              </div>
+              <div class="pc">
+                <div class="ring" style="--pct:60%"><i>60%</i></div>
+                <div class="px"><div class="k">CURRENT COURSE</div><b>Part-M</b><small>37 of 62 lessons read</small></div>
+              </div>
+              <div class="slab">Regulatory</div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 3.5 3.5 5.4A1 1 0 0 0 3 6.3v13.2a.6.6 0 0 0 .8.6L9 18.5l6 2 5.2-1.9a1 1 0 0 0 .8-1V4.6a.6.6 0 0 0-.8-.6L15 5.5l-6-2z"/></svg></div>
+                  <div class="nm"><b>Airline Operating Framework</b><small>The operating framework &amp; CAW foundations</small></div>
+                  <span class="seal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.5 1.9 3.1.1 1 2.9 2.5 1.8-1 2.9 1 2.9-2.5 1.8-1 2.9-3.1.1L12 23l-2.5-1.8-3.1-.1-1-2.9L2.9 16.4l1-2.9-1-2.9L5.4 8.8l1-2.9 3.1-.1z"/><path d="M10.4 14.7l-2.1-2.1-1.3 1.3 3.4 3.4 5.7-5.7-1.3-1.3z" fill="#fff"/></svg></span>
+                </div>
+                <div class="meta"><span class="pill">18 LESSONS</span><span class="rd">18/18 read</span></div>
+                <div class="bar"><i style="width:100%"></i></div>
+              </div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5v-1.8l-8-4.9V3.4a1.4 1.4 0 0 0-2.8 0v5.4l-8 4.9v1.8l8-2.4v4.9l-2 1.4v1.4l3.4-.9 3.4.9v-1.4l-2-1.4v-4.9z"/></svg></div>
+                  <div class="nm"><b>Part-M</b><small>Continuing airworthiness requirements</small></div>
+                  <span class="seal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.5 1.9 3.1.1 1 2.9 2.5 1.8-1 2.9 1 2.9-2.5 1.8-1 2.9-3.1.1L12 23l-2.5-1.8-3.1-.1-1-2.9L2.9 16.4l1-2.9-1-2.9L5.4 8.8l1-2.9 3.1-.1z"/><path d="M10.4 14.7l-2.1-2.1-1.3 1.3 3.4 3.4 5.7-5.7-1.3-1.3z" fill="#fff"/></svg></span>
+                </div>
+                <div class="meta"><span class="pill">62 LESSONS</span><span class="rd">37/62 read</span></div>
+                <div class="bar"><i style="width:60%"></i></div>
+              </div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V7l9-4 9 4v14h-6v-5h-6v5z"/></svg></div>
+                  <div class="nm"><b>Part-CAMO</b><small>Airworthiness management</small></div>
+                </div>
+                <div class="meta"><span class="pill">23 LESSONS</span><span class="rd">0/23 read</span></div>
+                <div class="bar"><i style="width:0%"></i></div>
+              </div>
+            </div>
+            <div class="tabs">
+              <div class="tab on"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 10v11h6v-6h6v6h6V10z"/></svg></div>Home</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a1 1 0 0 1 1 1v19l-7-4-7 4V3a1 1 0 0 1 1-1z"/></svg></div>Saved</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="11" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="14" rx="1"/><rect x="17" y="9" width="4" height="11" rx="1"/></svg></div>Stats</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4.2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg></div>Profile</div>
+            </div>
           </div>
         </div>
-        <div>
-          <label class="lbl">Courses</label>
-          <div class="ms">
-            <div class="ms-tools">
-              <input class="ms-search grow" id="courseSearch" placeholder="Filter courses…" autocomplete="off">
-              <button type="button" class="linkbtn" id="courseClear">Clear</button>
-              <span class="ms-count" id="courseCount">0 selected</span>
-            </div>
-            <div class="ms-list" id="courseList"></div>
-          </div>
         </div>
+        <span class="dlabel">iPhone</span>
       </div>
-      <div class="assign-foot">
-        <div>
-          <label class="lbl" for="deadline">First deadline</label>
-          <input class="field" id="deadline" type="date" required>
-        </div>
-        <div>
-          <label class="lbl" for="monthsApart">Months apart</label>
-          <input class="field" id="monthsApart" type="number" min="0" max="24" value="1">
-        </div>
-        <div>
-          <label class="lbl" for="sequence">Start sequence at</label>
-          <input class="field" id="sequence" type="number" min="0" max="9999" value="0">
-        </div>
-        <div>
-          <!-- invisible spacer label so this cell matches the labelled input cells and
-               the button lines up with the "Start sequence at" field -->
-          <label class="lbl" aria-hidden="true" style="visibility:hidden">Assign</label>
-          <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
-        </div>
+      <div class="dev ipad" aria-hidden="true" tabindex="0" aria-label="CAW Academy on iPad">
+        <div class="ipad-bz"><img src="screens/hero-ipad.png" alt="CAW Academy on iPad" loading="lazy"></div>
+        <span class="dlabel">iPad</span>
       </div>
-      <div class="hint" id="scheduleHint" style="margin-top:8px"></div>
-      <div id="assignMsg"></div>
+      <div class="dev mac" aria-hidden="true" tabindex="0" aria-label="CAW Academy on Mac">
+        <div class="macbook"><div class="lid"><img src="screens/hero-mac.png" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
+        <span class="dlabel">MacBook</span>
+      </div>
+      </div>
+    </div>
+
+    <!-- store badges: under the copy on desktop, under the devices on mobile (grid-area:cta) -->
+    <div class="hero-apps">
+      <a class="store-badge" id="appstore" href="#" aria-disabled="true" aria-label="App Store — coming soon">
+        <svg class="logo" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 1.6c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.8-.8 2-1.4 2.8-1.4zM19 17c-.5 1.1-.8 1.6-1.4 2.6-.9 1.3-2.1 3-3.6 3-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.5.9c-1.5 0-2.6-1.5-3.5-2.9C1.5 16.5 1.2 12 2.7 9.7 3.8 8 5.5 7 7.1 7c1.3 0 2.2.9 3.4.9 1.1 0 1.8-.9 3.4-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.8 1.2 7.9z"/></svg>
+        <span class="tx"><small>Coming soon on the</small><b>App Store</b></span>
+      </a>
+      <a class="store-badge" href="#" aria-disabled="true" aria-label="Google Play — coming soon">
+        <svg class="logo" viewBox="0 0 24 24"><path d="M3.6 2.2c-.3.2-.5.6-.5 1.1v17.4c0 .5.2.9.5 1.1l.1.1L13 12.1v-.2L3.6 2.2z" fill="#00C3FF"/><path d="M16.5 15.5 13 12.1v-.2l3.5-3.4.1.1 4.2 2.4c1.2.7 1.2 1.8 0 2.5l-4.3 2.4z" fill="#FFCE00"/><path d="M16.6 15.4 13 11.9 3.6 21.8c.4.4 1 .5 1.8.1l11.2-6.5z" fill="#FF3D47"/><path d="M16.6 8.6 5.4 2.1C4.6 1.7 4 1.8 3.6 2.2L13 11.9l3.6-3.3z" fill="#00D26A"/></svg>
+        <span class="tx"><small>Coming soon on</small><b>Google Play</b></span>
+      </a>
+    </div>
+
+  </div>
+  <!-- Full-width CTA + app badges below the hero -->
+  <div class="hero-bottom">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</header>
+
+<div class="ribbon">
+  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Aligned with EASA, UK CAA, GCAA &amp; FAA rules</span>
+  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>No ads · No third-party trackers</span>
+  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Works fully offline</span>
+  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>iPhone · iPad · Mac<span class="soon-txt"> · Android</span></span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============================ STATS ============================ -->
+  <section class="reveal" style="padding-top:8px">
+    <div class="stats" id="stats">
+      <div class="stat"><div class="n" data-count="75" data-suffix="+">75+</div><div class="l">structured courses</div></div>
+      <div class="stat"><div class="n" data-count="1600" data-suffix="+">1,600+</div><div class="l">expert lessons</div></div>
+      <div class="stat"><div class="n" data-count="10500" data-suffix="+">10,500+</div><div class="l">flashcards</div></div>
+      <div class="stat"><div class="n" data-count="24000" data-suffix="+">24,000+</div><div class="l">exam questions</div></div>
+    </div>
+  </section>
+
+  <!-- ============================ AUDIENCE ============================ -->
+  <section id="audience">
+    <div class="section-head center reveal">
+      <span class="eyebrow">For people</span>
+      <h2>Made for the people who keep aircraft airworthy</h2>
+    </div>
+    <div class="chips reveal">
+      <span>CAMO staff &amp; post-holders</span>
+      <span>Part-145 engineers</span>
+      <span>Airworthiness review staff</span>
+      <span>Part-147 / Part-66 students</span>
+      <span>Technical &amp; asset managers</span>
+      <span>Quality &amp; safety teams</span>
+    </div>
+  </section>
+
+  <!-- ============================ FOR ORGANISATIONS ============================ -->
+  <section id="organisations">
+    <div class="section-head center reveal">
+      <span class="eyebrow">For organisations</span>
+      <h2>Train your whole airworthiness team to one standard</h2>
+    </div>
+    <div class="grid reveal">
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>One standard, whole team</h3>
+        <p>One consistent baseline across every framework and Part — EASA, UK CAA, UAE GCAA and FAA — no more uneven, ad-hoc knowledge.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Audit-ready evidence</h3>
+        <p>Verifiable certificates — tamper-evident proof of completed study.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
+        <h3>Supports continuation training</h3>
+        <p>HF, SMS, EWIS and Fuel Tank Safety — ready for your recurrent programme.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>Onboard new hires faster</h3>
+        <p>New hires up to speed on all the regulations they need to know, in days, self-paced.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
+        <h3>Manage seats &amp; track progress</h3>
+        <p>Assign seats, set completion deadlines and monitor each learner's progress — restrict by email domain.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0M1 1l22 22" opacity=".0"/><path d="M5 19l-2 2M19 19l2 2"/></svg></div>
+        <h3>Works where your people work</h3>
+        <p>Fully offline in the hangar and at outstations — iPhone, iPad and Mac.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA centered in the gap between For-organisations and Why -->
+  <div class="reveal" style="text-align:center; margin:6px 0 8px">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+
+  <!-- ============================ WHY ============================ -->
+  <section id="why">
+    <div class="section-head reveal">
+      <span class="eyebrow">Why CAW Academy</span>
+      <h2>Built to make complex regulations clear</h2>
+    </div>
+    <div class="props">
+      <div class="prop reveal">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <h3>Clear and structured</h3>
+        <p>Dense rules turned into clear, structured lessons — plain English, one idea at a
+           time, with the official reference always a tap away. No dense legal wording, nothing to wade through.</p>
+      </div>
+      <div class="prop reveal">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13l2 2 4-4"/></svg></div>
+        <h3>Real-world &amp; case-based</h3>
+        <p>Grounded in real experience from the CAMO office and the hangar floor. Worked
+           examples and case studies show how the rule plays out in practice — not just in theory.</p>
+      </div>
+      <div class="prop reveal">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>Exam-ready</h3>
+        <p>Recall-rated flashcards and a timed Exam Mode with a 75% pass mark and attempt
+           history. Practise until it sticks, then walk in knowing you're ready.</p>
+      </div>
+      <div class="prop reveal">
+        <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Synced &amp; yours to keep</h3>
+        <p>Progress, highlights and notes follow you across iPhone, iPad and Mac — and you
+           can export your notes to a file to share or keep.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CURRICULUM ============================ -->
+  <section id="curriculum">
+    <div class="section-head reveal">
+      <span class="eyebrow">The curriculum</span>
+      <h2>The whole airworthiness picture in one app</h2>
+    </div>
+    <div class="tracks">
+      <div class="track reveal">
+        <span class="badge">Initial airworthiness</span>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-21</b> — design &amp; production organisations, certification</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Certification Specifications (CS)</b> — the airworthiness codes</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Familiarisation for CAMO</b> — Part-21 &amp; CS for CAMO staff</span></li>
+        </ul>
+      </div>
+      <div class="track reveal">
+        <span class="badge">Continuing airworthiness</span>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-M &amp; Part-CAMO</b> — continuing-airworthiness management</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-145 &amp; Part-IS</b> — maintenance &amp; information security</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>AMP development</b> — building the Aircraft Maintenance Programme</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>The Airworthiness Review (ARC)</b> — review, recommendation &amp; issue</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Fleet Reliability &amp; Availability</b> — reliability programme &amp; fleet availability</span></li>
+        </ul>
+      </div>
+      <div class="track reveal">
+        <span class="badge">Asset value</span>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Maintenance Economics &amp; Cost Management</b> — cost, benchmarking, technical-asset value across the lifecycle</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft &amp; Engine Leasing</b> — lease deals, delivery, redelivery &amp; records</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Engine &amp; LLP Asset Management</b> — engines &amp; life-limited parts as high-value assets</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft Recycling &amp; End-of-Life</b> — teardown, parts &amp; records at retirement</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Offshore Registries &amp; Article 83bis</b> — cross-border registration &amp; oversight transfer</span></li>
+        </ul>
+      </div>
+      <div class="track reveal">
+        <span class="badge">Essentials</span>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Human Factors</b> — error, culture &amp; performance</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Safety Management Systems (SMS)</b></span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>EWIS &amp; Fuel Tank Safety</b> — specialised continuation training</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="reveal fw-note">
+      <span class="eyebrow">The same syllabus, in your framework</span>
+      <div class="fw-note-card">
+      <div class="fw-pills">
+        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇪🇺</span><b>EASA</b> · Part-…</span>
+        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇬🇧</span><b>UK CAA</b> · UK&nbsp;Part-…</span>
+        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇦🇪</span><b>UAE GCAA</b> · CAR-…</span>
+        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇺🇸</span><b>FAA</b> · 14&nbsp;CFR</span>
+      </div>
+      <p class="fw-note-sub">Every track above is taught in each authority's own references. The FAA
+        edition covers 14&nbsp;CFR Parts&nbsp;21, 43, 145, 65 &amp; 39, plus Air Carrier CAMP and MSG-3.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FEATURES ============================ -->
+  <section id="features">
+    <div class="section-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2>Everything you need to study with confidence</h2>
+    </div>
+    <div class="grid">
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <h3>Regulation-grounded lessons</h3>
+        <p>Clear explanations linked to the rule and its guidance — aligned to each authority's regulations.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+        <h3>Recall-rated flashcards</h3>
+        <p>Self-rated cards that focus you on what you keep missing.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>Timed assessments</h3>
+        <p>Fresh question sets, a live timer and a 75% pass mark.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <h3>Search &amp; Glossary</h3>
+        <p>Full-text search and a built-in glossary — find any concept in seconds.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+        <h3>Progress that follows you</h3>
+        <p>Read-tracking and scores, synced across iPhone, iPad and Mac.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.2 13.5L7 22l5-3 5 3-1.2-8.5"/></svg></div>
+        <h3>Verifiable certificates</h3>
+        <p>Earn a certificate with a unique number and QR — confirmable in our <a href="verify.html">public registry</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mid-page CTA between Features and the gallery -->
+  <div class="reveal" style="text-align:center; margin:6px 0 8px">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+
+  <!-- ============================ INSIDE (gallery) ============================ -->
+  <section id="inside">
+    <div class="section-head center reveal">
+      <span class="eyebrow">A look inside</span>
+      <h2>See exactly how you'll learn</h2>
+    </div>
+    <div class="gallery-wrap reveal">
+      <button class="gnav gprev" type="button" aria-label="Show previous screens">&#8249;</button>
+      <div class="gallery">
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.jpg?v=4" alt="CAW Academy dashboard on iPad with the framework picker open — EASA, UK CAA, UAE GCAA and FAA — showing the full course list, a Continue card and course-progress bars"></div>
+        <div class="gcap"><b>Pick your framework</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.jpg?v=4" alt="CAW Academy lesson on iPad with sentences highlighted and the selection menu open — Highlight, Note, Bookmark and Copy"></div>
+        <div class="gcap"><b>Highlight, note &amp; bookmark</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.jpg?v=4" alt="CAW Academy full-text search on iPad finding TCAS 7.1 across lessons, with the matching lesson and a context snippet"></div>
+        <div class="gcap"><b>Search every lesson</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.jpg?v=4" alt="CAW Academy built-in glossary on iPad defining an acronym — CDCCL, Critical Design Configuration Control Limitations"></div>
+        <div class="gcap"><b>Glossary for every acronym</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-5.jpg?v=4" alt="CAW Academy flashcards on iPad — card 1 of 125 with a tap-to-reveal answer and Need review or Got it controls"></div>
+        <div class="gcap"><b>Flashcards to make it stick</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-8.jpg?v=4" alt="CAW Academy quiz on iPad showing instant feedback — the correct answer marked green, the chosen wrong answer red, and an explanation of why"></div>
+        <div class="gcap"><b>Quizzes with instant feedback</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-6.jpg?v=4" alt="CAW Academy timed assessment on iPad with a countdown timer, a question navigator and an unanswered-question tracker"></div>
+        <div class="gcap"><b>Timed assessments</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-9.jpg?v=4" alt="CAW Academy exam review on iPad marking each answer right or wrong, with the correct answer, an explanation and a link to study the source lesson"></div>
+        <div class="gcap"><b>Review every answer &amp; the why</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-7.jpg?v=4" alt="CAW Academy export screen on iPad sharing your highlights and notes as a PDF or Markdown file, selectable by course"></div>
+        <div class="gcap"><b>Export your notes</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-10.jpg?v=4" alt="CAW Academy Courses due on iPad listing training assigned by the company admin, each with a due date and Upcoming status"></div>
+        <div class="gcap"><b>Deadlines set by your admin</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-11.jpg?v=4" alt="CAW Academy What's new feed on iPad showing regulatory and content updates, filterable by type and framework"></div>
+        <div class="gcap"><b>Always current with the regulations</b></div>
+      </div>
+
+      </div>
+      <button class="gnav gnext" type="button" aria-label="Show more screens">&#8250;</button>
+    </div>
+  </section>
+
+  <!-- ============================ FAQ ============================ -->
+  <section id="faq">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Questions</span>
+      <h2>Good to know</h2>
+    </div>
+    <div class="faq" id="faqList">
+      <details class="reveal" open>
+        <summary>Is CAW Academy an official EASA, UK CAA, GCAA or FAA product?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">No. It is an independent study aid, <strong>not affiliated with or endorsed by EASA, the UK CAA, the GCAA or the FAA</strong>.
+          It is aligned with the applicable EASA, UK CAA, GCAA and FAA rules but is not an official publication and not a
+          substitute for the official regulations or your organisation's procedures.</div>
+      </details>
+      <details class="reveal">
+        <summary>Which subjects and frameworks does CAW Academy cover?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">Courses span four regulatory frameworks — <strong>EASA</strong>,
+          <strong>UK CAA</strong>, <strong>UAE GCAA</strong> and <strong>FAA</strong> — across the full airworthiness lifecycle:
+          <strong>Part-21</strong> (initial airworthiness),
+          <strong>Part-M</strong> and <strong>Part-CAMO</strong> (continuing-airworthiness management),
+          <strong>Part-145</strong> maintenance, plus their <strong>FAA 14 CFR</strong> equivalents (Parts 21, 43/65, 121/135 and ADs), <strong>AMP development</strong>, the
+          <strong>Airworthiness Review (ARC)</strong>, plus Maintenance Economics,
+          <strong>Aircraft &amp; Engine Leasing</strong>, Fleet Reliability &amp; Availability, Engine &amp; LLP asset management,
+          Offshore Registries &amp; Article 83 bis, Aircraft Recycling, Human Factors, SMS, EWIS and Fuel Tank Safety.</div>
+      </details>
+      <details class="reveal">
+        <summary>How do we get CAW Academy for our team?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">CAW Academy is <strong>licensed for organisations</strong> — your team gets all
+          75+ courses under a single agreement, with a <strong>free trial</strong> to evaluate it first.
+          Individual in-app purchases for private learners are planned for a later stage. There are no
+          ads, on any plan. <a class="open-trial" href="#">Request a free trial.</a></div>
+      </details>
+      <details class="reveal">
+        <summary>Do learners get a certificate?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">Yes. Complete a course and pass the assessment to earn a certificate with a
+          <strong>unique number and QR code</strong>, confirmable on our <a href="verify.html">public registry</a>
+          — audit-ready evidence of completed study. It confirms in-app study only; it is not an EASA qualification.</div>
+      </details>
+      <details class="reveal">
+        <summary>Is it useful for Part-66 / Part-147 exam preparation?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">Yes. The recall-rated flashcards and assessments (75% pass mark) make it strong
+          revision for <strong>Part-66</strong> and <strong>Part-147</strong> students sitting the EASA
+          regulation modules, alongside working CAMO and maintenance professionals.</div>
+      </details>
+      <details class="reveal faq-extra">
+        <summary>Does it work offline?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">Yes. Once installed, every lesson, flashcard and quiz works fully offline — ideal for
+          studying in the hangar, on the road or in the air.</div>
+      </details>
+      <details class="reveal faq-extra">
+        <summary>Which devices are supported?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">iPhone, iPad and Mac, with Android to follow — the apps are coming soon. Signed in
+          with a licence, your progress syncs across your devices so your team picks up exactly where they
+          left off.</div>
+      </details>
+      <details class="reveal faq-extra">
+        <summary>Is my data private?
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="ans">Yes. There are no ads or third-party trackers. Signed out, your study data stays
+          on your device; signed in with a licence, it syncs to your account so it follows you across
+          devices. See our <a href="privacy.html">Privacy Policy</a> for the detail.</div>
+      </details>
+    </div>
+    <div class="faq-more-wrap reveal">
+      <button class="faq-toggle" id="faqToggle" type="button" aria-expanded="false" aria-controls="faqList">
+        <span class="faq-toggle-label">Show all FAQs</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================ REVIEWS ============================ -->
+  <!-- NOTE: HIDDEN until real reviews exist. These are PLACEHOLDER reviews and a
+       placeholder rating/count. To restore: remove the `hidden` attribute below (and
+       the `hidden` on the nav "Reviews" link), then replace the placeholder cards with
+       genuine reviews and real App Store figures. Do not add aggregateRating structured
+       data until the ratings are real. -->
+  <section id="reviews" hidden>
+    <div class="section-head center reveal">
+      <span class="eyebrow">Reviews</span>
+      <h2>What airworthiness professionals say</h2>
+    </div>
+
+    <div class="reviews-bar reveal">
+      <button class="reviews-summary" id="reviewsToggle" aria-expanded="true" aria-controls="reviewsCarousel">
+        <span class="stars" aria-hidden="true">★★★★★</span>
+        <span class="rsum-rating">4.9</span>
+        <span class="rsum-count">· <span id="reviewsCount">120</span>+ reviews</span>
+        <svg class="rsum-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="sr-only">Show or hide reviews</span>
+      </button>
+    </div>
+
+    <div class="reviews-carousel reveal" id="reviewsCarousel">
+      <button class="rev-arrow rev-prev" type="button" aria-label="Previous review">&#8249;</button>
+      <div class="rev-track" id="revTrack" role="list">
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Finally a study tool that explains the <em>why</em> behind the regs, not just the article number. The Part-M and CAMO lessons map straight onto my day job."</p>
+          <div class="rev-author">— Continuing-airworthiness engineer, CAMO</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"The assessments and flashcards got me through my Part-66 module. The instant explanation after every question is what makes it stick."</p>
+          <div class="rev-author">— Part-66 / Part-147 student</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Plain-language lessons I can finish on a break and use the same afternoon. The ARC and AMP-development courses are spot on."</p>
+          <div class="rev-author">— Airworthiness review staff</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"Works fully offline in the hangar, no ads. Exactly what a busy Part-145 team needs for quick reference and revision."</p>
+          <div class="rev-author">— Part-145 certifying technician</div>
+        </article>
+        <article class="rev-card" role="listitem">
+          <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="rev-text">"The Maintenance Economics course is hard to find anywhere else. It finally made asset value and lease-return conditions click for me."</p>
+          <div class="rev-author">— Technical asset manager</div>
+        </article>
+      </div>
+      <button class="rev-arrow rev-next" type="button" aria-label="Next review">&#8250;</button>
+      <div class="rev-dots" id="revDots" role="group" aria-label="Choose a review"></div>
+    </div>
+  </section>
+
+  <!-- scoped styles: wider section intros + the free-trial modal/form -->
+  <style>
+    .hero{overflow:visible}
+    .faq-toggle, .faq-toggle:hover{color:var(--ink)}
+    .section-head{max-width:var(--maxw)}
+    .foot-center .disclaim{max-width:130ch}
+    .section-head p{max-width:900px}
+    .hero-bottom{max-width:var(--maxw); margin:-14px auto 0; padding:0 24px 30px}
+    .hero-apps{grid-area:cta; align-self:start; display:flex; gap:12px; justify-content:flex-start; flex-wrap:wrap; margin-top:24px}
+    /* "Request a free trial" buttons: full width of their container, everywhere */
+    .btn.open-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
+    .btn.open-trial:hover{color:var(--ink)}
+    /* Closing CTA-band: the standard full-width trial card, shown on every breakpoint */
+    #get .cta-band .cta-trial{display:flex; margin-top:22px}
+    /* When the hero stacks (single column), the store badges sit in the cta slot
+       directly above the trial button, so cancel the button's pull-up margin and
+       add a clear gap — otherwise the badges and the button clash. */
+    @media (max-width:1024px){
+      .hero-bottom{margin-top:18px}
+    }
+    /* Tablet portrait (iPad): centre the stacked hero so the copy, badges and CTA
+       line up with the centred device lineup (instead of sitting left with empty
+       space), and cap the heading. Inline so it beats the global .hero-apps rule
+       above and the linked stylesheet. */
+    @media (min-width:561px) and (max-width:1024px){
+      .hero-grid{text-align:center}
+      .hero-copy{text-align:center}
+      .hero .eyebrow{margin-left:auto; margin-right:auto}
+      .hero h1{font-size:clamp(38px,5.4vw,52px); margin-bottom:14px}
+      .hero .lede{margin-left:auto; margin-right:auto; max-width:76ch}
+      .hero-cta{justify-content:center}
+      .hero-apps{justify-content:center}
+      /* Assurances ribbon: balanced 2-up so nothing clips at the edge, with room to
+         breathe between the two rows. */
+      .ribbon{display:grid; grid-template-columns:repeat(2,auto); justify-content:center; gap:32px 40px; padding:22px 24px 8px}
+      /* "Who it's for" pills: two per row so each label fits on one line. */
+      .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
+      /* Card sections: even 2-up grid that fills the full width, like the curriculum
+         tracks (no narrow max-width cap). */
+      #features .grid, #organisations .grid, #why .props{
+        display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
+      #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
+    }
+    /* Mobile-only hero/footer trims */
+    @media (max-width:640px){
+      .hero .lede{display:none}                 /* drop the "Plain-language EASA…" caption on phones */
+      .btn.open-trial svg{display:none}         /* no arrow on the trial buttons on phones */
+      .cta-band h2{font-size:clamp(20px,5.6vw,24px)}  /* smaller "Equip your team…" heading */
+      /* keep only the top (hero) "Request a free trial" button; drop the mid-page repeats */
+      .btn.open-trial{display:none}
+      .hero-bottom .btn.open-trial{display:flex}
+      .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
+    }
+    @media (max-width:560px){
+      /* match the trial button's gutter to .wrap (18px on phones) so it's the
+         same width as the stats/chips/card blocks, not inset by the 24px default */
+      .hero-bottom{padding-left:18px; padding-right:18px}
+    }
+    /* Card sections fill the page column with even, full-width cells (so the
+       "Why", "For organisations" and "Features" rows all align edge-to-edge). */
+    @media (min-width:1025px){
+      #features .grid, #organisations .grid, #why .props{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:var(--maxw); margin-left:auto; margin-right:auto}
+      #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
+      /* Why has four value props — one clean row on desktop. */
+      #why .props{grid-template-columns:repeat(4,minmax(0,1fr))}
+    }
+    .trial-modal{position:fixed; inset:0; z-index:200; display:none}
+    .trial-modal.open{display:block}
+    .trial-backdrop{position:absolute; inset:0; background:rgba(11,18,56,.55)}
+    .trial-dialog{position:relative; z-index:1; width:min(560px,calc(100% - 32px)); margin:4vh auto; background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); max-height:94vh; overflow:hidden; display:flex; flex-direction:column}
+    /* The dialog itself doesn't scroll — the body does — so the close button stays put. */
+    .trial-body{overflow-y:auto; padding:30px 28px; scrollbar-width:none; -ms-overflow-style:none}
+    .trial-body::-webkit-scrollbar{width:0; height:0; display:none}
+    .trial-dialog h2{margin:0 0 6px; font-size:26px}
+    .trial-dialog .tsub{color:var(--ink-soft); font-size:15px; margin:0 0 20px}
+    .trial-close{position:absolute; top:12px; right:14px; z-index:2; width:34px; height:34px; border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1; color:var(--muted); cursor:pointer}
+    .trial-close:hover{color:var(--ink)}
+    body.modal-open{overflow:hidden}
+    .contact-form .cf-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+    .contact-form .cf-row > *{flex:1 1 220px}
+    .contact-form input, .contact-form textarea{width:100%; box-sizing:border-box; font:inherit; font-size:15.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+    .contact-form textarea{display:block; margin-bottom:14px; resize:vertical}
+    .contact-form .cf-fw{border:1px solid var(--line); border-radius:12px; padding:8px 14px 14px; margin:0 0 14px; min-width:0}
+    .contact-form .cf-fw legend{padding:0 6px; font-size:12.5px; font-weight:700; color:var(--muted)}
+    .contact-form .cf-fw-opts{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+    .contact-form .cf-fw label{display:flex; align-items:center; gap:8px; font-size:14.5px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 12px; cursor:pointer}
+    .contact-form .cf-fw label:hover{border-color:var(--indigo-3)}
+    .contact-form .cf-fw label:has(input:checked){border-color:var(--indigo-3); background:var(--indigo-soft)}
+    .contact-form .cf-fw input{width:auto; margin:0; accent-color:var(--indigo)}
+    .contact-form input:focus, .contact-form textarea:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+    .contact-form .hp{position:absolute; left:-9999px}
+    .contact-form .cf-submit{width:100%; justify-content:center; border:0; cursor:pointer}
+    .cf-msg{margin:0 0 14px; padding:12px 14px; border-radius:10px; font-size:14px}
+    .cf-msg.ok{background:#DCF1DD; color:#14532D; font-weight:600}
+    .cf-msg.err{background:#FCE3E3; color:#991B1B; font-weight:600}
+    .cf-alt{margin:12px 0 0; text-align:center; font-size:13.5px; color:var(--ink-soft)}
+    .cf-alt a{color:var(--indigo); font-weight:700}
+    .cf-fine{margin:10px 0 0; color:var(--muted); font-size:12.5px; text-align:center; line-height:1.5}
+  </style>
+
+  <!-- ============================ CTA ============================ -->
+  <section class="reveal" id="get">
+    <div class="cta-band">
+      <h2><img class="cta-icon" src="logo-header.png?v=4" alt="" width="48" height="48">Equip your team with airworthiness expertise</h2>
+      <a class="btn btn-light open-trial cta-trial" href="#">Request a free trial
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </section>
+
+</div>
+
+<!-- Free-trial enquiry popup: opened by any "Request a free trial" button -->
+<div class="trial-modal" id="trialModal" aria-hidden="true">
+  <div class="trial-backdrop" data-close></div>
+  <div class="trial-dialog" role="dialog" aria-modal="true" aria-labelledby="trialTitle">
+    <button class="trial-close" type="button" aria-label="Close" data-close>&times;</button>
+    <div class="trial-body">
+    <h2 id="trialTitle">Request a free trial</h2>
+    <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
+    <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+      <!-- For clean B2B routing, create a dedicated Web3Forms key (web3forms.com) pointing
+           at a sales inbox and replace the value below. This reuses the app's feedback relay. -->
+      <input type="hidden" name="access_key" value="25d49d43-0f4c-4a88-9a37-7fb44bc1f979">
+      <input type="hidden" name="subject" value="CAW Academy — free-trial enquiry">
+      <input type="hidden" name="from_name" value="CAW Academy website">
+      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="cf-row">
+        <input name="name" placeholder="Your name" autocomplete="name" required>
+        <input name="organisation" placeholder="Organisation" autocomplete="organization" required>
+      </div>
+      <div class="cf-row">
+        <input type="email" name="email" placeholder="Work email" autocomplete="email" required>
+        <input name="position" placeholder="Your position / role" autocomplete="organization-title" required>
+      </div>
+      <div class="cf-row">
+        <input name="team_size" placeholder="Approx. team size (optional)">
+      </div>
+      <fieldset class="cf-fw">
+        <legend>Which framework(s) do you need?</legend>
+        <div class="cf-fw-opts">
+          <label><input type="checkbox" name="frameworks" value="EASA"><span><span class="fw-flag" aria-hidden="true">🇪🇺</span> EASA</span></label>
+          <label><input type="checkbox" name="frameworks" value="UK CAA"><span><span class="fw-flag" aria-hidden="true">🇬🇧</span> UK CAA</span></label>
+          <label><input type="checkbox" name="frameworks" value="UAE GCAA"><span><span class="fw-flag" aria-hidden="true">🇦🇪</span> UAE GCAA</span></label>
+          <label><input type="checkbox" name="frameworks" value="FAA"><span><span class="fw-flag" aria-hidden="true">🇺🇸</span> FAA</span></label>
+        </div>
+      </fieldset>
+      <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
+      <div id="cfMsg" class="cf-msg" hidden></div>
+      <button class="btn btn-dark cf-submit" type="submit">Send request</button>
+      <p class="cf-alt">Prefer email? Contact us at <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a>.</p>
+      <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
+        details. See our <a href="privacy.html">Privacy Policy</a>.</p>
     </form>
-  </div>
-
-  <div class="card">
-    <div class="member-head" style="margin-bottom:6px">
-      <h2 style="margin:0">Team roster</h2>
-      <button class="btn btn-ghost" id="reloadBtn">Reload</button>
     </div>
-    <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Overdue items are shown in red.</p>
-    <div id="roster"></div>
   </div>
+</div>
 
-  <div class="card">
-    <div class="member-head" style="margin-bottom:6px">
-      <h2 style="margin:0">Your signed-in devices</h2>
-      <button class="btn btn-ghost" id="devicesReload">Reload</button>
+<!-- lightbox: tap a screenshot to view it full size -->
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="App screenshot">
+  <button class="lb-nav lb-prev" type="button" aria-label="Previous screen">&#8249;</button>
+  <div class="lb-stage">
+    <div class="lb-frame">
+      <button class="lb-close" type="button" aria-label="Close">&times;</button>
+      <img src="" alt="">
     </div>
-    <p class="sub" style="margin-bottom:4px">Native app sessions signed in on <b>your</b> account (this admin portal is not counted toward the device limit). Sign out any you no longer use to free a device slot.</p>
-    <div id="devicesMsg"></div>
-    <div id="devices"></div>
+    <div class="lb-cap" id="lbCap"></div>
   </div>
-</main>
+  <button class="lb-nav lb-next" type="button" aria-label="Next screen">&#8250;</button>
+</div>
 
-<script src="admin.js" defer></script>
+<!-- ============================ FOOTER ============================ -->
+<footer class="foot-center">
+  <div class="wrap">
+    <nav class="foot-nav">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="https://www.linkedin.com/company/caw-academy/" target="_blank" rel="noopener" aria-label="CAW Academy on LinkedIn"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true" style="vertical-align:-2px;margin-right:5px"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.5C0 23.2.8 24 1.77 24h20.45C23.2 24 24 23.2 24 22.24V1.74C24 .78 23.2 0 22.22 0z"/></svg>LinkedIn</a>
+    </nav>
+    <div class="disclaim">
+      © <span id="yr">2026</span> CAW Academy. An independent study aid —
+      <strong>not affiliated with or endorsed by EASA, the UK CAA, the GCAA or the FAA</strong>. Aligned with the
+      applicable EASA, UK CAA, GCAA and FAA rules; not an official publication and not a substitute for the
+      official regulations or your organisation’s approved procedures.
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // sticky nav shadow
+  var nav = document.getElementById('nav');
+  var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  // staggered scroll reveals
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  }, {threshold:0.10});
+  document.querySelectorAll('.reveal').forEach(function(el){
+    var sibs = Array.prototype.filter.call(el.parentElement.children, function(c){ return c.classList.contains('reveal'); });
+    var i = sibs.indexOf(el);
+    if (i > 0) el.style.transitionDelay = Math.min(i, 6) * 70 + 'ms';
+    io.observe(el);
+  });
+
+  // count-up stats
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var statsEl = document.getElementById('stats');
+  if (statsEl && !reduce) {
+    var ran = false;
+    var so = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting || ran) return; ran = true;
+        statsEl.querySelectorAll('[data-count]').forEach(function(n){
+          var end = +n.getAttribute('data-count'), suf = n.getAttribute('data-suffix') || '', t0 = null, dur = 1100;
+          function step(ts){ if(!t0) t0 = ts; var p = Math.min((ts - t0)/dur, 1);
+            var val = Math.round((1 - Math.pow(1 - p, 3)) * end);
+            n.textContent = val.toLocaleString() + suf;
+            if (p < 1) requestAnimationFrame(step); }
+          requestAnimationFrame(step);
+        });
+        so.disconnect();
+      });
+    }, {threshold:0.4});
+    so.observe(statsEl);
+  }
+
+  // disabled (coming soon) buttons
+  document.querySelectorAll('.btn[aria-disabled="true"]').forEach(function(b){
+    b.addEventListener('click', function(e){ e.preventDefault(); });
+  });
+
+  // lightbox — tap a gallery screenshot to view it full size
+  (function(){
+    var lb = document.getElementById('lightbox');
+    if (!lb) return;
+    var lbimg = lb.querySelector('img');
+    var lbCap = document.getElementById('lbCap');
+    var pads = Array.prototype.slice.call(document.querySelectorAll('.gcol .gpad'));
+    var idx = -1;
+    function show(i){
+      if (!pads.length) return;
+      idx = (i + pads.length) % pads.length;          // wrap around
+      var img = pads[idx].querySelector('img');
+      if (img) { lbimg.src = img.currentSrc || img.src; lbimg.alt = img.alt || ''; }
+      var col = pads[idx].closest('.gcol');            // carry the screen's caption
+      var cap = col && col.querySelector('.gcap');
+      if (lbCap) lbCap.textContent = cap ? cap.textContent.trim() : '';
+    }
+    function open(i){ show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function close(){ lb.classList.remove('open'); document.body.style.overflow = ''; lbimg.removeAttribute('src'); }
+    pads.forEach(function(p, i){
+      p.setAttribute('role','button'); p.setAttribute('tabindex','0');
+      p.setAttribute('aria-label','View this screen full size');
+      function go(){ open(i); }
+      p.addEventListener('click', go);
+      p.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+    var prevBtn = lb.querySelector('.lb-prev'), nextBtn = lb.querySelector('.lb-next');
+    if (prevBtn) prevBtn.addEventListener('click', function(e){ e.stopPropagation(); show(idx - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function(e){ e.stopPropagation(); show(idx + 1); });
+    lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb-close')) close(); });
+    document.addEventListener('keydown', function(e){
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(idx - 1);
+      else if (e.key === 'ArrowRight') show(idx + 1);
+    });
+  })();
+
+  // "A look inside" gallery — horizontal carousel arrows
+  (function(){
+    var g = document.querySelector('#inside .gallery');
+    var prev = document.querySelector('#inside .gprev');
+    var next = document.querySelector('#inside .gnext');
+    if (!g || !prev || !next) return;
+    function stepBy(){ var c = g.querySelector('.gcol'); return (c ? c.getBoundingClientRect().width + 44 : 254) * 1.5; }
+    function update(){
+      var atStart = g.scrollLeft <= 2;
+      var atEnd = g.scrollLeft >= (g.scrollWidth - g.clientWidth - 2);
+      prev.disabled = atStart;
+      next.disabled = atEnd;
+      // Fade the edge that still has screens beyond it, hiding any cut-off device frame.
+      g.classList.toggle('fade-l', !atStart);
+      g.classList.toggle('fade-r', !atEnd);
+    }
+    // Start at the very first screen (flush left) so it's the obvious one to open first.
+    function toStart(){ g.scrollLeft = 0; }
+    prev.addEventListener('click', function(){ g.scrollBy({ left: -stepBy(), behavior: 'smooth' }); });
+    next.addEventListener('click', function(){ g.scrollBy({ left: stepBy(), behavior: 'smooth' }); });
+    g.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    requestAnimationFrame(function(){ toStart(); update(); });
+    window.addEventListener('load', function(){ toStart(); update(); });
+  })();
+
+  // FAQ — reveal the secondary questions on demand
+  (function(){
+    var t = document.getElementById('faqToggle');
+    if (!t) return;
+    var list = document.getElementById('faqList');
+    var label = t.querySelector('.faq-toggle-label');
+    t.addEventListener('click', function(){
+      var open = t.getAttribute('aria-expanded') === 'true';
+      t.setAttribute('aria-expanded', String(!open));
+      list.classList.toggle('show-all', !open);
+      if (label) label.textContent = open ? 'Show all FAQs' : 'Show fewer';
+    });
+  })();
+
+  // reviews carousel — swipe / arrows / dots, auto-advance, click-to-toggle
+  (function(){
+    var track = document.getElementById('revTrack');
+    if (!track) return;
+    var sec = document.getElementById('reviews');
+    if (sec && sec.hidden) return; // reviews section hidden until real reviews exist
+    var carousel = document.getElementById('reviewsCarousel');
+    var cards = Array.prototype.slice.call(track.children);
+    var dotsWrap = document.getElementById('revDots');
+    var prev = carousel.querySelector('.rev-prev');
+    var next = carousel.querySelector('.rev-next');
+    var reduceM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    cards.forEach(function(_, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Go to review ' + (i + 1));
+      b.addEventListener('click', function(){ scrollToIndex(i); });
+      dotsWrap.appendChild(b);
+    });
+    var dots = Array.prototype.slice.call(dotsWrap.children);
+
+    function step(){ return cards.length > 1 ? (cards[1].offsetLeft - cards[0].offsetLeft) : track.clientWidth; }
+    function currentIndex(){ return Math.round(track.scrollLeft / (step() || 1)); }
+    function scrollToIndex(i){
+      i = Math.max(0, Math.min(cards.length - 1, i));
+      track.scrollTo({ left: i * step(), behavior: reduceM ? 'auto' : 'smooth' });
+    }
+    function setDots(){
+      var idx = currentIndex();
+      dots.forEach(function(d, i){ d.setAttribute('aria-current', i === idx ? 'true' : 'false'); });
+    }
+    setDots();
+    track.addEventListener('scroll', function(){ requestAnimationFrame(setDots); }, { passive: true });
+    if (prev) prev.addEventListener('click', function(){ scrollToIndex(currentIndex() - 1); });
+    if (next) next.addEventListener('click', function(){ scrollToIndex(currentIndex() + 1); });
+
+    var timer = null;
+    function start(){
+      if (reduceM || carousel.classList.contains('collapsed')) return;
+      stop();
+      timer = setInterval(function(){
+        var i = currentIndex();
+        scrollToIndex(i + 1 >= cards.length ? 0 : i + 1);
+      }, 5500);
+    }
+    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+    carousel.addEventListener('pointerenter', stop);
+    carousel.addEventListener('pointerleave', start);
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+    start();
+
+    var toggle = document.getElementById('reviewsToggle');
+    if (toggle) {
+      toggle.addEventListener('click', function(){
+        var open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        carousel.classList.toggle('collapsed', open);
+        if (open) { stop(); } else { setDots(); start(); }
+      });
+    }
+  })();
+</script>
+<script>
+  // Free-trial popup + Web3Forms enquiry relay (same service as the app's feedback).
+  (function () {
+    var modal = document.getElementById('trialModal');
+    var form = document.getElementById('contactForm');
+
+    function openModal(e) {
+      if (e) e.preventDefault();
+      if (!modal) return;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      var first = modal.querySelector('input[name="name"]');
+      if (first) setTimeout(function () { first.focus(); }, 60);
+    }
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+    document.querySelectorAll('.open-trial').forEach(function (b) { b.addEventListener('click', openModal); });
+    if (modal) {
+      modal.querySelectorAll('[data-close]').forEach(function (c) { c.addEventListener('click', closeModal); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+    }
+
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = form.querySelector('.cf-submit');
+      var msg = document.getElementById('cfMsg');
+      if (form.botcheck && form.botcheck.checked) return;   // honeypot
+      var msgEl = document.getElementById('cfMsg');
+      var picked = Array.prototype.map.call(
+        form.querySelectorAll('input[name="frameworks"]:checked'), function (c) { return c.value; });
+      if (!picked.length) {
+        msgEl.hidden = false; msgEl.className = 'cf-msg err';
+        msgEl.textContent = 'Please choose at least one framework (EASA, UK CAA, UAE GCAA or FAA).';
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      var data = {};
+      new FormData(form).forEach(function (v, k) { data[k] = v; });
+      data.frameworks = picked.join(', ');   // checkboxes → one readable field
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        msg.hidden = false;
+        if (j.success) {
+          msg.className = 'cf-msg ok';
+          msg.textContent = "Thanks — we've got your enquiry and will be in touch shortly.";
+          form.reset(); btn.style.display = 'none';
+        } else {
+          msg.className = 'cf-msg err';
+          msg.textContent = 'Something went wrong. Please email support@caw-academy.com.';
+          btn.disabled = false; btn.textContent = 'Send request';
+        }
+      }).catch(function () {
+        msg.hidden = false; msg.className = 'cf-msg err';
+        msg.textContent = "Couldn't reach the server. Please email support@caw-academy.com.";
+        btn.disabled = false; btn.textContent = 'Send request';
+      });
+    });
+  })();
+</script>
 </body>
 </html>
