@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 
@@ -875,6 +875,26 @@
   document.querySelectorAll('.btn[aria-disabled="true"]').forEach(function(b){
     b.addEventListener('click', function(e){ e.preventDefault(); });
   });
+
+  // Hero device lineup — tap to enlarge, then it eases back (touch parity with desktop hover)
+  (function(){
+    var lineup = document.querySelector('.lineup');
+    if (!lineup) return;
+    var devs = Array.prototype.slice.call(lineup.querySelectorAll('.dev'));
+    var timer;
+    devs.forEach(function(d){
+      d.addEventListener('click', function(){
+        clearTimeout(timer);
+        devs.forEach(function(x){ x.classList.remove('tapped'); });
+        lineup.classList.add('tap-active');
+        d.classList.add('tapped');
+        timer = setTimeout(function(){
+          lineup.classList.remove('tap-active');
+          d.classList.remove('tapped');
+        }, 1100);
+      });
+    });
+  })();
 
   // lightbox — tap a gallery screenshot to view it full size
   (function(){
