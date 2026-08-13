@@ -78,7 +78,8 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .nav .links a.nav-li{display:inline-flex; align-items:center; margin-left:18px; padding:3px; color:var(--ink-soft)}
 .nav .links a.nav-li:hover{color:var(--indigo)}
 .nav .links a.nav-li svg{display:block}
-@media (max-width:640px){ .nav .links a{margin-left:14px; font-size:13.5px} .nav .links a.hide-sm{display:none} .nav .links a.cta{margin-left:14px; padding:8px 14px} }
+.nav .links a.show-sm{display:none}   /* phones-only links (e.g. LinkedIn) hidden on desktop/tablet */
+@media (max-width:640px){ .nav .links a{margin-left:14px; font-size:13.5px} .nav .links a.hide-sm{display:none} .nav .links a.show-sm{display:inline-flex} .nav .links a.cta{margin-left:14px; padding:8px 14px} }
 
 /* ---------- buttons ------------------------------------------------------- */
 .btn{display:inline-flex; align-items:center; gap:9px; font-family:var(--sans); font-weight:700; font-size:16px;
