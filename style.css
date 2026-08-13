@@ -74,6 +74,10 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .nav .links a.nav-util:hover{color:var(--indigo)}
 .nav .links a.nav-ghost{margin-left:16px; padding:7px 14px; border:1px solid var(--line); border-radius:10px; color:var(--ink-soft); transition:border-color .15s, color .15s}
 .nav .links a.nav-ghost:hover{border-color:var(--indigo-3); color:var(--indigo)}
+/* iPad: slimmer header buttons (desktop keeps its size) */
+@media (min-width:561px) and (max-width:1024px){
+  .nav .links a.nav-ghost{margin-left:12px; padding:6px 11px; font-size:13.5px}
+}
 /* LinkedIn icon link in the header */
 .nav .links a.nav-li{display:inline-flex; align-items:center; margin-left:18px; padding:3px; color:var(--ink-soft)}
 .nav .links a.nav-li:hover{color:var(--indigo)}
@@ -438,6 +442,12 @@ footer .foot-links a:first-child{margin-left:0}
 .foot-nav{display:flex; flex-wrap:wrap; justify-content:center; gap:24px; margin-bottom:6px}
 .foot-nav a{font-size:14.5px; font-weight:600; color:var(--ink-soft)}
 .foot-nav a:hover{color:var(--indigo)}
+/* Phones: left-align the footer links + disclaimer (easier to read than centred) */
+@media (max-width:560px){
+  .foot-center{text-align:left}
+  .foot-center .foot-nav{justify-content:flex-start}
+  .foot-center .disclaim{margin:0; max-width:none}
+}
 
 /* lightbox (tap a gallery screen to enlarge) */
 .gcol .pscale{cursor:zoom-in}
