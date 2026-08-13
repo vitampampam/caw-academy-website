@@ -158,9 +158,13 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .dev.iphone{--b:1; z-index:3}
 .dev.ipad{--b:1; z-index:2}
 .dev.mac{--b:1; z-index:1}
-.lineup:hover .dev,
+/* Hover — gated to real pointers so touch doesn't get stuck in :hover (iOS sticky-hover) */
+@media (hover:hover){
+  .lineup:hover .dev{transform:scale(calc(var(--b) * .82)); filter:saturate(.92) brightness(.99)}
+  .lineup .dev:hover{transform:scale(calc(var(--b) * 1.16)); filter:none; z-index:6}
+}
+/* Keyboard focus */
 .lineup:has(.dev:focus-visible) .dev{transform:scale(calc(var(--b) * .82)); filter:saturate(.92) brightness(.99)}
-.lineup .dev:hover,
 .lineup .dev:focus-visible{transform:scale(calc(var(--b) * 1.16)); filter:none; z-index:6; outline:none}
 /* Touch (iPad/iPhone): JS adds these on tap so a device pops, then eases back */
 .lineup.tap-active .dev{transform:scale(calc(var(--b) * .82)); filter:saturate(.92) brightness(.99)}
@@ -605,8 +609,9 @@ footer .foot-links a:first-child{margin-left:0}
   /* hero: the very same three-device fan as desktop (iPhone · iPad · MacBook),
      just scaled down to fit the phone. zoom shrinks the layout too, so the fan
      never pushes the page sideways. */
-  .device-stage{min-height:0; margin-top:2px; padding:2px 0 28px}
+  .device-stage{min-height:0; margin-top:2px; padding:2px 0 48px}
   .lineup{zoom:.60; transform:none}
+  .dlabel{bottom:-40px}   /* a little more breathing space under the device captions */
   /* lighter cards */
   .card{padding:20px 18px}
   .card .ico{width:42px; height:42px; margin-bottom:12px}
