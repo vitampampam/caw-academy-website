@@ -41,6 +41,23 @@
   .acct-msg.ok{background:#E7F4E8; color:#2E7D32}
   .acct-section-title{font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.06em;
     color:var(--muted); margin:22px 0 10px}
+  /* Registration consent: the tick box and its sentence. The checkbox is a real
+     <input>, so the label association and keyboard behaviour come for free. */
+  .acct-consent{display:flex; align-items:flex-start; gap:10px; margin:4px 0 14px;
+    font-size:13px; color:var(--muted); line-height:1.5}
+  .acct-consent input{flex:0 0 auto; width:18px; height:18px; margin:1px 0 0; accent-color:var(--indigo)}
+  .acct-consent a{color:var(--indigo); font-weight:600}
+  /* The document modals: the real page shown in an iframe, so the wording has
+     exactly one home (terms.html / privacy.html) and can never drift out of step. */
+  .legal-modal{width:min(760px, 92vw); height:min(80vh, 820px); padding:0; border:0;
+    border-radius:16px; box-shadow:var(--shadow-lg); background:#fff; overflow:hidden}
+  .legal-modal::backdrop{background:rgba(11,18,56,.45)}
+  .legal-modal-head{display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:14px 18px; border-bottom:1px solid var(--line)}
+  .legal-modal-head strong{font-family:var(--serif); font-weight:600; font-size:18px}
+  .legal-modal-close{border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    font:inherit; font-weight:700; font-size:14px; padding:7px 14px; border-radius:10px; cursor:pointer}
+  .legal-modal iframe{display:block; width:100%; height:calc(100% - 57px); border:0}
   .hidden{display:none}
 </style>
 </head>
@@ -72,6 +89,15 @@
         <input class="acct-field" type="email" id="email" placeholder="Email" autocomplete="email" required>
         <input class="acct-field" type="password" id="password" placeholder="Password (10+ characters)" autocomplete="current-password" minlength="10" required>
         <p id="regNote" class="acct-note hidden">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
+        <!-- Registration consent. The links keep their real hrefs so they still work
+             without JavaScript and can be opened in a new tab; account.js intercepts a
+             plain click and shows the document in a modal instead, which keeps the
+             half-filled form on screen behind it. -->
+        <label class="acct-consent hidden" id="consentRow" for="acceptTerms">
+          <input type="checkbox" id="acceptTerms">
+          <span>I agree to the <a href="terms.html" data-legal="terms">Terms of Use</a>
+            and <a href="privacy.html" data-legal="privacy">Privacy Policy</a>.</span>
+        </label>
         <div id="authMsg"></div>
         <button class="acct-btn" type="submit" id="authSubmit">Sign in</button>
       </form>
@@ -104,6 +130,16 @@
 
   </div>
 </main>
+
+<!-- Terms / Privacy modals. The iframe src is set only when a modal is opened, so
+     neither document is fetched by a visitor who never asks for it. -->
+<dialog class="legal-modal" id="legalModal">
+  <div class="legal-modal-head">
+    <strong id="legalModalTitle">Terms of Use</strong>
+    <button type="button" class="legal-modal-close" id="legalModalClose">Close</button>
+  </div>
+  <iframe id="legalModalFrame" title="Terms of Use" src="about:blank"></iframe>
+</dialog>
 
 <footer class="foot-center">
   <div class="wrap">

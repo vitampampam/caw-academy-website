@@ -13,6 +13,10 @@
   // ── Configuration — FILL BEFORE GOING LIVE ──────────────────────────────
   var API_BASE = "https://api.caw-academy.com";          // licensing service base URL
   var PRICE_ID = "price_REPLACE_ME";                      // Stripe Price ID for full access
+  // The "Last updated" date shared by terms.html and privacy.html, sent with the
+  // registration consent and stored against the account. BUMP IT whenever either
+  // document is revised, in step with the apps' LEGAL_DOCUMENTS_VERSION constants.
+  var LEGAL_DOCUMENTS_VERSION = "2026-08-27";
   // ────────────────────────────────────────────────────────────────────────
 
   var accessToken = null; // in-memory only; never persisted.
@@ -104,10 +108,14 @@
     $("tabRegister").classList.toggle("active", register);
     $("authSubmit").textContent = register ? "Create account" : "Sign in";
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
-    // Register-only fields: name (required by the API) + optional org access code, and the org-only note.
-    ["regNames", "regNote"].forEach(function (id) {
+    // Register-only fields: name (required by the API), the org-only note, and the
+    // Terms/Privacy consent (which the server requires to create an account).
+    ["regNames", "regNote", "consentRow"].forEach(function (id) {
       $(id).classList.toggle("hidden", !register);
     });
+    // Consent belongs to one registration attempt by one person, so leaving the form
+    // drops it rather than carrying it into the next attempt.
+    $("acceptTerms").checked = false;
     // Heading + subtitle follow the mode.
     $("acctTitle").textContent = register ? "Create your account" : "Your account";
     $("acctSub").textContent = register
@@ -115,6 +123,47 @@
       : "Sign in to manage your account, redeem an organisation licence code, and see which courses it unlocks in the CAW Academy app. We never store your study data.";
     showMessage("authMsg", "", "err");
   }
+
+  // ── Terms / Privacy modals ─────────────────────────────────────────────
+  // The links keep working as ordinary links (new tab, no-JS, right-click); a plain
+  // left click is intercepted and the document is shown in a modal instead, so the
+  // half-filled sign-up form is still there behind it. The modal loads the real page
+  // in an iframe rather than a copy of the wording — one home for the text.
+  var legalTitles = { terms: "Terms of Use", privacy: "Privacy Policy" };
+
+  function openLegalModal(kind, href) {
+    var modal = $("legalModal");
+    if (!modal || typeof modal.showModal !== "function") return false;  // let the link do its job
+    $("legalModalTitle").textContent = legalTitles[kind] || "Legal";
+    var frame = $("legalModalFrame");
+    frame.title = legalTitles[kind] || "Legal";
+    frame.src = href;
+    modal.showModal();
+    return true;
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("a[data-legal]"), function (link) {
+    link.addEventListener("click", function (e) {
+      // Leave modified clicks alone — those are "open in a new tab/window" and the
+      // visitor means it.
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      if (openLegalModal(link.getAttribute("data-legal"), link.getAttribute("href"))) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  $("legalModalClose").addEventListener("click", function () { $("legalModal").close(); });
+  // Drop the iframe when the modal closes (including via Escape) so the document is
+  // not left loaded in the background.
+  $("legalModal").addEventListener("close", function () {
+    $("legalModalFrame").src = "about:blank";
+  });
+  // Clicking the backdrop closes it: the dialog element itself fills the whole
+  // viewport as the click target, while its content sits inside the head/iframe.
+  $("legalModal").addEventListener("click", function (e) {
+    if (e.target === $("legalModal")) $("legalModal").close();
+  });
 
   // ── Auth submit ────────────────────────────────────────────────────────
   $("authForm").addEventListener("submit", function (e) {
@@ -131,8 +180,18 @@
         showMessage("authMsg", "Enter your first and last name to create an account.", "err");
         return;
       }
+      if (!$("acceptTerms").checked) {
+        showMessage("authMsg", "Please accept the Terms of Use and Privacy Policy to create an account.", "err");
+        return;
+      }
       body.firstName = firstName;
       body.lastName = lastName;
+      // Consent is recorded server-side against the new account. `termsVersion` is
+      // the documents' "Last updated" date, so a later revision can be detected and
+      // re-consent asked for rather than assumed — keep it in step with terms.html,
+      // privacy.html and the two apps' LEGAL_DOCUMENTS_VERSION constants.
+      body.acceptedTerms = true;
+      body.termsVersion = LEGAL_DOCUMENTS_VERSION;
     }
     btn.disabled = true;
     var path = registerMode ? "/v1/auth/register" : "/v1/auth/login";
