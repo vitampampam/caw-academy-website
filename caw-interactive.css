@@ -1361,7 +1361,6 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
     justify-content:flex-start; -webkit-overflow-scrolling:touch}
   .cawx-hero::-webkit-scrollbar{display:none}
 
-  /* a compact footer, so the frame keeps the height */
   .cawx-modal[data-size="wide"] .cawx-foot{padding:8px 14px 10px; gap:8px}
   .cawx-modal[data-size="wide"] .cawx-foot-note{font-size:11px; line-height:1.4}
   .cawx-modal[data-size="wide"] .cawx-trial{padding:11px 16px; font-size:14px}
@@ -1550,4 +1549,26 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 @media (max-width:640px){
   .cawx-step{display:none}
   .cawx-framewrap{padding:0}      /* the arrows are hidden, so take the room back */
+}
+
+/* ---------------------------------------------------------------------------
+   Where the call to action gives way to the content
+   A small screen cannot carry both the button and a readable frame. The rule
+   is by device and orientation, not by pop-up: the note always stays, and the
+   page's own trial buttons are untouched - only the one inside a pop-up goes.
+     phone            - no button in any pop-up
+     tablet portrait  - button everywhere except the simulator pop-ups
+     tablet landscape - no button in any pop-up (the least height of the three)
+   `pointer:coarse` is what separates a tablet in landscape from a laptop at
+   the same width.
+   --------------------------------------------------------------------------- */
+@media (max-width:640px){
+  .cawx-modal .cawx-foot .cawx-trial{display:none}
+}
+@media (min-width:641px) and (max-width:1024px) and (orientation:portrait){
+  .cawx-modal[data-size="wide"] .cawx-foot .cawx-trial{display:none}
+}
+@media (min-width:641px) and (max-width:1400px) and (orientation:landscape)
+   and (pointer:coarse){
+  .cawx-modal .cawx-foot .cawx-trial{display:none}
 }
