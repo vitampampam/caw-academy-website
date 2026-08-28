@@ -1368,11 +1368,10 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
      illegibility; the group is measured after this, so the two that remain get
      the whole width. */
   .cawx-hero .dev.mac{display:none}
-  /* the lineup scrolls sideways at a readable size; the group is scaled from
-     its left edge so it starts flush and the overflow is scrollable */
-  .cawx-hero{overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
-    justify-content:flex-start; align-items:center; -webkit-overflow-scrolling:touch}
-  .cawx-hero::-webkit-scrollbar{display:none}
+  /* The two devices are fitted to the stage, so nothing overflows and there is
+     nothing to scroll: the group is centred and held still. It used to be a
+     sideways scroller, which is what made it sit off-centre and feel loose. */
+  .cawx-hero{overflow:hidden; justify-content:center; align-items:center}
   .cawx-hero .lineup{flex:0 0 auto}
 
   .cawx-modal[data-size="wide"] .cawx-foot{padding:8px 14px 10px; gap:8px}

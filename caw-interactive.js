@@ -627,13 +627,13 @@
             }
             line.style.transformOrigin = 'center center';
             line.style.transform = 'scale(' + k.toFixed(3) + ')';
-            /* A transform does not change layout, so the scroller has to be told
-               how much room the scaled group really needs. This MUST NOT be done
-               by setting a width: .lineup is a flex row, and a narrower width
-               makes the devices themselves shrink before the scale is applied —
-               which is why the phone lineup refused to grow. A margin adjusts the
-               space it occupies without touching the frames inside it. */
-            line.style.marginRight = Math.round(nw * (k - 1)) + 'px';
+            /* A transform does not change layout. Where the group is drawn LARGER
+               than its box, the extra room is claimed with a margin so a scroller
+               can reach it — never with a width, because .lineup is a flex row and
+               a narrower width shrinks the frames themselves before the scale is
+               applied. Where it is drawn smaller, no adjustment: the box stays as
+               it is and the group sits centred inside it. */
+            line.style.marginRight = k > 1 ? Math.round(nw * (k - 1)) + 'px' : '';
             /* what the fit actually measured — type CAW.fit in the console */
             CAW.fit = { stageW: w, stageH: h, groupW: nw, groupH: nh,
                         viewportH: (d.documentElement || {}).clientHeight,
