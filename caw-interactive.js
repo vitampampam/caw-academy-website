@@ -1536,7 +1536,9 @@
             + '</div>'
           : '<span class="cawx-fwchip"><i>' + cat.flag + '</i><span>' + cat.label +
             '</span>' + ICON.caret + '</span>') +
-        '<b' + (live ? ' id="cawxDHeroT"' : '') + '>' + cat.label +
+        /* the heading stands alone, so it carries the authority's full name —
+           the short one is only for the chip above, which has the flag */
+        '<b' + (live ? ' id="cawxDHeroT"' : '') + '>' + cat.fw +
           ' Airworthiness &amp; Technical Asset Management</b>' +
         '<small>Airworthiness, maintenance economics &amp; technical asset value &mdash; ' +
         'expert lessons, flashcards and assessments.</small></div>' +
@@ -1650,7 +1652,7 @@
      catalogue rather than retyped here. */
   var FRAMEWORK_ROWS = [
     ['EASA', '🇪🇺', 'EASA'], ['UK CAA', '🇬🇧', 'UK CAA'],
-    ['UAE GCAA', '🇦🇪', 'UAE GCAA'], ['FAA', '🇺🇸', 'FAA']
+    ['GCAA', '🇦🇪', 'UAE GCAA'], ['FAA', '🇺🇸', 'FAA']
   ];
   var CURRENT_FW = 0;          /* the edition the simulated app is showing */
 

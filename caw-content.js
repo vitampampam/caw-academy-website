@@ -33,7 +33,9 @@
   var FW = {
     EASA:       { label: 'EASA',     flag: '🇪🇺', naming: 'Part-…' },
     'UK CAA':   { label: 'UK CAA',   flag: '🇬🇧', naming: 'UK Part-…' },
-    'UAE GCAA': { label: 'UAE GCAA', flag: '🇦🇪', naming: 'CAR-…' },
+    /* `label` is only ever drawn next to the flag, so it does not repeat the
+       country; the full name lives in the framework's own `title`. */
+    'UAE GCAA': { label: 'GCAA',     flag: '🇦🇪', naming: 'CAR-…' },
     FAA:        { label: 'FAA',      flag: '🇺🇸', naming: '14 CFR' }
   };
 
@@ -778,7 +780,7 @@
       id: 'gcaa',
       free: { courses: [{ n: 'Airline Operating Framework', l: '28 lessons' }, { n: 'CAR-M Continuing Airworthiness', l: '71 lessons' }], note: 'Open in full, with no account and no licence.' },
       flag: '🇦🇪',
-      pill: 'UAE GCAA',
+      pill: 'GCAA',
       naming: 'CAR-…',
       title: 'UAE GCAA',
       what: 'The United Arab Emirates framework, administered by the General Civil Aviation Authority. The requirements are close in substance to the European set, but they are published as the UAE’s own instruments.',
