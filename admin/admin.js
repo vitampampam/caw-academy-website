@@ -55,7 +55,8 @@
     ["hf","Human Factors","EASA"],
     ["sms","Safety Management System (SMS)","EASA"],
     ["ewis12","EWIS Groups 1-2","EASA"],
-    ["ewis35","EWIS Groups 3-5","EASA"],
+    ["ewis35","EWIS Group 3","EASA"],
+    ["ewis45","EWIS Groups 4-5","EASA"],
     ["ewis68","EWIS Groups 6-8","EASA"],
     ["fts1","Fuel Tank Safety — Phase 1","EASA"],
     ["fts2","Fuel Tank Safety — Phase 2","EASA"],
@@ -377,7 +378,61 @@
     return span;
   }
 
-  function assignmentItem(a, isNextUp, selected, onToggle) {
+  // ── Progress on an assigned course ────────────────────────────────────────
+  // The member's app reports how far through each ASSIGNED course they are (see
+  // the client's ProgressSummary). Two things this deliberately does NOT do:
+  //   - it never shows 0% for a course with no report. "Not reported yet" and
+  //     "started and got nowhere" look identical on a bar and mean opposite
+  //     things, and only one of them is worth a conversation. Android does not
+  //     report progress at all yet, so this case is real, not theoretical.
+  //   - it does not grade anyone. "Behind" is a prompt to look, not a verdict.
+
+  /** Behind = open, due inside a fortnight, and less than half done. A rough
+   *  prompt for a conversation; the status pill still carries the real urgency. */
+  function isBehind(a, p) {
+    if (!p || a.status === "completed") return false;
+    if (a.displayStatus === "overdue") return p.percent < 100;
+    return typeof a.daysRemaining === "number" && a.daysRemaining <= 14 && p.percent < 50;
+  }
+
+  function progressRow(a, p) {
+    var row = document.createElement("div"); row.className = "prog";
+    if (!p) {
+      var none = document.createElement("small");
+      none.textContent = "No progress reported yet";
+      row.appendChild(none);
+      return row;
+    }
+    var behind = isBehind(a, p);
+    var bar = document.createElement("div");
+    bar.className = "bar" + (p.percent >= 100 ? " done" : behind ? " risk" : "");
+    var fill = document.createElement("i");
+    fill.style.width = Math.max(0, Math.min(100, p.percent)) + "%";
+    bar.appendChild(fill);
+    row.appendChild(bar);
+
+    var txt = document.createElement("small");
+    var bits = [p.percent + "%"];
+    if (p.lessonsTotal) bits.push(p.lessonsCompleted + " of " + p.lessonsTotal + " lessons");
+    if (p.examPassed) bits.push("assessment passed" + (p.examBest != null ? " (" + p.examBest + "%)" : ""));
+    else if (p.examBest != null) bits.push("best assessment " + p.examBest + "%");
+    if (p.lastActiveAt) bits.push("last opened " + fmtDate(p.lastActiveAt));
+    txt.textContent = bits.join("  ·  ");
+    row.appendChild(txt);
+
+    if (p.percent === 0) {
+      var idle = document.createElement("span");
+      idle.className = "flag idle"; idle.textContent = "Not started";
+      row.appendChild(idle);
+    } else if (behind) {
+      var flag = document.createElement("span");
+      flag.className = "flag"; flag.textContent = "Behind";
+      row.appendChild(flag);
+    }
+    return row;
+  }
+
+  function assignmentItem(a, isNextUp, selected, onToggle, progress) {
     var li = document.createElement("li"); li.className = "aitem";
 
     // Per-assignment tick for bulk removal. Selection state lives in the member's
@@ -404,6 +459,8 @@
     else bits.push("due " + fmtDate(a.deadline) + " · " + a.daysRemaining + "d");
     small.textContent = bits.join("  ·  ");
     course.appendChild(small);
+    // How far through it they actually are — the part a deadline alone cannot say.
+    if (a.status !== "completed") course.appendChild(progressRow(a, progress));
     li.appendChild(course);
 
     li.appendChild(statusPill(a));
@@ -497,6 +554,13 @@
     var name = document.createElement("span"); name.className = "member-name"; name.textContent = fullName(m);
     var email = document.createElement("span"); email.className = "member-email"; email.textContent = "  " + m.email;
     left.appendChild(name); left.appendChild(email);
+    // Seat utilisation, one line: is this person using the app at all? The single
+    // fact that answers it — never what they were reading.
+    var active = document.createElement("div"); active.className = "member-active";
+    active.textContent = m.lastActiveAt
+      ? "Last active " + fmtDate(m.lastActiveAt)
+      : "No activity reported yet";
+    left.appendChild(active);
     head.appendChild(left);
     if (m.orgRole === "admin") {
       var role = document.createElement("span"); role.className = "role-pill"; role.textContent = "Admin";
@@ -547,8 +611,11 @@
         removeAssignments(chosen, fullName(m));
       });
 
+      // Progress arrives as a list; index it by course so each row can find its own.
+      var byCourse = {};
+      (m.progress || []).forEach(function (p) { byCourse[p.courseKey] = p; });
       m.assignments.forEach(function (a) {
-        ul.appendChild(assignmentItem(a, a.id === nextUpId, selected, refreshBulk));
+        ul.appendChild(assignmentItem(a, a.id === nextUpId, selected, refreshBulk, byCourse[a.courseKey]));
       });
       card.appendChild(bulk);
       card.appendChild(ul);
