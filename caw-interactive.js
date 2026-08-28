@@ -703,12 +703,24 @@
         w.addEventListener('resize', arrows);
 
         stage.appendChild(bar);
-        var atLeft = function () { sw.scrollLeft = 0; arrows(); };
-        w.requestAnimationFrame(atLeft);
-        /* focus moves after the paint and the browser scrolls the focused pill
-           into view, which left the row part-scrolled; put it back */
-        w.requestAnimationFrame(function () { w.requestAnimationFrame(atLeft); });
-        w.setTimeout(atLeft, 60);
+        /* The pill for the screen on show must always be in view — it is the
+           only thing saying where you are. The row is scrolled by the least
+           amount that reveals it, so on the first screen it still sits at the
+           far left with the rest trailing off to the right. */
+        var showActive = function () {
+          var on = qs('button[aria-current="true"]', sw);
+          if (on) {
+            var l = on.offsetLeft, r = l + on.offsetWidth, pad = 10;
+            if (l < sw.scrollLeft + pad) { sw.scrollLeft = Math.max(0, l - pad); }
+            else if (r > sw.scrollLeft + sw.clientWidth - pad) {
+              sw.scrollLeft = r - sw.clientWidth + pad;
+            }
+          }
+          arrows();
+        };
+        w.requestAnimationFrame(showActive);
+        w.requestAnimationFrame(function () { w.requestAnimationFrame(showActive); });
+        w.setTimeout(showActive, 60);
         stage.appendChild(frameWrap);
         var inner = api && api.destroy;
         api = { destroy: function () {
