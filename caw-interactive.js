@@ -604,7 +604,11 @@
             if (!line) { return; }
             line.style.transform = 'none';
             line.style.marginRight = '';
-            var w = pad.clientWidth, h = pad.clientHeight;
+            /* the stage, not the hero: the hero is a scroll container on a phone
+               and its own box is not what the group has to fit into */
+            var box = pad.parentNode || pad;
+            var w = Math.min(pad.clientWidth, box.clientWidth || pad.clientWidth);
+            var h = box.clientHeight || pad.clientHeight;
             var nw = line.offsetWidth, nh = line.offsetHeight + 26;   /* + the labels */
             if (!nw || !nh) { return; }
             /* 0.86 headroom: hovering a device grows it to 1.16x, and it has to
@@ -628,6 +632,9 @@
                which is why the phone lineup refused to grow. A margin adjusts the
                space it occupies without touching the frames inside it. */
             line.style.marginRight = Math.round(nw * (k - 1)) + 'px';
+            /* what the fit actually measured — type CAW.fit in the console */
+            CAW.fit = { stageW: w, stageH: h, groupW: nw, groupH: nh,
+                        scale: +k.toFixed(3), phone: w < 560 };
           };
           /* The stage is measured, so it has to be measured when it is REALLY
              there. The pop-up is built before it is shown, and on a phone the
