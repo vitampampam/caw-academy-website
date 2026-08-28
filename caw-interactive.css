@@ -854,9 +854,15 @@ button.cawx-back:hover{background:var(--app-primary-fixed)}
    overlap, sit on one baseline and carry their labels exactly as they do on
    the home page. Only the sizes are overridden — the frames themselves are the
    site's. The group is scaled to the available box in caw-interactive.js. */
-.cawx-hero{width:100%; height:100%; display:flex; align-items:center; justify-content:center}
-.cawx-hero .lineup{transform-origin:center center; padding:0 18px 26px}
-.cawx-hero .dev + .dev{margin-left:-26px}
+/* `flex:1 1 0` and not `width:100%`: the stage also holds the two stepper
+   arrows, and a full-width hero pushed them outside the dialog. The lineup
+   inside is transform-scaled, so it keeps no layout width of its own. */
+.cawx-hero{flex:1 1 0; min-width:0; width:auto; height:100%;
+  display:flex; align-items:center; justify-content:center}
+.cawx-hero .lineup{transform-origin:center center; padding:0 10px 26px}
+/* the devices sit further into each other, which narrows the group and leaves
+   the arrows their room */
+.cawx-hero .dev + .dev{margin-left:-56px}
 .cawx-hero .dlabel{bottom:-24px; font-size:13px; color:var(--muted)}
 
 /* The three sizes are graded so the difference reads at a glance, the way the
