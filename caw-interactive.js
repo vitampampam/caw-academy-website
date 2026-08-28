@@ -603,7 +603,7 @@
             var line = qs('.lineup', pad);
             if (!line) { return; }
             line.style.transform = 'none';
-            line.style.width = '';
+            line.style.marginRight = '';
             var w = pad.clientWidth, h = pad.clientHeight;
             var nw = line.offsetWidth, nh = line.offsetHeight + 26;   /* + the labels */
             if (!nw || !nh) { return; }
@@ -621,9 +621,13 @@
               line.style.transformOrigin = 'center center';
             }
             line.style.transform = 'scale(' + k.toFixed(3) + ')';
-            /* the scaled group keeps its unscaled layout width, so the scroller
-               is told the width it actually occupies */
-            line.style.width = Math.round(nw * k) + 'px';
+            /* A transform does not change layout, so the scroller has to be told
+               how much room the scaled group really needs. This MUST NOT be done
+               by setting a width: .lineup is a flex row, and a narrower width
+               makes the devices themselves shrink before the scale is applied —
+               which is why the phone lineup refused to grow. A margin adjusts the
+               space it occupies without touching the frames inside it. */
+            line.style.marginRight = Math.round(nw * (k - 1)) + 'px';
           };
           /* The stage is measured, so it has to be measured when it is REALLY
              there. The pop-up is built before it is shown, and on a phone the
@@ -2008,6 +2012,8 @@
   if (d.readyState !== 'loading') { fromHash(); }
   else { d.addEventListener('DOMContentLoaded', fromHash); }
 
+  /* type CAW.build in the console to see which copy the browser is running */
+  CAW.build = '2026-08-28 19:34';
   CAW.open = function (kind, id) { if (OPENERS[kind]) { OPENERS[kind](id, null); } };
   CAW.closeModal = Modal.close;
 
