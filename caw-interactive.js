@@ -224,6 +224,12 @@
       d.body.classList.add('cawx-modal-open');
     }
     function unlockScroll() {
+      /* style.css sets `html{scroll-behavior:smooth}`, so restoring the offset
+         ANIMATED the page from the top back down to where the visitor was. The
+         restore has to be instant: an inline style on <html> outranks the
+         stylesheet, and is put back immediately afterwards. */
+      var root = d.documentElement, was = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
       d.body.classList.remove('cawx-modal-open');
       d.body.style.paddingRight = '';
       d.body.style.position = '';
@@ -232,6 +238,7 @@
       d.body.style.right = '';
       d.body.style.width = '';
       w.scrollTo(0, lockedAt);
+      root.style.scrollBehavior = was;
     }
 
     function show(cfg, trigger) {
