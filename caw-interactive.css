@@ -1,0 +1,1293 @@
+/* ===========================================================================
+   CAW Academy — interactive sections (A–F): triggers, modals, iPad demos.
+   ---------------------------------------------------------------------------
+   Loads AFTER style.css. It adds only; it overrides nothing.
+
+   RULE 1 — NO NEW UI ON THE PAGE.
+   Every trigger is an element the page already has: the audience pills, the
+   organisation cards, the value-prop cards, the curriculum track cards, the
+   framework pills and the feature cards. No extra pills, strips or rails are
+   introduced. The only thing added to a trigger is a small chevron symbol
+   saying it can be opened.
+
+   RULE 2 — SIZES STAY INTACT.
+   The chevron on a pill is absolutely positioned, so it takes no layout space
+   and the pill keeps the exact dimensions it has today.
+
+   Namespace: .cawx-*   (CAW eXperience)
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Tokens.
+   Site tokens come from style.css :root and are used unchanged.
+   The block below is the APP's own palette (CAWTrainer-iOS Theme/Theme.swift),
+   needed only inside the iPad demo screens so they match the real app rather
+   than the website. They are never used on the page itself.
+   --------------------------------------------------------------------------- */
+:root{
+  --app-primary:#3E44B5;        /* Theme.primary       */
+  --app-primary-2:#575ECF;      /* Theme.primaryLight  */
+  --app-primary-fixed:#E0E0FF;  /* Theme.primaryFixed  */
+  --app-ink:#0C1843;            /* Theme.onSurface     */
+  --app-ink-var:#464653;        /* Theme.onSurfaceVar  */
+  --app-success:#2E7D32;        /* Theme.success       */
+  --app-error:#BA1A1A;          /* Theme.error         */
+  --app-warning:#E65100;        /* Theme.warning       */
+  --app-cta:#FB8C00;            /* Theme.searchAccent / ctaGradient */
+  --app-grouped:#F1F1F6;
+  --app-surface:#FFFFFF;
+  --app-line:#E4E6F3;
+  /* highlighter colours, as they appear in the app */
+  --app-hl-yellow:rgba(250,204,21,.42);
+  --app-hl-green:rgba(52,199,89,.30);
+  --app-hl-indigo:rgba(62,68,181,.18);
+}
+
+/* ===========================================================================
+   1. TRIGGERS — existing elements, made openable
+   =========================================================================== */
+
+/* --- A / E: the two kinds of pill ---------------------------------------
+   Both keep their exact current metrics. The chevron is positioned, not
+   flowed, so nothing moves.
+
+   NOTE the trap this fixes: style.css has a bare `.chips span` rule, so ANY
+   span inside a pill is drawn as a second pill. The clickability symbol is
+   therefore a bare <svg>, never a <span>. Do not wrap it. */
+.chips button{
+  /* verbatim copy of `.chips span` in style.css (lines 306-313), because the
+     markup changes <span> to <button> and that selector stops matching.
+     If `.chips span` is restyled, copy the change here in the same edit. */
+  position:relative;
+  display:flex; align-items:center; justify-content:flex-start; gap:9px;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:999px; padding:12px 20px 12px 22%; font-size:15px; font-weight:600;
+  color:var(--ink-soft); box-shadow:var(--shadow-sm);
+  font-family:inherit; text-align:left; cursor:pointer;
+  -webkit-appearance:none; appearance:none; width:100%;
+  transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease;
+}
+.chips button::before{content:""; width:8px; height:8px; border-radius:50%; flex:0 0 auto;
+  background:linear-gradient(135deg,var(--indigo),var(--indigo-2))}
+.chips button:hover{transform:translateY(-2px); box-shadow:var(--shadow-md);
+  border-color:var(--indigo-3); color:var(--indigo)}
+@media (max-width:560px){
+  .chips button{font-size:14px; padding:11px 18px 11px 72px; justify-content:flex-start}
+}
+/* the "this opens" symbol — absolutely positioned, so the pill does not resize */
+.cawx-sym{
+  position:absolute; top:50%; right:15px; transform:translateY(-50%);
+  width:15px; height:15px; color:var(--indigo-3); pointer-events:none;
+  transition:transform .18s ease, color .18s ease;
+}
+.chips button:hover .cawx-sym, .fw-pill.cawx-trigger:hover .cawx-sym{
+  color:var(--indigo); transform:translateY(-50%) translateX(3px);
+}
+
+/* E — framework pills. `.fw-pill` already sets font-size, colour and
+   background, so the reset must not use the `font:`/`color:inherit` shorthand:
+   it would out-specify them and change the pill. */
+.fw-pill.cawx-trigger{
+  position:relative; padding-right:32px;   /* room for the symbol only */
+  font-family:inherit; font-size:14px; font-weight:400; line-height:inherit;
+  color:var(--muted); text-align:center; cursor:pointer;
+  -webkit-appearance:none; appearance:none;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
+}
+.fw-pill.cawx-trigger:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm);
+  border-color:var(--indigo-3)}
+.fw-pill.cawx-trigger .cawx-sym{right:12px}
+
+/* --- B / C / D / F: the four kinds of card ------------------------------
+   The card stays a <div> — it holds <h3> and <p>, which may not sit inside a
+   <button> — and a real button inside it stretches over the whole card.
+
+   The card becomes a flex column and the button is pushed to the bottom, so
+   the "See how it works" line sits on ONE level across every card in the row,
+   whatever the text length above it. */
+.card.cawx-trigger, .prop.cawx-trigger, .track.cawx-trigger{
+  position:relative; display:flex; flex-direction:column;
+}
+.cawx-stretch{
+  margin-top:auto; align-self:center;
+  position:relative; z-index:1; font:inherit; border:0; background:transparent;
+  padding:0; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  font-size:13.5px; font-weight:700; color:var(--indigo);
+  transition:gap .2s ease;
+}
+.cawx-stretch svg{width:15px; height:15px; flex:0 0 auto}
+.cawx-stretch::after{content:""; position:absolute; inset:0; border-radius:inherit}
+.card.cawx-trigger .cawx-stretch{padding-top:12px}
+.prop.cawx-trigger .cawx-stretch{padding-top:14px}
+.track.cawx-trigger .cawx-stretch{padding-top:16px}
+.card.cawx-trigger:hover .cawx-stretch,
+.prop.cawx-trigger:hover .cawx-stretch,
+.track.cawx-trigger:hover .cawx-stretch{gap:10px}
+.card.cawx-trigger:focus-within, .prop.cawx-trigger:focus-within,
+.track.cawx-trigger:focus-within{border-color:var(--indigo-3)}
+/* the track card's list must not stretch to fill — the CTA does */
+.track.cawx-trigger ul{flex:0 0 auto}
+
+/* ===========================================================================
+   2. MODAL SHELL
+   Mirrors the existing .trial-modal visual language exactly (same backdrop
+   tint, radius, shadow and round close button) and adds what it lacks: a
+   focus trap, wider layouts, a sticky header and a skeleton state.
+   =========================================================================== */
+.cawx-modal{position:fixed; inset:0; z-index:210; display:none}
+.cawx-modal.open{display:block}
+.cawx-backdrop{position:absolute; inset:0; background:rgba(11,18,56,.55);
+  animation:cawxFade .18s ease}
+.cawx-dialog{
+  position:relative; z-index:1; width:min(720px,calc(100% - 32px)); margin:4vh auto;
+  background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+  max-height:92vh; overflow:hidden; display:flex; flex-direction:column;
+  animation:cawxRise .22s cubic-bezier(.2,.7,.2,1);
+}
+/* A demo pop-up gives as much of the viewport as possible to the device frame:
+   the dialog fills the height, and every other part of it is kept deliberately
+   compact so the frame gets what is left. The expand button removes the last
+   margin for a near-fullscreen view. */
+/* Every demo frame is the SAME size, and none of it is ever cut off.
+   Two rules together do that: the chrome above and below is FIXED in height
+   (so the leftover never changes from one screen to the next), and the frame
+   takes exactly that leftover — it is not given a height of its own to
+   overflow with. */
+.cawx-modal[data-size="wide"] .cawx-dialog{
+  width:min(1120px,calc(100% - 24px)); height:96vh; max-height:96vh; margin:2vh auto;
+}
+/* The body does not scroll — the frame is fitted to it — and it FILLS the
+   dialog, so the footer stays pinned to the bottom even when the content is
+   short. Without flex:1 the footer rides up and leaves white space beneath. */
+.cawx-modal[data-size="wide"] .cawx-body{flex:1 1 auto; min-height:0;
+  display:flex; flex-direction:column; overflow:hidden; padding:12px 20px 14px}
+.cawx-modal[data-size="wide"].cawx-max .cawx-dialog{
+  width:calc(100% - 12px); height:calc(100% - 12px); max-height:none; margin:6px auto;
+  border-radius:18px;
+}
+/* Minimal chrome, so the frame is by far the biggest thing on screen. The
+   eyebrow is dropped here — the pop-up title already says what this is — and
+   the intro is held to ONE line at a fixed height, which is what stops the
+   frames shifting between screens. */
+.cawx-modal[data-size="wide"] .cawx-head{padding:12px 104px 10px 20px}
+.cawx-modal[data-size="wide"] .cawx-head .eyebrow{display:none}
+.cawx-modal[data-size="wide"] .cawx-title{font-size:19px; line-height:1.2}
+.cawx-modal[data-size="wide"] .cawx-sub{margin:3px 0 0; font-size:13px; line-height:1.5;
+  height:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.cawx-modal[data-size="wide"] .cawx-close, .cawx-modal[data-size="wide"] .cawx-expand{
+  top:11px; width:30px; height:30px}
+.cawx-modal[data-size="wide"] .cawx-expand{right:54px}
+.cawx-modal[data-size="wide"] .cawx-foot{flex-direction:row; align-items:center; gap:16px;
+  padding:10px 20px}
+.cawx-modal[data-size="wide"] .cawx-foot .cawx-foot-note{flex:1 1 auto; font-size:11px;
+  line-height:1.45}
+.cawx-modal[data-size="wide"] .cawx-trial{flex:0 0 auto; width:auto; padding:11px 22px; font-size:15px}
+.cawx-expand{position:absolute; top:16px; right:60px; z-index:2; width:34px; height:34px;
+  border:0; background:var(--grouped); border-radius:50%; cursor:pointer; color:var(--muted);
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:color .15s, background .15s}
+/* `display` beats the [hidden] attribute, so the demo-only rule needs saying
+   explicitly — otherwise the enlarge control appears on every pop-up. */
+.cawx-expand[hidden]{display:none}
+.cawx-expand:hover{color:var(--ink); background:var(--bg-2)}
+.cawx-expand svg{width:16px; height:16px}
+
+.cawx-head{position:relative; flex:0 0 auto; padding:24px 60px 16px 28px;
+  border-bottom:1px solid var(--line); background:var(--card)}
+.cawx-head .eyebrow{margin:0 0 12px}
+.cawx-title{margin:0; font-family:var(--serif); font-weight:600; font-size:26px;
+  line-height:1.2; letter-spacing:-.3px; color:var(--ink)}
+.cawx-title:focus{outline:none}
+.cawx-title:focus-visible{outline:3px solid rgba(62,68,181,.45); outline-offset:4px; border-radius:8px}
+.cawx-sub{margin:8px 0 0; color:var(--ink-soft); font-size:15.5px; line-height:1.6}
+
+.cawx-close{position:absolute; top:16px; right:18px; z-index:2; width:34px; height:34px;
+  border:0; background:var(--grouped); border-radius:50%; font-size:22px; line-height:1;
+  color:var(--muted); cursor:pointer; transition:color .15s, background .15s}
+.cawx-close:hover{color:var(--ink); background:var(--bg-2)}
+
+.cawx-body{overflow-y:auto; overscroll-behavior:contain; padding:24px 28px 30px;
+  scrollbar-width:none; -ms-overflow-style:none}
+.cawx-body::-webkit-scrollbar{width:0; height:0; display:none}
+
+/* The footer CTA is the SAME button as on the home page. style.css already
+   supplies .btn and .btn-light; the three declarations index.html adds for
+   `.btn.open-trial` (full width, centred, ink text) are repeated here, because
+   that rule lives in index.html's scoped <style> and would not otherwise apply.
+   The class `open-trial` itself is deliberately NOT used: the site binds its own
+   click handler to that class, and this button already hands off to it.
+   Footer background is the page background, so the white button sits on the same
+   tone it does in the hero. */
+.cawx-foot{flex:0 0 auto; border-top:1px solid var(--line); padding:16px 28px 18px;
+  display:flex; flex-direction:column; align-items:stretch; gap:12px;
+  background:var(--bg)}
+.cawx-foot .cawx-foot-note{margin:0; font-size:12.5px; color:var(--muted); line-height:1.5}
+.cawx-foot .cawx-foot-note b{color:var(--ink-soft); font-weight:800}
+.cawx-foot .cawx-foot-note a{font-weight:700; text-decoration:underline;
+  text-underline-offset:2px}
+.cawx-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
+.cawx-trial:hover{color:var(--ink)}
+
+body.cawx-modal-open{overflow:hidden}
+@keyframes cawxFade{from{opacity:0}to{opacity:1}}
+@keyframes cawxRise{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
+
+/* ===========================================================================
+   3. MODAL CONTENT BLOCKS
+   =========================================================================== */
+.cawx-lead{margin:0 0 20px; font-size:16px; line-height:1.65; color:var(--ink-soft)}
+.cawx-h{margin:24px 0 12px; font-size:13px; font-weight:800; letter-spacing:1.1px;
+  text-transform:uppercase; color:var(--indigo)}
+.cawx-h:first-child{margin-top:0}
+.cawx-p{margin:0 0 14px; font-size:15.5px; line-height:1.65; color:var(--ink-soft)}
+.cawx-p b, .cawx-li b{color:var(--ink); font-weight:800}
+
+.cawx-list{list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:10px}
+.cawx-li{display:flex; gap:10px; font-size:15px; line-height:1.6; color:var(--ink-soft)}
+.cawx-li > svg{width:17px; height:17px; flex:0 0 auto; margin-top:3px; color:var(--indigo)}
+
+.cawx-steps{counter-reset:cawx; list-style:none; margin:0 0 8px; padding:0;
+  display:flex; flex-direction:column; gap:12px}
+.cawx-steps li{position:relative; padding-left:38px; font-size:15px; line-height:1.6; color:var(--ink-soft)}
+.cawx-steps li::before{counter-increment:cawx; content:counter(cawx);
+  position:absolute; left:0; top:1px; width:25px; height:25px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; font-weight:800; color:#fff;
+  background:linear-gradient(135deg,var(--indigo),var(--indigo-2))}
+
+.cawx-courses{display:flex; flex-direction:column; gap:12px; margin:0 0 6px}
+.cawx-course{border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
+  padding:16px 18px; box-shadow:var(--shadow-sm)}
+.cawx-course-top{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.cawx-course-name{font-size:16px; font-weight:800; letter-spacing:-.2px; color:var(--ink); margin:0}
+.cawx-course-free{font-size:10px; font-weight:800; letter-spacing:.6px; text-transform:uppercase;
+  color:var(--success); background:rgba(46,125,50,.10); border-radius:999px; padding:4px 9px}
+.cawx-course-meta{margin:6px 0 0; font-size:13px; color:var(--muted); font-weight:700}
+.cawx-course-desc{margin:8px 0 0; font-size:14.5px; line-height:1.6; color:var(--ink-soft)}
+.cawx-course-feats{margin:10px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+.cawx-course-feats li{display:flex; gap:8px; font-size:13.5px; line-height:1.55; color:var(--ink-soft)}
+.cawx-course-feats li::before{content:""; width:5px; height:5px; border-radius:50%; flex:0 0 auto;
+  margin-top:8px; background:var(--indigo-3)}
+.cawx-course-note{margin:10px 0 0; font-size:12.5px; line-height:1.55; color:var(--muted)}
+
+.cawx-fws{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0 0}
+.cawx-fw{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
+  color:var(--ink-soft); background:var(--grouped); border:1px solid var(--line);
+  border-radius:999px; padding:5px 11px; white-space:nowrap}
+.cawx-fw .cawx-fw-flag{font-size:13px; line-height:1}
+.cawx-fw b{color:var(--ink); font-weight:800}
+
+.cawx-case{margin:14px 0 0; padding:14px 16px; border-radius:var(--radius);
+  background:var(--indigo-soft); border:1px solid var(--line);
+  font-size:14.5px; line-height:1.6; color:var(--ink-soft)}
+.cawx-case b{color:var(--ink)}
+/* the two free anchor courses, called out in the framework pop-up.
+   Kept light: a small green label, the courses as two short rows with the
+   lesson count as secondary text, and one plain closing line. */
+.cawx-free{
+  margin:0 0 20px; padding:13px 16px 14px; border-radius:var(--radius);
+  background:rgba(46,125,50,.06); border:1px solid rgba(46,125,50,.24);
+}
+.cawx-free b{display:block; font-size:11.5px; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; color:var(--success); margin:0 0 9px}
+.cawx-free ul{list-style:none; margin:0 0 9px; padding:0; display:flex;
+  flex-direction:column; gap:6px}
+.cawx-free li{display:flex; align-items:baseline; gap:8px; font-size:15px; line-height:1.45}
+.cawx-free li svg{width:14px; height:14px; flex:0 0 auto; align-self:center; color:var(--success)}
+.cawx-free li span{font-weight:700; color:var(--ink)}
+.cawx-free li i{font-style:normal; margin-left:auto; padding-left:12px; white-space:nowrap;
+  font-size:13px; color:var(--muted)}
+.cawx-free em{display:block; font-style:normal; font-size:13.5px; line-height:1.55;
+  color:var(--ink-soft)}
+@media (max-width:640px){
+  .cawx-free li{flex-wrap:wrap; font-size:14.5px}
+  .cawx-free li i{margin-left:22px; padding-left:0}
+}
+
+.cawx-note{margin:18px 0 0; padding:12px 14px; border-radius:12px;
+  background:var(--grouped); border:1px solid var(--line);
+  font-size:13px; line-height:1.55; color:var(--muted)}
+.cawx-ex{border-top:1px solid var(--line); padding-top:16px; margin-top:16px}
+.cawx-ex:first-of-type{border-top:0; padding-top:0; margin-top:0}
+.cawx-ex h4{margin:0 0 6px; font-size:16px; font-weight:800; letter-spacing:-.2px; color:var(--ink)}
+.cawx-ex p{margin:0; font-size:15px; line-height:1.65; color:var(--ink-soft)}
+
+/* ===========================================================================
+   4. SKELETON LOADING (one paint, so a demo dialog never opens empty)
+   =========================================================================== */
+.cawx-skel{display:flex; flex-direction:column; gap:12px}
+.cawx-skel i{display:block; height:14px; border-radius:7px; background:var(--grouped);
+  background-image:linear-gradient(90deg,var(--grouped),var(--bg-2),var(--grouped));
+  background-size:200% 100%; animation:cawxShimmer 1.2s linear infinite}
+.cawx-skel i.tall{height:260px; border-radius:var(--radius)}
+.cawx-skel i.w70{width:70%} .cawx-skel i.w50{width:50%} .cawx-skel i.w85{width:85%}
+@keyframes cawxShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* ===========================================================================
+   5. THE DEMO STAGE — a PORTRAIT iPad running the app
+   Every measurement below is taken from the real captures in website/screens/
+   (how-to-learn-2.jpg lesson, -8.jpg quiz, -6.jpg exam, -4.jpg glossary,
+   -1.jpg dashboard). The frame uses their exact aspect ratio, 1200 x 1747.
+
+   Type is scaled UP relative to the device: a true 1:1 reduction would render
+   the app's body text at about 6px, which nobody could read.
+   =========================================================================== */
+.cawx-stage{display:flex; flex-direction:column; align-items:stretch; gap:10px;
+  flex:1 1 auto; min-height:0; width:100%}
+/* the frame lives in its own box so it can be measured against the height that
+   is actually left, rather than fighting the switcher and the caption for it */
+.cawx-framewrap{flex:1 1 auto; min-height:0; display:flex;
+  align-items:center; justify-content:center}
+
+/* the switcher that moves between the eight demos — INSIDE the pop-up, so the
+   page itself gains nothing */
+.cawx-switch{flex:0 0 auto; display:flex; flex-wrap:nowrap; gap:7px; justify-content:center;
+  margin:0; overflow-x:auto; padding-bottom:2px; scrollbar-width:none}
+.cawx-switch::-webkit-scrollbar{display:none}
+.cawx-switch button{flex:0 0 auto}
+.cawx-switch button{
+  font:inherit; font-size:12.5px; font-weight:700; color:var(--ink-soft);
+  background:var(--card); border:1px solid var(--line); border-radius:999px;
+  padding:7px 13px; cursor:pointer;
+  transition:background .18s, color .18s, border-color .18s;
+}
+.cawx-switch button:hover{border-color:var(--indigo-3); color:var(--indigo)}
+.cawx-switch button[aria-current="true"]{background:var(--indigo); border-color:var(--indigo); color:#fff}
+
+.cawx-ipad{
+  position:relative; height:100%; width:auto; max-width:100%;
+  aspect-ratio:1200 / 1747;
+  background:linear-gradient(160deg,#23264c,#0e1030);
+  border-radius:26px; padding:11px; box-shadow:var(--shadow-lg);
+}
+/* older engines without aspect-ratio fall back to the fixed width */
+@supports not (aspect-ratio:1/1){ .cawx-ipad{width:100%; max-width:440px; height:auto} }
+/* a floor, so the frame never becomes a postage stamp on a short window;
+   the pop-up body scrolls instead */
+.cawx-framewrap .cawx-ipad{min-width:300px}
+.cawx-ipad::after{content:""; position:absolute; top:5px; left:50%; transform:translateX(-50%);
+  width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.22)}
+.cawx-screen{
+  position:relative; border-radius:15px; overflow:hidden; background:var(--app-grouped);
+  height:100%; display:flex; flex-direction:column;
+  font-family:var(--sans); color:var(--app-ink); font-size:10px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+@supports not (aspect-ratio:1/1){ .cawx-screen{height:610px} }
+
+
+/* ===========================================================================
+   6. POINTER FINGER
+   Half-transparent hand over the element the instruction line names.
+   Decorative: aria-hidden. Positioned with --x / --y as percentages.
+   =========================================================================== */
+.cawx-point{
+  position:absolute; left:var(--x,50%); top:var(--y,50%); z-index:8;
+  width:74px; height:74px; margin:-8px 0 0 -20px;
+  opacity:.9; pointer-events:none;
+  filter:drop-shadow(0 10px 14px rgba(11,18,56,.38));
+  animation:cawxTap 2.8s ease-in-out infinite;
+}
+.cawx-point svg{width:100%; height:100%; display:block}
+.cawx-point::before{content:""; position:absolute; left:12px; top:-6px;
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--app-cta);
+  opacity:.7; animation:cawxHalo 2.8s ease-out infinite}
+@keyframes cawxTap{0%,100%{transform:translate(0,0)}45%{transform:translate(-3px,-8px)}}
+@keyframes cawxHalo{0%{transform:scale(.5); opacity:.8}70%{transform:scale(1.6); opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  .cawx-point, .cawx-point::before, .cawx-dialog, .cawx-backdrop, .cawx-skel i{animation:none}
+}
+
+/* ===========================================================================
+   7. THE APP SHELL, REPRODUCED
+   =========================================================================== */
+
+/* --- status bar ----------------------------------------------------------- */
+.cawx-status{flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:5px 12px 2px; font-size:8.5px; font-weight:700; color:var(--app-ink);
+  background:#fff}
+.cawx-status .r{display:flex; align-items:center; gap:4px}
+.cawx-status svg{width:10px; height:8px}
+.cawx-bat{width:16px; height:8px; border:1px solid currentColor; border-radius:2.5px;
+  position:relative; opacity:.9}
+.cawx-bat::after{content:""; position:absolute; inset:1.5px; background:currentColor; border-radius:1px}
+
+/* --- the app's top tab bar: a capsule on a white strip --------------------- */
+.cawx-tabbar{flex:0 0 auto; display:flex; justify-content:center; padding:3px 0 7px; background:#fff}
+.cawx-tabbar .in{display:flex; align-items:center; gap:1px; background:rgba(120,120,128,.12);
+  border-radius:999px; padding:2.5px}
+.cawx-tabbar span, .cawx-tabbar button{display:inline-flex; align-items:center; gap:3.5px; font-size:8.5px;
+  font-weight:600; color:var(--app-ink-var); padding:3.5px 8px; border-radius:999px; white-space:nowrap}
+.cawx-tabbar button{border:0; background:transparent; font:inherit; font-size:8.5px;
+  font-weight:600; cursor:pointer; transition:background .15s, color .15s}
+.cawx-tabbar button:hover:not(.on){background:rgba(255,255,255,.6); color:var(--app-primary)}
+.cawx-tabbar span svg, .cawx-tabbar button svg{width:9px; height:9px}
+.cawx-tabbar span.on, .cawx-tabbar button.on{background:#fff; color:var(--app-primary); font-weight:700;
+  box-shadow:0 1px 3px rgba(16,22,68,.16)}
+
+/* --- the split view: sidebar + detail -------------------------------------- */
+.cawx-shell{flex:1 1 auto; display:flex; min-height:0; padding:7px 7px 0 7px; gap:7px}
+.cawx-shell.solo{padding-top:2px}
+
+.cawx-side{flex:0 0 39%; min-width:0; background:#fff; border-radius:13px;
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 10px 24px rgba(16,22,68,.06)}
+.cawx-side-h{flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  position:relative; padding:8px 8px 6px; font-size:10.5px; font-weight:800; color:var(--app-ink)}
+.cawx-side-h .tog{position:absolute; right:8px; top:7px; width:11px; height:11px; color:var(--app-ink)}
+.cawx-side-crumb{flex:0 0 auto; padding:2px 9px 5px; font-size:9.5px; font-weight:700;
+  color:var(--app-primary); display:flex; align-items:center; gap:3px}
+.cawx-side-crumb svg{width:8px; height:8px}
+.cawx-side-course{flex:0 0 auto; padding:0 9px 6px; font-size:9px; line-height:1.35;
+  color:var(--app-ink-var)}
+.cawx-side-sec{padding:6px 9px 3px; font-size:9px; color:var(--app-ink-var); opacity:.85}
+.cawx-side-list{flex:1 1 auto; overflow-y:auto; padding:0 5px 8px; scrollbar-width:none}
+.cawx-side-list::-webkit-scrollbar{display:none}
+.cawx-srow{display:flex; gap:5px; align-items:flex-start; padding:5px 5px; border-radius:8px;
+  width:100%; text-align:left; font:inherit; background:transparent; border:0}
+button.cawx-srow{cursor:pointer; transition:background .15s}
+button.cawx-srow:hover{background:rgba(120,120,128,.10)}
+button.cawx-srow.on:hover{background:var(--app-primary-fixed)}
+.cawx-srow > svg{flex:0 0 auto; width:11px; height:11px; margin-top:1px; color:var(--app-ink)}
+.cawx-srow > svg.done{color:var(--app-success)}
+.cawx-srow .code{display:flex; align-items:center; gap:3px; font-size:7.5px; font-weight:700;
+  color:var(--app-ink-var); letter-spacing:.2px}
+.cawx-srow .code .bm{color:var(--app-cta); width:6px; height:6px}
+.cawx-srow .code .hl{color:var(--app-error); width:6px; height:6px}
+.cawx-srow .nm{font-size:9px; line-height:1.3; color:var(--app-ink)}
+.cawx-srow.on{background:var(--app-primary-fixed)}
+/* outside a lesson the selected course sits on a neutral grey, not indigo */
+.cawx-srow.on.grey{background:rgba(120,120,128,.16)}
+.cawx-srow.on.grey > svg{color:var(--app-ink)}
+.cawx-srow.on .nm, .cawx-srow.on .code{color:var(--app-primary); font-weight:700}
+.cawx-srow.on > svg{color:var(--app-primary)}
+
+.cawx-detail{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
+
+/* --- nav row: back circle · centred title · tool capsule ------------------- */
+.cawx-navrow{flex:0 0 auto; display:flex; align-items:center; gap:5px; padding:2px 2px 7px}
+.cawx-back{width:20px; height:20px; flex:0 0 auto; border-radius:50%; background:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 3px rgba(16,22,68,.14); color:var(--app-primary)}
+.cawx-back svg{width:10px; height:10px}
+.cawx-navtitle{flex:1 1 auto; text-align:center; font-size:11.5px; font-weight:800;
+  color:var(--app-ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.cawx-tools{flex:0 0 auto; display:flex; align-items:center; gap:2px; background:#fff;
+  border-radius:999px; padding:2.5px 4px; box-shadow:0 1px 3px rgba(16,22,68,.14)}
+.cawx-tools i, .cawx-tools button{display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; border-radius:50%; color:var(--app-primary);
+  border:0; background:transparent; padding:0}
+.cawx-tools button{cursor:pointer; transition:background .15s}
+.cawx-tools button:hover{background:var(--app-primary-fixed)}
+.cawx-tools i svg, .cawx-tools button svg{width:10px; height:10px}
+.cawx-tools .hl{color:var(--app-error)}
+.cawx-tools .bm{color:#fff; background:var(--app-cta)}
+
+/* --- Lesson / Flashcards / Quiz segmented control --------------------------- */
+.cawx-seg{flex:0 0 auto; margin:0 0 7px; display:flex; background:rgba(120,120,128,.12);
+  border-radius:999px; padding:2.5px}
+.cawx-seg button{flex:1 1 0; font:inherit; font-size:9.5px; font-weight:700; cursor:pointer;
+  color:var(--app-ink-var); background:transparent; border:0; border-radius:999px; padding:5px 3px;
+  transition:background .18s, color .18s}
+.cawx-seg button[aria-selected="true"]{background:#fff; color:var(--app-ink);
+  box-shadow:0 1px 3px rgba(16,22,68,.16)}
+
+/* --- the scrolling page ----------------------------------------------------- */
+.cawx-page{flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain;
+  padding:0 1px 8px; scrollbar-width:none}
+.cawx-page::-webkit-scrollbar{display:none}
+
+.cawx-subpart{display:inline-block; font-size:7.5px; font-weight:800; letter-spacing:.6px;
+  text-transform:uppercase; color:var(--app-primary); background:var(--app-primary-fixed);
+  border-radius:4px; padding:3px 6px; margin:0 0 5px}
+.cawx-lt{font-size:17px; font-weight:800; letter-spacing:-.4px; color:var(--app-primary);
+  margin:0 0 3px; line-height:1.1}
+.cawx-lsub{font-size:9.5px; line-height:1.45; color:var(--app-ink-var); margin:0 0 5px}
+.cawx-lmeta{display:flex; align-items:center; gap:9px; font-size:8.5px; color:var(--app-ink-var);
+  margin:0 0 8px}
+.cawx-lmeta span{display:inline-flex; align-items:center; gap:3px}
+.cawx-lmeta svg{width:9px; height:9px; opacity:.75}
+
+.cawx-sechead{display:flex; align-items:center; gap:5px; margin:9px 0 5px;
+  font-size:9.5px; font-weight:800; letter-spacing:.4px; text-transform:uppercase;
+  color:var(--app-ink)}
+.cawx-sechead .ic{width:13px; height:13px; flex:0 0 auto; display:inline-flex;
+  align-items:center; justify-content:center; color:var(--app-primary)}
+.cawx-sechead .ic svg{width:12px; height:12px}
+
+.cawx-appcard{background:var(--app-surface); border-radius:11px; padding:9px 10px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05); margin:0 0 8px}
+.cawx-appcard > :last-child{margin-bottom:0}
+
+/* the in-lesson bookmark marker: an orange chip and rule above the block */
+.cawx-bmrule{display:flex; align-items:center; gap:5px; margin:0 0 7px}
+.cawx-bmrule b{display:inline-flex; align-items:center; gap:3px; font-size:7px; font-weight:800;
+  letter-spacing:.4px; text-transform:uppercase; color:#fff; background:var(--app-cta);
+  border-radius:4px; padding:3px 6px}
+.cawx-bmrule b svg{width:7px; height:7px}
+.cawx-bmrule i{flex:1 1 auto; height:1.4px; background:var(--app-cta); opacity:.85; border-radius:1px}
+
+.cawx-ap{font-size:9.5px; line-height:1.5; color:var(--app-ink); margin:0 0 6px}
+.cawx-ap.lead{font-size:10.5px}
+.cawx-ap b{font-weight:800}
+.cawx-ah{font-size:10px; font-weight:800; color:var(--app-ink); margin:8px 0 3px; line-height:1.3}
+.cawx-ah:first-child{margin-top:0}
+.cawx-alist{list-style:none; margin:0 0 6px; padding:0; display:flex; flex-direction:column; gap:5px}
+.cawx-alist li{display:flex; gap:5px; font-size:9px; line-height:1.45; color:var(--app-ink)}
+.cawx-alist li .tick{flex:0 0 auto; width:11px; height:11px; margin-top:1px; border-radius:50%;
+  background:var(--app-primary-fixed); color:var(--app-primary);
+  display:inline-flex; align-items:center; justify-content:center}
+.cawx-alist li .tick svg{width:7px; height:7px}
+.cawx-akey{border-left:2px solid var(--app-primary); background:var(--app-primary-fixed);
+  border-radius:0 7px 7px 0; padding:7px 8px; margin:7px 0 0}
+.cawx-akey b{display:block; font-size:7.5px; font-weight:800; letter-spacing:.6px;
+  text-transform:uppercase; color:var(--app-primary); margin:0 0 2px}
+.cawx-akey span{font-size:9px; line-height:1.45; color:var(--app-ink)}
+
+/* --- lesson footer ---------------------------------------------------------- */
+.cawx-lfoot{flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:6px 2px 5px; font-size:9.5px; font-weight:700; color:var(--app-primary)}
+.cawx-lfoot .mid{color:var(--app-ink-var); font-weight:600}
+.cawx-lfoot span{display:inline-flex; align-items:center; gap:3px}
+.cawx-lfoot svg{width:9px; height:9px}
+
+/* --- highlights -------------------------------------------------------------- */
+.cawx-mark{border-radius:2px; padding:0 1px}
+.cawx-mark[data-c="yellow"]{background:var(--app-hl-yellow)}
+.cawx-mark[data-c="green"]{background:var(--app-hl-green)}
+.cawx-mark[data-c="indigo"]{background:var(--app-hl-indigo)}
+
+/* the text-selection popover */
+.cawx-selpop{position:absolute; z-index:7; display:flex; background:#fff; border-radius:999px;
+  box-shadow:0 6px 20px rgba(16,22,68,.22); overflow:hidden;
+  font-size:8.5px; font-weight:600; color:var(--app-ink)}
+.cawx-selpop span{padding:5px 8px; white-space:nowrap}
+.cawx-selpop span + span{border-left:1px solid var(--app-line)}
+
+/* ===========================================================================
+   8. PER-DEMO PIECES
+   =========================================================================== */
+
+/* --- flashcards -------------------------------------------------------------
+   Rebuilt from the real screens: counter row + progress bar, then the card.
+   Front = indigo gradient with the lesson-code chip, the question, a large
+   "CAW Academy" watermark and a "Tap to reveal answer" hint; the rating buttons
+   are dimmed until the card is turned. Back = white with a light border and the
+   answer only; the rating buttons then come alive — Need review on a peach tint,
+   Got it on a green tint. */
+.cawx-fc-wrap{flex:1 1 auto; display:flex; flex-direction:column; gap:7px; padding:2px 0 8px}
+.cawx-fc-head{display:flex; justify-content:space-between; font-size:8.5px; font-weight:600;
+  color:var(--app-ink-var)}
+.cawx-fc-bar{height:4px; border-radius:3px; background:rgba(62,68,181,.18); margin:0 0 3px}
+.cawx-fc-bar i{display:block; height:100%; border-radius:3px; background:var(--app-primary);
+  transition:width .3s ease}
+.cawx-fc{position:relative; font:inherit; text-align:left; cursor:pointer; width:100%;
+  flex:0 0 auto; min-height:172px; border:0; border-radius:16px; padding:13px 14px; overflow:hidden;
+  display:flex; flex-direction:column; transition:transform .2s}
+.cawx-fc:hover{transform:translateY(-2px)}
+.cawx-fc[data-face="q"]{background:linear-gradient(135deg,#3E44B5,#575ECF); color:#fff;
+  box-shadow:0 3px 10px rgba(16,22,68,.14), 0 14px 32px rgba(62,68,181,.20)}
+.cawx-fc[data-face="a"]{background:var(--app-surface); color:var(--app-ink);
+  box-shadow:0 1px 3px rgba(16,22,68,.08), 0 8px 22px rgba(16,22,68,.06),
+             inset 0 0 0 1px rgba(62,68,181,.18)}
+/* the lesson-code chip on the question side */
+.cawx-fc .chip{align-self:flex-start; position:relative; z-index:1; font-size:7.5px; font-weight:800;
+  letter-spacing:.4px; color:#fff; background:rgba(255,255,255,.22); border-radius:5px;
+  padding:3px 7px; margin:0 0 7px}
+/* the brand watermark, bottom-right of the question side */
+.cawx-fc .wm{position:absolute; right:-6px; bottom:2px; z-index:0; pointer-events:none;
+  font-family:var(--serif); font-weight:600; font-size:44px; line-height:.95; text-align:right;
+  color:rgba(255,255,255,.13)}
+.cawx-fc .wm em{display:block; font-style:normal; font-size:20px; letter-spacing:.5px}
+.cawx-fc .txt{position:relative; z-index:1; font-size:11.5px; line-height:1.4; font-weight:700}
+.cawx-fc[data-face="a"] .txt{font-size:10px; font-weight:400; line-height:1.5}
+.cawx-fc .hint{position:relative; z-index:1; margin-top:auto; align-self:center;
+  display:inline-flex; align-items:center; gap:4px; font-size:8px; font-weight:600; opacity:.92}
+.cawx-fc .hint svg{width:9px; height:9px}
+.cawx-fc-rate{display:flex; gap:8px}
+.cawx-fc-rate button{flex:1 1 0; font:inherit; font-size:9.5px; font-weight:800; cursor:pointer;
+  border:0; border-radius:10px; padding:9px 4px; display:inline-flex; align-items:center;
+  justify-content:center; gap:5px; transition:opacity .2s}
+.cawx-fc-rate button svg{width:10px; height:10px}
+.cawx-fc-rate .need{color:var(--app-warning); background:rgba(230,81,0,.14)}
+.cawx-fc-rate .got{color:var(--app-success); background:rgba(46,125,50,.14)}
+.cawx-fc-rate button[disabled]{opacity:.4; cursor:default}
+
+/* --- questions: the lesson quiz and the timed assessment --------------------- */
+.cawx-qcount{font-size:8.5px; font-weight:700; color:var(--app-ink-var); margin:2px 0 4px}
+.cawx-qbar{height:3px; margin:0 0 8px; border-radius:2px; background:rgba(62,68,181,.15)}
+.cawx-qbar i{display:block; height:100%; border-radius:2px; background:var(--app-primary);
+  transition:width .3s ease}
+.cawx-qtext{font-size:10.5px; font-weight:800; line-height:1.35; color:var(--app-ink); margin:0 0 7px}
+.cawx-opts{display:flex; flex-direction:column; gap:5px}
+.cawx-opt{font:inherit; text-align:left; cursor:pointer; display:flex; align-items:flex-start; gap:6px;
+  font-size:9px; line-height:1.4; background:var(--app-surface); border:1px solid var(--app-line);
+  border-radius:9px; padding:7px 8px; color:var(--app-ink);
+  transition:border-color .18s, background .18s, opacity .18s}
+.cawx-opt .ltr{flex:0 0 auto; width:13px; height:13px; border-radius:50%; font-size:7.5px;
+  font-weight:800; display:inline-flex; align-items:center; justify-content:center;
+  background:var(--app-grouped); color:var(--app-ink-var)}
+.cawx-opt:hover{border-color:var(--app-primary)}
+.cawx-opt[data-state="on"]{border-color:var(--app-primary); background:var(--app-primary-fixed);
+  color:var(--app-primary); font-weight:600}
+.cawx-opt[data-state="on"] .ltr{background:var(--app-primary); color:#fff}
+.cawx-opt[data-state="right"]{border-color:var(--app-success); background:rgba(46,125,50,.08);
+  color:var(--app-success)}
+.cawx-opt[data-state="right"] .ltr{background:rgba(46,125,50,.18); color:var(--app-success)}
+.cawx-opt[data-state="wrong"]{border-color:var(--app-error); background:rgba(186,26,26,.06);
+  color:var(--app-error)}
+.cawx-opt[data-state="wrong"] .ltr{background:rgba(186,26,26,.15); color:var(--app-error)}
+/* an option that was neither correct nor chosen: filled grey, no border,
+   grey badge and grey text — the app greys them out rather than fading them */
+.cawx-opt[data-state="dim"]{background:var(--app-grouped); border-color:transparent;
+  color:var(--app-ink-var); opacity:.75}
+.cawx-opt[data-state="dim"] .ltr{background:rgba(70,70,83,.10); color:var(--app-ink-var)}
+.cawx-opt[disabled]{cursor:default}
+
+/* the explanation panel that follows an answered question */
+.cawx-why{display:flex; gap:7px; margin:9px 0 0; padding:10px 11px; border-radius:11px;
+  background:#E8E8FA; font-size:9.5px; line-height:1.5; color:var(--app-ink)}
+.cawx-why svg{flex:0 0 auto; width:10px; height:10px; margin-top:1px; color:var(--app-primary)}
+
+.cawx-solid{width:100%; font:inherit; font-size:10px; font-weight:800; cursor:pointer; border:0;
+  border-radius:10px; padding:9px 8px; margin:9px 0 0; color:#fff; background:var(--app-primary);
+  display:inline-flex; align-items:center; justify-content:center; gap:4px}
+.cawx-solid svg{width:10px; height:10px}
+.cawx-solid[disabled]{opacity:.45; cursor:not-allowed}
+.cawx-ghost{background:var(--app-primary-fixed); color:var(--app-primary)}
+.cawx-btnrow{display:flex; gap:6px; margin:9px 0 0}
+.cawx-btnrow .cawx-solid{margin:0; flex:1 1 0}
+
+/* the timed assessment's header block */
+.cawx-timer{display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:800;
+  color:var(--app-ink); margin:0 0 5px}
+.cawx-timer svg{width:11px; height:11px}
+.cawx-qnav{display:flex; gap:3px; overflow-x:auto; padding:0 0 5px; scrollbar-width:none}
+.cawx-qnav::-webkit-scrollbar{display:none}
+.cawx-qn{flex:0 0 auto; font:inherit; width:18px; height:18px; border-radius:50%; font-size:8.5px;
+  font-weight:700; border:1px solid var(--app-line); background:#fff; color:var(--app-ink-var);
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center}
+.cawx-qn[data-done="true"]{background:var(--app-primary); border-color:var(--app-primary); color:#fff}
+.cawx-qn[aria-current="true"]{box-shadow:0 0 0 2px rgba(62,68,181,.35)}
+.cawx-qn[aria-disabled="true"]{opacity:.4; cursor:not-allowed; background:var(--app-grouped)}
+.cawx-warn{display:flex; align-items:center; gap:5px; margin:0 0 6px; padding:5px 7px;
+  border-radius:6px; background:rgba(230,81,0,.09); font-size:8.5px;
+  font-weight:700; color:var(--app-warning)}
+.cawx-warn svg{width:10px; height:10px; flex:0 0 auto}
+.cawx-warn svg:last-child{margin-left:auto}
+.cawx-result{margin:0 0 7px; border-radius:9px; padding:8px 9px; font-size:9px; line-height:1.45;
+  background:var(--app-surface); border:1px solid var(--app-line); color:var(--app-ink-var)}
+.cawx-result b{color:var(--app-ink)}
+.cawx-result.pass{background:rgba(46,125,50,.08); border-color:rgba(46,125,50,.3)}
+.cawx-result .link{color:var(--app-primary); font-weight:800; display:block; margin-top:4px}
+
+.cawx-subnote{margin:7px 0 0; font-size:8.5px; line-height:1.45; color:var(--app-ink-var)}
+
+/* --- sheets that cover the app (glossary, notes) ----------------------------- */
+.cawx-dim{position:absolute; inset:0; z-index:5; background:rgba(11,18,56,.18)}
+.cawx-sheet{position:absolute; z-index:6; left:7%; right:7%; top:8%; bottom:14%;
+  background:var(--app-grouped); border-radius:13px; box-shadow:0 16px 44px rgba(11,18,56,.30);
+  overflow:hidden; display:flex; flex-direction:column}
+.cawx-sheet-h{flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  position:relative; padding:9px 10px; font-size:11px; font-weight:800; color:var(--app-ink)}
+.cawx-sheet-h .done{position:absolute; right:8px; top:6px; background:#fff; border-radius:999px;
+  padding:4px 9px; font-size:9.5px; font-weight:700; color:var(--app-primary);
+  box-shadow:0 1px 3px rgba(16,22,68,.14); border:0; font-family:inherit; cursor:pointer;
+  transition:background .15s}
+.cawx-sheet-h .done:hover{background:var(--app-primary-fixed)}
+.cawx-dim{cursor:pointer}
+.cawx-gl-field{display:flex; align-items:center; gap:6px; background:#fff; border-radius:8px;
+  padding:6px 9px; margin:0 9px 7px}
+.cawx-gl-field svg{width:11px; height:11px; color:var(--app-ink-var); flex:0 0 auto}
+.cawx-gl-field input{flex:1 1 auto; min-width:0; font:inherit; font-size:10px; color:var(--app-ink);
+  border:0; background:transparent; outline:none}
+.cawx-gl-field:focus-within{box-shadow:0 0 0 2px rgba(62,68,181,.35)}
+.cawx-gl-list{flex:1 1 auto; overflow-y:auto; list-style:none; margin:0; padding:0;
+  background:#fff; scrollbar-width:none}
+.cawx-gl-list::-webkit-scrollbar{display:none}
+.cawx-gl-item{padding:8px 10px; border-bottom:1px solid var(--app-line)}
+.cawx-gl-item.best{background:var(--app-primary-fixed)}
+.cawx-gl-best{font-size:7px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;
+  color:var(--app-primary); margin:0 0 2px}
+.cawx-gl-t{font-size:10px; font-weight:800; color:var(--app-ink); margin:0 0 2px}
+.cawx-gl-t em{font-style:normal; color:var(--app-primary)}
+.cawx-gl-d{font-size:9px; line-height:1.45; color:var(--app-ink-var); margin:0}
+.cawx-gl-empty{padding:12px 10px; font-size:9.5px; color:var(--app-ink-var)}
+.cawx-gl-count{padding:0 9px 5px; font-size:8px; font-weight:700; color:var(--app-ink-var)}
+
+/* --- certificate ----------------------------------------------------------
+   Reproduced from the issued PDF: A4 landscape on cream stock, a thick indigo
+   outer rule with a thin amber rule inside it, the pale eight-lobed seal behind
+   the middle, the serif wordmark, an amber rule under the holder name, the
+   issuer block bottom-left and the small QR bottom-right.
+
+   Every size is set so the WHOLE certificate fits its A4 box at this scale —
+   nothing may be clipped. The "sample" marker deliberately sits OUTSIDE the
+   artwork, so the certificate itself is a faithful reproduction. */
+.cawx-cert-wrap{flex:1 1 auto; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:5px; padding:6px 4px}
+.cawx-cert-sample{margin:0; font-size:6px; font-weight:800; letter-spacing:1.2px;
+  text-transform:uppercase; color:var(--app-ink-var); opacity:.6}
+.cawx-cert{position:relative; width:100%; aspect-ratio:1.414 / 1; background:#FDF9EF;
+  border:2px solid #4A4FBF; border-radius:7px; padding:4px;
+  box-shadow:0 3px 10px rgba(16,22,68,.10), 0 14px 34px rgba(16,22,68,.12)}
+.cawx-cert-in{position:relative; width:100%; height:100%; border:1px solid #E8A33D;
+  border-radius:4px; padding:7px 9px 5px; display:flex; flex-direction:column; overflow:hidden}
+.cawx-cert-seal{position:absolute; left:50%; top:53%; transform:translate(-50%,-50%);
+  width:52%; color:#ECECF1; pointer-events:none; line-height:0}
+.cawx-cert-seal svg{width:100%; height:auto; display:block}
+
+.cawx-cert-head{position:relative; flex:0 0 auto; text-align:center}
+.cawx-cert-brand{font-family:var(--serif); font-weight:700; font-size:12px;
+  color:#1B2559; margin:0 0 2px; letter-spacing:.1px; line-height:1.1}
+.cawx-cert-brand span{color:#4A4FBF}
+.cawx-cert-kind{font-size:5px; font-weight:600; letter-spacing:3px; text-transform:uppercase;
+  color:#6B7390; margin:0; line-height:1.2}
+
+.cawx-cert-mid{position:relative; flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center}
+.cawx-cert-lede{font-size:6.5px; color:#6B7390; margin:0; line-height:1.3}
+.cawx-cert-name{font-family:var(--serif); font-size:16px; font-weight:700; color:#1B2559;
+  margin:2px 0 3px; line-height:1.05; letter-spacing:.1px}
+.cawx-cert-rule{width:26%; height:1.6px; background:#E89A2C; border-radius:2px; margin:0 0 4px}
+.cawx-cert-course{font-size:10.5px; font-weight:800; color:#4A4FBF;
+  line-height:1.15; margin:3px 0 4px}
+.cawx-cert-meta{font-size:7px; font-weight:700; color:#1B2559; margin:0 0 3px; line-height:1.3}
+.cawx-cert-meta i{font-style:normal; color:#9AA1B8; margin:0 5px}
+.cawx-cert-no{font-size:6px; color:#6B7390; margin:0; line-height:1.3; white-space:nowrap}
+.cawx-cert-no b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:500;
+  color:#1B2559; letter-spacing:.4px; margin-left:3px}
+
+.cawx-cert-bot{position:relative; flex:0 0 auto; display:flex; align-items:flex-end;
+  justify-content:space-between; gap:6px}
+.cawx-cert-iss{line-height:1.3}
+.cawx-cert-iss small{display:block; font-size:5.5px; color:#6B7390}
+.cawx-cert-iss b{display:block; font-family:var(--serif); font-size:8.5px; font-weight:700;
+  color:#1B2559; margin:1px 0}
+.cawx-cert-iss b span{color:#4A4FBF}
+.cawx-cert-iss em{display:block; font-style:normal; font-size:5.5px; color:#6B7390}
+/* the small QR in the lower right corner */
+.cawx-cert-qrwrap{text-align:center; flex:0 0 auto}
+.cawx-cert-qr{display:block; width:27px; height:27px; margin:0 auto}
+.cawx-cert-qr svg{width:100%; height:100%; display:block}
+.cawx-cert-qrwrap small{display:block; font-size:4.5px; color:#8890A8; margin:2px 0 0}
+.cawx-cert-disc{position:relative; flex:0 0 auto; text-align:center; font-size:4.5px;
+  line-height:1.5; color:#8890A8; margin:3px 0 0}
+
+/* --- "My notes" ------------------------------------------------------------
+   Rebuilt from the real screen: search field, three filter pills, the
+   Clear filters / Expand all row, then one card per course. Each entry has a
+   coloured bar down its left edge, the quoted sentence with the highlighted
+   words tinted, and a "YOUR NOTE" block where a note was written. */
+.cawx-nsearch{display:flex; align-items:center; gap:7px; background:#fff; border:1px solid var(--app-line);
+  border-radius:999px; padding:8px 12px; margin:2px 0 8px; font-size:9.5px; color:#9AA1B8}
+.cawx-nsearch svg{width:11px; height:11px; flex:0 0 auto}
+.cawx-nfilters{display:flex; gap:6px; margin:0 0 6px; flex-wrap:wrap}
+.cawx-nfilter{display:inline-flex; align-items:center; gap:4px; font-size:8.5px; font-weight:700;
+  color:var(--app-ink); background:#fff; border:1px solid var(--app-line); border-radius:999px;
+  padding:5px 9px}
+.cawx-nfilter svg{width:9px; height:9px; opacity:.8}
+.cawx-nfilter .dot{width:7px; height:7px; border-radius:50%; background:#9AA1B8; display:inline-block}
+.cawx-nbar{display:flex; justify-content:space-between; margin:0 0 8px; font-size:8.5px; font-weight:700}
+.cawx-nbar .mut{color:#B4B9CC}
+.cawx-nbar .act{color:var(--app-primary)}
+.cawx-ncard{background:#fff; border-radius:12px; padding:11px 12px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-nhead{display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size:10px; font-weight:800; color:var(--app-primary); margin:0 0 5px}
+.cawx-nhead b{font-size:9px; font-weight:700; color:var(--app-ink-var)}
+.cawx-nlesson{font-size:8.5px; font-weight:800; color:var(--app-ink); margin:0 0 8px}
+.cawx-nentry{position:relative; display:flex; gap:8px; align-items:flex-start; width:100%;
+  padding:0 0 0 9px; margin:0 0 11px; border:0; background:transparent; font:inherit;
+  text-align:left; cursor:pointer; border-radius:6px; transition:background .15s}
+.cawx-nentry:hover{background:rgba(120,120,128,.07)}
+.cawx-nquote, .cawx-nnote{display:block}
+.cawx-nentry::before{content:""; position:absolute; left:0; top:1px; bottom:1px; width:3px;
+  border-radius:2px}
+.cawx-nentry[data-c="yellow"]::before{background:#EAB308}
+.cawx-nentry[data-c="green"]::before{background:var(--app-success)}
+.cawx-nentry[data-c="coral"]::before{background:#F4674A}
+.cawx-nbody{flex:1 1 auto; min-width:0}
+.cawx-nquote{font-size:9.5px; line-height:1.5; color:var(--app-ink); margin:0}
+.cawx-nnote{margin:6px 0 0; padding:6px 8px 6px 9px; border-left:2px solid var(--app-primary);
+  border-radius:0 7px 7px 0; background:rgba(62,68,181,.06)}
+.cawx-nnote > span{display:block}
+.cawx-nnote b{display:block; font-size:6.5px; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; color:var(--app-primary); margin:0 0 2px}
+.cawx-nnote span{font-size:9px; line-height:1.45; color:var(--app-ink)}
+.cawx-nedit{flex:0 0 auto; width:12px; height:12px; color:var(--app-ink-var); opacity:.7}
+.cawx-nedit svg{width:100%; height:100%}
+.cawx-mark[data-c="coral"]{background:rgba(244,103,74,.30)}
+/* the highlight the reader came from gets a ring, so it is findable at a glance */
+.cawx-mark-focus{box-shadow:0 0 0 2px var(--app-primary)}
+button.cawx-back{border:0; padding:0; cursor:pointer; font:inherit}
+button.cawx-back:hover{background:var(--app-primary-fixed)}
+
+/* --- three devices, one account --------------------------------------------
+   The hero lineup, reusing the site's own frame classes from style.css
+   (.lineup, .dev, .phone, .island, .ipad-bz, .macbook, .dlabel) so the devices
+   overlap, sit on one baseline and carry their labels exactly as they do on
+   the home page. Only the sizes are overridden — the frames themselves are the
+   site's. The group is scaled to the available box in caw-interactive.js. */
+.cawx-hero{width:100%; height:100%; display:flex; align-items:center; justify-content:center}
+.cawx-hero .lineup{transform-origin:center center; padding:0 18px 26px}
+.cawx-hero .dev + .dev{margin-left:-26px}
+.cawx-hero .dlabel{bottom:-24px; font-size:13px; color:var(--muted)}
+
+/* The three sizes are graded so the difference reads at a glance, the way the
+   hero does it: the phone is clearly the smallest object, the Mac the largest. */
+.cawx-hero .phone{width:140px; height:291px; padding:5px; border-radius:22px}
+.cawx-hero .phone .cawx-screen{border-radius:18px; height:100%; font-size:4px}
+.cawx-hero .island{top:5px; width:38px; height:10px; border-radius:6px}
+
+.cawx-hero .ipad-bz{width:252px; padding:6px; border-radius:14px}
+.cawx-hero .ipad-bz .cawx-screen{border-radius:9px; height:auto; aspect-ratio:1200 / 1747;
+  font-size:5.5px}
+
+.cawx-hero .macbook{width:560px}
+.cawx-hero .macbook .lid{padding:7px 7px 8px; border-radius:10px}
+.cawx-hero .macbook .lid .cawx-screen{border-radius:4px; height:auto; aspect-ratio:16 / 10;
+  font-size:8px}
+/* the base overhangs the lid, so the lineup carries padding to match */
+.cawx-hero .macbook .base{height:10px; width:110%; margin-left:-5%}
+.cawx-hero .macbook .base::after{width:56px; height:5px}
+
+/* The hero's own hover behaviour comes from style.css: hovering one device
+   grows it and eases the others back. It only reads correctly if the resting
+   lineup leaves room for that growth — see the headroom in the fit routine. */
+.cawx-hero .dev{cursor:pointer}
+
+/* the phone's own chrome: a title row and the bottom tab bar */
+.cawx-pnav{flex:0 0 auto; position:relative; display:flex; align-items:center;
+  justify-content:center; padding:2px 5px 4px; background:#fff}
+.cawx-pnav .t{font-size:6px; font-weight:800; color:var(--app-ink)}
+.cawx-pnav .cawx-tools{position:absolute; right:4px; padding:1.5px 3px}
+.cawx-pnav .cawx-tools i{width:9px; height:9px}
+.cawx-pnav .cawx-tools i svg{width:6px; height:6px}
+.cawx-ptabs{flex:0 0 auto; display:flex; justify-content:space-around; padding:3px 2px 4px;
+  background:#fff; border-top:1px solid var(--app-line)}
+.cawx-ptabs span{display:inline-flex; align-items:center; justify-content:center;
+  color:var(--app-ink-var)}
+.cawx-ptabs span.on{color:var(--app-primary)}
+.cawx-ptabs svg{width:7px; height:7px; flex:0 0 auto}
+
+/* the dashboard, shared by all three frames */
+.cawx-dhero{border-radius:9px; padding:7px 8px; margin:0 0 6px; color:#fff;
+  background:linear-gradient(135deg,#3E44B5,#575ECF)}
+.cawx-dhero b{display:block; font-size:9px; line-height:1.25; margin:0 0 2px}
+.cawx-dhero small{display:block; font-size:6.5px; line-height:1.35; opacity:.85}
+.cawx-dcont{border-radius:9px; padding:7px 8px; margin:0 0 6px; color:#fff;
+  background:linear-gradient(135deg,#F4511E,#FB8C00)}
+.cawx-dcont .k{display:block; font-size:5.5px; font-weight:800; letter-spacing:1px; opacity:.9}
+.cawx-dcont b{display:block; font-size:9px; margin:1px 0 2px}
+.cawx-dcont .r{display:flex; justify-content:space-between; align-items:center;
+  font-size:6.5px; opacity:.95}
+.cawx-dcont .res{display:inline-flex; align-items:center; gap:2px; font-weight:800}
+.cawx-dcont .res svg{width:7px; height:7px}
+.cawx-dsec{font-size:8px; font-weight:800; color:var(--app-ink); margin:0 0 5px}
+.cawx-dcard{background:#fff; border-radius:9px; padding:7px 8px; margin:0 0 6px;
+  box-shadow:0 1px 3px rgba(16,22,68,.06)}
+.cawx-dcard .top{display:flex; align-items:flex-start; gap:6px}
+.cawx-dcard .ic{flex:0 0 auto; width:15px; height:15px; border-radius:5px; color:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#3E44B5,#575ECF)}
+.cawx-dcard .ic svg{width:9px; height:9px}
+.cawx-dcard .nm{flex:1 1 auto; min-width:0}
+.cawx-dcard .nm b{display:block; font-size:8px; color:var(--app-ink); line-height:1.25}
+.cawx-dcard .nm small{display:block; font-size:6.5px; color:var(--app-ink-var); line-height:1.3}
+.cawx-dcard .seal{flex:0 0 auto; width:11px; height:11px; color:var(--app-success)}
+.cawx-dcard .seal svg{width:100%; height:100%}
+.cawx-dcard .meta{display:flex; align-items:center; justify-content:space-between;
+  margin:5px 0 4px; font-size:6px}
+.cawx-dcard .pill{font-weight:800; letter-spacing:.4px; color:var(--app-primary);
+  background:var(--app-primary-fixed); border-radius:4px; padding:2px 5px}
+.cawx-dcard .rd{color:var(--app-ink-var); font-weight:600}
+.cawx-dcard .bar{height:3px; border-radius:2px; background:rgba(62,68,181,.15)}
+.cawx-dcard .bar i{display:block; height:100%; border-radius:2px; background:var(--app-primary)}
+
+@media (max-width:640px){
+  .cawx-lineup{gap:6%}
+  .cawx-iphone{height:52%}
+  .cawx-lineup .cawx-ipad{height:76%}
+}
+
+/* --- read aloud ------------------------------------------------------------
+   The transport sits at the FOOT of the detail pane, above Previous/Next:
+   a speed control on the left, the transport centred, a close button on the
+   right, and the position and time remaining underneath. */
+.cawx-voice{flex:0 0 auto; background:var(--app-surface); border-top:1px solid var(--app-line);
+  padding:6px 8px 5px; margin:0 -1px}
+.cawx-vrow{display:flex; align-items:center; gap:6px}
+.cawx-vmid{flex:1 1 auto; display:flex; align-items:center; justify-content:center; gap:12px}
+.cawx-vbtn{border:0; background:transparent; padding:0; cursor:pointer; color:var(--app-ink);
+  display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; transition:opacity .15s}
+.cawx-vbtn:hover{opacity:.65}
+.cawx-vbtn svg{width:100%; height:100%}
+.cawx-vbtn.big{width:20px; height:20px; color:var(--app-primary)}
+.cawx-vspeed{flex:0 0 auto; width:14px; height:14px; color:var(--app-ink-var); opacity:.8}
+.cawx-vspeed svg{width:100%; height:100%}
+.cawx-vclose{flex:0 0 auto; width:14px; height:14px; border:0; background:transparent; padding:0;
+  cursor:pointer; color:var(--app-ink-var); display:inline-flex}
+.cawx-vclose:hover{color:var(--app-ink)}
+.cawx-vclose svg{width:100%; height:100%}
+.cawx-vpos{margin:4px 0 0; text-align:center; font-size:8.5px; color:var(--app-ink-var)}
+/* the block being spoken is tinted across its full width */
+.cawx-speaking{background:var(--app-primary-fixed); border-radius:5px;
+  box-shadow:0 0 0 4px var(--app-primary-fixed)}
+.cawx-tools i.on{color:var(--app-primary)}
+
+/* ===========================================================================
+   9. RESPONSIVE
+   =========================================================================== */
+@media (max-width:1024px){
+  .cawx-dialog, .cawx-modal[data-size="wide"] .cawx-dialog{width:calc(100% - 28px); margin:3vh auto; max-height:94vh}
+  .cawx-head{padding:22px 56px 14px 22px}
+  .cawx-title{font-size:23px}
+  .cawx-body{padding:20px 22px 24px}
+  .cawx-foot{padding:14px 22px 16px}
+}
+@media (max-width:640px){
+  .cawx-dialog, .cawx-modal[data-size="wide"] .cawx-dialog{
+    width:100%; margin:0; margin-top:auto; max-height:94vh;
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+  .cawx-modal.open{display:flex; flex-direction:column; justify-content:flex-end}
+  .cawx-title{font-size:21px}
+  .cawx-sub{font-size:14.5px}
+  .cawx-body{padding:16px 16px 20px}
+  .cawx-head{padding:20px 52px 12px 18px}
+  .cawx-foot{padding:12px 18px 16px}
+  .cawx-trial svg{display:none}   /* the site hides the arrow on phones too */
+  .cawx-ipad{max-width:330px; border-radius:22px; padding:9px}
+  .cawx-point{width:64px; height:64px}
+  .cawx-switch button{font-size:11.5px; padding:6px 11px}
+  .cawx-cert::before{font-size:34px}
+}
+
+
+/* ===========================================================================
+   The rest of the app: the pages behind the tab bar
+   Reproduced from the device — Saved, Stats, Settings, Profile, Search and
+   the framework picker. A control that leads nowhere in a preview carries
+   `.dim`, so it reads as unavailable instead of looking live and doing
+   nothing.
+   =========================================================================== */
+
+.cawx-side-crumb{border:0; background:transparent; font:inherit; font-size:9.5px;
+  font-weight:700; cursor:pointer; width:100%; text-align:left}
+.cawx-side-crumb:hover{color:var(--app-primary-2, var(--app-primary)); text-decoration:underline}
+
+/* --- inset row lists (Profile, Saved, Stats, Settings) --------------------- */
+.cawx-arows{background:var(--app-surface); border-radius:11px; overflow:hidden; margin:0 0 9px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-arow{display:flex; align-items:center; gap:7px; width:100%; padding:8px 9px;
+  font:inherit; text-align:left; background:transparent; border:0; cursor:pointer;
+  border-top:1px solid var(--app-line); transition:background .15s}
+.cawx-arow:first-child{border-top:0}
+.cawx-arow:hover:not(.dim){background:var(--app-primary-fixed)}
+.cawx-arow.dim{cursor:default; opacity:.42}
+.cawx-arow .ic{flex:0 0 auto; width:17px; height:17px; border-radius:5px; color:#fff;
+  display:inline-flex; align-items:center; justify-content:center; background:var(--app-primary)}
+.cawx-arow .ic[data-t="red"]{background:var(--app-error)}
+.cawx-arow .ic[data-t="amber"]{background:var(--app-cta)}
+.cawx-arow .ic[data-t="green"]{background:var(--app-success)}
+.cawx-arow .ic[data-t="blue"]{background:#0A66C2}
+.cawx-arow .ic[data-t="plain"]{background:transparent; color:var(--app-primary)}
+.cawx-arow .ic svg{width:10px; height:10px}
+.cawx-arow .tx{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px}
+.cawx-arow .tx b{font-size:10px; font-weight:600; color:var(--app-ink); letter-spacing:-.1px}
+.cawx-arow .tx small{font-size:8.5px; color:var(--app-ink-var)}
+.cawx-arow .val{flex:0 0 auto; font-size:9.5px; font-weight:600; color:var(--app-primary)}
+.cawx-arow .bdg{flex:0 0 auto; min-width:12px; height:12px; padding:0 3px; border-radius:999px;
+  background:var(--app-error); color:#fff; font-size:7.5px; font-weight:800;
+  display:inline-flex; align-items:center; justify-content:center}
+.cawx-arow .cv{flex:0 0 auto; color:var(--app-ink-var); opacity:.6; display:inline-flex}
+.cawx-arow .cv svg{width:9px; height:9px}
+
+/* --- Profile --------------------------------------------------------------- */
+.cawx-pcard{display:flex; align-items:center; gap:8px; background:var(--app-surface);
+  border-radius:11px; padding:11px 10px; margin:0 0 9px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-pcard .av{width:22px; height:22px; border-radius:50%; background:var(--app-primary);
+  color:#fff; display:inline-flex; align-items:center; justify-content:center}
+.cawx-pcard .av svg{width:13px; height:13px}
+.cawx-pcard b{font-size:12px; font-weight:800; color:var(--app-ink)}
+.cawx-signout{padding:9px; text-align:center; font-size:10.5px; font-weight:600;
+  color:var(--app-error); opacity:.55}
+
+/* --- Stats ----------------------------------------------------------------- */
+.cawx-stov{display:flex; align-items:center; gap:9px; background:var(--app-surface);
+  border-radius:11px; padding:9px 10px; margin:0 0 9px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-stov .ring{flex:0 0 auto; width:34px; height:34px; border-radius:50%;
+  background:conic-gradient(var(--app-primary) 0 56%, var(--app-primary-fixed) 56% 100%);
+  display:inline-flex; align-items:center; justify-content:center}
+.cawx-stov .ring i{width:25px; height:25px; border-radius:50%; background:var(--app-surface);
+  display:inline-flex; align-items:center; justify-content:center; font-style:normal;
+  font-size:8px; font-weight:800; color:var(--app-ink)}
+.cawx-stov .px{display:flex; flex-direction:column; gap:1px}
+.cawx-stov .px b{font-size:10px; color:var(--app-ink)}
+.cawx-stov .px small{font-size:8.5px; color:var(--app-ink-var)}
+
+.cawx-stcard{background:var(--app-surface); border-radius:11px; padding:9px 10px; margin:0 0 8px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-stcard .hd{display:flex; align-items:center; gap:6px; margin:0 0 6px}
+.cawx-stcard .hd .ic{flex:0 0 auto; width:16px; height:16px; border-radius:5px;
+  background:var(--app-primary); color:#fff; display:inline-flex; align-items:center;
+  justify-content:center}
+.cawx-stcard .hd .ic svg{width:9px; height:9px}
+.cawx-stcard .hd b{flex:1 1 auto; min-width:0; font-size:10px; font-weight:800;
+  color:var(--app-ink); letter-spacing:-.1px}
+.cawx-stcard .hd .n{flex:0 0 auto; font-size:9px; font-weight:600; color:var(--app-ink-var)}
+.cawx-stcard .bar{height:4px; border-radius:999px; background:var(--app-primary-fixed);
+  overflow:hidden; margin:0 0 7px}
+.cawx-stcard .bar i{display:block; height:100%; background:var(--app-primary)}
+.cawx-stcard .tiles{display:flex; gap:5px}
+.cawx-stcard .t{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:1px;
+  background:var(--app-grouped); border-radius:8px; padding:6px 3px;
+  font-size:7.5px; color:var(--app-ink-var)}
+.cawx-stcard .t b{font-size:11px; font-weight:800; color:var(--app-ink-var)}
+.cawx-stcard .t b.ok{color:var(--app-success)}
+
+/* --- Settings -------------------------------------------------------------- */
+.cawx-setsec{margin:2px 0 4px 3px; font-size:9px; font-weight:600; color:var(--app-ink-var)}
+.cawx-setnote{margin:-5px 3px 9px; font-size:8px; line-height:1.45; color:var(--app-ink-var);
+  opacity:.85}
+.cawx-vrow{display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:8px 9px; border-top:1px solid var(--app-line); font-size:10px; color:var(--app-ink)}
+.cawx-vrow:first-child{border-top:0}
+.cawx-vrow b{font-weight:500; color:var(--app-ink-var)}
+.cawx-vrow.link{color:var(--app-primary); opacity:.55}
+
+/* --- Saved lessons --------------------------------------------------------- */
+.cawx-slbar{display:flex; align-items:center; gap:6px; margin:0 0 8px}
+.cawx-seglist{display:inline-flex; background:rgba(120,120,128,.12); border-radius:999px;
+  padding:2.5px}
+.cawx-seglist button{font:inherit; font-size:9px; font-weight:700; cursor:pointer; border:0;
+  background:transparent; color:var(--app-ink-var); border-radius:999px; padding:4px 9px;
+  transition:background .15s, color .15s}
+.cawx-seglist button[aria-selected="true"]{background:#fff; color:var(--app-ink);
+  box-shadow:0 1px 3px rgba(16,22,68,.16)}
+.cawx-nfilter.dim{opacity:.45}
+.cawx-slrow{display:flex; align-items:center; gap:7px; background:var(--app-surface);
+  border-radius:11px; padding:8px 9px; margin:0 0 7px;
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-slrow .mk{flex:0 0 auto; display:flex; flex-direction:column; gap:2px;
+  color:var(--app-primary)}
+.cawx-slrow .mk svg{width:10px; height:10px}
+.cawx-slrow .mk .bm{color:var(--app-cta); display:inline-flex}
+.cawx-slrow .tx{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px}
+.cawx-slrow .hd{display:flex; align-items:center; gap:5px; font-size:7.5px; font-weight:700;
+  color:var(--app-ink-var)}
+.cawx-slrow .hd em{font-style:normal; font-size:7px; font-weight:800; letter-spacing:.5px;
+  color:var(--app-primary); background:var(--app-primary-fixed); border-radius:4px; padding:2px 5px}
+.cawx-slrow .hd .nt{display:inline-flex; gap:3px; color:var(--app-error)}
+.cawx-slrow .hd .nt svg{width:8px; height:8px}
+.cawx-slrow .hd .nt svg:last-child{color:var(--app-primary)}
+.cawx-slrow .tx b{font-size:10px; font-weight:700; color:var(--app-ink); letter-spacing:-.1px}
+.cawx-slrow .tr{flex:0 0 auto; color:var(--app-ink-var); opacity:.45}
+.cawx-slrow .tr svg{width:11px; height:11px}
+
+/* --- the framework picker on the dashboard --------------------------------- */
+.cawx-dhero{position:relative}
+.cawx-fwchip{display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.94);
+  color:var(--app-ink); border:0; border-radius:7px; padding:4px 7px; margin:0 0 6px;
+  font:inherit; font-size:8.5px; font-weight:700; cursor:pointer;
+  box-shadow:0 1px 3px rgba(16,22,68,.18)}
+span.cawx-fwchip{cursor:default}
+.cawx-fwchip i{font-style:normal; font-size:9px; line-height:1}
+.cawx-fwchip svg{width:8px; height:8px; opacity:.6}
+.cawx-fwmenu{position:absolute; top:26px; left:8px; z-index:4; min-width:96px; padding:3px;
+  background:rgba(252,252,255,.98); border-radius:9px;
+  box-shadow:0 2px 6px rgba(16,22,68,.18), 0 12px 28px rgba(16,22,68,.22)}
+.cawx-fwmenu button{display:flex; align-items:center; gap:5px; width:100%; padding:5px 6px;
+  font:inherit; font-size:9px; font-weight:600; color:var(--app-ink); text-align:left;
+  background:transparent; border:0; border-radius:6px; cursor:pointer}
+.cawx-fwmenu button:hover{background:var(--app-primary-fixed)}
+.cawx-fwmenu button i{font-style:normal; font-size:9px}
+.cawx-fwmenu .tk{width:8px; display:inline-flex; color:var(--app-primary); opacity:0}
+.cawx-fwmenu .tk svg{width:8px; height:8px}
+.cawx-fwmenu button[aria-checked="true"] .tk{opacity:1}
+
+/* the "Courses due" row on the dashboard */
+.cawx-drow{display:flex; align-items:center; gap:7px; background:var(--app-surface);
+  border-radius:11px; padding:8px 9px; margin:0 0 7px; color:var(--app-ink-var);
+  box-shadow:0 1px 3px rgba(16,22,68,.07), 0 6px 16px rgba(16,22,68,.05)}
+.cawx-drow.dim{opacity:.5}
+.cawx-drow .ic{flex:0 0 auto; width:17px; height:17px; border-radius:5px; color:#fff;
+  display:inline-flex; align-items:center; justify-content:center; background:var(--app-primary)}
+.cawx-drow .ic.red{background:var(--app-error)}
+.cawx-drow .ic svg{width:10px; height:10px}
+.cawx-drow .tx{flex:1 1 auto; display:flex; flex-direction:column; gap:1px}
+.cawx-drow .tx b{font-size:10px; color:var(--app-ink)}
+.cawx-drow .tx small{font-size:8.5px}
+.cawx-drow .bdg{min-width:12px; height:12px; padding:0 3px; border-radius:999px;
+  background:var(--app-error); color:#fff; font-size:7.5px; font-weight:800;
+  display:inline-flex; align-items:center; justify-content:center}
+.cawx-drow > svg{width:9px; height:9px; opacity:.5}
+
+/* --- the Search sheet ------------------------------------------------------ */
+.cawx-se-body{flex:1 1 auto; overflow-y:auto; padding:4px 2px 8px; scrollbar-width:none}
+.cawx-se-body::-webkit-scrollbar{display:none}
+.cawx-se-empty{display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:26px 12px; text-align:center; color:var(--app-ink-var)}
+.cawx-se-empty svg{width:24px; height:24px; opacity:.4}
+.cawx-se-empty b{font-size:12px; font-weight:800; color:var(--app-ink)}
+.cawx-se-empty span{font-size:9px; max-width:180px}
+.cawx-se-hit{display:flex; align-items:center; gap:7px; width:100%; padding:7px 8px;
+  font:inherit; text-align:left; background:transparent; border:0;
+  border-bottom:1px solid var(--app-line); cursor:pointer; transition:background .15s}
+.cawx-se-hit:hover{background:var(--app-primary-fixed)}
+.cawx-se-hit .cd{flex:0 0 auto; font-size:7.5px; font-weight:800; letter-spacing:.4px;
+  color:var(--app-primary); background:var(--app-primary-fixed); border-radius:4px; padding:3px 5px}
+.cawx-se-hit .tx{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px}
+.cawx-se-hit .tx b{font-size:10px; font-weight:700; color:var(--app-ink)}
+.cawx-se-hit .tx small{font-size:8px; color:var(--app-ink-var); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis}
+.cawx-se-hit > svg{width:9px; height:9px; color:var(--app-ink-var); opacity:.55}
+
+/* Inert chrome inside a simulated screen reads as unavailable rather than
+   pretending to be live: a bit grey, never invisible. */
+.cawx-lfoot.dim{opacity:.5}
+.cawx-lfoot button{font:inherit; font-size:inherit; color:inherit; background:transparent;
+  border:0; cursor:pointer; display:inline-flex; align-items:center; gap:3px; padding:0;
+  border-radius:6px; transition:color .15s}
+.cawx-lfoot button:hover{color:var(--app-primary)}
+.cawx-tools i{opacity:.45}
+.cawx-nsearch, .cawx-nfilters, .cawx-nbar{opacity:.62}
+
+/* On the dashboard the preview carries one course in full — Part-M. That card,
+   the Continue card and the sidebar row open it; every other course is dimmed
+   rather than opening material that is not really here. */
+.cawx-dcard.dim, .cawx-srow.dim, .cawx-dcont.dim{opacity:.5}
+button.cawx-dcard, button.cawx-dcont{width:100%; text-align:left; display:block;
+  font:inherit; border:0; cursor:pointer}
+button.cawx-dcont{color:#fff}
+button.cawx-dcard:hover{box-shadow:0 2px 6px rgba(16,22,68,.14),
+  0 10px 24px rgba(16,22,68,.12)}
+button.cawx-dcont:hover{filter:brightness(1.04)}
+
+/* The Mac window keeps the same inset split view as the iPad — a sidebar card
+   with a margin around it, cards that stop short of the window edge. An
+   edge-to-edge variant was tried and is not how the app looks. */
+
+/* --- the macOS window ------------------------------------------------------
+   Not an iPad: there is no status bar and no tab bar. The window's sidebar
+   carries Home / Saved / Stats, Search and Glossary, the course list, and
+   Profile at the foot. */
+.cawx-macwin{flex:1 1 auto; display:flex; min-height:0; background:var(--app-grouped)}
+.cawx-macside{flex:0 0 30%; min-width:0; display:flex; flex-direction:column;
+  background:#EDEDF0; border-right:1px solid rgba(16,22,68,.10); padding:5px 4px 4px}
+.cawx-mtog{padding:2px 4px 5px; color:var(--app-ink-var); opacity:.7}
+.cawx-mtog svg{width:9px; height:9px}
+.cawx-mrow{display:flex; align-items:center; gap:5px; padding:4px 5px; border-radius:6px;
+  font-size:7.5px; font-weight:600; color:var(--app-ink)}
+.cawx-mrow svg{flex:0 0 auto; width:8px; height:8px; color:var(--app-primary)}
+.cawx-mrow span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cawx-mrow.on{background:var(--app-primary); color:#fff}
+.cawx-mrow.on svg{color:#fff}
+.cawx-mrow.course{font-weight:500; color:var(--app-ink-var)}
+.cawx-mdiv{height:1px; margin:4px 5px; background:rgba(16,22,68,.10)}
+.cawx-msec{margin:6px 5px 2px; font-size:6.5px; font-weight:600; color:var(--app-ink-var);
+  opacity:.8}
+.cawx-mfoot{margin-top:auto; padding-top:5px}
+.cawx-macdetail{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;
+  padding:0 8px 0}
+.cawx-mactitle{flex:0 0 auto; padding:5px 2px 6px; font-size:7px; font-weight:600;
+  color:var(--app-ink-var)}
+
+/* The one course the visitor can open carries more weight than the dimmed
+   rest, so the live row is obvious at a glance. */
+button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
+
+/* ---------------------------------------------------------------------------
+   The device lineup only. The single iPad frame elsewhere is ~2.5x wider than
+   these, so type sized for it wraps two or three times more here and the cards
+   grow to fill the screen. These are the same styles at the size the lineup
+   needs, so each frame shows about as much of the page as the real device.
+   Scoped to .cawx-hero: the full-size frames are untouched.
+   --------------------------------------------------------------------------- */
+.cawx-hero .cawx-dhero{padding:5px 6px; margin:0 0 4px; border-radius:7px}
+.cawx-hero .cawx-dhero b{font-size:6.5px; line-height:1.2; margin:0 0 1.5px}
+.cawx-hero .cawx-dhero small{font-size:4.5px; line-height:1.3}
+.cawx-hero .cawx-fwchip{font-size:6px; padding:2.5px 5px; margin:0 0 4px; border-radius:5px}
+.cawx-hero .cawx-fwchip i{font-size:6.5px}
+.cawx-hero .cawx-fwchip svg{width:6px; height:6px}
+
+.cawx-hero .cawx-dcont{padding:5px 6px; margin:0 0 4px; border-radius:7px}
+.cawx-hero .cawx-dcont .k{font-size:4px}
+.cawx-hero .cawx-dcont b{font-size:6.5px; margin:1px 0 1px}
+.cawx-hero .cawx-dcont .r{font-size:4.5px}
+.cawx-hero .cawx-dcont .res svg{width:5px; height:5px}
+
+.cawx-hero .cawx-drow{padding:5px 6px; margin:0 0 4px; border-radius:7px}
+.cawx-hero .cawx-drow .ic{width:12px; height:12px; border-radius:4px}
+.cawx-hero .cawx-drow .ic svg{width:7px; height:7px}
+.cawx-hero .cawx-drow .tx b{font-size:6.5px}
+.cawx-hero .cawx-drow .tx small{font-size:5px}
+.cawx-hero .cawx-drow .bdg{min-width:8px; height:8px; font-size:5px}
+.cawx-hero .cawx-drow > svg{width:6px; height:6px}
+
+.cawx-hero .cawx-dsec{font-size:5.5px; margin:0 0 3px}
+.cawx-hero .cawx-dcard{padding:5px 6px; margin:0 0 4px; border-radius:7px}
+.cawx-hero .cawx-dcard .top{gap:4px; margin:0 0 3px}
+.cawx-hero .cawx-dcard .ic{width:12px; height:12px; border-radius:4px}
+.cawx-hero .cawx-dcard .ic svg{width:7px; height:7px}
+.cawx-hero .cawx-dcard .nm b{font-size:6px; line-height:1.2}
+.cawx-hero .cawx-dcard .nm small{font-size:4.5px; line-height:1.25}
+.cawx-hero .cawx-dcard .seal svg{width:7px; height:7px}
+.cawx-hero .cawx-dcard .meta{gap:3px; margin:0 0 3px}
+.cawx-hero .cawx-dcard .pill{font-size:4px; padding:2px 4px}
+.cawx-hero .cawx-dcard .rd{font-size:4.5px}
+.cawx-hero .cawx-dcard .bar{height:2.5px}
+
+/* the chrome around it */
+.cawx-hero .cawx-page{padding:0 1px 5px}
+.cawx-hero .cawx-status{font-size:4.5px}
+.cawx-hero .cawx-tabbar span, .cawx-hero .cawx-tabbar button{font-size:6px; padding:2.5px 5px}
+.cawx-hero .cawx-tabbar span svg, .cawx-hero .cawx-tabbar button svg{width:6px; height:6px}
+.cawx-hero .cawx-navtitle{font-size:7px}
+.cawx-hero .cawx-side-h{font-size:6.5px; padding:4px 5px}
+.cawx-hero .cawx-side-sec{font-size:5.5px; padding:4px 6px 2px}
+.cawx-hero .cawx-srow{padding:3px 4px; gap:4px}
+.cawx-hero .cawx-srow > svg{width:7px; height:7px}
+.cawx-hero .cawx-srow .nm{font-size:5.5px; line-height:1.25}
+.cawx-hero .cawx-shell{padding:4px 4px 0; gap:4px}
+
+/* the iPhone */
+.cawx-hero .cawx-pnav .t{font-size:5.5px}
+.cawx-hero .cawx-ptabs svg{width:6px; height:6px}
+/* the Mac window */
+.cawx-hero .cawx-mrow{font-size:5.5px; padding:2.5px 4px; gap:4px}
+.cawx-hero .cawx-mrow svg{width:6px; height:6px}
+.cawx-hero .cawx-msec{font-size:5px}
+.cawx-hero .cawx-mactitle{font-size:5.5px; padding:4px 2px 4px}
+.cawx-hero .cawx-macdetail{padding:0 6px}
+
+/* A further step down for the two smallest frames only — the Mac lid is twice
+   the width of the iPad's and reads correctly at the size above. */
+.cawx-hero .iphone .cawx-dhero b, .cawx-hero .ipad .cawx-dhero b{font-size:5.5px}
+.cawx-hero .iphone .cawx-dhero small, .cawx-hero .ipad .cawx-dhero small{font-size:4px}
+.cawx-hero .iphone .cawx-dhero, .cawx-hero .ipad .cawx-dhero{padding:4px 5px}
+.cawx-hero .iphone .cawx-fwchip, .cawx-hero .ipad .cawx-fwchip{font-size:5px; padding:2px 4px}
+.cawx-hero .iphone .cawx-dcont b, .cawx-hero .ipad .cawx-dcont b{font-size:5.5px}
+.cawx-hero .iphone .cawx-dcont .r, .cawx-hero .ipad .cawx-dcont .r{font-size:4px}
+.cawx-hero .iphone .cawx-dcont, .cawx-hero .ipad .cawx-dcont{padding:4px 5px}
+.cawx-hero .iphone .cawx-drow, .cawx-hero .ipad .cawx-drow{padding:4px 5px}
+.cawx-hero .iphone .cawx-drow .tx b, .cawx-hero .ipad .cawx-drow .tx b{font-size:5.5px}
+.cawx-hero .iphone .cawx-drow .tx small, .cawx-hero .ipad .cawx-drow .tx small{font-size:4.5px}
+.cawx-hero .iphone .cawx-dsec, .cawx-hero .ipad .cawx-dsec{font-size:5px}
+.cawx-hero .iphone .cawx-dcard, .cawx-hero .ipad .cawx-dcard{padding:4px 5px}
+.cawx-hero .iphone .cawx-dcard .nm b, .cawx-hero .ipad .cawx-dcard .nm b{font-size:5.2px}
+.cawx-hero .iphone .cawx-dcard .nm small,
+.cawx-hero .ipad .cawx-dcard .nm small{font-size:4px}
+.cawx-hero .iphone .cawx-dcard .ic, .cawx-hero .ipad .cawx-dcard .ic{width:10px; height:10px}
+.cawx-hero .iphone .cawx-drow .ic, .cawx-hero .ipad .cawx-drow .ic{width:10px; height:10px}
+.cawx-hero .iphone .cawx-dcard .pill, .cawx-hero .ipad .cawx-dcard .pill{font-size:3.5px}
+.cawx-hero .iphone .cawx-dcard .rd, .cawx-hero .ipad .cawx-dcard .rd{font-size:4px}
+
+/* The Mac keeps its content in an inset column, as the window does: the cards
+   stop well short of both window edges rather than running to them. */
+.cawx-hero .macbook .cawx-macdetail{padding:0}
+.cawx-hero .macbook .cawx-macdetail .cawx-page{padding:0 11% 5px}
+.cawx-hero .macbook .cawx-mactitle{padding:4px 0 4px 8px}

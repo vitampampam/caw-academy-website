@@ -96,6 +96,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
 <link rel="stylesheet" href="style.css?v=51">
+<link rel="stylesheet" href="caw-interactive.css?v=1">
 </head>
 <body>
 
@@ -245,13 +246,13 @@
       <span class="eyebrow">For people</span>
       <h2>Made for the people who keep aircraft airworthy</h2>
     </div>
-    <div class="chips reveal">
-      <span>CAMO staff &amp; post-holders</span>
-      <span>Part-145 engineers</span>
-      <span>Airworthiness review staff</span>
-      <span>Part-147 / Part-66 students</span>
-      <span>Technical &amp; asset managers</span>
-      <span>Quality &amp; safety teams</span>
+    <div class="chips reveal" role="group" aria-label="Who CAW Academy is for">
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="camo-staff">CAMO staff &amp; post-holders<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="p145-engineers">Part-145 engineers<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="review-staff">Airworthiness review staff<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="students">Part-147 / Part-66 students<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="asset-managers">Technical &amp; asset managers<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="quality-safety">Quality &amp; safety teams<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
   </section>
 
@@ -262,35 +263,65 @@
       <h2>Train your whole airworthiness team to one standard</h2>
     </div>
     <div class="grid reveal">
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <h3>One standard, whole team</h3>
         <p>One consistent baseline across every framework and Part — EASA, UK CAA, UAE GCAA and FAA — no more uneven, ad-hoc knowledge.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="one-standard">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <h3>Audit-ready evidence</h3>
         <p>Verifiable certificates — tamper-evident proof of completed study.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="audit-evidence">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
         <h3>Supports continuation training</h3>
         <p>HF, SMS, EWIS and Fuel Tank Safety — ready for your recurrent programme.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="continuation">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
         <h3>Onboard new hires faster</h3>
         <p>New hires up to speed on all the regulations they need to know, in days, self-paced.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="onboarding">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
         <h3>Manage seats &amp; track progress</h3>
         <p>Assign seats, set completion deadlines and monitor each learner's progress — restrict by email domain.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="seats">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card">
+      <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0M1 1l22 22" opacity=".0"/><path d="M5 19l-2 2M19 19l2 2"/></svg></div>
         <h3>Works where your people work</h3>
         <p>Fully offline in the hangar and at outstations — iPhone, iPad and Mac.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="offline">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -308,29 +339,49 @@
       <h2>Built to make complex regulations clear</h2>
     </div>
     <div class="props">
-      <div class="prop reveal">
+      <div class="prop reveal cawx-trigger">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
         <h3>Clear and structured</h3>
         <p>Dense regulations turned into clear, structured lessons — plain English, one idea at a
            time, with the official reference always a tap away. No dense legal wording, nothing to wade through.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="clarity" data-caw-id="clear-structured">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="prop reveal">
+      <div class="prop reveal cawx-trigger">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13l2 2 4-4"/></svg></div>
         <h3>Real-world &amp; case-based</h3>
         <p>Grounded in real experience from the CAMO office and the hangar floor. Worked
            examples and case studies show how the rule plays out in practice — not just in theory.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="clarity" data-caw-id="case-based">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="prop reveal">
+      <div class="prop reveal cawx-trigger">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
         <h3>Exam-ready</h3>
         <p>Recall-rated flashcards and a timed Exam Mode with a 75% pass mark and attempt
            history. Practise until it sticks, then walk in knowing you're ready.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="clarity" data-caw-id="exam-ready">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="prop reveal">
+      <div class="prop reveal cawx-trigger">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
         <h3>Synced &amp; yours to keep</h3>
         <p>Progress, highlights, notes and bookmarks follow you across iPhone, iPad and Mac — and you
            can export your notes to a file to share or keep.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="clarity" data-caw-id="synced">
+          See how it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -342,15 +393,20 @@
       <h2>The whole airworthiness picture in one app</h2>
     </div>
     <div class="tracks">
-      <div class="track reveal">
+      <div class="track reveal cawx-trigger">
         <span class="badge">Initial airworthiness</span>
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-21</b> — design &amp; production organisations, certification</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Certification Specifications (CS)</b> — the airworthiness codes</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Familiarisation for CAMO</b> — Part-21 &amp; CS for CAMO staff</span></li>
         </ul>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="track" data-caw-id="initial">
+          See the courses
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="track reveal">
+      <div class="track reveal cawx-trigger">
         <span class="badge">Continuing airworthiness</span>
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Part-M &amp; Part-CAMO</b> — continuing-airworthiness management</span></li>
@@ -359,8 +415,13 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>The Airworthiness Review (ARC)</b> — review, recommendation &amp; issue</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Fleet Reliability &amp; Availability</b> — reliability programme &amp; fleet availability</span></li>
         </ul>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="track" data-caw-id="continuing">
+          See the courses
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="track reveal">
+      <div class="track reveal cawx-trigger">
         <span class="badge">Asset value</span>
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Maintenance Economics &amp; Cost Management</b> — cost, benchmarking, technical-asset value across the lifecycle</span></li>
@@ -369,24 +430,34 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Aircraft Recycling &amp; End-of-Life</b> — teardown, parts &amp; records at retirement</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Offshore Registries &amp; Article 83bis</b> — cross-border registration &amp; oversight transfer</span></li>
         </ul>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="track" data-caw-id="asset">
+          See the courses
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="track reveal">
+      <div class="track reveal cawx-trigger">
         <span class="badge">Essentials</span>
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Human Factors</b> — error, culture &amp; performance</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>Safety Management Systems (SMS)</b></span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span><b>EWIS &amp; Fuel Tank Safety</b> — specialised continuation training</span></li>
         </ul>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="track" data-caw-id="essentials">
+          See the courses
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
     <div class="reveal fw-note">
       <span class="eyebrow">The same syllabus, in your framework</span>
       <div class="fw-note-card">
       <div class="fw-pills">
-        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇪🇺</span><b>EASA</b> · Part-…</span>
-        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇬🇧</span><b>UK CAA</b> · UK&nbsp;Part-…</span>
-        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇦🇪</span><b>UAE GCAA</b> · CAR-…</span>
-        <span class="fw-pill"><span class="fw-flag" aria-hidden="true">🇺🇸</span><b>FAA</b> · 14&nbsp;CFR</span>
+        <button class="fw-pill cawx-trigger" type="button" aria-haspopup="dialog" data-caw-open="framework" data-caw-id="easa"><span class="fw-flag" aria-hidden="true">🇪🇺</span><b>EASA</b> · Part-…<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="fw-pill cawx-trigger" type="button" aria-haspopup="dialog" data-caw-open="framework" data-caw-id="uk"><span class="fw-flag" aria-hidden="true">🇬🇧</span><b>UK CAA</b> · UK&nbsp;Part-…<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="fw-pill cawx-trigger" type="button" aria-haspopup="dialog" data-caw-open="framework" data-caw-id="gcaa"><span class="fw-flag" aria-hidden="true">🇦🇪</span><b>UAE GCAA</b> · CAR-…<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="fw-pill cawx-trigger" type="button" aria-haspopup="dialog" data-caw-open="framework" data-caw-id="faa"><span class="fw-flag" aria-hidden="true">🇺🇸</span><b>FAA</b> · 14&nbsp;CFR<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
       <p class="fw-note-sub">Every track above is grounded in each authority's own references.</p>
       </div>
@@ -400,35 +471,65 @@
       <h2>Everything you need to study with confidence</h2>
     </div>
     <div class="grid">
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
         <h3>Regulation-grounded lessons</h3>
         <p>Clear explanations linked to the rule and its guidance — aligned to each authority's regulations.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="lesson">
+          See a lesson
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
         <h3>Recall-rated flashcards</h3>
         <p>Self-rated cards that focus you on what you keep missing.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="flashcards">
+          Try a flashcard
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
         <h3>Timed assessments</h3>
         <p>Fresh question sets, a live timer and a 75% pass mark.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="exam">
+          Try the assessment
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
         <h3>Search &amp; Glossary</h3>
         <p>Full-text search and a built-in glossary — find any concept in seconds.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="glossary">
+          Try the glossary
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
         <h3>Progress that follows you</h3>
         <p>Read-tracking and scores, synced across iPhone, iPad and Mac.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="sync">
+          See it sync
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      <div class="card reveal">
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.2 13.5L7 22l5-3 5 3-1.2-8.5"/></svg></div>
         <h3>Verifiable certificates</h3>
         <p>Earn a certificate with a unique number and QR — confirmable in our <a href="verify.html">public registry</a>.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="certificate">
+          See a certificate
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
   </section>
@@ -460,6 +561,11 @@
       </div>
 
       <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-13.jpg?v=1" alt="CAW Academy lesson on iPad being read aloud — the paragraph being spoken is highlighted and a transport bar sits at the foot of the lesson with play, skip and position controls"></div>
+        <div class="gcap"><b>Listen to any lesson</b></div>
+      </div>
+
+      <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.jpg?v=4" alt="CAW Academy full-text search on iPad finding TCAS 7.1 across lessons, with the matching lesson and a context snippet"></div>
         <div class="gcap"><b>Search inside every lesson</b></div>
       </div>
@@ -487,6 +593,11 @@
       <div class="gcol">
         <div class="gpad"><img loading="lazy" src="screens/how-to-learn-9.jpg?v=4" alt="CAW Academy exam review on iPad marking each answer right or wrong, with the correct answer, an explanation and a link to study the source lesson"></div>
         <div class="gcap"><b>Review every answer &amp; the why</b></div>
+      </div>
+
+      <div class="gcol">
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-14.jpg?v=1" alt="CAW Academy My notes screen on iPad listing every highlight by course and lesson, each showing the highlighted sentence and the note written against it"></div>
+        <div class="gcap"><b>All your highlights in one place</b></div>
       </div>
 
       <div class="gcol">
@@ -1109,5 +1220,8 @@
     });
   })();
 </script>
+<script src="caw-content.js?v=1" defer></script>
+<script src="caw-demo-content.js?v=1" defer></script>
+<script src="caw-interactive.js?v=1" defer></script>
 </body>
 </html>
