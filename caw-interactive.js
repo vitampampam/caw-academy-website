@@ -266,15 +266,17 @@
       CAW.track('modal_open', { id: cfg.trackId || cfg.title });
     }
 
+    /* Every pop-up ends with the same call to action, so the footer is the same
+       height in all of them and there is always somewhere to go next. */
+    var DEFAULT_CTA = { label: 'Request a free trial', href: '#', trial: true };
+
     function paintFoot(cfg) {
-      if (cfg.footNote || cfg.cta) {
-        foot.hidden = false;
-        foot.innerHTML =
-          (cfg.footNote ? '<p class="cawx-foot-note">' + cfg.footNote + '</p>' : '<span></span>') +
-          (cfg.cta ? '<a class="btn btn-light cawx-trial" href="' + esc(cfg.cta.href) + '"' +
-                     (cfg.cta.trial ? ' data-cawx-trial' : '') + '>' + esc(cfg.cta.label) +
-                     ICON.arrow + '</a>' : '');
-      } else { foot.hidden = true; foot.innerHTML = ''; }
+      var cta = cfg.cta || DEFAULT_CTA;
+      foot.hidden = false;
+      foot.innerHTML =
+        (cfg.footNote ? '<p class="cawx-foot-note">' + cfg.footNote + '</p>' : '<span></span>') +
+        '<a class="btn btn-light cawx-trial" href="' + esc(cta.href) + '"' +
+        (cta.trial ? ' data-cawx-trial' : '') + '>' + esc(cta.label) + ICON.arrow + '</a>';
     }
 
     /* Swap the CONTENT of an already-open pop-up, with no skeleton and no
@@ -569,6 +571,15 @@
           api = { destroy: function () { w.removeEventListener('resize', fit); if (prev) { prev(); } } };
         }
         stage.appendChild(sw);
+        /* On a phone the switcher scrolls. It always starts at the far left, so
+           the first screen is the one in view and the fade on the right edge
+           shows there are more. */
+        var atLeft = function () { sw.scrollLeft = 0; };
+        w.requestAnimationFrame(atLeft);
+        /* focus moves after the paint and the browser scrolls the focused pill
+           into view, which left the row part-scrolled; put it back */
+        w.requestAnimationFrame(function () { w.requestAnimationFrame(atLeft); });
+        w.setTimeout(atLeft, 60);
         stage.appendChild(frameWrap);
         /* the instruction is kept for assistive technology only: the pointer is
            decorative, so its meaning still has to exist as text somewhere */
@@ -1113,10 +1124,22 @@
     /* ---- F6 · the certificate, laid out from the real issued PDF ---------- */
     certificate: function (screen) {
       var K = S.certificate;
+      /* As the app does it: the certificate opens as a preview sheet over the
+         My-certificates list, with Done at the top right. */
       screen.innerHTML = shell({
         tab: 'Profile', side: null, solo: true, title: 'My certificates', tools: false,
         back: 'profile',
-        page: '<div class="cawx-cert-wrap">' +
+        page: '<div class="cawx-page">' + rowList([{
+          icon: ICON.award, tone: 'amber', label: esc(K.course),
+          sub: 'Certificate issued &middot; tap to view or download', demo: 'certificate'
+        }]) + '</div>'
+      }) +
+        '<div class="cawx-dim" data-caw-nav="back" data-caw-fallback="page:profile"></div>' +
+        '<div class="cawx-sheet cawx-certsheet">' +
+          '<div class="cawx-sheet-h">Certificate' +
+            '<button type="button" class="done" data-caw-nav="back" ' +
+              'data-caw-fallback="page:profile">Done</button></div>' +
+        '<div class="cawx-cert-wrap">' +
           '<p class="cawx-cert-sample">Sample certificate &middot; not issued</p>' +
           '<div class="cawx-cert"><div class="cawx-cert-in">' +
           '<div class="cawx-cert-seal" aria-hidden="true">' + sealSvg() + '</div>' +
@@ -1141,8 +1164,7 @@
             '<small>Scan to verify</small></span>' +
           '</div>' +
           '<p class="cawx-cert-disc">' + esc(K.disclaimer) + '</p>' +
-        '</div></div></div>'
-      });
+        '</div></div></div></div>';
     },
 
     /* ---- F7 · reading a lesson aloud ---------------------------------------

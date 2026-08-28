@@ -97,6 +97,13 @@
 .fw-pill.cawx-trigger:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm);
   border-color:var(--indigo-3)}
 .fw-pill.cawx-trigger .cawx-sym{right:12px}
+/* `.fw-pill.cawx-trigger` out-specifies style.css's own phone rule, so the
+   phone sizes have to be restated here or the label grows back to 14px and
+   truncates inside the 2-column grid. */
+@media (max-width:560px){
+  .fw-pill.cawx-trigger{font-size:11.5px; padding:8px 22px 8px 10px; text-align:left}
+  .fw-pill.cawx-trigger .cawx-sym{right:7px; width:11px; height:11px}
+}
 
 /* --- B / C / D / F: the four kinds of card ------------------------------
    The card stays a <div> — it holds <h3> and <p>, which may not sit inside a
@@ -221,6 +228,7 @@
 .cawx-foot{flex:0 0 auto; border-top:1px solid var(--line); padding:16px 28px 18px;
   display:flex; flex-direction:column; align-items:stretch; gap:12px;
   background:var(--bg)}
+.cawx-foot[hidden]{display:none}     /* `display` beats the attribute */
 .cawx-foot .cawx-foot-note{margin:0; font-size:12.5px; color:var(--muted); line-height:1.5}
 .cawx-foot .cawx-foot-note b{color:var(--ink-soft); font-weight:800}
 .cawx-foot .cawx-foot-note a{font-weight:700; text-decoration:underline;
@@ -344,6 +352,9 @@ body.cawx-modal-open{overflow:hidden}
 .cawx-switch{flex:0 0 auto; display:flex; flex-wrap:nowrap; gap:7px; justify-content:center;
   margin:0; overflow-x:auto; padding-bottom:2px; scrollbar-width:none}
 .cawx-switch::-webkit-scrollbar{display:none}
+/* the right edge fades where the row overflows, so it reads as "more this way" */
+.cawx-switch{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%)}
 .cawx-switch button{flex:0 0 auto}
 .cawx-switch button{
   font:inherit; font-size:12.5px; font-weight:700; color:var(--ink-soft);
@@ -1291,3 +1302,160 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 .cawx-hero .macbook .cawx-macdetail{padding:0}
 .cawx-hero .macbook .cawx-macdetail .cawx-page{padding:0 11% 5px}
 .cawx-hero .macbook .cawx-mactitle{padding:4px 0 4px 8px}
+
+/* The certificate preview sheet: the artwork sits high in the sheet rather than
+   centred in it, and a little smaller, so the whole page is comfortably in view
+   under the Done bar. */
+.cawx-certsheet .cawx-cert-wrap{justify-content:flex-start; padding:2px 4px 6px; gap:4px}
+.cawx-certsheet .cawx-cert{width:88%}
+.cawx-certsheet .cawx-cert-sample{margin:0 0 1px}
+
+/* ---------------------------------------------------------------------------
+   Phones: a demo pop-up
+   Three frames side by side cannot fit a phone's width, so on a narrow screen
+   the lineup is sized to the HEIGHT it has and the stage scrolls sideways —
+   legible devices you swipe through, rather than a legible-to-nobody thumbnail
+   floating in an empty dialog. The footer is compacted to give the frame the
+   height it gives up.
+   --------------------------------------------------------------------------- */
+@media (max-width:640px){
+  .cawx-modal[data-size="wide"] .cawx-dialog{height:94vh}
+  .cawx-modal[data-size="wide"] .cawx-body{padding:8px 12px 10px}
+  .cawx-modal[data-size="wide"] .cawx-head{padding:14px 92px 8px 16px}
+  .cawx-modal[data-size="wide"] .cawx-title{font-size:17px}
+  .cawx-modal[data-size="wide"] .cawx-sub{font-size:12px; height:17px}
+
+  /* the screen switcher: a proper scroller, with the edges eased */
+  .cawx-switch{overflow-x:auto; scrollbar-width:none; padding:0 2px 8px;
+    flex-wrap:nowrap; justify-content:flex-start;
+    scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+    /* the right edge fades, so it reads as "there is more this way" */
+    -webkit-mask-image:linear-gradient(90deg,#000 0, #000 calc(100% - 26px), transparent 100%);
+    mask-image:linear-gradient(90deg,#000 0, #000 calc(100% - 26px), transparent 100%)}
+  .cawx-switch::-webkit-scrollbar{display:none}
+  .cawx-switch button{scroll-snap-align:start; flex:0 0 auto}
+
+  /* the device lineup scrolls sideways at a readable size */
+  .cawx-hero{overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
+    justify-content:flex-start; -webkit-overflow-scrolling:touch}
+  .cawx-hero::-webkit-scrollbar{display:none}
+
+  /* a compact footer, so the frame keeps the height */
+  .cawx-modal[data-size="wide"] .cawx-foot{padding:8px 14px 10px; gap:8px}
+  .cawx-modal[data-size="wide"] .cawx-foot-note{font-size:11px; line-height:1.4}
+  .cawx-modal[data-size="wide"] .cawx-trial{padding:11px 16px; font-size:14px}
+}
+
+/* ---------------------------------------------------------------------------
+   Phones: the single frame renders about 350px wide where a desktop gives it
+   ~480px, so type fixed in px reads about a quarter too large and the screen
+   looks zoomed. Below are the same sizes at 73%, measured against the real
+   captures in website/screens - the lesson title is 3.7% of the screen width
+   there and body text 2.2%. Every part of a multi-selector rule is scoped to
+   .cawx-ipad, so nothing leaks to the device lineup, which has its own sizes.
+   --------------------------------------------------------------------------- */
+@media (max-width:640px){
+  .cawx-ipad .cawx-screen{font-size:7.3px}
+  .cawx-ipad .cawx-status{font-size:6.21px}
+  .cawx-ipad .cawx-tabbar span, .cawx-ipad .cawx-tabbar button{font-size:6.21px}
+  .cawx-ipad .cawx-tabbar button{font-size:6.21px}
+  .cawx-ipad .cawx-side-h{font-size:7.67px}
+  .cawx-ipad .cawx-side-crumb{font-size:6.93px}
+  .cawx-ipad .cawx-side-course{font-size:6.57px}
+  .cawx-ipad .cawx-side-sec{font-size:6.57px}
+  .cawx-ipad .cawx-srow .code{font-size:5.47px}
+  .cawx-ipad .cawx-srow .nm{font-size:6.57px}
+  .cawx-ipad .cawx-navtitle{font-size:8.39px}
+  .cawx-ipad .cawx-seg button{font-size:6.93px}
+  .cawx-ipad .cawx-subpart{font-size:5.47px}
+  .cawx-ipad .cawx-lt{font-size:12.41px}
+  .cawx-ipad .cawx-lsub{font-size:6.93px}
+  .cawx-ipad .cawx-lmeta{font-size:6.21px}
+  .cawx-ipad .cawx-sechead{font-size:6.93px}
+  .cawx-ipad .cawx-bmrule b{font-size:5.11px}
+  .cawx-ipad .cawx-ap{font-size:6.93px}
+  .cawx-ipad .cawx-ap.lead{font-size:7.67px}
+  .cawx-ipad .cawx-ah{font-size:7.3px}
+  .cawx-ipad .cawx-alist li{font-size:6.57px}
+  .cawx-ipad .cawx-akey b{font-size:5.47px}
+  .cawx-ipad .cawx-akey span{font-size:6.57px}
+  .cawx-ipad .cawx-lfoot{font-size:6.93px}
+  .cawx-ipad .cawx-selpop{font-size:6.21px}
+  .cawx-ipad .cawx-fc-head{font-size:6.21px}
+  .cawx-ipad .cawx-fc .chip{font-size:5.47px}
+  .cawx-ipad .cawx-fc .wm{font-size:32.12px}
+  .cawx-ipad .cawx-fc .wm em{font-size:14.6px}
+  .cawx-ipad .cawx-fc .txt{font-size:8.39px}
+  .cawx-ipad .cawx-fc[data-face="a"] .txt{font-size:7.3px}
+  .cawx-ipad .cawx-fc .hint{font-size:5.84px}
+  .cawx-ipad .cawx-fc-rate button{font-size:6.93px}
+  .cawx-ipad .cawx-qcount{font-size:6.21px}
+  .cawx-ipad .cawx-qtext{font-size:7.67px}
+  .cawx-ipad .cawx-opt{font-size:6.57px}
+  .cawx-ipad .cawx-opt .ltr{font-size:5.47px}
+  .cawx-ipad .cawx-why{font-size:6.93px}
+  .cawx-ipad .cawx-solid{font-size:7.3px}
+  .cawx-ipad .cawx-timer{font-size:8.39px}
+  .cawx-ipad .cawx-qn{font-size:6.21px}
+  .cawx-ipad .cawx-warn{font-size:6.21px}
+  .cawx-ipad .cawx-result{font-size:6.57px}
+  .cawx-ipad .cawx-subnote{font-size:6.21px}
+  .cawx-ipad .cawx-sheet-h{font-size:8.03px}
+  .cawx-ipad .cawx-sheet-h .done{font-size:6.93px}
+  .cawx-ipad .cawx-gl-field input{font-size:7.3px}
+  .cawx-ipad .cawx-gl-best{font-size:5.11px}
+  .cawx-ipad .cawx-gl-t{font-size:7.3px}
+  .cawx-ipad .cawx-gl-d{font-size:6.57px}
+  .cawx-ipad .cawx-gl-empty{font-size:6.93px}
+  .cawx-ipad .cawx-gl-count{font-size:5.84px}
+  .cawx-ipad .cawx-cert-sample{font-size:4.38px}
+  .cawx-ipad .cawx-cert-brand{font-size:8.76px}
+  .cawx-ipad .cawx-cert-kind{font-size:3.65px}
+  .cawx-ipad .cawx-cert-lede{font-size:4.75px}
+  .cawx-ipad .cawx-cert-name{font-size:11.68px}
+  .cawx-ipad .cawx-cert-course{font-size:7.67px}
+  .cawx-ipad .cawx-cert-meta{font-size:5.11px}
+  .cawx-ipad .cawx-cert-no{font-size:4.38px}
+  .cawx-ipad .cawx-cert-iss small{font-size:4.01px}
+  .cawx-ipad .cawx-cert-iss b{font-size:6.21px}
+  .cawx-ipad .cawx-cert-iss em{font-size:4.01px}
+  .cawx-ipad .cawx-cert-qrwrap small{font-size:3.29px}
+  .cawx-ipad .cawx-cert-disc{font-size:3.29px}
+  .cawx-ipad .cawx-nsearch{font-size:6.93px}
+  .cawx-ipad .cawx-nfilter{font-size:6.21px}
+  .cawx-ipad .cawx-nbar{font-size:6.21px}
+  .cawx-ipad .cawx-nhead{font-size:7.3px}
+  .cawx-ipad .cawx-nhead b{font-size:6.57px}
+  .cawx-ipad .cawx-nlesson{font-size:6.21px}
+  .cawx-ipad .cawx-nquote{font-size:6.93px}
+  .cawx-ipad .cawx-nnote b{font-size:4.75px}
+  .cawx-ipad .cawx-nnote span{font-size:6.57px}
+  .cawx-ipad .cawx-pnav .t{font-size:4.38px}
+  .cawx-ipad .cawx-dhero b{font-size:6.57px}
+  .cawx-ipad .cawx-dhero small{font-size:4.75px}
+  .cawx-ipad .cawx-dcont .k{font-size:4.01px}
+  .cawx-ipad .cawx-dcont b{font-size:6.57px}
+  .cawx-ipad .cawx-dcont .r{font-size:4.75px}
+  .cawx-ipad .cawx-dsec{font-size:5.84px}
+  .cawx-ipad .cawx-dcard .nm b{font-size:5.84px}
+  .cawx-ipad .cawx-dcard .nm small{font-size:4.75px}
+  .cawx-ipad .cawx-dcard .meta{font-size:4.38px}
+  .cawx-ipad .cawx-vpos{font-size:6.21px}
+}
+
+/* ---------------------------------------------------------------------------
+   iPad: every pop-up the same size
+   A pop-up that resizes itself to its content makes the page jump as a visitor
+   moves between them. On a tablet they are all the same height and a little
+   narrower than the full width, and all of them end with the same call to
+   action, so the footer never changes height either.
+   --------------------------------------------------------------------------- */
+@media (min-width:641px) and (max-width:1024px){
+  .cawx-dialog,
+  .cawx-modal[data-size="wide"] .cawx-dialog{
+    width:min(720px, calc(100% - 56px)); height:86vh; max-height:86vh; margin:7vh auto}
+  .cawx-switch{justify-content:flex-start}
+  /* the framework pills: the symbol was crowding the label into an ellipsis */
+  .fw-pill.cawx-trigger{padding-right:24px}
+  .fw-pill.cawx-trigger .cawx-sym{right:7px; width:12px; height:12px}
+}
