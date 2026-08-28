@@ -615,7 +615,7 @@
                instead — capped, so two frames never become absurd — and let the
                stage scroll sideways if the group is then wider than the screen. */
             if (w < 560) {
-              k = Math.min((h / nh) * 0.94, 1.6);
+              k = Math.min((h / nh) * 0.96, 2.2);
               line.style.transformOrigin = 'left center';
             } else {
               line.style.transformOrigin = 'center center';
@@ -625,11 +625,24 @@
                is told the width it actually occupies */
             line.style.width = Math.round(nw * k) + 'px';
           };
+          /* The stage is measured, so it has to be measured when it is REALLY
+             there. The pop-up is built before it is shown, and on a phone the
+             browser settles the height a frame or two later still, so a single
+             rAF read a box that was too short and the group was fitted small.
+             Watch the box instead, and re-fit whenever it changes. */
           w.requestAnimationFrame(fit);
+          w.setTimeout(fit, 60);
+          w.setTimeout(fit, 260);
           w.addEventListener('resize', fit);
+          var ro = null;
+          if (w.ResizeObserver) {
+            ro = new w.ResizeObserver(function () { fit(); });
+            ro.observe(pad);
+          }
           var before = api && api.destroy;
           api = { destroy: function () {
             w.removeEventListener('resize', fit);
+            if (ro) { ro.disconnect(); }
             if (before) { before(); }
           } };
         }

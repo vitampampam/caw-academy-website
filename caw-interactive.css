@@ -860,11 +860,12 @@ button.cawx-back:hover{background:var(--app-primary-fixed)}
    inside is transform-scaled, so it keeps no layout width of its own. */
 .cawx-hero{flex:1 1 0; min-width:0; width:auto; height:100%;
   display:flex; align-items:center; justify-content:center}
-.cawx-hero .lineup{transform-origin:center center; padding:0 10px 26px}
+.cawx-hero .lineup{transform-origin:center center; padding:0 10px 34px}
 /* the devices sit further into each other, which narrows the group and leaves
    the arrows their room */
 .cawx-hero .dev + .dev{margin-left:-56px}
-.cawx-hero .dlabel{bottom:-24px; font-size:13px; color:var(--muted)}
+/* the caption sits clear of the device, not against it */
+.cawx-hero .dlabel{bottom:-32px; font-size:13px; color:var(--muted)}
 
 /* The three sizes are graded so the difference reads at a glance, the way the
    hero does it: the phone is clearly the smallest object, the Mac the largest. */
