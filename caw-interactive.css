@@ -1354,14 +1354,17 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-modal[data-size="wide"] .cawx-sub{font-size:12px; height:17px}
 
   /* the screen switcher: a proper scroller, with the edges eased */
+  /* No scroll snapping. It was pulling the row back to the nearest pill after
+     the active one had been scrolled into view, which is why the current screen's
+     pill stayed off-screen on a phone but not on a tablet. */
   .cawx-switch{overflow-x:auto; scrollbar-width:none; padding:0 2px 8px;
     flex-wrap:nowrap; justify-content:flex-start;
-    scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:none; -webkit-overflow-scrolling:touch;
     /* the right edge fades, so it reads as "there is more this way" */
     -webkit-mask-image:linear-gradient(90deg,#000 0, #000 calc(100% - 26px), transparent 100%);
     mask-image:linear-gradient(90deg,#000 0, #000 calc(100% - 26px), transparent 100%)}
   .cawx-switch::-webkit-scrollbar{display:none}
-  .cawx-switch button{scroll-snap-align:start; flex:0 0 auto}
+  .cawx-switch button{scroll-snap-align:none; flex:0 0 auto}
 
   /* A phone shows the two devices the story is actually about - "stop on the
      iPhone, carry on on the iPad". The Mac is dropped rather than shrunk to

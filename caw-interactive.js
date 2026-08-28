@@ -721,6 +721,10 @@
         w.requestAnimationFrame(showActive);
         w.requestAnimationFrame(function () { w.requestAnimationFrame(showActive); });
         w.setTimeout(showActive, 60);
+        /* iOS settles the pop-up later than the other engines, and a momentum
+           scroller can ignore an assignment made while it is still laying out */
+        w.setTimeout(showActive, 260);
+        w.setTimeout(showActive, 600);
         stage.appendChild(frameWrap);
         var inner = api && api.destroy;
         api = { destroy: function () {
