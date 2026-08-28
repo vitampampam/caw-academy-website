@@ -20,7 +20,7 @@
 <div class="wrap">
   <article class="legal">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 27 August 2026</p>
+    <p class="updated">Last updated: 28 August 2026</p>
 
     <p>CAW Academy (“the app”) is a study aid for airworthiness regulations across the
     EASA, UK CAA, UAE GCAA and FAA frameworks. We designed it to collect as little as
@@ -32,7 +32,7 @@
       <li>You can use the app <strong>without an account</strong>. If you choose to sign in to use a licence, we collect only your <strong>email address, a securely hashed password</strong>, and a record that you accepted these documents.</li>
       <li>We do <strong>not</strong> use advertising, ad networks, or third-party trackers — in the app or on this website. The website sets <strong>one cookie</strong>, and only if you sign in on it.</li>
       <li>We do <strong>not</strong> sell or share personal data.</li>
-      <li>Your study progress stays <strong>on your device</strong> — and, if you sign in to an account, also syncs to our servers so it follows you across your devices. Your <strong>highlights</strong> sync too — where they sit and what colour they are. <strong>The text of a note you write on a lesson never leaves your device at all.</strong></li>
+      <li>Your study progress stays <strong>on your device</strong> — and, if you sign in to an account, also syncs to our servers so it follows you across your devices. Your <strong>highlights and the notes you attach to them</strong> sync too, so your own study material follows you. <strong>Note text is end-to-end encrypted with a key only you hold: we store it, but we cannot read it.</strong></li>
     </ul>
 
     <h2>Reading lessons aloud</h2>
@@ -114,20 +114,28 @@
     <p>We use this only to authenticate you and unlock the content your licence grants.
     The legal basis is performance of our contract with you (providing the access you
     signed up for). If you are signed in, your <strong>learning progress, earned
-    certificates and highlights</strong> also sync to your account (see “What stays on
-    your device” above), along with some app <strong>settings</strong> (such as your
-    reminder time and hidden-course choices). A highlight syncs as its position and
-    colour only: <strong>the text of a note you attach to a lesson is never
-    uploaded</strong> — it stays on the device you wrote it on, on every platform. That
-    also means a lesson note does not follow you to another device, and is lost if you
-    delete the app; the app’s export screens let you keep a copy.</p>
+    certificates, highlights and notes</strong> also sync to your account (see “What
+    stays on your device” above), along with some app <strong>settings</strong> (such as
+    your reminder time and hidden-course choices). A highlight syncs as its position and
+    colour. The <strong>text of a note</strong> you attach to a highlight syncs as well,
+    so your notes follow you between your devices — but it is
+    <strong>end-to-end encrypted</strong> before it leaves the device, with a key that is
+    unlocked by your password and never sent to us. We store only the ciphertext and a
+    wrapped copy of that key: <strong>we cannot read your notes, and neither can anyone
+    who obtains the stored data</strong>. The note text also stays in plain form on the
+    device you wrote it on, so the feature can never lose a note.</p>
+    <p><strong>One consequence of that design, stated plainly.</strong> Because the key
+    is unlocked by your password, <strong>resetting a forgotten password makes previously
+    synced note text unreadable</strong> — the app creates a new key at the next sign-in
+    and notes encrypted under the old one cannot be recovered by us or by you. Notes
+    still held in plain form on a device you are already using are unaffected. This is
+    the necessary cost of us not holding a key of our own; the app’s export screens let
+    you keep your own copy at any time.</p>
     <p><strong>Controlled documents (organisations).</strong> Where an organisation’s
     licence includes private controlled documents, the app has a separate reader for
-    them. Highlights and notes made there <strong>do</strong> sync across your devices,
-    and the note text is <strong>end-to-end encrypted</strong> with a key derived from
-    your password: we store only the ciphertext and a wrapped key, so we can never read
-    it. The documents themselves are delivered only to accounts entitled to them and are
-    never public.</p>
+    them. Highlights and notes made there sync in exactly the same way, under the same
+    end-to-end encryption. The documents themselves are delivered only to accounts
+    entitled to them and are never public.</p>
     <p><strong>Signed-in devices.</strong> When you sign in, we record each active device
     session — a device name, an app-generated device identifier and the last-used time —
     so you can see and remotely sign out your devices, and so we can enforce a per-account
@@ -135,7 +143,15 @@
     <p><strong>Course assignments (organisations).</strong> If your organisation assigns
     you courses, we store those assignments on your account — the course, its deadline,
     your completion status and assessment score — so they appear in your app and your
-    organisation’s administrator can track the team’s progress and completion. This is
+    organisation’s administrator can track the team’s progress and completion. For an
+    <strong>assigned</strong> course, the app also reports a short progress summary —
+    how many of its lessons you have completed, the resulting percentage, your best
+    assessment score and when you last opened that course — together with the date you
+    last used the app at all, so your administrator can see who may need help and
+    whether a paid seat is being used. This is deliberately limited: your administrator
+    sees progress on <strong>courses they assigned you</strong> and nothing about
+    courses you study on your own, and never which lesson you are on, how you answered
+    a question, or anything you highlighted or noted. This is
     part of providing the licensed service to your organisation. Deleting your account
     removes them.</p>
     <p><strong>Where it is processed.</strong> Account data is stored on servers in the
