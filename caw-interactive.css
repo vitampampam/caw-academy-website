@@ -860,7 +860,13 @@ button.cawx-back:hover{background:var(--app-primary-fixed)}
    inside is transform-scaled, so it keeps no layout width of its own. */
 .cawx-hero{flex:1 1 0; min-width:0; width:auto; height:100%;
   display:flex; align-items:center; justify-content:center}
-.cawx-hero .lineup{transform-origin:center center; padding:0 10px 34px}
+/* THE ONE THAT MATTERED: style.css shrinks `.lineup` with `zoom` at several
+   widths (.64, .60, .56 on phones, 1.15 on tablets) to size the PAGE hero. The
+   pop-up reuses the same class, so every scale computed in the fit was being
+   multiplied by that zoom — the group drew at 60% of the size asked for, and no
+   change to the scale ever looked like it did anything. `zoom` is not affected
+   by the inline transform, so it has to be cancelled here. */
+.cawx-hero .lineup{zoom:1; transform-origin:center center; padding:0 10px 34px}
 /* the devices sit further into each other, which narrows the group and leaves
    the arrows their room */
 .cawx-hero .dev + .dev{margin-left:-56px}

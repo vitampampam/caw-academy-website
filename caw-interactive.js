@@ -619,19 +619,13 @@
                instead — capped, so two frames never become absurd — and let the
                stage scroll sideways if the group is then wider than the screen. */
             if (w < 560) {
-              /* Measuring the stage on a phone has proved unreliable — the box
-                 reports far less height than the pop-up actually shows — so the
-                 phone size comes from the VIEWPORT, which cannot be misread: the
-                 group is drawn at a little over half the screen's height. Any
-                 overflow scrolls sideways. */
-              /* NOT w.innerHeight: `w` is the stage width here, shadowing the
-                 window alias. The document element gives the viewport height. */
+              /* Two devices on a phone: fill the stage's width, but never take
+                 more than 60% of the screen's height. NOT w.innerHeight — `w` is
+                 the stage width here and shadows the window alias. */
               var vh = (d.documentElement && d.documentElement.clientHeight) || h;
-              k = Math.max(0.8, Math.min((vh * 0.56) / nh, 2.2));
-              line.style.transformOrigin = 'left center';
-            } else {
-              line.style.transformOrigin = 'center center';
+              k = Math.min((w / nw) * 0.99, (vh * 0.60) / nh);
             }
+            line.style.transformOrigin = 'center center';
             line.style.transform = 'scale(' + k.toFixed(3) + ')';
             /* A transform does not change layout, so the scroller has to be told
                how much room the scaled group really needs. This MUST NOT be done
