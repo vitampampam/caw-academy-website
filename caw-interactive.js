@@ -207,14 +207,31 @@
       }
     }
 
+    /* `overflow:hidden` on the body is ignored by iOS Safari, which is why the
+       page could still be scrolled behind an open pop-up on an iPad or iPhone.
+       Pinning the body at its current offset holds it still on every engine;
+       the offset is restored on close so the page does not jump. */
+    var lockedAt = 0;
     function lockScroll() {
       var gap = w.innerWidth - d.documentElement.clientWidth;
+      lockedAt = w.pageYOffset || d.documentElement.scrollTop || 0;
       if (gap > 0) { d.body.style.paddingRight = gap + 'px'; }
+      d.body.style.position = 'fixed';
+      d.body.style.top = -lockedAt + 'px';
+      d.body.style.left = '0';
+      d.body.style.right = '0';
+      d.body.style.width = '100%';
       d.body.classList.add('cawx-modal-open');
     }
     function unlockScroll() {
       d.body.classList.remove('cawx-modal-open');
       d.body.style.paddingRight = '';
+      d.body.style.position = '';
+      d.body.style.top = '';
+      d.body.style.left = '';
+      d.body.style.right = '';
+      d.body.style.width = '';
+      w.scrollTo(0, lockedAt);
     }
 
     function show(cfg, trigger) {
@@ -567,20 +584,55 @@
           };
           w.requestAnimationFrame(fit);
           w.addEventListener('resize', fit);
-          var prev = api && api.destroy;
-          api = { destroy: function () { w.removeEventListener('resize', fit); if (prev) { prev(); } } };
+          var before = api && api.destroy;
+          api = { destroy: function () {
+            w.removeEventListener('resize', fit);
+            if (before) { before(); }
+          } };
         }
-        stage.appendChild(sw);
-        /* On a phone the switcher scrolls. It always starts at the far left, so
-           the first screen is the one in view and the fade on the right edge
-           shows there are more. */
-        var atLeft = function () { sw.scrollLeft = 0; };
+        /* An arrow at each end pages the row, for anyone who is not swiping. They
+           show only while the row overflows, and each is disabled at its end of
+           the travel. The row itself always starts at the far left, so the first
+           screen is the one in view. */
+        var bar = el('div', 'cawx-switchbar');
+        var swPrev = el('button', 'cawx-swarrow', ICON.back);
+        var swNext = el('button', 'cawx-swarrow', ICON.chevron);
+        swPrev.type = swNext.type = 'button';
+        swPrev.setAttribute('aria-label', 'Earlier screens');
+        swNext.setAttribute('aria-label', 'Later screens');
+        bar.appendChild(swPrev); bar.appendChild(sw); bar.appendChild(swNext);
+
+        function page(dir) {
+          var by = Math.round(sw.clientWidth * 0.8) * dir;
+          if (sw.scrollBy) {
+            sw.scrollBy({ left: by, behavior: reducedMotion() ? 'auto' : 'smooth' });
+          } else { sw.scrollLeft += by; }
+        }
+        swPrev.addEventListener('click', function () { page(-1); });
+        swNext.addEventListener('click', function () { page(1); });
+
+        function arrows() {
+          var over = sw.scrollWidth - sw.clientWidth > 2;
+          bar.setAttribute('data-scrollable', over ? 'true' : 'false');
+          swPrev.disabled = !over || sw.scrollLeft <= 1;
+          swNext.disabled = !over || sw.scrollLeft >= sw.scrollWidth - sw.clientWidth - 1;
+        }
+        sw.addEventListener('scroll', arrows);
+        w.addEventListener('resize', arrows);
+
+        stage.appendChild(bar);
+        var atLeft = function () { sw.scrollLeft = 0; arrows(); };
         w.requestAnimationFrame(atLeft);
         /* focus moves after the paint and the browser scrolls the focused pill
            into view, which left the row part-scrolled; put it back */
         w.requestAnimationFrame(function () { w.requestAnimationFrame(atLeft); });
         w.setTimeout(atLeft, 60);
         stage.appendChild(frameWrap);
+        var inner = api && api.destroy;
+        api = { destroy: function () {
+          w.removeEventListener('resize', arrows);
+          if (inner) { inner(); }
+        } };
         /* the instruction is kept for assistive technology only: the pointer is
            decorative, so its meaning still has to exist as text somewhere */
         stage.appendChild(el('p', 'sr-only', 'What to look at: ' + esc(demo.instruction)));

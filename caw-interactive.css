@@ -89,6 +89,9 @@
    it would out-specify them and change the pill. */
 .fw-pill.cawx-trigger{
   position:relative; padding-right:32px;   /* room for the symbol only */
+  /* the authority and its reference sit closer together, so the label has the
+     width it needs inside the pill */
+  gap:4px;
   font-family:inherit; font-size:14px; font-weight:400; line-height:inherit;
   color:var(--muted); text-align:center; cursor:pointer;
   -webkit-appearance:none; appearance:none;
@@ -97,11 +100,12 @@
 .fw-pill.cawx-trigger:hover{transform:translateY(-2px); box-shadow:var(--shadow-sm);
   border-color:var(--indigo-3)}
 .fw-pill.cawx-trigger .cawx-sym{right:12px}
+.fw-pill.cawx-trigger .fw-flag{margin-right:1px}
 /* `.fw-pill.cawx-trigger` out-specifies style.css's own phone rule, so the
    phone sizes have to be restated here or the label grows back to 14px and
    truncates inside the 2-column grid. */
 @media (max-width:560px){
-  .fw-pill.cawx-trigger{font-size:11.5px; padding:8px 22px 8px 10px; text-align:left}
+  .fw-pill.cawx-trigger{font-size:11.5px; padding:8px 22px 8px 10px; text-align:left; gap:3px}
   .fw-pill.cawx-trigger .cawx-sym{right:7px; width:11px; height:11px}
 }
 
@@ -213,7 +217,12 @@
   color:var(--muted); cursor:pointer; transition:color .15s, background .15s}
 .cawx-close:hover{color:var(--ink); background:var(--bg-2)}
 
-.cawx-body{overflow-y:auto; overscroll-behavior:contain; padding:24px 28px 30px;
+/* The body FILLS the dialog, so the call to action is pinned to the bottom of
+   it. Without this a short pop-up leaves the button floating in the middle with
+   white space beneath, which is what happens as soon as the dialog has a fixed
+   height (tablets). In an auto-height dialog flex:1 changes nothing. */
+.cawx-body{flex:1 1 auto; min-height:0;
+  overflow-y:auto; overscroll-behavior:contain; padding:24px 28px 30px;
   scrollbar-width:none; -ms-overflow-style:none}
 .cawx-body::-webkit-scrollbar{width:0; height:0; display:none}
 
@@ -225,7 +234,8 @@
    click handler to that class, and this button already hands off to it.
    Footer background is the page background, so the white button sits on the same
    tone it does in the hero. */
-.cawx-foot{flex:0 0 auto; border-top:1px solid var(--line); padding:16px 28px 18px;
+.cawx-foot{flex:0 0 auto; margin-top:auto;   /* always the last thing in the dialog */
+  border-top:1px solid var(--line); padding:16px 28px 18px;
   display:flex; flex-direction:column; align-items:stretch; gap:12px;
   background:var(--bg)}
 .cawx-foot[hidden]{display:none}     /* `display` beats the attribute */
@@ -236,7 +246,11 @@
 .cawx-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
 .cawx-trial:hover{color:var(--ink)}
 
-body.cawx-modal-open{overflow:hidden}
+body.cawx-modal-open{overflow:hidden; overscroll-behavior:none}
+/* nothing behind the pop-up may take the scroll, and the pop-up itself does
+   not rubber-band past its own ends */
+.cawx-modal{overscroll-behavior:contain; touch-action:none}
+.cawx-modal .cawx-body, .cawx-modal .cawx-switch{touch-action:pan-x pan-y}
 @keyframes cawxFade{from{opacity:0}to{opacity:1}}
 @keyframes cawxRise{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
 
@@ -1454,8 +1468,56 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-dialog,
   .cawx-modal[data-size="wide"] .cawx-dialog{
     width:min(720px, calc(100% - 56px)); height:86vh; max-height:86vh; margin:7vh auto}
+  /* On a tablet the demo footer stacks like every other pop-up: the note on one
+     row, the call to action full width beneath it, so the button is the same
+     button everywhere. Side by side it was narrower than the rest. */
+  .cawx-modal[data-size="wide"] .cawx-foot{flex-direction:column; align-items:stretch; gap:10px}
+  .cawx-modal[data-size="wide"] .cawx-foot .cawx-foot-note{flex:0 0 auto; font-size:12.5px;
+    line-height:1.5; text-align:left}
+  .cawx-modal[data-size="wide"] .cawx-foot .cawx-trial{width:100%; justify-content:center}
   .cawx-switch{justify-content:flex-start}
   /* the framework pills: the symbol was crowding the label into an ellipsis */
-  .fw-pill.cawx-trigger{padding-right:24px}
+  .fw-pill.cawx-trigger{padding-right:24px; gap:3px}
+  .fw-pill.cawx-trigger .fw-flag{margin-right:0}
   .fw-pill.cawx-trigger .cawx-sym{right:7px; width:12px; height:12px}
+}
+
+/* ---------------------------------------------------------------------------
+   The trial form is one of these pop-ups
+   It is the page's own dialog (styled in a <style> block inside index.html) and
+   was 560px wide against the 720px of every pop-up, so the window changed size
+   the moment a visitor followed the call to action out of one. `.trial-modal
+   .trial-dialog` out-specifies the page's own rule, so this holds whatever
+   order the stylesheets load in — nothing in index.html has to change.
+   --------------------------------------------------------------------------- */
+.trial-modal .trial-dialog{
+  width:min(720px, calc(100% - 32px)); margin:4vh auto; max-height:92vh}
+
+@media (min-width:641px) and (max-width:1024px){
+  /* the tablet rule the pop-ups use: one size, so nothing resizes */
+  .trial-modal .trial-dialog{
+    width:min(720px, calc(100% - 56px)); height:86vh; max-height:86vh; margin:7vh auto}
+}
+@media (max-width:640px){
+  /* a sheet from the foot of the screen, as the pop-ups are */
+  .trial-modal.open{display:flex; flex-direction:column; justify-content:flex-end}
+  .trial-modal .trial-dialog{
+    width:100%; margin:0; margin-top:auto; max-height:94vh;
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+}
+
+/* --- the screen switcher's paging arrows ----------------------------------- */
+.cawx-switchbar{flex:0 0 auto; display:flex; align-items:center; gap:8px; margin:0}
+.cawx-switchbar .cawx-switch{flex:1 1 auto; min-width:0}
+.cawx-swarrow{flex:0 0 auto; width:32px; height:32px; border-radius:50%; border:1px solid var(--line);
+  background:var(--card); color:var(--ink-soft); cursor:pointer; display:none;
+  align-items:center; justify-content:center; transition:color .15s, border-color .15s, opacity .15s}
+.cawx-switchbar[data-scrollable="true"] .cawx-swarrow{display:inline-flex}
+.cawx-swarrow svg{width:15px; height:15px}
+.cawx-swarrow:hover:not(:disabled){color:var(--indigo); border-color:var(--indigo-3)}
+.cawx-swarrow:disabled{opacity:.32; cursor:default}
+@media (max-width:640px){
+  .cawx-swarrow{width:28px; height:28px}
+  .cawx-swarrow svg{width:13px; height:13px}
+  .cawx-switchbar{gap:5px}
 }
