@@ -212,6 +212,16 @@
        Pinning the body at its current offset holds it still on every engine;
        the offset is restored on close so the page does not jump. */
     var lockedAt = 0;
+    /* Pinning the body holds the page, but iOS still lets a touch that is
+       already in flight drag the document for a moment, which reads as the site
+       coming loose behind the pop-up. Refusing the touch outright removes that
+       moment; touches inside the pop-up's own scrolling area still work. */
+    function blockTouch(e) {
+      if (!open) { return; }
+      var t = e.target;
+      if (body && (body === t || body.contains(t))) { return; }
+      if (e.cancelable) { e.preventDefault(); }
+    }
     function lockScroll() {
       var gap = w.innerWidth - d.documentElement.clientWidth;
       lockedAt = w.pageYOffset || d.documentElement.scrollTop || 0;
@@ -222,6 +232,7 @@
       d.body.style.right = '0';
       d.body.style.width = '100%';
       d.body.classList.add('cawx-modal-open');
+      d.addEventListener('touchmove', blockTouch, { passive: false });
     }
     function unlockScroll() {
       /* style.css sets `html{scroll-behavior:smooth}`, so restoring the offset
@@ -229,6 +240,7 @@
          restore has to be instant: an inline style on <html> outranks the
          stylesheet, and is put back immediately afterwards. */
       var root = d.documentElement, was = root.style.scrollBehavior;
+      d.removeEventListener('touchmove', blockTouch, { passive: false });
       root.style.scrollBehavior = 'auto';
       d.body.classList.remove('cawx-modal-open');
       d.body.style.paddingRight = '';

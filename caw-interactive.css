@@ -1593,3 +1593,25 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    and (pointer:coarse){
   .cawx-modal .cawx-foot .cawx-trial{display:none}
 }
+
+/* ---------------------------------------------------------------------------
+   iOS zooms the page whenever a text field smaller than 16px is focused, which
+   is what happened on the glossary and search sheets — their input matches the
+   app's own type size, about 7px. The field is given a real 16px and then
+   scaled back down, so it looks the same and iOS leaves the page alone. The
+   selector carries `.cawx-ipad` because the phone type block sets the size at
+   that specificity.
+   --------------------------------------------------------------------------- */
+@media (max-width:640px){
+  .cawx-ipad .cawx-gl-field input, .cawx-gl-field input{
+    font-size:16px; transform:scale(.46); transform-origin:left center;
+    width:217%; flex:0 0 217%}
+}
+
+/* The footer disclaimer used to run wider than the Privacy…LinkedIn row above
+   it. Both are bounded to the same column, so their edges line up. */
+@media (max-width:560px){
+  .foot-center .foot-nav,
+  .foot-center .disclaim{max-width:min(100%, 340px); margin-left:auto; margin-right:auto}
+  .foot-center .disclaim{text-align:left}
+}

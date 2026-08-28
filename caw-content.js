@@ -940,16 +940,6 @@
       notes: 'This preview shows the behaviour only. It plays no sound.'
     },
     {
-      id: 'sync',
-      card: 'Progress that follows you',
-      title: 'The same progress on every device',
-      instruction: 'Compare the two screens. The Continue card, the percentage and the per-course progress are identical, because both devices are signed in to the same account.',
-      intro: 'Progress, highlights, notes and bookmarks are tied to the account, not the device. Stop on the iPhone in the hangar and carry on from the same lesson on the iPad at the desk.',
-      demo: 'sync',
-      layout: 'devices',
-      notes: 'Progress syncs through the CAW account. Highlights and notes stay on the device and are not shared.'
-    },
-    {
       id: 'exam',
       card: 'Assessment',
       title: 'Assessment & quiz',
@@ -966,7 +956,18 @@
       intro: 'A certificate is issued once every lesson in a course is complete and the assessment is passed. The number is issued centrally, so it is unique across all holders.',
       demo: 'certificate',
       notes: 'The screen below is a sample layout, marked as such. It is not a real certificate and cannot be verified.'
+    },
+    {
+      id: 'sync',
+      card: 'Progress that follows you',
+      title: 'The same progress on every device',
+      instruction: 'Compare the two screens. The Continue card, the percentage and the per-course progress are identical, because both devices are signed in to the same account.',
+      intro: 'Progress, highlights, notes and bookmarks are tied to the account, not the device. Stop on the iPhone in the hangar and carry on from the same lesson on the iPad at the desk.',
+      demo: 'sync',
+      layout: 'devices',
+      notes: 'Progress syncs through the CAW account. Highlights and notes stay on the device and are not shared.'
     }
+
   ];
 
   /* --- export ----------------------------------------------------------- */
