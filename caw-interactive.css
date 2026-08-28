@@ -1521,3 +1521,17 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-swarrow svg{width:13px; height:13px}
   .cawx-switchbar{gap:5px}
 }
+
+/* --- stepping between screens from beside the frame ------------------------
+   The same move as the pills above, within reach of the thumb that is already
+   on the device. Hidden on phones, where the frame needs the whole width and
+   the switcher's own arrows are right above it. */
+.cawx-step{flex:0 0 auto; width:40px; height:40px; margin:0 6px; border-radius:50%;
+  border:1px solid var(--line); background:var(--card); color:var(--ink-soft);
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow-sm); transition:color .15s, border-color .15s, transform .15s}
+.cawx-step svg{width:18px; height:18px}
+.cawx-step:hover:not(:disabled){color:var(--indigo); border-color:var(--indigo-3);
+  transform:scale(1.06)}
+.cawx-step:disabled{opacity:.3; cursor:default; box-shadow:none}
+@media (max-width:640px){ .cawx-step{display:none} }

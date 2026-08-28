@@ -884,7 +884,7 @@
   var DEMOS = [
     {
       id: 'lesson',
-      card: 'A lesson',
+      card: 'Lessons',
       title: 'Inside a lesson',
       instruction: 'Look at the numbered section headers as you scroll. Every lesson in the catalogue uses the same five sections, in the same order.',
       intro: 'M.A.201 Responsibilities, from the Part-M course, shown as it appears on iPad. This is the real lesson text, not a summary written for the website.',
@@ -909,7 +909,7 @@
       intro: 'Every lesson has its own quiz on the third tab. It marks the answer immediately and explains why the other options are wrong — this is the real M.A.201 question set.',
       demo: 'quiz',
       pointer: { x: 72, y: 43, label: 'Pointing at the answer options' },
-      notes: 'The worked examples are prose inside the lesson itself — see the "A lesson" screen, section 3. The quiz is the interactive part.'
+      notes: 'The worked examples are prose inside the lesson itself — see the Lessons screen, section 3. The quiz is the interactive part.'
     },
     {
       id: 'glossary',

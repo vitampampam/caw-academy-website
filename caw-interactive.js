@@ -564,7 +564,28 @@
           pad.appendChild(pt);
         }
 
+        /* An arrow each side of the frame steps to the previous or next screen.
+           It goes through openDemo, so the pills above follow and the pop-up
+           title and note change with it. */
+        var order = C.demos.map(function (dm) { return dm.id; });
+        var here = order.indexOf(demo.id);
+        function stepper(dir, label) {
+          var b = el('button', 'cawx-step', dir < 0 ? ICON.back : ICON.chevron);
+          b.type = 'button';
+          b.setAttribute('aria-label', label);
+          var to = order[here + dir];
+          if (!to) { b.disabled = true; }
+          else {
+            b.addEventListener('click', function () {
+              openDemo(to);
+              CAW.track('demo_step', { to: to });
+            });
+          }
+          return b;
+        }
+        frameWrap.appendChild(stepper(-1, 'Previous screen'));
         frameWrap.appendChild(pad);
+        frameWrap.appendChild(stepper(1, 'Next screen'));
 
         /* The hero frames are laid out at their natural pixel size, then scaled
            as one group to fill the space — the alternative, restyling every
@@ -985,7 +1006,7 @@
 
     /* ---- F3 · the lesson quiz, with the app's answer feedback ------------
        The worked examples in the app are PROSE inside the lesson body (see the
-       "A lesson" screen, section 3). The interactive part of a lesson is its
+       Lessons screen, section 3). The interactive part of a lesson is its
        quiz, so that is what this demo shows. */
     quiz: function (screen) {
       var Q = D.quiz, i = 0, picked = null;
