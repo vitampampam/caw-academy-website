@@ -603,13 +603,27 @@
             var line = qs('.lineup', pad);
             if (!line) { return; }
             line.style.transform = 'none';
+            line.style.width = '';
             var w = pad.clientWidth, h = pad.clientHeight;
             var nw = line.offsetWidth, nh = line.offsetHeight + 26;   /* + the labels */
             if (!nw || !nh) { return; }
             /* 0.86 headroom: hovering a device grows it to 1.16x, and it has to
                stay inside the frame when it does */
             var k = Math.min(w / nw, h / nh) * 0.86;
+            /* On a phone three frames side by side cannot fit the width, and
+               fitting to it leaves a thumbnail in a tall empty stage. Fit the
+               HEIGHT instead and let the stage scroll sideways: the devices stay
+               readable and the visitor swipes between them. */
+            if (w < 560 && w / nw < h / nh) {
+              k = (h / nh) * 0.92;
+              line.style.transformOrigin = 'left center';
+            } else {
+              line.style.transformOrigin = 'center center';
+            }
             line.style.transform = 'scale(' + k.toFixed(3) + ')';
+            /* the scaled group keeps its unscaled layout width, so the scroller
+               is told the width it actually occupies */
+            line.style.width = Math.round(nw * k) + 'px';
           };
           w.requestAnimationFrame(fit);
           w.addEventListener('resize', fit);

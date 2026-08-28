@@ -1356,10 +1356,12 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-switch::-webkit-scrollbar{display:none}
   .cawx-switch button{scroll-snap-align:start; flex:0 0 auto}
 
-  /* the device lineup scrolls sideways at a readable size */
+  /* the device lineup scrolls sideways at a readable size; the group is scaled
+     from its left edge so it starts flush and the overflow is scrollable */
   .cawx-hero{overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
-    justify-content:flex-start; -webkit-overflow-scrolling:touch}
+    justify-content:flex-start; align-items:center; -webkit-overflow-scrolling:touch}
   .cawx-hero::-webkit-scrollbar{display:none}
+  .cawx-hero .lineup{flex:0 0 auto}
 
   .cawx-modal[data-size="wide"] .cawx-foot{padding:8px 14px 10px; gap:8px}
   .cawx-modal[data-size="wide"] .cawx-foot-note{font-size:11px; line-height:1.4}
@@ -1547,8 +1549,14 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   transform:translateY(-50%) scale(1.06)}
 .cawx-step:disabled{opacity:.3; cursor:default; box-shadow:none}
 @media (max-width:640px){
-  .cawx-step{display:none}
-  .cawx-framewrap{padding:0}      /* the arrows are hidden, so take the room back */
+  /* The frame is sized from its height, so a phone leaves a clear margin either
+     side of it. The arrows live in that margin: smaller, and pinned to the
+     stage edges rather than taking layout width off the frame. */
+  .cawx-step{width:30px; height:30px}
+  .cawx-step svg{width:14px; height:14px}
+  .cawx-framewrap{padding:0}
+  .cawx-step.prev{left:0}
+  .cawx-step.next{right:0}
 }
 
 /* ---------------------------------------------------------------------------
