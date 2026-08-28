@@ -1356,8 +1356,13 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-switch::-webkit-scrollbar{display:none}
   .cawx-switch button{scroll-snap-align:start; flex:0 0 auto}
 
-  /* the device lineup scrolls sideways at a readable size; the group is scaled
-     from its left edge so it starts flush and the overflow is scrollable */
+  /* A phone shows the two devices the story is actually about - "stop on the
+     iPhone, carry on on the iPad". The Mac is dropped rather than shrunk to
+     illegibility; the group is measured after this, so the two that remain get
+     the whole width. */
+  .cawx-hero .dev.mac{display:none}
+  /* the lineup scrolls sideways at a readable size; the group is scaled from
+     its left edge so it starts flush and the overflow is scrollable */
   .cawx-hero{overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
     justify-content:flex-start; align-items:center; -webkit-overflow-scrolling:touch}
   .cawx-hero::-webkit-scrollbar{display:none}
@@ -1554,7 +1559,9 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
      stage edges rather than taking layout width off the frame. */
   .cawx-step{width:30px; height:30px}
   .cawx-step svg{width:14px; height:14px}
-  .cawx-framewrap{padding:0}
+  /* the stage keeps a lane at each side for the arrows, so they never sit on
+     the device frame; the frame gives up those few pixels of width */
+  .cawx-framewrap{padding:0 36px}
   .cawx-step.prev{left:0}
   .cawx-step.next{right:0}
 }
