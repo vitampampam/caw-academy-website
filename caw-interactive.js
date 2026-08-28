@@ -619,7 +619,15 @@
                instead — capped, so two frames never become absurd — and let the
                stage scroll sideways if the group is then wider than the screen. */
             if (w < 560) {
-              k = Math.min((h / nh) * 0.96, 2.2);
+              /* Measuring the stage on a phone has proved unreliable — the box
+                 reports far less height than the pop-up actually shows — so the
+                 phone size comes from the VIEWPORT, which cannot be misread: the
+                 group is drawn at a little over half the screen's height. Any
+                 overflow scrolls sideways. */
+              /* NOT w.innerHeight: `w` is the stage width here, shadowing the
+                 window alias. The document element gives the viewport height. */
+              var vh = (d.documentElement && d.documentElement.clientHeight) || h;
+              k = Math.max(0.8, Math.min((vh * 0.56) / nh, 2.2));
               line.style.transformOrigin = 'left center';
             } else {
               line.style.transformOrigin = 'center center';
@@ -634,6 +642,7 @@
             line.style.marginRight = Math.round(nw * (k - 1)) + 'px';
             /* what the fit actually measured — type CAW.fit in the console */
             CAW.fit = { stageW: w, stageH: h, groupW: nw, groupH: nh,
+                        viewportH: (d.documentElement || {}).clientHeight,
                         scale: +k.toFixed(3), phone: w < 560 };
           };
           /* The stage is measured, so it has to be measured when it is REALLY
