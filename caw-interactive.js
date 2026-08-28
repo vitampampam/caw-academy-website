@@ -577,7 +577,8 @@
         var order = C.demos.map(function (dm) { return dm.id; });
         var here = order.indexOf(demo.id);
         function stepper(dir, label) {
-          var b = el('button', 'cawx-step', dir < 0 ? ICON.back : ICON.chevron);
+          var b = el('button', 'cawx-step ' + (dir < 0 ? 'prev' : 'next'),
+                     dir < 0 ? ICON.back : ICON.chevron);
           b.type = 'button';
           b.setAttribute('aria-label', label);
           var to = order[here + dir];

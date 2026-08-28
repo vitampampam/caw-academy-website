@@ -358,7 +358,8 @@ body.cawx-modal-open{overflow:hidden; overscroll-behavior:none}
   flex:1 1 auto; min-height:0; width:100%}
 /* the frame lives in its own box so it can be measured against the height that
    is actually left, rather than fighting the switcher and the caption for it */
-.cawx-framewrap{flex:1 1 auto; min-height:0; display:flex;
+.cawx-framewrap{position:relative; padding:0 48px;
+  flex:1 1 auto; min-height:0; display:flex;
   align-items:center; justify-content:center}
 
 /* the switcher that moves between the eight demos — INSIDE the pop-up, so the
@@ -1532,12 +1533,21 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    The same move as the pills above, within reach of the thumb that is already
    on the device. Hidden on phones, where the frame needs the whole width and
    the switcher's own arrows are right above it. */
-.cawx-step{flex:0 0 auto; width:40px; height:40px; margin:0 6px; border-radius:50%;
+/* Pinned to the edges of the stage, not laid out beside the content: the frame
+   is narrow on most screens and wide on the device lineup, and a centred row
+   moved the arrows every time the screen changed. */
+.cawx-step{position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:40px; height:40px; border-radius:50%;
   border:1px solid var(--line); background:var(--card); color:var(--ink-soft);
   cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
   box-shadow:var(--shadow-sm); transition:color .15s, border-color .15s, transform .15s}
+.cawx-step.prev{left:2px}
+.cawx-step.next{right:2px}
 .cawx-step svg{width:18px; height:18px}
 .cawx-step:hover:not(:disabled){color:var(--indigo); border-color:var(--indigo-3);
-  transform:scale(1.06)}
+  transform:translateY(-50%) scale(1.06)}
 .cawx-step:disabled{opacity:.3; cursor:default; box-shadow:none}
-@media (max-width:640px){ .cawx-step{display:none} }
+@media (max-width:640px){
+  .cawx-step{display:none}
+  .cawx-framewrap{padding:0}      /* the arrows are hidden, so take the room back */
+}
