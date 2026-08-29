@@ -785,7 +785,7 @@
        wording matches the app, and the 10-character rule (the server's minimum)
        is stated and enforced here rather than surfacing as a rejection. */
     $("passwordLbl").textContent = register ? "Choose a password" : "Password";
-    $("password").placeholder = register ? "At least 10 characters" : "Your password";
+    $("password").placeholder = register ? "At least 10 characters" : "Your CAW Academy password";
     if (register) { $("password").setAttribute("minlength", "10"); }
     else { $("password").removeAttribute("minlength"); }
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
@@ -833,7 +833,15 @@
     btn.disabled = true;
     request("POST", path, body, false)
       .then(function (b) { accessToken = b.accessToken || null; $("password").value = ""; return enter(); })
-      .catch(function (err) { showMessage("authMsg", err.message, "err"); })
+      .catch(function (err) {
+        /* The commonest case: they already have a CAW Academy account from the
+           app. It is the SAME account here, so the answer is to sign in, not to
+           make another one. */
+        var msg = /already exists/i.test(err.message || "")
+          ? "You already have a CAW Academy account with this email. Choose Sign in above and use that password — it is the same account."
+          : err.message;
+        showMessage("authMsg", msg, "err");
+      })
       .finally(function () { btn.disabled = false; });
   });
 
