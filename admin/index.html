@@ -67,7 +67,7 @@
   .foot-nav a:hover{color:var(--indigo, #3E44B5)}
   .foot-center .disclaim{margin:0 auto; font-size:11.5px}
   .signin-wrap{max-width:560px; margin:6vh auto 48px; padding:0 20px}
-  /* Compact spacing so the taller "Create admin account" card fits without scrolling */
+  /* Compact spacing so the taller "Request admin account" card fits without scrolling */
   #signinView .sub{margin-bottom:16px}
   #signinView label.lbl{margin-bottom:4px}
   #signinView .field{margin-bottom:10px}
@@ -265,7 +265,7 @@
     <p class="sub" id="authSub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
     <div class="tabs">
       <div class="tab active" id="tabSignIn">Sign in</div>
-      <div class="tab" id="tabRegister">Create admin account</div>
+      <div class="tab" id="tabRegister">Request admin account</div>
     </div>
     <form id="authForm" autocomplete="on">
       <div id="regNames" class="hidden">
@@ -283,7 +283,7 @@
         <span>I agree to the <a href="../terms.html" target="_blank" rel="noopener">Terms of Use</a>
           and <a href="../privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
       </label>
-      <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
+      <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin access is for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Your account is created straight away, and we activate its admin access before you can manage the team — we will email you when it is ready. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
       <p id="forgotRow" style="text-align:center;margin:12px 0 0"><span id="forgotLink" class="link-off" aria-disabled="true" style="font-size:14px">Forgot password?</span></p>
@@ -296,7 +296,7 @@
 <main class="signin-wrap hidden" id="deniedView">
   <div class="card">
     <h1>Not an administrator</h1>
-    <p class="sub" id="deniedMsg">This account is not set up as an organisation administrator.</p>
+    <p class="sub" id="deniedMsg">This account is not set up as an organisation administrator yet. If you have just requested admin access, we will email you once it is activated.</p>
     <button class="btn btn-ghost" id="deniedSignOut">Sign out</button>
   </div>
 </main>

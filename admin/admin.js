@@ -771,7 +771,7 @@
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
   $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
-  // ── Auth (Sign in / Create admin account tabs) ─────────────────────────────
+  // ── Auth (Sign in / Request admin account tabs) ────────────────────────────
   var registerMode = false;
   $("tabSignIn").addEventListener("click", function () { setMode(false); });
   $("tabRegister").addEventListener("click", function () { setMode(true); });
@@ -779,16 +779,16 @@
     registerMode = register;
     $("tabSignIn").classList.toggle("active", !register);
     $("tabRegister").classList.toggle("active", register);
-    $("authSubmit").textContent = register ? "Create admin account" : "Sign in";
+    $("authSubmit").textContent = register ? "Request admin account" : "Sign in";
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
     $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
     $("consentRow").classList.toggle("hidden", !register); // consent is only for a NEW account
     $("portalNote").classList.toggle("hidden", register);
     $("forgotRow").classList.toggle("hidden", register);   // forgot-password only for sign-in
-    $("authTitle").textContent = register ? "Create admin account" : "Team admin";
+    $("authTitle").textContent = register ? "Request admin account" : "Team admin";
     $("authSub").textContent = register
-      ? "Create an administrator account for your organisation to manage its team, course assignments and deadlines."
+      ? "Request administrator access for your organisation. The account is created straight away; we activate its admin access before it can manage the team, course assignments and deadlines."
       : "Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.";
     showMessage("authMsg", "", "err");
   }
@@ -809,7 +809,7 @@
         return;
       }
       if (!$("acceptTerms").checked) {
-        showMessage("authMsg", "Please accept the Terms of Use and Privacy Policy to create an account.", "err");
+        showMessage("authMsg", "Please accept the Terms of Use and Privacy Policy to request an account.", "err");
         return;
       }
       body.firstName = firstName;
