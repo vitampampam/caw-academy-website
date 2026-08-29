@@ -93,6 +93,12 @@
     font-size:13px; color:var(--muted); line-height:1.5}
   .acct-consent input{flex:0 0 auto; width:18px; height:18px; margin:1px 0 0; accent-color:var(--indigo)}
   .acct-consent a{color:var(--indigo); font-weight:600}
+  /* Live password feedback, as the app gives: the length rule while it is unmet,
+     then whether the two entries match. */
+  .pw-hint{font-size:13px; line-height:1.45; margin:-6px 0 12px}
+  .pw-hint.muted{color:var(--muted)}
+  .pw-hint.err{color:var(--err)}
+  .pw-hint.ok{color:var(--success)}
   /* Chrome paints its own background on an autofilled field; pinning it keeps a
      filled field the same colour as an empty one. */
   .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus{
@@ -278,6 +284,11 @@
       <input class="field" id="email" type="email" autocomplete="username" required placeholder="e.g. alex.morgan@yourairline.com">
       <label class="lbl" for="password" id="passwordLbl">Password</label>
       <input class="field" id="password" type="password" autocomplete="current-password" required placeholder="Your password">
+      <div id="confirmRow" class="hidden">
+        <label class="lbl" for="password2">Confirm password</label>
+        <input class="field" id="password2" type="password" autocomplete="new-password" placeholder="Repeat the password">
+      </div>
+      <p id="pwHint" class="pw-hint hidden"></p>
       <label class="acct-consent hidden" id="consentRow" for="acceptTerms">
         <input type="checkbox" id="acceptTerms">
         <span>I agree to the <a href="../terms.html" target="_blank" rel="noopener">Terms of Use</a>

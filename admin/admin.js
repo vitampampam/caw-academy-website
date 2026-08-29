@@ -16,6 +16,9 @@
   // The documents' "Last updated" date. Must match terms.html, privacy.html,
   // account.js and the apps' LEGAL_DOCUMENTS_VERSION.
   var LEGAL_DOCUMENTS_VERSION = "2026-08-28";
+  // The server's minimum (schemas.ts: z.string().min(10)). Declared here because
+  // setMode() runs during init and reads it.
+  var MIN_PASSWORD = 10;
   var API_BASE = "https://api.caw-academy.com"; // licensing/account service base URL
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -791,6 +794,9 @@
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
     $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
     $("consentRow").classList.toggle("hidden", !register); // consent is only for a NEW account
+    $("confirmRow").classList.toggle("hidden", !register); // confirm only when choosing one
+    if (!register) { $("password2").value = ""; }
+    updatePasswordHint();
     $("portalNote").classList.toggle("hidden", register);
     $("forgotRow").classList.toggle("hidden", register);   // forgot-password only for sign-in
     $("authTitle").textContent = register ? "Request admin account" : "Team admin";
@@ -799,6 +805,27 @@
       : "Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.";
     showMessage("authMsg", "", "err");
   }
+
+  /* The same feedback the app gives while choosing a password: the length rule
+     is shown while it is unmet, then whether the two entries agree. Nothing is
+     shown when signing in, where there is one field and nothing to compare. */
+  function updatePasswordHint() {
+    var hint = $("pwHint");
+    if (!registerMode) { hint.className = "pw-hint hidden"; hint.textContent = ""; return; }
+    var pw = $("password").value, pw2 = $("password2").value;
+    var text = "", tone = "muted";
+    if (pw.length < MIN_PASSWORD) {
+      text = "The password must be no less than " + MIN_PASSWORD + " characters";
+    } else if (pw2 && pw2 !== pw) {
+      text = "Passwords do not match"; tone = "err";
+    } else if (pw2 && pw2 === pw) {
+      text = "Passwords match"; tone = "ok";
+    }
+    hint.textContent = text;
+    hint.className = "pw-hint " + tone + (text ? "" : " hidden");
+  }
+  $("password").addEventListener("input", updatePasswordHint);
+  $("password2").addEventListener("input", updatePasswordHint);
 
   $("authForm").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -813,6 +840,16 @@
       var lastName = $("lastName").value.trim();
       if (!firstName || !lastName) {
         showMessage("authMsg", "Enter your first and last name to create an account.", "err");
+        return;
+      }
+      if (password.length < MIN_PASSWORD) {
+        showMessage("authMsg", "The password must be no less than " + MIN_PASSWORD + " characters.", "err");
+        $("password").focus();
+        return;
+      }
+      if ($("password2").value !== password) {
+        showMessage("authMsg", "The two passwords do not match.", "err");
+        $("password2").focus();
         return;
       }
       if (!$("acceptTerms").checked) {
