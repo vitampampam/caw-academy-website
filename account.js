@@ -75,7 +75,19 @@
     if (!text) return;
     var box = document.createElement("div");
     box.className = "acct-msg " + kind;
-    box.textContent = text; // textContent — never innerHTML (no injection)
+    /* Any email address in the message becomes a real mailto link. Built as DOM
+       nodes, so the message text is still never passed through innerHTML — the
+       no-injection rule these boxes were written with is kept. */
+    var re = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, last = 0, m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) { box.appendChild(document.createTextNode(text.slice(last, m.index))); }
+      var a = document.createElement("a");
+      a.href = "mailto:" + m[0];
+      a.textContent = m[0];
+      box.appendChild(a);
+      last = re.lastIndex;
+    }
+    if (last < text.length) { box.appendChild(document.createTextNode(text.slice(last))); }
     el.appendChild(box);
   }
 
