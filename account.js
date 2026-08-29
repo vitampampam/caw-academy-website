@@ -16,7 +16,7 @@
   // The "Last updated" date shared by terms.html and privacy.html, sent with the
   // registration consent and stored against the account. BUMP IT whenever either
   // document is revised, in step with the apps' LEGAL_DOCUMENTS_VERSION constants.
-  var LEGAL_DOCUMENTS_VERSION = "2026-08-27";
+  var LEGAL_DOCUMENTS_VERSION = "2026-08-28";
   // Self-serve password reset. FALSE, temporarily: the reset link is delivered by
   // email and the server ships with SMTP dark, so the message is logged and dropped —
   // the page would promise "a reset link is on its way" and nothing would arrive.
