@@ -294,7 +294,7 @@
       if (cfg.size !== 'wide') { root.classList.remove('cawx-max'); }
       if (cfg.eyebrow) { eyebrowEl.hidden = false; eyebrowEl.textContent = cfg.eyebrow; }
       else { eyebrowEl.hidden = true; eyebrowEl.textContent = ''; }
-      titleEl.textContent = cfg.title || '';
+      setTitle(cfg);
       subEl.innerHTML = cfg.sub || '';
       subEl.hidden = !cfg.sub;
 
@@ -315,7 +315,9 @@
       body.scrollTop = 0;
 
       if (cfg.focusTitle !== false) {
-        w.setTimeout(function () { titleEl.focus(); }, 40);
+        w.setTimeout(function () {
+          (titleEl.hidden ? dialog : titleEl).focus();
+        }, 40);
       }
 
       if (cfg.render) {
@@ -336,6 +338,23 @@
        height in all of them and there is always somewhere to go next. */
     var DEFAULT_CTA = { label: 'Request a free trial', href: '#', trial: true };
 
+    /* A pop-up may carry no heading — the framework ones say the name in the
+       eyebrow pill already, and repeating it directly underneath read as a
+       mistake. The heading element is then hidden and the dialog takes its
+       accessible name from `ariaLabel` instead, so it is still announced. */
+    function setTitle(cfg) {
+      var has = !!cfg.title;
+      titleEl.textContent = cfg.title || '';
+      titleEl.hidden = !has;
+      if (has) {
+        dialog.setAttribute('aria-labelledby', 'cawxTitle');
+        dialog.removeAttribute('aria-label');
+      } else {
+        dialog.removeAttribute('aria-labelledby');
+        dialog.setAttribute('aria-label', cfg.ariaLabel || cfg.eyebrow || 'Details');
+      }
+    }
+
     function paintFoot(cfg) {
       /* The simulator pop-ups carry no call to action at any size: the screen is
          the point there, and the button competed with it for room. Every other
@@ -355,7 +374,7 @@
     function swap(cfg) {
       if (!open) { return false; }
       if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
-      titleEl.textContent = cfg.title || '';
+      setTitle(cfg);
       subEl.innerHTML = cfg.sub || '';
       subEl.hidden = !cfg.sub;
       paintFoot(cfg);
@@ -548,7 +567,9 @@
          'authority&rsquo;s references, wording and examples. Where the frameworks are structured differently the ' +
          'courses differ too &mdash; the FAA framework, for example, has no CAMO approval and no airworthiness ' +
          'review certificate, and carries courses the others do not.</p>';
-    Modal.show({ eyebrow: f.flag + ' ' + f.pill, title: f.title, html: h, trackId: 'framework:' + f.id }, trigger);
+    /* no `title`: the eyebrow above already reads "🇪🇺 EASA" */
+    Modal.show({ eyebrow: f.flag + ' ' + f.pill, ariaLabel: f.title, html: h,
+                 trackId: 'framework:' + f.id }, trigger);
   }
 
   /* --- F: one modal, eight screens, switched from inside ------------------ */

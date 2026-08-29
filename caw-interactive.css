@@ -1669,3 +1669,7 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 /* A simulator footer holds only the note now, so it is not a two-column row. */
 .cawx-modal[data-size="wide"] .cawx-foot{justify-content:flex-start}
 .cawx-modal[data-size="wide"] .cawx-foot .cawx-foot-note{flex:1 1 auto; text-align:left}
+
+/* A pop-up with no heading (the framework ones) must not leave its gap. */
+.cawx-title[hidden]{display:none}
+.cawx-head:has(.cawx-title[hidden]) .eyebrow{margin-bottom:2px}
