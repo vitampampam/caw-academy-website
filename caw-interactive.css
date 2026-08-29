@@ -223,8 +223,18 @@
    height (tablets). In an auto-height dialog flex:1 changes nothing. */
 .cawx-body{flex:1 1 auto; min-height:0;
   overflow-y:auto; overscroll-behavior:contain; padding:24px 28px 30px;
-  scrollbar-width:none; -ms-overflow-style:none}
-.cawx-body::-webkit-scrollbar{width:0; height:0; display:none}
+  /* The pop-up KEEPS its scrollbar. It was hidden, which is fine on a touch
+     screen and unusable with a mouse: nothing to drag, and no sign that there is
+     more below the fold. Slim and brand-tinted, so it reads as part of the
+     design rather than an OS afterthought. Scrollbars stay hidden INSIDE the
+     simulated device, where a real iPad does not show them either. */
+  scrollbar-width:thin; scrollbar-color:var(--indigo-3) transparent}
+.cawx-body::-webkit-scrollbar{width:10px; height:10px}
+.cawx-body::-webkit-scrollbar-track{background:transparent}
+.cawx-body::-webkit-scrollbar-thumb{background:var(--indigo-3); border-radius:99px;
+  border:3px solid var(--card); background-clip:padding-box}
+.cawx-body::-webkit-scrollbar-thumb:hover{background:var(--indigo-2);
+  border:3px solid var(--card); background-clip:padding-box}
 
 /* The footer CTA is the SAME button as on the home page. style.css already
    supplies .btn and .btn-light; the three declarations index.html adds for
@@ -1618,3 +1628,15 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .foot-center .disclaim{max-width:min(100%, 340px); margin-left:auto; margin-right:auto}
   .foot-center .disclaim{text-align:left}
 }
+
+/* The trial form is a pop-up too, and index.html hides its scrollbar in its own
+   <style> block. Same treatment, same reason — matched by a stronger selector so
+   no edit to index.html is needed. */
+.trial-modal .trial-body{scrollbar-width:thin; scrollbar-color:var(--indigo-3) transparent;
+  -ms-overflow-style:auto}
+.trial-modal .trial-body::-webkit-scrollbar{width:10px; height:10px; display:block}
+.trial-modal .trial-body::-webkit-scrollbar-track{background:transparent}
+.trial-modal .trial-body::-webkit-scrollbar-thumb{background:var(--indigo-3); border-radius:99px;
+  border:3px solid var(--card); background-clip:padding-box}
+.trial-modal .trial-body::-webkit-scrollbar-thumb:hover{background:var(--indigo-2);
+  border:3px solid var(--card); background-clip:padding-box}
