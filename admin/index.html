@@ -86,7 +86,13 @@
   .field::placeholder{color:var(--muted)}
   /* Password reset is not live on the website yet, so the link is shown but
      inert — `pointer-events:none` also stops admin.js's click handler firing. */
-  .link-off{color:var(--muted); cursor:default; pointer-events:none; user-select:none}
+  .link-off{color:var(--muted); opacity:.6; cursor:default; pointer-events:none; user-select:none}
+  /* Consent to the documents, required to create an account — the same row as
+     account.html so the two web sign-ups look and behave alike. */
+  .acct-consent{display:flex; align-items:flex-start; gap:10px; margin:4px 0 14px;
+    font-size:13px; color:var(--muted); line-height:1.5}
+  .acct-consent input{flex:0 0 auto; width:18px; height:18px; margin:1px 0 0; accent-color:var(--indigo)}
+  .acct-consent a{color:var(--indigo); font-weight:600}
   /* Chrome paints its own background on an autofilled field; pinning it keeps a
      filled field the same colour as an empty one. */
   .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus{
@@ -272,6 +278,11 @@
       <input class="field" id="email" type="email" autocomplete="username" required placeholder="e.g. alex.morgan@yourairline.com">
       <label class="lbl" for="password">Password</label>
       <input class="field" id="password" type="password" autocomplete="current-password" required placeholder="Your password">
+      <label class="acct-consent hidden" id="consentRow" for="acceptTerms">
+        <input type="checkbox" id="acceptTerms">
+        <span>I agree to the <a href="../terms.html" target="_blank" rel="noopener">Terms of Use</a>
+          and <a href="../privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+      </label>
       <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>

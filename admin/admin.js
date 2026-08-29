@@ -13,6 +13,9 @@
   "use strict";
 
   // ── Configuration ────────────────────────────────────────────────────────
+  // The documents' "Last updated" date. Must match terms.html, privacy.html,
+  // account.js and the apps' LEGAL_DOCUMENTS_VERSION.
+  var LEGAL_DOCUMENTS_VERSION = "2026-08-27";
   var API_BASE = "https://api.caw-academy.com"; // licensing/account service base URL
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -780,6 +783,7 @@
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
     $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
+    $("consentRow").classList.toggle("hidden", !register); // consent is only for a NEW account
     $("portalNote").classList.toggle("hidden", register);
     $("forgotRow").classList.toggle("hidden", register);   // forgot-password only for sign-in
     $("authTitle").textContent = register ? "Create admin account" : "Team admin";
@@ -804,8 +808,19 @@
         showMessage("authMsg", "Enter your first and last name to create an account.", "err");
         return;
       }
+      if (!$("acceptTerms").checked) {
+        showMessage("authMsg", "Please accept the Terms of Use and Privacy Policy to create an account.", "err");
+        return;
+      }
       body.firstName = firstName;
       body.lastName = lastName;
+      /* The server's register schema REQUIRES these two — `acceptedTerms` is a
+         z.literal(true) — so a registration without them is rejected outright.
+         `termsVersion` is the documents' "Last updated" date, so a later revision
+         can be detected and re-consent asked for rather than assumed. Keep it in
+         step with terms.html, privacy.html, account.js and the apps. */
+      body.acceptedTerms = true;
+      body.termsVersion = LEGAL_DOCUMENTS_VERSION;
       path = "/v1/auth/register";
     }
     btn.disabled = true;
