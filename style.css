@@ -713,3 +713,10 @@ footer .foot-links a:first-child{margin-left:0}
   .gpad{transition:none}
   .gallery:hover .gpad, .gcol:hover .gpad, .gcol:focus-within .gpad{transform:none; filter:none}
 }
+
+/* Standalone pages (verify, support, privacy, terms, account) are often shorter
+   than the screen, which left the footer floating under the content instead of
+   at the foot of the window. A sticky-footer column fixes that without touching
+   the home page's own layout, which is long and spaced by collapsing margins. */
+.page-short{min-height:100vh; min-height:100dvh; display:flex; flex-direction:column}
+.page-short > footer{margin-top:auto}

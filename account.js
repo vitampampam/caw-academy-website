@@ -17,6 +17,11 @@
   // registration consent and stored against the account. BUMP IT whenever either
   // document is revised, in step with the apps' LEGAL_DOCUMENTS_VERSION constants.
   var LEGAL_DOCUMENTS_VERSION = "2026-08-27";
+  // Self-serve password reset. FALSE, temporarily: the reset link is delivered by
+  // email and the server ships with SMTP dark, so the message is logged and dropped —
+  // the page would promise "a reset link is on its way" and nothing would arrive.
+  // Flip back to true the moment SMTP is configured; the flow itself already works.
+  var PASSWORD_RESET_ENABLED = false;
   // ────────────────────────────────────────────────────────────────────────
 
   var accessToken = null; // in-memory only; never persisted.
@@ -208,8 +213,17 @@
   });
 
   // ── Forgot password ──────────────────────────────────────────────────────
+  // Inactive while PASSWORD_RESET_ENABLED is false: the link is shown greyed rather
+  // than removed, so the option is visibly coming back rather than looking as though
+  // it never existed. Mirrors the two apps.
+  if (!PASSWORD_RESET_ENABLED) {
+    $("forgotLink").classList.add("disabled");
+    $("forgotLink").setAttribute("aria-disabled", "true");
+  }
+
   $("forgotLink").addEventListener("click", function (e) {
     e.preventDefault();
+    if (!PASSWORD_RESET_ENABLED) return;
     var email = $("email").value.trim();
     if (!email) {
       showMessage("authMsg", "Enter your email above first, then tap Forgot password.", "err");

@@ -1673,3 +1673,10 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 /* A pop-up with no heading (the framework ones) must not leave its gap. */
 .cawx-title[hidden]{display:none}
 .cawx-head:has(.cawx-title[hidden]) .eyebrow{margin-bottom:2px}
+
+/* iOS treats two quick taps as a zoom gesture, so tapping ‹ or › twice in a row
+   — which is exactly how anyone steps through screens — zoomed the page instead.
+   `manipulation` keeps scrolling and pinch-zoom while dropping the double-tap
+   zoom, on every control in a dialog. */
+.lightbox button, .cawx-modal button, .cawx-modal a, .trial-modal button,
+.gcol .gpad, .cawx-trigger, .chips button, .fw-pill.cawx-trigger{touch-action:manipulation}

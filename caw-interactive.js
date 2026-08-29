@@ -2121,17 +2121,24 @@
      which only sets `overflow:hidden` on the body — the weak lock iOS ignores.
      It is given the same hold as the pop-ups here: the class change is watched,
      and the page is pinned while it is open. */
-  (function holdPageForTrialDialog() {
-    var el = qs('#trialModal');
-    if (!el || !w.MutationObserver) { return; }
-    var wasOpen = el.classList.contains('open');
-    if (wasOpen) { Modal.holdPage(true, el); }
-    new w.MutationObserver(function () {
-      var isOpen = el.classList.contains('open');
-      if (isOpen === wasOpen) { return; }
-      wasOpen = isOpen;
-      Modal.holdPage(isOpen, el);
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  /* The page's OWN dialogs — the trial form and the gallery lightbox — are
+     opened by index.html's scripts, which hold the page with `overflow:hidden`
+     alone. iOS ignores that, so the site kept scrolling behind them. Each is
+     watched for its `.open` class and given the same hold as the pop-ups here. */
+  (function holdPageForTheSitesOwnDialogs() {
+    if (!w.MutationObserver) { return; }
+    ['#trialModal', '#lightbox'].forEach(function (sel) {
+      var el = qs(sel);
+      if (!el) { return; }
+      var wasOpen = el.classList.contains('open');
+      if (wasOpen) { Modal.holdPage(true, el); }
+      new w.MutationObserver(function () {
+        var isOpen = el.classList.contains('open');
+        if (isOpen === wasOpen) { return; }
+        wasOpen = isOpen;
+        Modal.holdPage(isOpen, el);
+      }).observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
   })();
 
   CAW.open = function (kind, id) { if (OPENERS[kind]) { OPENERS[kind](id, null); } };

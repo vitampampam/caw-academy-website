@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://api.caw-academy.com; form-action 'self'">
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=52">
 <style>
   /* Scoped styles for the account area, built on the site's CSS variables. */
   .acct-wrap{max-width:520px; margin:48px auto 80px; padding:0 20px}
@@ -36,6 +36,8 @@
   .acct-row span:first-child{color:var(--muted)}
   .acct-row span:last-child{font-weight:700; color:var(--ink)}
   .acct-note{font-size:13px; color:var(--muted); margin-top:14px; line-height:1.5}
+  /* An inactive link: greyed and unclickable, but still visibly present. */
+  a.disabled{color:var(--muted); opacity:.6; pointer-events:none; cursor:default}
   .acct-msg{font-size:14px; margin:10px 0; padding:10px 12px; border-radius:10px}
   .acct-msg.err{background:#FDECEC; color:#B3261E}
   .acct-msg.ok{background:#E7F4E8; color:#2E7D32}
@@ -61,7 +63,7 @@
   .hidden{display:none}
 </style>
 </head>
-<body>
+<body class="page-short">
 
 <nav class="nav" id="nav">
   <a class="brand" href="index.html"><img src="logo-header.png?v=4" alt="" width="30" height="30">CAW <span>Academy</span></a>
