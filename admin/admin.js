@@ -816,7 +816,11 @@
   });
 
   // ── Forgot password ────────────────────────────────────────────────────────
+  /* Password reset is disabled on the website for now: the element is rendered
+     inert (see `.link-off`), and the handler is kept but guarded so re-enabling
+     it is a one-line change here and in index.html. */
   $("forgotLink").addEventListener("click", function (e) {
+    if (this.getAttribute("aria-disabled") === "true") { e.preventDefault(); return; }
     e.preventDefault();
     var email = $("email").value.trim();
     if (!email) {

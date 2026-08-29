@@ -34,7 +34,11 @@
     min-height:100vh;}
   a{color:var(--indigo); text-decoration:none}
 
-  .nav{display:flex; align-items:center; justify-content:space-between; max-width:1080px; margin:0 auto; padding:18px 24px}
+  /* Frozen at the top, as on the rest of the site. This page has its own CSS,
+     so it did not inherit the sticky nav from style.css. */
+  .nav{position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    justify-content:space-between; max-width:1080px; margin:0 auto; padding:18px 24px;
+    backdrop-filter:saturate(160%) blur(12px); -webkit-backdrop-filter:saturate(160%) blur(12px)}
   .brand{display:inline-flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:600; font-size:23px; color:var(--ink)}
   .brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm)}
   .brand span{color:var(--indigo)}
@@ -80,6 +84,9 @@
     border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#E8F0FE}
   .field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
   .field::placeholder{color:var(--muted)}
+  /* Password reset is not live on the website yet, so the link is shown but
+     inert — `pointer-events:none` also stops admin.js's click handler firing. */
+  .link-off{color:var(--muted); cursor:default; pointer-events:none; user-select:none}
   /* Chrome paints its own background on an autofilled field; pinning it keeps a
      filled field the same colour as an empty one. */
   .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus{
@@ -268,7 +275,7 @@
       <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
-      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><a href="#" id="forgotLink" style="font-size:14px">Forgot password?</a></p>
+      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><span id="forgotLink" class="link-off" aria-disabled="true" style="font-size:14px">Forgot password?</span></p>
     </form>
     <p class="note" id="portalNote">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
   </div>
