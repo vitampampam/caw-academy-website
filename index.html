@@ -1043,7 +1043,10 @@
     var prevBtn = lb.querySelector('.lb-prev'), nextBtn = lb.querySelector('.lb-next');
     if (prevBtn) prevBtn.addEventListener('click', function(e){ e.stopPropagation(); show(idx - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function(e){ e.stopPropagation(); show(idx + 1); });
-    lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb-close')) close(); });
+    // Only the × closes it. Tapping the space around the screen used to close
+    // the lightbox, which happened by accident while reaching for the arrows or
+    // panning the image. Escape still closes it for keyboard users.
+    lb.addEventListener('click', function(e){ if (e.target.classList.contains('lb-close')) close(); });
     document.addEventListener('keydown', function(e){
       if (!lb.classList.contains('open')) return;
       if (e.key === 'Escape') close();
