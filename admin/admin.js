@@ -781,6 +781,13 @@
     $("tabRegister").classList.toggle("active", register);
     $("authSubmit").textContent = register ? "Request admin account" : "Sign in";
     $("password").setAttribute("autocomplete", register ? "new-password" : "current-password");
+    /* Requesting an account means CHOOSING a password, not recalling one. The
+       wording matches the app, and the 10-character rule (the server's minimum)
+       is stated and enforced here rather than surfacing as a rejection. */
+    $("passwordLbl").textContent = register ? "Choose a password" : "Password";
+    $("password").placeholder = register ? "At least 10 characters" : "Your password";
+    if (register) { $("password").setAttribute("minlength", "10"); }
+    else { $("password").removeAttribute("minlength"); }
     $("regNames").classList.toggle("hidden", !register);   // name fields (required by the API)
     $("regNote").classList.toggle("hidden", !register);    // "registered organisations only"
     $("consentRow").classList.toggle("hidden", !register); // consent is only for a NEW account
@@ -788,7 +795,7 @@
     $("forgotRow").classList.toggle("hidden", register);   // forgot-password only for sign-in
     $("authTitle").textContent = register ? "Request admin account" : "Team admin";
     $("authSub").textContent = register
-      ? "Request administrator access for your organisation. The account is created straight away; we activate its admin access before it can manage the team, course assignments and deadlines."
+      ? "Request administrator access for your organisation. Our support team reviews each request, and you will be notified by email once the account is activated."
       : "Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.";
     showMessage("authMsg", "", "err");
   }
