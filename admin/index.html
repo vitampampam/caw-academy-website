@@ -77,8 +77,12 @@
   label.lbl{display:block; font-size:13px; font-weight:700; color:var(--ink-soft); margin:0 0 5px}
 
   .field{display:block; width:100%; margin:0 0 12px; padding:11px 13px; border:1px solid var(--line);
-    border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#F2F3FC}
+    border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#E8F0FE}
   .field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+  /* Chrome paints its own background on an autofilled field; pinning it keeps a
+     filled field the same colour as an empty one. */
+  .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus{
+    -webkit-box-shadow:0 0 0 100px #E8F0FE inset; -webkit-text-fill-color:var(--ink)}
   /* iOS Safari centres a date input's value and lets it grow tall; left-align it and
      normalise height so it matches the number/text fields. */
   input[type="date"].field{-webkit-appearance:none; appearance:none; text-align:left; min-height:44px; line-height:1.2}
