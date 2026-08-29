@@ -874,10 +874,12 @@
   <div class="trial-backdrop" data-close></div>
   <div class="trial-dialog" role="dialog" aria-modal="true" aria-labelledby="trialTitle">
     <button class="trial-close" type="button" aria-label="Close" data-close>&times;</button>
-    <div class="trial-body">
-    <h2 id="trialTitle">Request a free trial</h2>
-    <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
+    <div class="trial-head">
+      <h2 id="trialTitle">Request a free trial</h2>
+      <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
+    </div>
     <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+      <div class="trial-body">
       <!-- For clean B2B routing, create a dedicated Web3Forms key (web3forms.com) pointing
            at a sales inbox and replace the value below. This reuses the app's feedback relay. -->
       <input type="hidden" name="access_key" value="25d49d43-0f4c-4a88-9a37-7fb44bc1f979">
@@ -900,18 +902,20 @@
         <div class="cf-fw-opts">
           <label><input type="checkbox" name="frameworks" value="EASA"><span><span class="fw-flag" aria-hidden="true">🇪🇺</span> EASA</span></label>
           <label><input type="checkbox" name="frameworks" value="UK CAA"><span><span class="fw-flag" aria-hidden="true">🇬🇧</span> UK CAA</span></label>
-          <label><input type="checkbox" name="frameworks" value="UAE GCAA"><span><span class="fw-flag" aria-hidden="true">🇦🇪</span> UAE GCAA</span></label>
+          <label><input type="checkbox" name="frameworks" value="UAE GCAA"><span><span class="fw-flag" aria-hidden="true">🇦🇪</span> GCAA</span></label>
           <label><input type="checkbox" name="frameworks" value="FAA"><span><span class="fw-flag" aria-hidden="true">🇺🇸</span> FAA</span></label>
         </div>
       </fieldset>
       <textarea name="message" rows="3" placeholder="Anything specific — courses (Part-145, CAMO, EWIS…), a walkthrough, timing?"></textarea>
-      <div id="cfMsg" class="cf-msg" hidden></div>
-      <button class="btn btn-dark cf-submit" type="submit">Send request</button>
-      <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
-        details. See our <a href="privacy.html">Privacy Policy</a>.</p>
-      <p class="cf-alt">Prefer email? Contact us at <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a>.</p>
+      </div><!-- /trial-body: only the fields scroll -->
+      <div class="trial-foot">
+        <div id="cfMsg" class="cf-msg" hidden></div>
+        <button class="btn btn-dark cf-submit" type="submit">Send request</button>
+        <p class="cf-fine">By submitting you agree we may contact you about your enquiry. We never share your
+          details. See our <a href="privacy.html">Privacy Policy</a>.</p>
+        <p class="cf-alt">Prefer email? Contact us at <a href="mailto:support@caw-academy.com?subject=Quote%20request">support@caw-academy.com</a>.</p>
+      </div>
     </form>
-    </div>
   </div>
 </div>
 

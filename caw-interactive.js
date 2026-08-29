@@ -307,12 +307,16 @@
     var DEFAULT_CTA = { label: 'Request a free trial', href: '#', trial: true };
 
     function paintFoot(cfg) {
-      var cta = cfg.cta || DEFAULT_CTA;
-      foot.hidden = false;
+      /* The simulator pop-ups carry no call to action at any size: the screen is
+         the point there, and the button competed with it for room. Every other
+         pop-up ends with the same one. */
+      var cta = cfg.size === 'wide' ? null : (cfg.cta || DEFAULT_CTA);
+      foot.hidden = !cfg.footNote && !cta;
       foot.innerHTML =
         (cfg.footNote ? '<p class="cawx-foot-note">' + cfg.footNote + '</p>' : '<span></span>') +
-        '<a class="btn btn-light cawx-trial" href="' + esc(cta.href) + '"' +
-        (cta.trial ? ' data-cawx-trial' : '') + '>' + esc(cta.label) + ICON.arrow + '</a>';
+        (cta ? '<a class="btn btn-light cawx-trial" href="' + esc(cta.href) + '"' +
+               (cta.trial ? ' data-cawx-trial' : '') + '>' + esc(cta.label) + ICON.arrow + '</a>'
+             : '');
     }
 
     /* Swap the CONTENT of an already-open pop-up, with no skeleton and no
@@ -527,7 +531,6 @@
       footNote:
         '<b>Simplified simulation.</b> For the app exactly as it looks, see ' +
         '<a href="#inside" data-cawx-goto="#inside">See exactly how you&rsquo;ll learn</a>.',
-      cta: { label: 'Request a free trial', href: '#', trial: true },
       render: function (bodyEl) {
         var stage = el('div', 'cawx-stage');
         var frameWrap = el('div', 'cawx-framewrap');

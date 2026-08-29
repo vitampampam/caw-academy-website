@@ -228,12 +228,12 @@
      more below the fold. Slim and brand-tinted, so it reads as part of the
      design rather than an OS afterthought. Scrollbars stay hidden INSIDE the
      simulated device, where a real iPad does not show them either. */
-  scrollbar-width:thin; scrollbar-color:var(--indigo-3) transparent}
+  scrollbar-width:thin; scrollbar-color:#C1C1C6 transparent}
 .cawx-body::-webkit-scrollbar{width:10px; height:10px}
 .cawx-body::-webkit-scrollbar-track{background:transparent}
-.cawx-body::-webkit-scrollbar-thumb{background:var(--indigo-3); border-radius:99px;
+.cawx-body::-webkit-scrollbar-thumb{background:#C1C1C6; border-radius:99px;
   border:3px solid var(--card); background-clip:padding-box}
-.cawx-body::-webkit-scrollbar-thumb:hover{background:var(--indigo-2);
+.cawx-body::-webkit-scrollbar-thumb:hover{background:#A6A6AC;
   border:3px solid var(--card); background-clip:padding-box}
 
 /* The footer CTA is the SAME button as on the home page. style.css already
@@ -1599,9 +1599,6 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 @media (max-width:640px){
   .cawx-modal .cawx-foot .cawx-trial{display:none}
 }
-@media (min-width:641px) and (max-width:1024px) and (orientation:portrait){
-  .cawx-modal[data-size="wide"] .cawx-foot .cawx-trial{display:none}
-}
 @media (min-width:641px) and (max-width:1400px) and (orientation:landscape)
    and (pointer:coarse){
   .cawx-modal .cawx-foot .cawx-trial{display:none}
@@ -1632,11 +1629,43 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 /* The trial form is a pop-up too, and index.html hides its scrollbar in its own
    <style> block. Same treatment, same reason — matched by a stronger selector so
    no edit to index.html is needed. */
-.trial-modal .trial-body{scrollbar-width:thin; scrollbar-color:var(--indigo-3) transparent;
+.trial-modal .trial-body{scrollbar-width:thin; scrollbar-color:#C1C1C6 transparent;
   -ms-overflow-style:auto}
-.trial-modal .trial-body::-webkit-scrollbar{width:10px; height:10px; display:block}
+/* no `display:block` here: forcing it reserves the gutter even when the form
+   fits, which showed an empty bar down the side of a page with nothing to
+   scroll. Left to the browser, the bar appears only when it is needed. */
+.trial-modal .trial-body::-webkit-scrollbar{width:10px; height:10px}
 .trial-modal .trial-body::-webkit-scrollbar-track{background:transparent}
-.trial-modal .trial-body::-webkit-scrollbar-thumb{background:var(--indigo-3); border-radius:99px;
+.trial-modal .trial-body::-webkit-scrollbar-thumb{background:#C1C1C6; border-radius:99px;
   border:3px solid var(--card); background-clip:padding-box}
-.trial-modal .trial-body::-webkit-scrollbar-thumb:hover{background:var(--indigo-2);
+.trial-modal .trial-body::-webkit-scrollbar-thumb:hover{background:#A6A6AC;
   border:3px solid var(--card); background-clip:padding-box}
+
+/* ---------------------------------------------------------------------------
+   The trial form is built like the other pop-ups
+   A fixed header and footer with only the fields scrolling between them: the
+   scrollbar then belongs to the field list rather than running the whole height
+   of a dialog whose title and submit button never move. index.html carries the
+   markup; the layout is here, beside the pop-ups it now matches.
+   --------------------------------------------------------------------------- */
+.trial-modal .trial-dialog{display:flex; flex-direction:column}
+.trial-modal .trial-head{flex:0 0 auto; padding:26px 56px 14px 28px;
+  border-bottom:1px solid var(--line); background:var(--card)}
+.trial-modal .trial-head h2{margin:0 0 6px}
+.trial-modal .trial-head .tsub{margin:0}
+.trial-modal .contact-form{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
+.trial-modal .trial-body{flex:1 1 auto; min-height:0; overflow-y:auto; padding:20px 28px 22px}
+.trial-modal .trial-foot{flex:0 0 auto; padding:14px 28px 18px;
+  border-top:1px solid var(--line); background:var(--bg)}
+.trial-modal .trial-foot .cf-submit{width:100%}
+.trial-modal .trial-foot .cf-fine{margin:10px 0 0}
+.trial-modal .trial-foot .cf-alt{margin:6px 0 0}
+@media (max-width:640px){
+  .trial-modal .trial-head{padding:20px 52px 12px 18px}
+  .trial-modal .trial-body{padding:16px 18px 18px}
+  .trial-modal .trial-foot{padding:12px 18px 16px}
+}
+
+/* A simulator footer holds only the note now, so it is not a two-column row. */
+.cawx-modal[data-size="wide"] .cawx-foot{justify-content:flex-start}
+.cawx-modal[data-size="wide"] .cawx-foot .cawx-foot-note{flex:1 1 auto; text-align:left}
