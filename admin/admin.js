@@ -15,7 +15,7 @@
   // ── Configuration ────────────────────────────────────────────────────────
   // The documents' "Last updated" date. Must match terms.html, privacy.html,
   // account.js and the apps' LEGAL_DOCUMENTS_VERSION.
-  var LEGAL_DOCUMENTS_VERSION = "2026-08-27";
+  var LEGAL_DOCUMENTS_VERSION = "2026-08-28";
   var API_BASE = "https://api.caw-academy.com"; // licensing/account service base URL
   // ──────────────────────────────────────────────────────────────────────────
 
