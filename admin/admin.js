@@ -166,7 +166,20 @@
     var el = $(elId); el.textContent = "";
     if (!text) return;
     var box = document.createElement("div");
-    box.className = "msg " + kind; box.textContent = text;
+    box.className = "msg " + kind;
+    /* Any email address in the message becomes a real mailto link. Built as DOM
+       nodes, so the message text is still never passed through innerHTML — the
+       no-injection rule these boxes were written with is kept. */
+    var re = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, last = 0, m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) { box.appendChild(document.createTextNode(text.slice(last, m.index))); }
+      var a = document.createElement("a");
+      a.href = "mailto:" + m[0];
+      a.textContent = m[0];
+      box.appendChild(a);
+      last = re.lastIndex;
+    }
+    if (last < text.length) { box.appendChild(document.createTextNode(text.slice(last))); }
     el.appendChild(box);
   }
   function show(view) {
@@ -814,11 +827,12 @@
     if (!registerMode) { hint.className = "pw-hint hidden"; hint.textContent = ""; return; }
     var pw = $("password").value, pw2 = $("password2").value;
     var text = "", tone = "muted";
-    if (pw.length < MIN_PASSWORD) {
-      text = "The password must be no less than " + MIN_PASSWORD + " characters";
-    } else if (pw2 && pw2 !== pw) {
+    /* The length rule is already in the field's own placeholder, so it is not
+       repeated here — this line only reports whether the two entries agree.
+       Nothing is claimed until the password is long enough to be valid. */
+    if (pw2 && pw2 !== pw) {
       text = "Passwords do not match"; tone = "err";
-    } else if (pw2 && pw2 === pw) {
+    } else if (pw2 && pw2 === pw && pw.length >= MIN_PASSWORD) {
       text = "Passwords match"; tone = "ok";
     }
     hint.textContent = text;
