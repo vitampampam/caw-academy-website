@@ -216,13 +216,37 @@
        already in flight drag the document for a moment, which reads as the site
        coming loose behind the pop-up. Refusing the touch outright removes that
        moment; touches inside the pop-up's own scrolling area still work. */
-    function blockTouch(e) {
-      if (!open) { return; }
-      var t = e.target;
-      if (body && (body === t || body.contains(t))) { return; }
-      if (e.cancelable) { e.preventDefault(); }
+    var touchScope = null;      /* the one region a gesture may still scroll */
+
+    /* The nearest thing under the pointer that can actually scroll, searched no
+       further than the open dialog. Returns null when there is nothing to
+       scroll — which is the case that was letting the gesture through to the
+       page and moving the whole view. */
+    function scrollableUnder(node, scope) {
+      while (node && node.nodeType === 1) {
+        if (node.scrollHeight > node.clientHeight + 1) {
+          var oy = w.getComputedStyle(node).overflowY;
+          if (oy === 'auto' || oy === 'scroll') { return node; }
+        }
+        if (node === scope) { return null; }
+        node = node.parentNode;
+      }
+      return null;
     }
-    function lockScroll() {
+
+    function blockGesture(e) {
+      var scope = touchScope || body;
+      if (!scope) { return; }
+      /* outside the dialog entirely: never scrolls the page while one is open */
+      if (scope !== e.target && !scope.contains(e.target)) {
+        if (e.cancelable) { e.preventDefault(); }
+        return;
+      }
+      /* inside it, but over content that cannot scroll: the same */
+      if (!scrollableUnder(e.target, scope) && e.cancelable) { e.preventDefault(); }
+    }
+    function lockScroll(scope) {
+      touchScope = scope || body;
       var gap = w.innerWidth - d.documentElement.clientWidth;
       lockedAt = w.pageYOffset || d.documentElement.scrollTop || 0;
       if (gap > 0) { d.body.style.paddingRight = gap + 'px'; }
@@ -232,7 +256,10 @@
       d.body.style.right = '0';
       d.body.style.width = '100%';
       d.body.classList.add('cawx-modal-open');
-      d.addEventListener('touchmove', blockTouch, { passive: false });
+      /* iOS bounces the viewport itself unless the root refuses the overscroll */
+      d.documentElement.style.overscrollBehavior = 'none';
+      d.addEventListener('touchmove', blockGesture, { passive: false });
+      d.addEventListener('wheel', blockGesture, { passive: false });
     }
     function unlockScroll() {
       /* style.css sets `html{scroll-behavior:smooth}`, so restoring the offset
@@ -240,7 +267,10 @@
          restore has to be instant: an inline style on <html> outranks the
          stylesheet, and is put back immediately afterwards. */
       var root = d.documentElement, was = root.style.scrollBehavior;
-      d.removeEventListener('touchmove', blockTouch, { passive: false });
+      d.removeEventListener('touchmove', blockGesture, { passive: false });
+      d.removeEventListener('wheel', blockGesture, { passive: false });
+      d.documentElement.style.overscrollBehavior = '';
+      touchScope = null;
       root.style.scrollBehavior = 'auto';
       d.body.classList.remove('cawx-modal-open');
       d.body.style.paddingRight = '';
@@ -358,7 +388,16 @@
       lastTrigger = null;
     }
 
-    return { show: show, swap: swap, close: close, isOpen: function () { return open; } };
+    /* Hold or release the page for a dialog this module did not build — the
+       page's own trial form. `scope` is the element whose inside may still be
+       touched and scrolled. */
+    function holdPage(on, scope) {
+      if (on) { if (!open) { lockScroll(scope); } }
+      else if (!open) { unlockScroll(); }
+    }
+
+    return { show: show, swap: swap, close: close, holdPage: holdPage,
+             isOpen: function () { return open; } };
   })();
 
   /* =======================================================================
@@ -2057,6 +2096,23 @@
 
   /* type CAW.build in the console to see which copy the browser is running */
   CAW.build = '2026-08-28 19:34';
+  /* The trial form is the PAGE's own dialog, opened by index.html's script,
+     which only sets `overflow:hidden` on the body — the weak lock iOS ignores.
+     It is given the same hold as the pop-ups here: the class change is watched,
+     and the page is pinned while it is open. */
+  (function holdPageForTrialDialog() {
+    var el = qs('#trialModal');
+    if (!el || !w.MutationObserver) { return; }
+    var wasOpen = el.classList.contains('open');
+    if (wasOpen) { Modal.holdPage(true, el); }
+    new w.MutationObserver(function () {
+      var isOpen = el.classList.contains('open');
+      if (isOpen === wasOpen) { return; }
+      wasOpen = isOpen;
+      Modal.holdPage(isOpen, el);
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  })();
+
   CAW.open = function (kind, id) { if (OPENERS[kind]) { OPENERS[kind](id, null); } };
   CAW.closeModal = Modal.close;
 
