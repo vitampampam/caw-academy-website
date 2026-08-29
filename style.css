@@ -719,4 +719,9 @@ footer .foot-links a:first-child{margin-left:0}
    at the foot of the window. A sticky-footer column fixes that without touching
    the home page's own layout, which is long and spaced by collapsing margins. */
 .page-short{min-height:100vh; min-height:100dvh; display:flex; flex-direction:column}
+/* `.nav`, `.wrap` and `.acct-wrap` centre themselves with `margin:0 auto`, and an
+   auto cross-axis margin CANCELS flex stretch — as flex items they shrank to
+   their content and the header bunched into the middle. Full width restores the
+   block behaviour they were written for; their own max-width still centres them. */
+.page-short > *{width:100%}
 .page-short > footer{margin-top:auto}
