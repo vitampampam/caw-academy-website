@@ -79,6 +79,7 @@
   .field{display:block; width:100%; margin:0 0 12px; padding:11px 13px; border:1px solid var(--line);
     border-radius:11px; font:inherit; font-size:15px; color:var(--ink); background:#E8F0FE}
   .field:focus{outline:none; border-color:var(--indigo-3); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .field::placeholder{color:var(--muted)}
   /* Chrome paints its own background on an autofilled field; pinning it keeps a
      filled field the same colour as an empty one. */
   .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus{
@@ -256,14 +257,14 @@
     <form id="authForm" autocomplete="on">
       <div id="regNames" class="hidden">
         <label class="lbl" for="firstName">First name</label>
-        <input class="field" id="firstName" type="text" autocomplete="given-name">
+        <input class="field" id="firstName" type="text" autocomplete="given-name" placeholder="e.g. Alex">
         <label class="lbl" for="lastName">Last name</label>
-        <input class="field" id="lastName" type="text" autocomplete="family-name">
+        <input class="field" id="lastName" type="text" autocomplete="family-name" placeholder="e.g. Morgan">
       </div>
       <label class="lbl" for="email">Work email</label>
-      <input class="field" id="email" type="email" autocomplete="username" required>
+      <input class="field" id="email" type="email" autocomplete="username" required placeholder="e.g. alex.morgan@yourairline.com">
       <label class="lbl" for="password">Password</label>
-      <input class="field" id="password" type="password" autocomplete="current-password" required>
+      <input class="field" id="password" type="password" autocomplete="current-password" required placeholder="Your password">
       <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin accounts can be created for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. Otherwise, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
