@@ -30,6 +30,7 @@
      0. Helpers
      ======================================================================= */
   var CURRENT_DEMO = null;      /* the demo the pop-up is showing right now */
+  var PENDING_LESSON = null;    /* a lesson another screen asked the Lessons screen to open */
   var CURRENT_PAGE = null;      /* or, if the visitor has navigated, the app page */
   var NAV_STACK = [];           /* where "Done" and "Back" return to */
 
@@ -1085,7 +1086,10 @@
        Every lesson in the sidebar is real and openable: selecting one swaps the
        detail pane, exactly as it does on the device. */
     lesson: function (screen) {
-      var current = D.lesson.id;
+      /* Another screen may have asked for a particular lesson (the glossary and
+         the notes drill-down both do), so the chosen one is not lost on the way. */
+      var current = PENDING_LESSON || D.lesson.id;
+      PENDING_LESSON = null;
 
       function paint() {
         var L = lessonById(current), s = L.sections, body = '', n = 0;
@@ -1321,7 +1325,10 @@
 
       /* Choosing a lesson behind the sheet leaves the glossary and opens it, which
          is what the app does — the sheet is closed by the act of navigating. */
-      wireLessonNav(screen, current, function () { openDemo('lesson', undefined, true); });
+      wireLessonNav(screen, current, function (id) {
+        PENDING_LESSON = id;
+        openDemo('lesson', undefined, true);
+      });
 
       var input = qs('#cawxGl', screen), list = qs('#cawxGlList', screen),
           count = qs('#cawxGlCount', screen), data = D.glossary;
@@ -1540,11 +1547,19 @@
 
       function lesson() {
         screen.innerHTML = shell({
-          tab: 'Home', side: sidebar(D.lesson.id, true), title: D.lesson.id,
-          tools: 'long', seg: 'Lesson', foot: true, back: true,
+          tab: 'Home', side: sidebar(D.lesson.id, true, true), title: D.lesson.id,
+          tools: 'long', seg: 'Lesson', foot: 'live', back: true,
+          position: D.lesson.position,
           page: '<div class="cawx-page">' + lessonHead() +
             sectionHTML(D.lesson.sections[0], 1, { transform: tint }) +
             sectionHTML(D.lesson.sections[1], 2, { limit: 3, transform: tint }) + '</div>'
+        });
+        /* The sidebar and the footer work here too. The highlights belong to this
+           lesson, so moving to another one leaves the notes context behind and
+           opens it on the Lessons screen — the pills follow. */
+        wireLessonNav(screen, D.lesson.id, function (id) {
+          PENDING_LESSON = id;
+          openDemo('lesson', undefined, true);
         });
         var mk = qs('#cawxMk' + at, screen);
         if (mk) {
@@ -1570,6 +1585,50 @@
       phone.innerHTML = dashboard('phone');
       pad.innerHTML = dashboard('pad');
       if (mac) { mac.innerHTML = dashboard('mac'); }
+
+      /* The point of this screen is the ORDER: a lesson is finished on the
+         iPhone, and the same figure turns up on the iPad and then the Mac a
+         moment later. Updating all three at once would show three identical
+         dashboards and say nothing about syncing. */
+      var cat = catalogue(CURRENT_FW), anchor = null;
+      cat.courses.forEach(function (c) {
+        if (!anchor && (c.id === 'm' || c.id === 'p43')) { anchor = c; }
+      });
+      anchor = anchor || cat.courses[1] || cat.courses[0];
+      var total = anchor.lessons, from = Math.round(total * 0.6), done = from, timers = [];
+
+      function apply(host, n) {
+        if (!host) { return; }
+        var card = qs('[data-sync]', host);
+        if (!card) { return; }
+        var rd = qs('.rd', card), bar = qs('.bar i', card);
+        if (rd) { rd.textContent = n + '/' + total + ' done'; }
+        if (bar) { bar.style.width = Math.round(n / total * 100) + '%'; }
+        var dev = host.closest ? host.closest('.dev') : null;
+        if (!dev) { return; }
+        dev.classList.add('cawx-synced');
+        timers.push(w.setTimeout(function () { dev.classList.remove('cawx-synced'); }, 1000));
+      }
+
+      function round() {
+        done = done + 1 > total ? from : done + 1;
+        if (reducedMotion()) {          /* no staggered motion: set all three */
+          apply(phone, done); apply(pad, done); apply(mac, done);
+          return;
+        }
+        apply(phone, done);
+        timers.push(w.setTimeout(function () { apply(pad, done); }, 900));
+        timers.push(w.setTimeout(function () { apply(mac, done); }, 1800));
+      }
+
+      var every = w.setInterval(round, 4600);
+      timers.push(w.setTimeout(round, 1200));
+      return {
+        destroy: function () {
+          w.clearInterval(every);
+          timers.forEach(function (t) { w.clearTimeout(t); });
+        }
+      };
     }
   };
 
@@ -1605,9 +1664,11 @@
         cards += '<p class="cawx-dsec">' + esc(section) + '</p>';
       }
       var open = live && c.id === cat.openable;
+      /* the course the sync screen advances; marked so it can be found again */
+      var mark = c.id === anchor.id ? ' data-sync="1"' : '';
       cards += (open
-          ? '<button type="button" class="cawx-dcard" data-caw-demo="lesson">'
-          : '<div class="cawx-dcard' + (live ? ' dim' : '') + '">') +
+          ? '<button type="button" class="cawx-dcard"' + mark + ' data-caw-demo="lesson">'
+          : '<div class="cawx-dcard' + (live ? ' dim' : '') + '"' + mark + '>') +
         '<div class="top"><span class="ic">' + ICON.lesson + '</span>' +
         '<span class="nm"><b>' + esc(c.long) + '</b><small>' + esc(c.blurb) + '</small></span>' +
         (pc === 100 ? '<span class="seal">' + ICON.doneTick + '</span>' : '') + '</div>' +

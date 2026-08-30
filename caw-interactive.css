@@ -1692,3 +1692,13 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    zoom, on every control in a dialog. */
 .lightbox button, .cawx-modal button, .cawx-modal a, .trial-modal button,
 .gcol .gpad, .cawx-trigger, .chips button, .fw-pill.cawx-trigger{touch-action:manipulation}
+
+/* The device that has just received the change lifts and glows for a moment, so
+   the eye follows iPhone -> iPad -> MacBook and reads it as one figure moving
+   between them rather than three dashboards that happen to agree. */
+.cawx-hero .dev{transition:filter .35s ease, transform .35s ease}
+.cawx-hero .dev.cawx-synced{filter:drop-shadow(0 0 14px rgba(62,68,181,.55)); transform:translateY(-4px)}
+.cawx-hero .dev.cawx-synced .cawx-dcard[data-sync] .bar i{transition:width .5s ease}
+@media (prefers-reduced-motion:reduce){
+  .cawx-hero .dev, .cawx-hero .dev.cawx-synced{transition:none; transform:none; filter:none}
+}
