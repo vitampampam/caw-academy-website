@@ -1724,12 +1724,16 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
    card is the control, and a half-working miniature would be worse than none.
    --------------------------------------------------------------------------- */
 .cawx-thumb{margin:2px 0 18px; display:flex; justify-content:center; pointer-events:none}
-.cawx-thumb-pad{position:relative; display:block; width:212px; height:150px;
-  border-radius:12px; padding:5px; overflow:hidden;
+/* A portrait iPad, as the pop-up frames are, showing the WHOLE screen. The
+   screen is built at 400x582 — the device's real 1200:1747 — and scaled to fit
+   the frame exactly, so nothing is cropped and the layout reads as it does in
+   the app rather than as a magnified corner of it. */
+.cawx-thumb-pad{position:relative; display:block; width:158px; height:230px;
+  border-radius:13px; padding:5px; overflow:hidden;
   background:linear-gradient(160deg,#23264c,#0e1030);
   box-shadow:0 2px 6px rgba(16,22,68,.14), 0 12px 26px rgba(16,22,68,.13)}
-.cawx-thumb-pad .cawx-thumbscreen{display:block; width:540px; height:372px;
-  transform:scale(.374); transform-origin:top left; border-radius:20px}
+.cawx-thumb-pad .cawx-thumbscreen{display:block; width:400px; height:582px;
+  transform:scale(.37); transform-origin:top left; border-radius:22px}
 /* the card lifts its miniature slightly on hover, so it reads as a way in */
 #features .cawx-trigger .cawx-thumb-pad{transition:transform .22s ease, box-shadow .22s ease}
 #features .cawx-trigger:hover .cawx-thumb-pad{transform:translateY(-3px);
@@ -1738,6 +1742,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{width:184px; height:130px}
+  .cawx-thumb-pad{width:140px; height:203px}
   .cawx-thumb-pad .cawx-thumbscreen{transform:scale(.325)}
 }
