@@ -403,7 +403,10 @@ body.cawx-modal-open{overflow:hidden; overscroll-behavior:none}
 .cawx-framewrap .cawx-ipad{min-width:300px}
 .cawx-ipad::after{content:""; position:absolute; top:5px; left:50%; transform:translateX(-50%);
   width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.22)}
-.cawx-screen{
+/* `.cawx-thumbscreen` is the Features miniature. It shares the app's base look
+   but is deliberately NOT `.cawx-screen`: only a real, interactive screen carries
+   that class, so nothing — code or test — can mistake a thumbnail for one. */
+.cawx-screen, .cawx-thumbscreen{
   position:relative; border-radius:15px; overflow:hidden; background:var(--app-grouped);
   height:100%; display:flex; flex-direction:column;
   font-family:var(--sans); color:var(--app-ink); font-size:10px; line-height:1.45;
@@ -1701,4 +1704,40 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
 .cawx-hero .dev.cawx-synced .cawx-dcard[data-sync] .bar i{transition:width .5s ease}
 @media (prefers-reduced-motion:reduce){
   .cawx-hero .dev, .cawx-hero .dev.cawx-synced{transition:none; transform:none; filter:none}
+}
+
+/* The progress bar animates to its new value, so the rise is visible rather
+   than a jump — this is what the sync screen is showing. */
+.cawx-hero .cawx-dcard .bar i{transition:width .55s cubic-bezier(.3,.8,.3,1)}
+/* the notes colour filter is a real control; the others are honestly inert */
+button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
+.cawx-nfilter .dot[data-c="yellow"]{background:#F6C445}
+.cawx-nfilter .dot[data-c="green"]{background:#4CAF7D}
+.cawx-nfilter .dot[data-c="coral"]{background:#F0705A}
+@media (prefers-reduced-motion:reduce){ .cawx-hero .cawx-dcard .bar i{transition:none} }
+
+/* ---------------------------------------------------------------------------
+   The miniature inside a Features card
+   A real render of the screen the card opens, drawn small. The app's own styles
+   are all in px, so the screen is built at its normal size and scaled down —
+   the same trick the pop-up frames use. Pointer events are off throughout: the
+   card is the control, and a half-working miniature would be worse than none.
+   --------------------------------------------------------------------------- */
+.cawx-thumb{margin:2px 0 18px; display:flex; justify-content:center; pointer-events:none}
+.cawx-thumb-pad{position:relative; display:block; width:212px; height:150px;
+  border-radius:12px; padding:5px; overflow:hidden;
+  background:linear-gradient(160deg,#23264c,#0e1030);
+  box-shadow:0 2px 6px rgba(16,22,68,.14), 0 12px 26px rgba(16,22,68,.13)}
+.cawx-thumb-pad .cawx-thumbscreen{display:block; width:540px; height:372px;
+  transform:scale(.374); transform-origin:top left; border-radius:20px}
+/* the card lifts its miniature slightly on hover, so it reads as a way in */
+#features .cawx-trigger .cawx-thumb-pad{transition:transform .22s ease, box-shadow .22s ease}
+#features .cawx-trigger:hover .cawx-thumb-pad{transform:translateY(-3px);
+  box-shadow:0 4px 10px rgba(16,22,68,.16), 0 16px 34px rgba(16,22,68,.18)}
+@media (prefers-reduced-motion:reduce){
+  #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
+}
+@media (max-width:560px){
+  .cawx-thumb-pad{width:184px; height:130px}
+  .cawx-thumb-pad .cawx-thumbscreen{transform:scale(.325)}
 }

@@ -1222,7 +1222,9 @@
       var Q = D.quiz, total = D.quizTotal, active = Q.length, i = 0, answers = [];
 
       screen.innerHTML = shell({
-        tab: 'Home', side: courseSidebar('Part-M Continuing Airworthiness'),
+        /* `live` makes the one course this preview carries openable and dims the
+           rest — without it every row looked clickable and none of them were. */
+        tab: 'Home', side: courseSidebar('Part-M Continuing Airworthiness', true),
         title: D.course.short + ' Full exam', tools: false,
         page: '<div class="cawx-page">' +
           '<div class="cawx-timer">' + ICON.clock + '<span id="cawxClock">28:14</span></div>' +
@@ -1494,7 +1496,11 @@
        The list is the real screen. Selecting an entry opens the lesson at that
        highlight — which is what the app does — and the back arrow returns. */
     notes: function (screen) {
-      var N = S.notes, view = 'list', at = 0;
+      var N = S.notes, view = 'list', at = 0, colour = 'all';
+      var COLOUR_NAMES = { yellow: 'Yellow', green: 'Green', coral: 'Coral' };
+      /* the colours actually present in the sample, in the app's order */
+      var COLOURS = ['all'].concat(N.map(function (n) { return n.colour; })
+        .filter(function (c, i, a) { return a.indexOf(c) === i; }));
 
       function tint(html) {
         N.forEach(function (n, k) {
@@ -1507,7 +1513,9 @@
       }
 
       function list() {
+        var shown = N.filter(function (n) { return colour === 'all' || n.colour === colour; });
         var entries = N.map(function (n, k) {
+          if (colour !== 'all' && n.colour !== colour) { return ''; }
           var quote = esc(n.quote).replace(esc(n.anchor),
             '<mark class="cawx-mark" data-c="' + n.colour + '">' + esc(n.anchor) + '</mark>');
           return '<button type="button" class="cawx-nentry" data-note="' + k + '" data-c="' + n.colour + '">' +
@@ -1525,13 +1533,16 @@
           page: '<div class="cawx-page">' +
             '<div class="cawx-nsearch">' + ICON.search + '<span>Search your highlights and notes</span></div>' +
             '<div class="cawx-nfilters">' +
-              '<span class="cawx-nfilter">' + ICON.book + 'All courses' + ICON.caret + '</span>' +
-              '<span class="cawx-nfilter"><i class="dot"></i>All colours' + ICON.caret + '</span>' +
-              '<span class="cawx-nfilter">' + ICON.sort + 'Course' + ICON.caret + '</span>' +
+              '<span class="cawx-nfilter dim">' + ICON.book + 'All courses' + ICON.caret + '</span>' +
+              /* the colour filter is real: the sample notes are one of each */
+              '<button type="button" class="cawx-nfilter" data-colour="' + colour + '">' +
+                '<i class="dot" data-c="' + (colour === 'all' ? '' : colour) + '"></i>' +
+                (colour === 'all' ? 'All colours' : COLOUR_NAMES[colour]) + ICON.caret + '</button>' +
+              '<span class="cawx-nfilter dim">' + ICON.sort + 'Course' + ICON.caret + '</span>' +
             '</div>' +
             '<div class="cawx-nbar"><span class="mut">Clear filters</span><span class="act">Expand all</span></div>' +
             '<div class="cawx-ncard">' +
-              '<div class="cawx-nhead"><span>' + esc(D.course.name) + '</span><b>' + N.length + '</b></div>' +
+              '<div class="cawx-nhead"><span>' + esc(D.course.name) + '</span><b>' + shown.length + '</b></div>' +
               '<p class="cawx-nlesson">' + esc(D.lesson.id) + '&nbsp;&nbsp;' +
                 esc(D.lesson.id) + ' - ' + esc(D.lesson.title) + '</p>' +
               entries +
@@ -1543,6 +1554,14 @@
             CAW.track('demo_notes_open_lesson', { index: at });
           });
         });
+        var pick = qs('[data-colour]', screen);
+        if (pick) {
+          pick.addEventListener('click', function () {
+            colour = COLOURS[(COLOURS.indexOf(colour) + 1) % COLOURS.length];
+            paint();
+            CAW.track('demo_notes_filter', { colour: colour });
+          });
+        }
       }
 
       function lesson() {
@@ -1595,7 +1614,14 @@
         if (!anchor && (c.id === 'm' || c.id === 'p43')) { anchor = c; }
       });
       anchor = anchor || cat.courses[1] || cat.courses[0];
-      var total = anchor.lessons, from = Math.round(total * 0.6), done = from, timers = [];
+      /* A single lesson moves the bar by about 1.5% — invisible. The step is a
+         handful of lessons so the bar visibly rises on the iPhone, then rises
+         to match on the iPad and the Mac. */
+      /* `from` must be the value the dashboard itself drew for this course (60%),
+         or the first update would move the bar DOWNWARDS before rising. */
+      var total = anchor.lessons, from = Math.round(total * 0.6),
+          step = Math.max(3, Math.round(total * 0.07)),
+          done = from, timers = [];
 
       function apply(host, n) {
         if (!host) { return; }
@@ -1611,7 +1637,7 @@
       }
 
       function round() {
-        done = done + 1 > total ? from : done + 1;
+        done = done + step >= total ? from : done + step;
         if (reducedMotion()) {          /* no staggered motion: set all three */
           apply(phone, done); apply(pad, done); apply(mac, done);
           return;
@@ -1785,7 +1811,8 @@
       g[1].forEach(function (c) {
         var on = current && c.long.indexOf(current) === 0,
             open = live && c.id === cat.openable;
-        h += (open ? '<button type="button" class="cawx-srow" data-caw-demo="lesson">'
+        h += (open ? '<button type="button" class="cawx-srow' + (on ? ' on grey' : '') +
+                     '" data-caw-demo="lesson">'
                    : '<div class="cawx-srow' + (on ? ' on grey' : '') +
                      (live ? ' dim' : '') + '">') + ICON.lesson +
              '<span><span class="nm">' + esc(c.long) + '</span></span>' +
@@ -2234,6 +2261,55 @@
       }).observe(el, { attributes: true, attributeFilter: ['class'] });
     });
   })();
+
+  /* ------------------------------------------------------------------------
+     A miniature of the screen inside each Features card
+     ---------------------------------------------------------------------
+     The cards read as plain marketing copy, so the working app behind them
+     went unnoticed. Each one now carries a small, real render of the screen it
+     opens — built from the same demo builders, so it can never drift from what
+     the pop-up shows, and never needs a screenshot kept up to date.
+
+     The renders are STATIC: each demo is run into a detached element, its
+     markup is taken, and its timers are stopped immediately. Nothing inside a
+     thumbnail is clickable — the card itself is the control.
+     ------------------------------------------------------------------------ */
+  function buildFeatureThumbnails() {
+    var cards = qsa('#features .cawx-trigger');
+    if (!cards.length) { return; }
+
+    function snapshot(id) {
+      var tmp = el('div', 'cawx-thumbscreen'), api = null;
+      try {
+        if (id === 'sync') { tmp.innerHTML = dashboard('pad'); }   /* it wants 3 hosts */
+        else { api = (DEMOS[id] || DEMOS.lesson)(tmp); }
+      } catch (err) { return ''; }
+      if (api && api.destroy) { try { api.destroy(); } catch (e) {} }
+      /* Ids must not travel into the page: six miniatures would otherwise put
+         six copies of #cawxFc, #cawxGl and friends into the document, and
+         getElementById would start returning a decoration. */
+      qsa('[id]', tmp).forEach(function (n) { n.removeAttribute('id'); });
+      return tmp.innerHTML;
+    }
+
+    cards.forEach(function (card) {
+      if (qs('.cawx-thumb', card)) { return; }
+      var trigger = qs('[data-caw-open="demo"]', card);
+      var cta = qs('.cawx-more', card);
+      if (!trigger || !cta) { return; }
+      var html = snapshot(trigger.getAttribute('data-caw-id'));
+      if (!html) { return; }
+      var thumb = el('div', 'cawx-thumb');
+      thumb.setAttribute('aria-hidden', 'true');   /* decorative: the card is the control */
+      thumb.innerHTML = '<span class="cawx-thumb-pad"><span class="cawx-thumbscreen">' +
+        html + '</span></span>';
+      card.insertBefore(thumb, cta);
+    });
+  }
+
+  /* built once the page is idle, so it never delays first paint */
+  if (w.requestIdleCallback) { w.requestIdleCallback(buildFeatureThumbnails, { timeout: 2500 }); }
+  else { w.setTimeout(buildFeatureThumbnails, 900); }
 
   CAW.open = function (kind, id) { if (OPENERS[kind]) { OPENERS[kind](id, null); } };
   CAW.closeModal = Modal.close;
