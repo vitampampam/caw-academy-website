@@ -1045,6 +1045,37 @@
       '</div>';
   }
 
+  /* A lesson from the exported set, by display id. */
+  function lessonById(id) {
+    for (var i = 0; i < D.siblings.length; i++) {
+      if (D.siblings[i].id === id) { return D.siblings[i]; }
+    }
+    return D.siblings[0];
+  }
+
+  /* Every screen that shows a lesson navigates the same way: the sidebar picks a
+     lesson and Previous/Next step through the course. `repaint(id)` redraws that
+     screen for the lesson chosen, so each demo keeps its own state (which card,
+     which question) while sharing the navigation. */
+  function wireLessonNav(screen, current, repaint) {
+    qsa('.cawx-srow[data-lesson]', screen).forEach(function (row) {
+      row.addEventListener('click', function () {
+        repaint(row.getAttribute('data-lesson'));
+        CAW.track('demo_lesson_open', { lesson: row.getAttribute('data-lesson') });
+      });
+    });
+    qsa('[data-caw-step]', screen).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var ids = D.siblings.map(function (x) { return x.id; }),
+            at = ids.indexOf(current),
+            to = b.getAttribute('data-caw-step') === 'next' ? at + 1 : at - 1;
+        if (to < 0 || to >= ids.length) { return; }
+        repaint(ids[to]);
+        CAW.track('demo_lesson_step', { lesson: ids[to] });
+      });
+    });
+  }
+
   /* =======================================================================
      6. The eight demo screens
      ======================================================================= */
@@ -1055,13 +1086,6 @@
        detail pane, exactly as it does on the device. */
     lesson: function (screen) {
       var current = D.lesson.id;
-
-      function lessonById(id) {
-        for (var i = 0; i < D.siblings.length; i++) {
-          if (D.siblings[i].id === id) { return D.siblings[i]; }
-        }
-        return D.siblings[0];
-      }
 
       function paint() {
         var L = lessonById(current), s = L.sections, body = '', n = 0;
@@ -1074,73 +1098,60 @@
           tools: 'long', seg: 'Lesson', foot: 'live', position: L.position,
           page: '<div class="cawx-page">' + lessonHead(L) + body + '</div>'
         });
-        qsa('.cawx-srow[data-lesson]', screen).forEach(function (row) {
-          row.addEventListener('click', function () {
-            current = row.getAttribute('data-lesson');
-            paint();
-            CAW.track('demo_lesson_open', { lesson: current });
-          });
-        });
-        /* Previous / Next step through the course, as they do on the device */
-        qsa('[data-caw-step]', screen).forEach(function (b) {
-          b.addEventListener('click', function () {
-            var ids = D.siblings.map(function (x) { return x.id; }),
-                at = ids.indexOf(current),
-                to = b.getAttribute('data-caw-step') === 'next' ? at + 1 : at - 1;
-            if (to < 0 || to >= ids.length) { return; }
-            current = ids[to];
-            paint();
-            CAW.track('demo_lesson_step', { lesson: current });
-          });
-        });
+        wireLessonNav(screen, current, function (id) { current = id; paint(); });
       }
       paint();
     },
 
     /* ---- F2 · flashcards, as the real screens draw them -------------------- */
     flashcards: function (screen) {
-      var cards = D.flashcards, idx = 0, flipped = false, mastered = {};
-      screen.innerHTML = shell({
-        tab: 'Home', side: sidebar(D.lesson.id, true), title: D.lesson.id,
-        tools: 'cards', seg: 'Flashcards',
-        page: '<div class="cawx-fc-wrap">' +
-          '<div class="cawx-fc-head"><span id="cawxFcN"></span><span id="cawxFcM"></span></div>' +
-          '<div class="cawx-fc-bar"><i id="cawxFcBar"></i></div>' +
-          '<button class="cawx-fc" type="button" id="cawxFc" aria-live="polite"></button>' +
-          '<div class="cawx-fc-rate">' +
-            '<button type="button" class="need" data-r="need" disabled>' + ICON.again + 'Need review</button>' +
-            '<button type="button" class="got" data-r="got" disabled>' + ICON.check + 'Got it</button>' +
-          '</div></div>'
-      });
-      var card = qs('#cawxFc', screen), num = qs('#cawxFcN', screen),
-          mas = qs('#cawxFcM', screen), bar = qs('#cawxFcBar', screen);
+      var current = D.lesson.id, idx = 0, flipped = false, mastered = {};
+
       function paint() {
-        var c = cards[idx];
-        card.setAttribute('data-face', flipped ? 'a' : 'q');
-        card.innerHTML = flipped
-          ? '<span class="txt">' + esc(c.a) + '</span>'
-          : '<span class="chip">' + esc(D.lesson.id) + '</span>' +
-            '<span class="txt">' + esc(c.q) + '</span>' +
-            '<span class="wm" aria-hidden="true">CAW<em>Academy</em></span>' +
-            '<span class="hint">' + ICON.tap + 'Tap to reveal answer</span>';
-        num.textContent = 'Card ' + (idx + 1) + ' of ' + D.lesson.cards;
-        mas.textContent = Object.keys(mastered).length + ' mastered';
-        bar.style.width = Math.round((idx + 1) / D.lesson.cards * 100) + '%';
-        /* the rating buttons only come alive once the answer is showing */
-        qsa('.cawx-fc-rate button', screen).forEach(function (b) { b.disabled = !flipped; });
-      }
-      card.addEventListener('click', function () {
-        flipped = !flipped; paint(); CAW.track('demo_flashcard_flip', { index: idx });
-      });
-      qsa('.cawx-fc-rate button', screen).forEach(function (b) {
-        b.addEventListener('click', function () {
-          if (b.disabled) { return; }
-          if (b.getAttribute('data-r') === 'got') { mastered[idx] = true; }
-          else { delete mastered[idx]; }
-          CAW.track('demo_flashcard_rate', { rating: b.getAttribute('data-r') });
-          idx = (idx + 1) % cards.length; flipped = false; paint();
+        var L = lessonById(current), cards = L.flashcards, c = cards[idx % cards.length];
+        idx = idx % cards.length;
+        screen.innerHTML = shell({
+          tab: 'Home', side: sidebar(current, true, true), title: L.id,
+          tools: 'cards', seg: 'Flashcards', foot: 'live', position: L.position,
+          page: '<div class="cawx-fc-wrap">' +
+            '<div class="cawx-fc-head"><span>Card ' + (idx + 1) + ' of ' + L.cards + '</span>' +
+              '<span>' + Object.keys(mastered).length + ' mastered</span></div>' +
+            '<div class="cawx-fc-bar"><i style="width:' +
+              Math.round((idx + 1) / L.cards * 100) + '%"></i></div>' +
+            '<button class="cawx-fc" type="button" id="cawxFc" aria-live="polite" data-face="' +
+              (flipped ? 'a' : 'q') + '">' +
+              (flipped
+                ? '<span class="txt">' + esc(c.a) + '</span>'
+                : '<span class="chip">' + esc(L.id) + '</span>' +
+                  '<span class="txt">' + esc(c.q) + '</span>' +
+                  '<span class="wm" aria-hidden="true">CAW<em>Academy</em></span>' +
+                  '<span class="hint">' + ICON.tap + 'Tap to reveal answer</span>') +
+            '</button>' +
+            '<div class="cawx-fc-rate">' +
+              '<button type="button" class="need" data-r="need"' + (flipped ? '' : ' disabled') + '>' +
+                ICON.again + 'Need review</button>' +
+              '<button type="button" class="got" data-r="got"' + (flipped ? '' : ' disabled') + '>' +
+                ICON.check + 'Got it</button>' +
+            '</div></div>'
         });
-      });
+        qs('#cawxFc', screen).addEventListener('click', function () {
+          flipped = !flipped; paint(); CAW.track('demo_flashcard_flip', { index: idx });
+        });
+        qsa('.cawx-fc-rate button', screen).forEach(function (b) {
+          b.addEventListener('click', function () {
+            if (b.disabled) { return; }
+            if (b.getAttribute('data-r') === 'got') { mastered[idx] = true; }
+            else { delete mastered[idx]; }
+            CAW.track('demo_flashcard_rate', { rating: b.getAttribute('data-r') });
+            idx = (idx + 1) % cards.length; flipped = false; paint();
+          });
+        });
+        /* the sidebar and the footer move between lessons, and each lesson has
+           its own cards — so the deck changes with it */
+        wireLessonNav(screen, current, function (id) {
+          current = id; idx = 0; flipped = false; mastered = {}; paint();
+        });
+      }
       paint();
     },
 
@@ -1149,17 +1160,15 @@
        Lessons screen, section 3). The interactive part of a lesson is its
        quiz, so that is what this demo shows. */
     quiz: function (screen) {
-      var Q = D.quiz, i = 0, picked = null;
-      screen.innerHTML = shell({
-        tab: 'Home', side: sidebar(D.lesson.id, true), title: D.lesson.id,
-        tools: 'short', seg: 'Quiz',
-        page: '<div class="cawx-page" id="cawxQz" aria-live="polite"></div>'
-      });
-      var host = qs('#cawxQz', screen);
+      var current = D.lesson.id, i = 0, picked = null;
+
       function paint() {
+        var L = lessonById(current), Q = L.quiz;
+        if (i >= Q.length) { i = 0; }
         var q = Q[i], h = '', k;
-        h += '<div class="cawx-qcount">Question ' + (i + 1) + ' of ' + D.lesson.questions + '</div>' +
-             '<div class="cawx-qbar"><i style="width:' + Math.round((i + 1) / D.lesson.questions * 100) + '%"></i></div>' +
+        h += '<div class="cawx-qcount">Question ' + (i + 1) + ' of ' + L.questions + '</div>' +
+             '<div class="cawx-qbar"><i style="width:' +
+               Math.round((i + 1) / L.questions * 100) + '%"></i></div>' +
              '<p class="cawx-qtext">' + esc(q.q) + '</p><div class="cawx-opts">';
         for (k = 0; k < q.options.length; k++) {
           var state = '';
@@ -1177,7 +1186,12 @@
                '<button class="cawx-solid" type="button" id="cawxQzNext">' +
                (i === Q.length - 1 ? 'Start again' : 'Next question') + '</button>';
         }
-        host.innerHTML = h;
+        screen.innerHTML = shell({
+          tab: 'Home', side: sidebar(current, true, true), title: L.id,
+          tools: 'short', seg: 'Quiz', foot: 'live', position: L.position,
+          page: '<div class="cawx-page" id="cawxQz" aria-live="polite">' + h + '</div>'
+        });
+        var host = qs('#cawxQz', screen);
         qsa('.cawx-opt[data-i]', host).forEach(function (btn) {
           btn.addEventListener('click', function () {
             picked = +btn.getAttribute('data-i');
@@ -1191,6 +1205,10 @@
             i = (i + 1) % Q.length; picked = null; paint();
           });
         }
+        /* each lesson brings its own questions */
+        wireLessonNav(screen, current, function (id) {
+          current = id; i = 0; picked = null; paint();
+        });
       }
       paint();
     },
@@ -1283,10 +1301,11 @@
 
     /* ---- F5 · the glossary sheet ------------------------------------------ */
     glossary: function (screen) {
+      var current = D.lesson.id, L = lessonById(current);
       screen.innerHTML = shell({
-        tab: 'Home', side: sidebar(D.lesson.id, true), title: D.lesson.id,
-        tools: 'long', seg: 'Lesson', foot: true,
-        page: '<div class="cawx-page">' + lessonHead() + sectionHTML(D.lesson.sections[0], 1, {}) + '</div>'
+        tab: 'Home', side: sidebar(current, true, true), title: L.id,
+        tools: 'long', seg: 'Lesson', foot: 'live', position: L.position,
+        page: '<div class="cawx-page">' + lessonHead(L) + sectionHTML(L.sections[0], 1, {}) + '</div>'
       }) +
         '<div class="cawx-dim" data-caw-nav="back" data-caw-fallback="demo:lesson"></div>' +
         '<div class="cawx-sheet">' +
@@ -1299,6 +1318,10 @@
           '<p class="cawx-gl-count" id="cawxGlCount" role="status" aria-live="polite"></p>' +
           '<ul class="cawx-gl-list" id="cawxGlList"></ul>' +
         '</div>';
+
+      /* Choosing a lesson behind the sheet leaves the glossary and opens it, which
+         is what the app does — the sheet is closed by the act of navigating. */
+      wireLessonNav(screen, current, function () { openDemo('lesson', undefined, true); });
 
       var input = qs('#cawxGl', screen), list = qs('#cawxGlList', screen),
           count = qs('#cawxGlCount', screen), data = D.glossary;
@@ -1386,24 +1409,25 @@
        the transport centred, a close button on the right, and the position and
        time remaining underneath. The block being spoken is tinted across its
        full width, and the speaker in the toolbar is shown active. */
-    voice: function (screen) {
+    voice: function (screen, startId) {
       var playing = true, at = 0, timer = null;
 
+      var current = startId || D.lesson.id, L = lessonById(current);
       screen.innerHTML = shell({
-        tab: 'Home', side: sidebar(D.lesson.id, true), title: D.lesson.id,
-        tools: 'reading', seg: 'Lesson', foot: true,
-        page: '<div class="cawx-page" id="cawxVp">' + lessonHead() +
-            sectionHTML(D.lesson.sections[0], 1, {}) +
-            sectionHTML(D.lesson.sections[1], 2, { limit: 3 }) + '</div>' +
+        tab: 'Home', side: sidebar(current, true, true), title: L.id,
+        tools: 'reading', seg: 'Lesson', foot: 'live', position: L.position,
+        page: '<div class="cawx-page" id="cawxVp">' + lessonHead(L) +
+            sectionHTML(L.sections[0], 1, {}) +
+            (L.sections[1] ? sectionHTML(L.sections[1], 2, { limit: 3 }) : '') + '</div>' +
           '<div class="cawx-voice">' +
             '<div class="cawx-vrow">' +
               '<span class="cawx-vspeed" aria-hidden="true">' + ICON.gauge + '</span>' +
               '<span class="cawx-vmid">' +
-                '<button type="button" class="cawx-vbtn" aria-label="Back to the start">' + ICON.skipBack + '</button>' +
+                '<button type="button" class="cawx-vbtn" id="cawxVfirst" aria-label="Back to the start">' + ICON.skipBack + '</button>' +
                 '<button type="button" class="cawx-vbtn" id="cawxVprev" aria-label="Previous">' + ICON.rewind + '</button>' +
                 '<button type="button" class="cawx-vbtn big" id="cawxPlay" aria-label="Pause">' + ICON.pause + '</button>' +
                 '<button type="button" class="cawx-vbtn" id="cawxVnext" aria-label="Next">' + ICON.forward + '</button>' +
-                '<button type="button" class="cawx-vbtn" aria-label="To the end">' + ICON.skipFwd + '</button>' +
+                '<button type="button" class="cawx-vbtn" id="cawxVlast" aria-label="To the end">' + ICON.skipFwd + '</button>' +
               '</span>' +
               '<button type="button" class="cawx-vclose" data-caw-demo="lesson" aria-label="Stop reading">' +
                 ICON.close + '</button>' +
@@ -1445,6 +1469,15 @@
       qs('#cawxVnext', screen).addEventListener('click', function () {
         at = Math.min(blocks.length - 1, at + 1); mark();
       });
+      /* the outer two jump to the ends, as the app's transport does */
+      qs('#cawxVfirst', screen).addEventListener('click', function () { at = 0; mark(); });
+      qs('#cawxVlast', screen).addEventListener('click', function () {
+        at = blocks.length - 1; playing = false; stop(); mark();
+      });
+      /* Choosing another lesson reads THAT one from the top. The screen is simply
+         re-run for it, which resets the transport, the position and the
+         follow-along highlight together. */
+      wireLessonNav(screen, current, function (id) { stop(); DEMOS.voice(screen, id); });
       mark();
       run();
       return { destroy: stop };

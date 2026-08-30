@@ -322,6 +322,59 @@ window.CAW_DEMO = {
  },
  "siblings": [
   {
+   "flashcards": [
+    {
+     "q": "Which ICAO Annex forms the global basis for continuing airworthiness?",
+     "a": "ICAO Annex 8."
+    },
+    {
+     "q": "Which regulation contains Part-M, Part-145, and Part-CAMO?",
+     "a": "Regulation (EU) No 1321/2014."
+    },
+    {
+     "q": "Which regulation implements ICAO Annex 19 requirements for occurrence reporting?",
+     "a": "Regulation (EU) No 376/2014."
+    },
+    {
+     "q": "What is the regulatory status of CS-25?",
+     "a": "A certification specification issued under the Basic Regulation."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "An operator asks where its MEL and technical-log obligations originate. Which ICAO Annex defines them?",
+     "options": [
+      "Annex 6, on the operation of aircraft.",
+      "Annex 8, on the airworthiness of aircraft.",
+      "Annex 19, on safety management systems.",
+      "Annex 1, on personnel licensing matters."
+     ],
+     "correct": 0,
+     "why": "The operating annex carries the maintenance control system, defect reporting, the equipment list and the technical log. The airworthiness annex sets the technical baseline and the safety-management annex covers reporting and risk."
+    },
+    {
+     "q": "An engineer opens one regulation and finds Part-M, Part-145 and Part-CAMO inside it. Which regulation is it?",
+     "options": [
+      "Regulation (EU) No 1321/2014.",
+      "Regulation (EU) No 748/2012, on initial airworthiness.",
+      "Regulation (EU) No 965/2012.",
+      "Regulation (EU) 2018/1139."
+     ],
+     "correct": 0,
+     "why": "Continuing airworthiness sits in one regulation with its Parts as annexes, which is why those three are read together. Initial airworthiness, air operations and the Basic Regulation each occupy their own instrument."
+    },
+    {
+     "q": "A design engineer needs Part-21 and the CS codes. Which regulation carries them?",
+     "options": [
+      "Regulation (EU) No 748/2012.",
+      "Regulation (EU) No 1321/2014.",
+      "Regulation (EU) No 965/2012.",
+      "Regulation (EU) 2015/640."
+     ],
+     "correct": 0,
+     "why": "Design and production sit apart from continuing airworthiness, so Part-21 and the certification specifications belong to the initial-airworthiness regulation. Continuing airworthiness, air operations and the additional airworthiness requirements each have their own."
+    }
+   ],
    "id": "INTRO TO CAW",
    "uid": "intro-to-caw",
    "subpart": "Part-M - INTRODUCTION",
@@ -489,6 +542,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "Which measures does Part-M Section A cover?",
+     "a": "The measures to keep an aircraft airworthy, including maintenance, and the conditions to be met by the persons and organisations involved (M.A.101)."
+    },
+    {
+     "q": "What is the core principle of M.A.101?",
+     "a": "M.A.101 says what Part-M is for; the applicability boundary (Part-M vs Part-ML, Part-T, permit-to-fly) is set by Articles 1 and 3 of Reg (EU) No 1321/2014."
+    },
+    {
+     "q": "Which aircraft go to Part-ML instead of Part-M?",
+     "a": "Other-than-complex aeroplanes of 2730 kg or less, rotorcraft of 1200 kg or less (up to four occupants) and other ELA2 - unless on a licensed air carrier's AOC, when Part-M applies (Article 3(2) of Regulation (EU) No 1321/2014)."
+    },
+    {
+     "q": "What does Section A of Part-M contain?",
+     "a": "Accountability (B), continuing-airworthiness tasks and records (C), maintenance standards (D), components (E), the legacy maintenance and CAW-management organisations (F/G), the certificate of release to service (H) and the airworthiness review (I)."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "(M.A.101) At the highest level, what is set out by Part-M Section A - the airworthiness measures and who must apply them?",
+     "options": [
+      "The scope of Part-M Section A - the measures to keep aircraft airworthy.",
+      "The list of every aircraft type and operator that Part-M applies to.",
+      "The approval requirements for continuing-airworthiness organisations.",
+      "The design and production responsibilities of the type-certificate holder."
+     ],
+     "correct": 0,
+     "why": "M.A.101 is a short scope statement: Section A establishes the measures to maintain airworthiness (including maintenance) and the conditions for those involved. The detailed applicability is in Article 3 of Regulation (EU) No 1321/2014, and organisation approvals and design duties are set out elsewhere."
+    },
+    {
+     "q": "(Article 3, Reg 1321/2014) Which aircraft fall under Part-ML rather than Part-M?",
+     "options": [
+      "Lighter other-than-complex aircraft - e.g. aeroplanes of 2730 kg or less.",
+      "Any aircraft maintained outside the EU under an active bilateral agreement.",
+      "All aircraft not operated by a licensed air carrier, of any size.",
+      "Only rotorcraft, regardless of their mass or seating."
+     ],
+     "correct": 0,
+     "why": "Article 3(2) of Regulation (EU) No 1321/2014 routes lighter other-than-complex types - aeroplanes at or below 2730 kg, rotorcraft at or below 1200 kg for up to four occupants, and other ELA2 - to Part-ML. It is not decided by operator nationality or where maintenance is done."
+    },
+    {
+     "q": "A light aeroplane below the Part-ML thresholds is placed on a licensed air carrier's AOC. Which rules apply?",
+     "options": [
+      "Part-M applies, because of the air-carrier AOC exception.",
+      "Part-ML continues to apply, because the aircraft is still light.",
+      "Neither applies until the aircraft exceeds 2730 kg take-off mass.",
+      "The operator may freely choose either Part-M or Part-ML."
+     ],
+     "correct": 0,
+     "why": "Article 3(2) of Regulation (EU) No 1321/2014 brings a light aircraft back under Part-M once it is listed on a licensed air carrier's AOC (and it meets Article 3(3)). Mass alone does not decide it, and there is no free choice between the two."
+    }
+   ],
    "id": "M.A.101",
    "uid": "m-a-101",
    "subpart": "PART-M - SUBPART A",
@@ -672,6 +778,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "When may two operators use the same CAMO under M.A.201(ea)?",
+     "a": "When they form a single air carrier business grouping and all five conditions are met: the CAMO is Part-CAMO approved for the aircraft, is in the same grouping, holds an Appendix I contract with each AOC holder that is not itself a CAMO, has its principal place of business in the EU, and the management systems are harmonised. Each operator still stays accountable for its own aircraft."
+    },
+    {
+     "q": "Who holds accountability for an aircraft's continuing airworthiness? (M.A.201)",
+     "a": "Accountability for continuing airworthiness: the owner (or the lessee when leased, or the operator for a licensed air carrier) must ensure no flight unless the aircraft is airworthy, equipment serviceable, the airworthiness certificate valid and maintenance done to the AMP - using an approved CAMO/CAO and Part-145 by approval or written contract."
+    },
+    {
+     "q": "What is the core principle of M.A.201?",
+     "a": "Accountability for continuing airworthiness cannot be contracted away - the owner or operator remains responsible even when a CAMO, CAO or Part-145 does the work."
+    },
+    {
+     "q": "When does responsibility pass to the lessee?",
+     "a": "When the lessee is stipulated on the registration document or detailed in the leasing contract (M.A.201(b)); thereafter 'owner' means owner or lessee."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "(M.A.201) Who is the baseline party responsible for an aircraft's continuing airworthiness?",
+     "options": [
+      "The owner - unless the aircraft is leased or used by a licensed air carrier.",
+      "The CAMO, from the moment a management contract is signed.",
+      "The Part-145 organisation that performs its maintenance.",
+      "The competent authority that issued the aircraft's airworthiness certificate."
+     ],
+     "correct": 0,
+     "why": "M.A.201(a) puts the baseline duty on the owner; it moves to the lessee when leased (b) and to the operator for licensed air carriers (e). A CAMO or Part-145 does the work under contract but never assumes the accountability, and the authority oversees rather than holds it."
+    },
+    {
+     "q": "When does responsibility for continuing airworthiness pass from the owner to the lessee?",
+     "options": [
+      "When the lessee is named on the registration document or lease contract.",
+      "As soon as the aircraft is physically delivered and accepted by the lessee.",
+      "Automatically, on any lease of more than six months.",
+      "Only once the competent authority approves the lease."
+     ],
+     "correct": 0,
+     "why": "M.A.201(b) transfers the owner's responsibilities to the lessee only if the lessee is stipulated on the registration document or detailed in the leasing contract - not by lease duration, physical delivery, or a separate authority approval."
+    },
+    {
+     "q": "(M.A.201) Who is responsible for the satisfactory pre-flight inspection?",
+     "options": [
+      "The pilot-in-command, or the operator for a licensed air carrier.",
+      "Only an approved Part-145 maintenance organisation may perform it.",
+      "The certifying staff who signed the last release to service.",
+      "The CAMO managing the aircraft's continuing airworthiness."
+     ],
+     "correct": 0,
+     "why": "M.A.201(d) places the pre-flight on the pilot-in-command (or the operator for a (EC) No 1008/2008 air carrier); it may be done by the pilot or another qualified person and need not involve an approved organisation or certifying staff."
+    }
+   ],
    "id": "M.A.201",
    "uid": "m-a-201",
    "subpart": "PART-M - SUBPART B - ACCOUNTABILITY",
@@ -895,6 +1054,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "Who must report a safety-endangering event or condition? (M.A.202)",
+     "a": "Three people: the owner who carries out the continuing-airworthiness tasks themselves, the independent certifying staff under M.A.801(b)(1), and the pilot-owner under M.A.801(b)(2)."
+    },
+    {
+     "q": "Who must report under M.A.202?",
+     "a": "Three named people: the owner who carries out the aircraft's continuing-airworthiness tasks themselves (M.A.201(i)), the independent certifying staff (M.A.801(b)(1)) and the pilot-owner (M.A.801(b)(2)). An approved CAMO, CAO or Part-145 organisation reports instead under CAMO.A.160 or 145.A.60."
+    },
+    {
+     "q": "What is the reporting deadline under M.A.202?",
+     "a": "As soon as practicable, and in any case within 72 hours of becoming aware of the event or condition, unless exceptional circumstances prevent it; in the form and manner set by the competent authority of the State of registry."
+    },
+    {
+     "q": "Who receives an M.A.202 report?",
+     "a": "Two recipients: the competent authority of the Member State of registry of the aircraft, and the organisation responsible for the design of the aircraft or component concerned."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "(M.A.202) The occurrence-reporting duty falls on which of these?",
+     "options": [
+      "The owner carrying out their own airworthiness tasks.",
+      "Any approved Part-145 organisation releasing the aircraft.",
+      "The competent authority of the Member State of registry.",
+      "The design approval holder for the affected product."
+     ],
+     "correct": 0,
+     "why": "The amended article names three reporters, and all of them act outside an approved organisation: the self-managing owner, the independent certifying staff and the pilot-owner. An approved maintenance organisation does report occurrences, but under its own subpart rule rather than this one. The competent authority and the design organisation are the recipients of a report, not the persons who must make it."
+    },
+    {
+     "q": "(M.A.202) Which kind of condition must be reported as an occurrence?",
+     "options": [
+      "Endangers, or could endanger, an aircraft or any person.",
+      "Any minor defect, even a trivial one.",
+      "Only a defect that immediately grounds the aircraft.",
+      "Only a finding raised at the annual airworthiness review."
+     ],
+     "correct": 0,
+     "why": "The test is deliberately forward-looking. A condition qualifies if it endangers safety now, or would do so if left uncorrected, and it reaches any person who could be harmed rather than only those on board. That is wider than a defect serious enough to stop the aircraft flying today, and narrower than every trivial snag found in service. Confining it to what a periodic review happens to catch would miss conditions found at any other time."
+    },
+    {
+     "q": "(M.A.202) An occurrence report goes to the registry authority and to whom else?",
+     "options": [
+      "The organisation responsible for the design.",
+      "The nearest available maintenance organisation.",
+      "The aircraft's lessor or financier.",
+      "The operator's own compliance-monitoring manager."
+     ],
+     "correct": 0,
+     "why": "There are exactly two recipients, and each has a reason. The registry authority needs the data for its oversight. The design organisation needs it because one field condition can be the first sign of a fleet-wide design problem that only the design holder can investigate and cure. A maintenance provider, a party with a financial interest in the aircraft, and an internal monitoring function may all learn of the condition, but none of them can issue a design fix or exercise State oversight."
+    }
+   ],
    "id": "M.A.202",
    "uid": "m-a-202",
    "subpart": "PART-M - SUBPART B - ACCOUNTABILITY",
@@ -1098,6 +1310,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "Why is a repaint more than cosmetic in continuing airworthiness?",
+     "a": "It is controlled by an engineering order, re-marks the registration and required placards, and adds empty mass - so it feeds the mass-and-balance revision (by calculation, or by weighing where the effect is not accurately known) and is embodied as a Part-21 change on approved data."
+    },
+    {
+     "q": "Which continuing-airworthiness tasks must be accomplished for every aircraft?",
+     "a": "The continuing-airworthiness tasks: pre-flight inspections, defect rectification (MEL/CDL, approved data), maintenance to the AMP, release under Subpart H, ADs and mandatory actions, mods/repairs to M.A.304, AMP-effectiveness analysis, mass-and-balance, and check flights."
+    },
+    {
+     "q": "Can an operator choose which of the M.A.301 tasks to carry out?",
+     "a": "No - every task that applies to the aircraft and operation must be done; it is the concrete expression of the M.A.201 responsibility."
+    },
+    {
+     "q": "How are defects handled?",
+     "a": "Rectified to approved data, or deferred only within the MEL/CDL limits and recorded, then cleared in time (M.A.301(b))."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "Between physical weighings, how is an aircraft's mass and balance kept current?",
+     "options": [
+      "By calculation from the approved weight data.",
+      "By re-weighing the whole aircraft after each modification.",
+      "By the load controller on each individual flight.",
+      "By the flight crew's pre-flight mass estimate."
+     ],
+     "correct": 0,
+     "why": "Mass and CG are revised by calculation as modifications and repairs change the empty mass, so the load sheet always works from current figures. Weighing on scales is the periodic re-baseline, done before entry into service and then at the interval set for individual or fleet masses. It is also compelled where a modification's effect on mass and balance is not accurately known. Re-weighing after every single change, leaving the figures to the load controller, or relying on a crew estimate would each put them beyond proper control."
+    },
+    {
+     "q": "(M.A.301) Which is a continuing-airworthiness task?",
+     "options": [
+      "Accomplishing applicable airworthiness directives.",
+      "Designing modifications and issuing their approved data.",
+      "Approving the operator's minimum equipment list itself.",
+      "Licensing the certifying staff who sign the release."
+     ],
+     "correct": 0,
+     "why": "M.A.301(f) lists accomplishing applicable ADs; designing mod data is Part-21, MEL approval is the authority's, and licensing staff is Part-66."
+    },
+    {
+     "q": "(M.A.301) To what must all maintenance be accomplished?",
+     "options": [
+      "The approved maintenance programme.",
+      "Whatever schedule the maintenance provider prefers.",
+      "The manufacturer's recommendations only.",
+      "The operator's own turnaround targets."
+     ],
+     "correct": 0,
+     "why": "Maintenance is carried out to the programme approved for that aircraft, which is what makes the schedule enforceable and auditable rather than a matter of preference. A provider's preferred schedule has no approval behind it, the manufacturer's recommendations are an input to the programme rather than the programme itself, and turnaround targets are commercial."
+    }
+   ],
    "id": "M.A.301",
    "uid": "m-a-301",
    "subpart": "PART-M - SUBPART C - CONTINUING AIRWORTHINESS",
@@ -1309,6 +1574,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "Why can de-fuelling an aircraft for maintenance be a planning problem?",
+     "a": "The into-plane provider must be satisfied the returned fuel is safe and on-specification (certified Jet A-1) before taking it into its reservoirs, and can ask for recent Jet A-1 delivery records and the latest microbiological test - fuel of doubtful provenance (for example TS-1 mixed into Jet A-1) may be refused or quarantined."
+    },
+    {
+     "q": "Can AMP maintenance periods be varied, and how?",
+     "a": "Yes, but only with the competent authority's approval or through a procedure set out in the approved AMP. This differs from a task's planning tolerance (a 'whichever comes first' allowance), which must never be used serially to creep past a limit."
+    },
+    {
+     "q": "What must the AMP be based on under M.A.302(d)?",
+     "a": "The instructions issued by the competent authority, and the instructions for continuing airworthiness from the design approval holders, together with the instructions in the certification specifications for standard changes and repairs. (Part-26 requirements bind in their own right and are carried in the AMP in practice, but M.A.302(d) does not cite them. The Minimum Inspection Programme is a Part-ML concept under ML.A.302, not a Part-M AMP basis.)"
+    },
+    {
+     "q": "How does MSG-3 analysis become scheduled tasks on an individual aircraft?",
+     "a": "MSG-3 logic produces the maintenance review board report (MRBR); the manufacturer turns that into a maintenance planning document (MPD); the operator then develops its own AMP from the MPD together with the ALS and the other required instructions."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "(M.A.302) A complex motor-powered aircraft's programme is based on MSG logic. What must the AMP include?",
+     "options": [
+      "A reliability programme for the fleet.",
+      "A minimum inspection programme instead.",
+      "A condition-monitoring exemption from the authority.",
+      "A separate reliability approval from the authority."
+     ],
+     "correct": 0,
+     "why": "Programmes built on maintenance-steering-group logic or condition monitoring depend on in-service evidence, so the AMP has to carry the mechanism that produces it. The lighter inspection programme belongs to another regime, and no exemption or separate approval is involved."
+    },
+    {
+     "q": "How may an AMP-prescribed maintenance period legitimately be varied?",
+     "options": [
+      "Only with authority approval or an approved AMP procedure.",
+      "Freely, using the task's planning tolerance each time.",
+      "By the CAMO on its own whenever the fleet is short of slots.",
+      "Automatically once a reliability trend looks favourable."
+     ],
+     "correct": 0,
+     "why": "A prescribed period may be changed only with the competent authority's approval or through a procedure in the approved AMP; the small planning tolerance on a task limit is an allowance, not extra interval, and cannot be used serially to stretch a period."
+    },
+    {
+     "q": "Which documents form the basis of the AMP for a modern aircraft?",
+     "options": [
+      "MRBR, MPD, ALS, ICA from airframe/engine/APU/STC holders.",
+      "The MPD alone, as the manufacturer's consolidated schedule.",
+      "The airframe manufacturer's general service recommendations.",
+      "The operator's own internal maintenance procedures."
+     ],
+     "correct": 0,
+     "why": "The programme is assembled from the data defining how the type was certified and must be kept safe, which is why it draws on the review board report, the planning document, the limitations section and the instructions of every design contributor. The planning document is one input rather than the whole basis, a general service recommendation carries no approval behind it, and an internal procedure describes how the operator works rather than what the aircraft needs."
+    }
+   ],
    "id": "M.A.302",
    "uid": "m-a-302",
    "subpart": "PART-M - SUBPART C - CONTINUING AIRWORTHINESS",
@@ -1532,6 +1850,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "How must an applicable airworthiness directive be complied with? (M.A.303)",
+     "a": "Any applicable airworthiness directive (AD) must be carried out within its own requirements - the specified tasks, method and compliance time - unless EASA specifies otherwise. The duty attaches to every AD effective for the aircraft's actual configuration."
+    },
+    {
+     "q": "What is an AD for?",
+     "a": "To correct an unsafe condition - a design, part or instruction problem, shown by evidence to be capable of causing serious harm and likely to exist in other aircraft of the type. The AD makes the fix mandatory across the fleet."
+    },
+    {
+     "q": "Who issues the ADs an EU operator must comply with?",
+     "a": "An AD is a document issued or adopted by EASA. EASA issues ADs for EU-designed products and adopts the State-of-Design ADs (for example FAA, ANAC, TCCA) for foreign-designed products on EU aircraft. Any authority can originate an AD for its own designs; the operator must track them all."
+    },
+    {
+     "q": "Which ADs apply to a mixed-origin aircraft?",
+     "a": "All applicable ADs from every relevant State of Design - airframe, engines, propellers and each appliance - plus EASA ADs. Tracking only one authority leaves gaps."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "Under EU continuing-airworthiness rules, who issues or adopts the airworthiness directives that apply to an EU-registered aircraft?",
+     "options": [
+      "EASA, which issues EU ADs and adopts foreign State-of-Design ADs.",
+      "Only the manufacturer of each product, by publishing mandatory service bulletins that need no authority action.",
+      "Only the operator's own national civil aviation authority, for every product on the aircraft.",
+      "Whichever airline first reports the unsafe condition to a regulator."
+     ],
+     "correct": 0,
+     "why": "An AD is defined as a document issued or adopted by EASA; the manufacturer only proposes corrective data and cannot mandate it, and reporting a problem is not the same as issuing the directive."
+    },
+    {
+     "q": "An aircraft's airframe, engines and appliances were each designed in different states. Which ADs must the CAMO track to satisfy M.A.303?",
+     "options": [
+      "EASA ADs plus the State-of-Design ADs for every product.",
+      "EASA airworthiness directives, since the aircraft is registered in the European Union.",
+      "The airframe State-of-Design ADs, because the airframe governs the type.",
+      "The ADs the manufacturer flags as mandatory in its own documentation."
+     ],
+     "correct": 0,
+     "why": "A modern aircraft combines designs from several States of Design, so applicable ADs come from multiple authorities plus EASA; limiting tracking to one authority leaves whole product areas uncovered."
+    },
+    {
+     "q": "A repetitive-inspection AD has just been complied with for the first time. What must be recorded so the aircraft stays compliant with M.A.303?",
+     "options": [
+      "The method and date of compliance and the next-due point.",
+      "Confirmation that the first inspection was completed.",
+      "The signature of the technician who performed it.",
+      "The date of the last application, with the next scheduled separately."
+     ],
+     "correct": 0,
+     "why": "A recurring directive needs both ends recorded: how and when compliance was achieved, and the point at which the next application falls due. A completion note, a signature or the date of the last application each leave the recurring obligation without a due point, which is the whole purpose of holding a directive status."
+    }
+   ],
    "id": "M.A.303",
    "uid": "m-a-303",
    "subpart": "PART-M - SUBPART C - CONTINUING AIRWORTHINESS",
@@ -1743,6 +2114,59 @@ window.CAW_DEMO = {
    ]
   },
   {
+   "flashcards": [
+    {
+     "q": "What data may a modification or repair be carried out to under M.A.304?",
+     "a": "Only approved data - approved by the Agency or a Part-21 design organisation, the standard changes/repairs of CS-STAN (21.A.90B / 21.A.431B), the Part-21 Light equivalents, or data declared by a declarant of a declaration of design compliance. An unapproved repair is not airworthy, even when it is well made."
+    },
+    {
+     "q": "What determines whether a repair is major or minor?",
+     "a": "A repair design is classified by the criteria for a change to the type certificate (21.A.435(a) applying 21.A.91): it is minor only where it has no appreciable effect on mass, balance, structural strength, reliability, operational characteristics, certified noise or emissions levels, operational suitability data, or other characteristics affecting the airworthiness or environmental compatibility. Anything else is major."
+    },
+    {
+     "q": "Why can one design authority's approval not cover a whole mixed-origin aircraft?",
+     "a": "Because approved data has to come from the design authority responsible for each product, or an equivalent validated for use in the EU. Airframe repair data cannot approve an engine repair, and an appliance needs data traceable to its own design approval."
+    },
+    {
+     "q": "When is a repair actually finished?",
+     "a": "Not when the work is embodied. It is finished once the data it was carried out to is approved and any follow-on inspections the repair brings are entered in that aircraft's maintenance programme, so the repaired area stays tracked for the rest of the aircraft's life."
+    }
+   ],
+   "quiz": [
+    {
+     "q": "Under Part-21 (as applied through M.A.304), what determines whether a repair is classified major or minor?",
+     "options": [
+      "Whether it appreciably affects strength, performance, handling or the limitations.",
+      "Whether the design approval holder classifies it so in its published manuals and bulletins.",
+      "Whether the repair is carried out using approved data.",
+      "The operator's own engineering judgement, applied case by case."
+     ],
+     "correct": 0,
+     "why": "The test is the effect on the product: a change is major where it appreciably affects mass, balance, structural strength, reliability, operational characteristics or the approved limitations. A manual's wording, the use of approved data and an operator's judgement are all real parts of the system, but none of them is the classification test."
+    },
+    {
+     "q": "Which authority approves the data for a major repair on a mixed-origin aircraft (airframe and engines from different States of Design) operated by an EU operator?",
+     "options": [
+      "State-of-Design or EASA-validated data, product by product.",
+      "EASA data alone, since the operator and registration are in the EU.",
+      "FAA data alone, on the basis that the engines were designed there.",
+      "The operator's own engineering instructions, issued in-house."
+     ],
+     "correct": 0,
+     "why": "Repair data has to come from the design authority responsible for each product, or from an equivalent validated for use in the EU under a bilateral arrangement, so a mixed-origin aircraft needs the right source for each part of it. Airframe data cannot approve an engine repair, and the aircraft's registration does not change that. The engine's design authority does not cover the airframe, and an operator's own instructions carry no design approval at all."
+    },
+    {
+     "q": "(M.A.304) Modifications and repairs must be carried out to approved data. Which scenario breaches that?",
+     "options": [
+      "A major repair embodied using unapproved manufacturer recommendations.",
+      "A CAMO updates the AMP after an STC installation.",
+      "A Part-145 organisation requests approved structural repair data from the holder.",
+      "A pilot reports a defect in the Tech Log."
+     ],
+     "correct": 0,
+     "why": "A recommendation is not approved data, so embodying a major repair on it leaves the structure without a validated basis - the common confusion of guidance with approval."
+    }
+   ],
    "id": "M.A.304",
    "uid": "m-a-304",
    "subpart": "PART-M - SUBPART C - CONTINUING AIRWORTHINESS",
