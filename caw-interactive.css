@@ -1738,12 +1738,23 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
 /* `zoom`, not `transform`: a transform does not change layout, so the frame
    could not hug the screen and left a fat lip under it. With zoom the screen's
    scaled size IS its layout size, and the bezel is an even 5px all round. */
-.cawx-thumb-pad{position:relative; display:block; width:auto;
-  border-radius:13px; padding:5px; overflow:hidden; line-height:0;
+.cawx-thumb-pad{
+  /* One source of truth for the frame: the screen's real size (400 x 582 is the
+     device's 1200:1747) and the scale. The bezel is then exactly 5px on every
+     side by construction — no rounding gap, no fat lip under the screen. */
+  /* 480 x 699 is the size the pop-up's own frame renders at, so the miniature
+     lays out IDENTICALLY to the real thing — just smaller. Building it narrower
+     made every fixed px size proportionally larger, and the dense screens (the
+     certificate worst of all) overflowed their boxes. */
+  --tw:480px; --th:699px; --tz:.3083; --bezel:5px;
+  position:relative; display:block; line-height:0; overflow:hidden;
+  width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
+  height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
+  padding:var(--bezel); border-radius:13px;
   background:linear-gradient(160deg,#23264c,#0e1030);
   box-shadow:0 2px 6px rgba(16,22,68,.14), 0 12px 26px rgba(16,22,68,.13)}
-.cawx-thumb-pad .cawx-thumbscreen{display:block; width:400px; height:582px;
-  zoom:.37; border-radius:22px}
+.cawx-thumb-pad .cawx-thumbscreen{display:block; width:var(--tw); height:var(--th);
+  zoom:var(--tz); border-radius:calc(8px / var(--tz))}
 /* the card lifts its miniature slightly on hover, so it reads as a way in */
 #features .cawx-trigger .cawx-thumb-pad{transition:transform .22s ease, box-shadow .22s ease}
 #features .cawx-trigger:hover .cawx-thumb-pad{transform:translateY(-3px);
@@ -1752,5 +1763,5 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad .cawx-thumbscreen{zoom:.325}
+  .cawx-thumb-pad{--tz:.2708}
 }
