@@ -1726,8 +1726,11 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
 /* `margin-top:auto` puts the miniature and the call to action together at the
    foot of the card, so the frames line up across the row however many lines the
    description runs to — they used to start wherever the copy happened to end. */
-.cawx-thumb{margin:14px 0 4px auto; margin-top:auto;
-  display:flex; justify-content:center; pointer-events:none}
+/* `margin-top:auto` keeps the miniature and the call to action together at the
+   foot of the card, so the frames line up across the row. The side margins must
+   stay 0: an auto left margin shrink-wrapped the block and pushed it right. */
+.cawx-thumb{margin:auto 0 4px; display:flex; justify-content:center;
+  pointer-events:none}
 #features .card.cawx-trigger .cawx-stretch{margin-top:0}
 /* A portrait iPad, as the pop-up frames are, showing the WHOLE screen. The
    screen is built at 400x582 — the device's real 1200:1747 — and scaled to fit
@@ -1765,3 +1768,10 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
 @media (max-width:560px){
   .cawx-thumb-pad{--tz:.2708}
 }
+
+/* The certificate is a document, so its own type is large next to a dense screen
+   like the glossary. In a miniature that reads as a zoomed-in certificate rather
+   than a screen showing one, so the artwork is given more room around it — the
+   pop-up itself is untouched. */
+.cawx-thumbscreen .cawx-certsheet .cawx-cert{width:74%}
+.cawx-thumbscreen .cawx-certsheet .cawx-cert-wrap{padding-top:6px}
