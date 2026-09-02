@@ -1745,11 +1745,12 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   /* One source of truth for the frame: the screen's real size (400 x 582 is the
      device's 1200:1747) and the scale. The bezel is then exactly 5px on every
      side by construction — no rounding gap, no fat lip under the screen. */
-  /* 480 x 699 is the size the pop-up's own frame renders at, so the miniature
-     lays out IDENTICALLY to the real thing — just smaller. Building it narrower
-     made every fixed px size proportionally larger, and the dense screens (the
-     certificate worst of all) overflowed their boxes. */
-  --tw:480px; --th:699px; --tz:.3083; --bezel:5px;
+  /* 426 x 630 is what the pop-up's own screen MEASURES on a desktop — checked in
+     the browser, not guessed. Building the miniature at any other size changes
+     how big the app's fixed px sizes are relative to the screen, which is what
+     made the content look zoomed. At this size the miniature is the real screen,
+     reduced by a third and nothing else. */
+  --tw:426px; --th:630px; --tz:.3474; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
   height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
@@ -1766,12 +1767,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{--tz:.2708}
+  .cawx-thumb-pad{--tz:.3052}
 }
 
-/* The certificate is a document, so its own type is large next to a dense screen
-   like the glossary. In a miniature that reads as a zoomed-in certificate rather
-   than a screen showing one, so the artwork is given more room around it — the
-   pop-up itself is untouched. */
-.cawx-thumbscreen .cawx-certsheet .cawx-cert{width:74%}
-.cawx-thumbscreen .cawx-certsheet .cawx-cert-wrap{padding-top:6px}
