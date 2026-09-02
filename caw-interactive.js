@@ -1609,18 +1609,11 @@
          iPhone, and the same figure turns up on the iPad and then the Mac a
          moment later. Updating all three at once would show three identical
          dashboards and say nothing about syncing. */
-      var cat = catalogue(CURRENT_FW), anchor = null;
-      cat.courses.forEach(function (c) {
-        if (!anchor && (c.id === 'm' || c.id === 'p43')) { anchor = c; }
-      });
-      anchor = anchor || cat.courses[1] || cat.courses[0];
-      /* A single lesson moves the bar by about 1.5% — invisible. The step is a
-         handful of lessons so the bar visibly rises on the iPhone, then rises
-         to match on the iPad and the Mac. */
-      /* `from` must be the value the dashboard itself drew for this course (60%),
-         or the first update would move the bar DOWNWARDS before rising. */
-      var total = anchor.lessons, from = Math.round(total * 0.6),
-          step = Math.max(3, Math.round(total * 0.07)),
+      /* the second card: the dashboard draws it at 0%, it is visible in every
+         frame, and a step of ~9% of the course is a rise you cannot miss */
+      var cat = catalogue(CURRENT_FW), tracked = cat.courses[1] || cat.courses[0];
+      var total = tracked.lessons, from = 0,
+          step = Math.max(2, Math.round(total * 0.09)),
           done = from, timers = [];
 
       function apply(host, n) {
@@ -1691,7 +1684,10 @@
       }
       var open = live && c.id === cat.openable;
       /* the course the sync screen advances; marked so it can be found again */
-      var mark = c.id === anchor.id ? ' data-sync="1"' : '';
+      /* The card the sync screen advances. It must be one that is ON SCREEN in
+         the phone and tablet frames: the anchor (Part-M) is the fifth card and
+         sits below the fold there, so animating it moved a bar nobody saw. */
+      var mark = i === 1 ? ' data-sync="1"' : '';
       cards += (open
           ? '<button type="button" class="cawx-dcard"' + mark + ' data-caw-demo="lesson">'
           : '<div class="cawx-dcard' + (live ? ' dim' : '') + '"' + mark + '>') +
