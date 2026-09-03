@@ -1363,7 +1363,10 @@
       home();
       window.addEventListener('load', home);
       if (window.MutationObserver) {
-        new MutationObserver(home).observe(track, { childList: true, subtree: true });
+        /* The miniatures land seconds later and change scrollWidth, so the
+           arrows' enabled state has to be recomputed, not just the position. */
+        new MutationObserver(function () { home(); sync(); })
+          .observe(track, { childList: true, subtree: true });
       }
 
       function stride() {
@@ -1378,10 +1381,17 @@
         track.scrollTo({ left: track.scrollLeft + dir * pageWidth(),
                          behavior: smooth ? 'smooth' : 'auto' });
       }
+      /* An "at the end" test needs slack at BOTH ends. The track carries 2px of
+         side padding and the cards use scroll-snap-align:start, so the row
+         settles at scrollLeft 2 rather than 0 — and `<= 0` was false by those
+         two pixels, which left the back arrow looking live with nothing behind
+         it. Sub-pixel layout and zoom make exact comparisons unsafe anyway, so
+         allow a few pixels of slack from each edge. */
+      var EDGE = 4;
       function sync() {
-        var max = track.scrollWidth - track.clientWidth - 1;
-        if (prev) { prev.disabled = track.scrollLeft <= 0; }
-        if (next) { next.disabled = track.scrollLeft >= max; }
+        var max = track.scrollWidth - track.clientWidth;
+        if (prev) { prev.disabled = track.scrollLeft <= EDGE; }
+        if (next) { next.disabled = track.scrollLeft >= max - EDGE; }
       }
       if (prev) { prev.addEventListener('click', function () { taken = true; go(-1); }); }
       if (next) { next.addEventListener('click', function () { taken = true; go(1); }); }
