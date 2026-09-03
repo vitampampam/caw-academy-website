@@ -976,19 +976,33 @@ button.cawx-back:hover{background:var(--app-primary-fixed)}
    The transport sits at the FOOT of the detail pane, above Previous/Next:
    a speed control on the left, the transport centred, a close button on the
    right, and the position and time remaining underneath. */
+/* The transport sizes itself as a PROPORTION of the screen, not in fixed px.
+   Seven controls at fixed size need 185px of row, and the phone frame gives 142
+   — so the last button was drawn past the right edge of the simulated screen.
+   A breakpoint would not do here: this same markup is drawn at several widths
+   (the pop-up, which is height-driven, and the Features miniature at a fixed
+   555), so the fit has to follow the container rather than the viewport. The
+   clamp maxima are the original sizes, and the percentages are calibrated so the
+   pop-up frame reaches them exactly — a percentage here resolves against the
+   button group, not the screen, so ratios taken from the screen width came out a
+   fifth too small and quietly shrank the desktop transport. Only a narrow frame
+   compresses now. */
 .cawx-voice{flex:0 0 auto; background:var(--app-surface); border-top:1px solid var(--app-line);
-  padding:6px 8px 5px; margin:0 -1px}
-.cawx-vrow{display:flex; align-items:center; gap:6px}
-.cawx-vmid{flex:1 1 auto; display:flex; align-items:center; justify-content:center; gap:12px}
+  padding:6px 5px 5px; margin:0 -1px}
+.cawx-vrow{display:flex; align-items:center; gap:clamp(3px, 2.7%, 6px)}
+.cawx-vmid{flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:center;
+  gap:clamp(4px, 6.3%, 12px)}
 .cawx-vbtn{border:0; background:transparent; padding:0; cursor:pointer; color:var(--app-ink);
   display:inline-flex; align-items:center; justify-content:center;
-  width:16px; height:16px; transition:opacity .15s}
+  width:clamp(11px, 8.4%, 16px); height:auto; aspect-ratio:1; transition:opacity .15s}
 .cawx-vbtn:hover{opacity:.65}
 .cawx-vbtn svg{width:100%; height:100%}
-.cawx-vbtn.big{width:20px; height:20px; color:var(--app-primary)}
-.cawx-vspeed{flex:0 0 auto; width:14px; height:14px; color:var(--app-ink-var); opacity:.8}
+.cawx-vbtn.big{width:clamp(14px, 10.5%, 20px); height:auto; aspect-ratio:1; color:var(--app-primary)}
+.cawx-vspeed{flex:0 0 auto; width:clamp(10px, 6.3%, 14px); height:auto; aspect-ratio:1;
+  color:var(--app-ink-var); opacity:.8}
 .cawx-vspeed svg{width:100%; height:100%}
-.cawx-vclose{flex:0 0 auto; width:14px; height:14px; border:0; background:transparent; padding:0;
+.cawx-vclose{flex:0 0 auto; width:clamp(10px, 6.3%, 14px); height:auto; aspect-ratio:1;
+  border:0; background:transparent; padding:0;
   cursor:pointer; color:var(--app-ink-var); display:inline-flex}
 .cawx-vclose:hover{color:var(--app-ink)}
 .cawx-vclose svg{width:100%; height:100%}
