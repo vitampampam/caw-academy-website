@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=61">
+<link rel="stylesheet" href="style.css?v=62">
 <link rel="stylesheet" href="caw-interactive.css?v=19">
 </head>
 <body>
@@ -797,9 +797,28 @@
       .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
       /* Card sections: even 2-up grid that fills the full width, like the curriculum
          tracks (no narrow max-width cap). */
-      #features .grid, #organisations .grid, #why .props{
+      #organisations .grid, #why .props{
         display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
-      #features .grid .card, #organisations .grid .card, #why .props .card{max-width:none}
+      #organisations .grid .card, #why .props .card{max-width:none}
+      /* FEATURES is the exception: a swipe carousel, as phones already get. Two-up
+         and stacked it runs to about three screens, which puts the miniatures —
+         the reason the section is worth opening — below the fold. As a snap row the
+         section is one screen and every card is one swipe away. Two cards fit with
+         the third peeking, so it reads as a tablet layout rather than an enlarged
+         phone one, and the peek is what signals there is more.
+         This MUST live here, not in style.css: the 2-up grid above is inline, so it
+         loads last and beat an identical rule in the stylesheet — leaving the cards
+         as grid items while the child width:46% measured against a 388px column and
+         squeezed them to 178px. Keep the carousel and the grid it replaces together. */
+      #features .grid{
+        display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
+        overflow-x:auto; gap:14px; margin:0 -24px; padding:4px 24px 12px;
+        scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+      #features .grid::-webkit-scrollbar{display:none}
+      #features .grid > .card{
+        flex:0 0 46%; width:46%; max-width:46%; scroll-snap-align:center;
+        opacity:1; transform:none}
+      #features .card:hover{transform:none}
     }
     /* Mobile-only hero/footer trims */
     @media (max-width:640px){

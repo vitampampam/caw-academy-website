@@ -628,26 +628,6 @@ footer .foot-links a:first-child{margin-left:0}
 }
 @media (max-width:400px){ .lineup{zoom:.56} }
 
-/* TABLETS: the six feature cards as a swipe carousel, the way phones already show
-   them. Stacked two-up they run to roughly three screens of scrolling, and the
-   miniatures — the whole reason the section is worth opening — sit below the fold.
-   As a snap row the section is one screen and every card is one swipe away.
-   Two cards fit with the third peeking, so it reads as a tablet layout rather
-   than an enlarged phone one, and the peek is what signals there is more.
-   Only #features: the other card rows are short enough to stay as grids. */
-@media (min-width:561px) and (max-width:1024px){
-  #features .grid{
-    display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
-    overflow-x:auto; gap:14px; margin:0 -24px; padding:4px 24px 12px;
-    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none;
-  }
-  #features .grid::-webkit-scrollbar{display:none}
-  #features .grid > *{
-    flex:0 0 46%; width:46%; max-width:46%; scroll-snap-align:center;
-    opacity:1; transform:none; transition:box-shadow .2s ease, border-color .2s ease;
-  }
-  #features .card:hover{transform:none}
-}
 
 /* ===== mobile: store badges stay side-by-side (never stack vertically) ===== */
 @media (max-width:560px){
