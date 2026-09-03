@@ -480,13 +480,16 @@ footer .foot-links a:first-child{margin-left:0}
    stage above can actually scroll to the parts now off-screen. */
 .lightbox{--lbz:1}
 .lightbox .lb-frame img{display:block; width:auto; max-width:none;
-  height:calc((100vh - 132px) * var(--lbz)); max-height:none; border-radius:20px}
+  height:calc((100vh - 178px) * var(--lbz)); max-height:none; border-radius:20px}
 @media (max-width:820px){
-  .lightbox .lb-frame img{height:calc((100vh - 150px) * var(--lbz))}
+  .lightbox .lb-frame img{height:calc((100vh - 196px) * var(--lbz))}
 }
 
-/* Stepped zoom, so it can never be pinched into a collapsed or unreadable state */
-.lb-zoom{display:inline-flex; align-items:center; gap:2px; padding:4px;
+/* Stepped zoom, so it can never be pinched into a collapsed or unreadable state.
+   Pinned to the bottom of the window rather than sitting under the caption: in
+   the flow it was pushed off-screen as soon as the screen filled the height. */
+.lb-zoom{position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:4;
+  display:inline-flex; align-items:center; gap:2px; padding:4px;
   background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
   border-radius:999px; backdrop-filter:blur(4px)}
 .lb-zoom button{width:34px; height:34px; border-radius:50%; cursor:pointer; border:0;
