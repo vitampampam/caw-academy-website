@@ -847,11 +847,26 @@
       /* Features as a carousel here too: three cards with the next peeking. The
          peek is what says there is more — without it a scroll row on a mouse
          machine looks like a finished grid and nobody drags it. */
+      /* justify-content:flex-start is LOAD-BEARING. Without it the row inherits
+         `center` from the base .grid, and a centred flex row that overflows
+         pushes content out of BOTH ends — the left overflow is then unreachable,
+         because scrollLeft 0 is already past it. That is what hid card 1 on
+         desktop while scrollLeft read 0 the whole time; the tablet rule sets
+         flex-start, which is why only desktop broke.
+         Vertical padding is symmetric so 50% is the card's centre, which is
+         where the arrows sit. */
       #features .grid{
-        display:flex; flex-wrap:nowrap; align-items:stretch; gap:20px;
-        overflow-x:auto; padding:4px 2px 14px; scroll-snap-type:x mandatory;
+        display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
+        gap:20px; overflow-x:auto; padding:6px 2px; scroll-snap-type:x mandatory;
         scrollbar-width:none}
-      #features .grid > .card{flex:0 0 31%; width:31%; max-width:31%; scroll-snap-align:start}
+      /* opacity/transform are LOAD-BEARING too. .reveal animates a card in from
+         below when it first intersects the viewport — but a card scrolled out of
+         the carousel never intersects, so it stays translated down and can stay
+         fully transparent. That translate was also the 21px that pushed every
+         card below its own row, which is why the arrows looked off-centre. The
+         tablet rule already neutralises this; desktop was missing it. */
+      #features .grid > .card{flex:0 0 31%; width:31%; max-width:31%; scroll-snap-align:start;
+        opacity:1; transform:none}
       #features .card:hover{transform:none}
       /* Why has four value props — one clean row on desktop. */
       #why .props{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -866,6 +881,9 @@
        where the carousel cannot be dragged with a finger. */
     /* Arrows are for pointer machines; touch widths swipe instead. */
     @media (max-width:1024px){ #features .gnav{display:none} }
+    /* The gallery puts its arrows at 45% because its cards carry a caption
+       below; a feature card has nothing under it, so centre them properly. */
+    #features .gnav{top:50%}
 
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
