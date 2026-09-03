@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=62">
+<link rel="stylesheet" href="style.css?v=64">
 <link rel="stylesheet" href="caw-interactive.css?v=20">
 </head>
 <body>
@@ -471,7 +471,7 @@
       <h2>Everything you need to study with confidence</h2>
     </div>
     <div class="feat-carousel" id="featCarousel">
-      <button class="rev-arrow feat-prev" type="button" aria-label="Previous features">&#8249;</button>
+      <button class="gnav gprev" type="button" aria-label="Previous features">&#8249;</button>
       <div class="grid" id="featTrack">
       <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
@@ -534,8 +534,7 @@
         </button>
       </div>
       </div>
-      <button class="rev-arrow feat-next" type="button" aria-label="More features">&#8250;</button>
-      <div class="rev-dots" id="featDots"></div>
+      <button class="gnav gnext" type="button" aria-label="More features">&#8250;</button>
     </div>
   </section>
 
@@ -857,17 +856,16 @@
       /* Why has four value props — one clean row on desktop. */
       #why .props{grid-template-columns:repeat(4,minmax(0,1fr))}
     }
-    /* The features carousel reuses the reviews carousel's arrows and dots
-       (.rev-arrow / .rev-dots) rather than introducing a second control style. */
-    .feat-carousel{position:relative; max-width:var(--maxw); margin:0 auto}
+    /* Built to match the gallery carousel below: the same .gnav buttons and the
+       same shell geometry (relative box, 24px gutter, so the arrows sit beside
+       the cards rather than on them). The gallery's arrow script is scoped to
+       #inside, so reusing its classes here cannot cross-wire the two. */
+    .feat-carousel{position:relative; max-width:var(--maxw); margin:0 auto; padding:0 24px}
     #features .grid::-webkit-scrollbar{display:none}
-    .feat-arrow-hidden{display:none}
     /* Arrows are for pointer machines; touch widths swipe, so they only appear
        where the carousel cannot be dragged with a finger. */
-    @media (max-width:1024px){ .feat-prev, .feat-next{display:none} }
-    @media (min-width:1025px){ .feat-prev{left:-18px} .feat-next{right:-18px} }
-    #featDots{margin-top:2px}
-    #featDots:empty{display:none}
+    /* Arrows are for pointer machines; touch widths swipe instead. */
+    @media (max-width:1024px){ #features .gnav{display:none} }
 
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
@@ -1304,70 +1302,59 @@
 </script>
 <script src="caw-content.js?v=20" defer></script>
 <script src="caw-demo-content.js?v=20" defer></script>
-<script src="caw-interactive.js?v=20" defer>
+<script src="caw-interactive.js?v=20" defer></script>
+<script>
   /* ---- Features carousel -------------------------------------------------
-     Reuses the reviews carousel's arrows and dots, so it adds no new control
-     style. Dots count PAGES, not cards: with six cards and three in view, six
-     dots would imply six positions that do not exist. Recomputed on resize
-     because the cards-per-view changes with the breakpoint. */
+     Arrows only, matching the gallery carousel below. A click steps by a PAGE
+     (as many whole cards as are in view) rather than a single card, so it moves
+     a visible amount.
+     NOTE: this MUST be its own tag. It first lived inside the src'd
+     caw-interactive.js tag above, and a browser ignores the inline body of a
+     script that carries a src — the markup was all present and the arrows
+     simply did nothing. */
   (function () {
-    var track = document.getElementById('featTrack');
-    var box = document.getElementById('featCarousel');
-    var dotsWrap = document.getElementById('featDots');
-    if (!track || !box || !dotsWrap) { return; }
-    var cards = Array.prototype.slice.call(track.children);
-    if (cards.length < 2) { return; }
-    var prev = box.querySelector('.feat-prev');
-    var next = box.querySelector('.feat-next');
-    var reduceM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var dots = [];
+    function init() {
+      var box = document.getElementById('featCarousel');
+      var track = document.getElementById('featTrack');
+      if (!box || !track) { return; }
+      var cards = Array.prototype.slice.call(track.children);
+      if (cards.length < 2) { return; }
+      var prev = box.querySelector('.gprev');
+      var next = box.querySelector('.gnext');
+      var smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function step() { return cards[1].offsetLeft - cards[0].offsetLeft; }
-    function perView() {
-      var s = step();
-      return s > 0 ? Math.max(1, Math.round(track.clientWidth / s)) : 1;
-    }
-    function pages() { return Math.max(1, Math.ceil(cards.length / perView())); }
-    function page() { return Math.round(track.scrollLeft / (step() * perView() || 1)); }
+      /* Always open on the first card. Browsers restore a scroll container's
+         offset across a reload, which left the row parked mid-carousel with a
+         card sliced off at each edge. */
+      track.scrollLeft = 0;
 
-    function goto(p) {
-      var n = pages();
-      p = Math.max(0, Math.min(n - 1, p));
-      track.scrollTo({ left: p * step() * perView(), behavior: reduceM ? 'auto' : 'smooth' });
-    }
-    function buildDots() {
-      var n = pages();
-      if (dots.length === n) { return; }
-      dotsWrap.innerHTML = '';
-      dots = [];
-      if (n < 2) { return; }             /* one page is not a carousel */
-      for (var i = 0; i < n; i++) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.setAttribute('aria-label', 'Features, page ' + (i + 1) + ' of ' + n);
-        b.addEventListener('click', (function (k) {
-          return function () { goto(k); };
-        })(i));
-        dotsWrap.appendChild(b);
-        dots.push(b);
+      function stride() {
+        var s = cards[1].offsetLeft - cards[0].offsetLeft;
+        return s > 0 ? s : cards[0].getBoundingClientRect().width;
       }
+      function pageWidth() {
+        var s = stride();
+        return Math.max(s, Math.round(track.clientWidth / s) * s);
+      }
+      function go(dir) {
+        track.scrollTo({ left: track.scrollLeft + dir * pageWidth(),
+                         behavior: smooth ? 'smooth' : 'auto' });
+      }
+      function sync() {
+        var max = track.scrollWidth - track.clientWidth - 1;
+        if (prev) { prev.disabled = track.scrollLeft <= 0; }
+        if (next) { next.disabled = track.scrollLeft >= max; }
+      }
+      if (prev) { prev.addEventListener('click', function () { go(-1); }); }
+      if (next) { next.addEventListener('click', function () { go(1); }); }
+      track.addEventListener('scroll', function () { requestAnimationFrame(sync); },
+                             { passive: true });
+      window.addEventListener('resize', sync);
+      sync();
     }
-    function sync() {
-      var p = page(), n = pages();
-      dots.forEach(function (d, i) { d.setAttribute('aria-current', i === p ? 'true' : 'false'); });
-      /* An arrow that cannot move is disabled rather than silently inert. */
-      if (prev) { prev.disabled = p <= 0; prev.style.opacity = p <= 0 ? '.35' : ''; }
-      if (next) { next.disabled = p >= n - 1; next.style.opacity = p >= n - 1 ? '.35' : ''; }
-    }
-    if (prev) { prev.addEventListener('click', function () { goto(page() - 1); }); }
-    if (next) { next.addEventListener('click', function () { goto(page() + 1); }); }
-    track.addEventListener('scroll', function () { requestAnimationFrame(sync); }, { passive: true });
-    var t = null;
-    window.addEventListener('resize', function () {
-      window.clearTimeout(t);
-      t = window.setTimeout(function () { buildDots(); sync(); }, 180);
-    });
-    buildDots(); sync();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else { init(); }
   })();
 </script>
 </body>
