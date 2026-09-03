@@ -1323,10 +1323,27 @@
       var next = box.querySelector('.gnext');
       var smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      /* Always open on the first card. Browsers restore a scroll container's
-         offset across a reload, which left the row parked mid-carousel with a
-         card sliced off at each edge. */
-      track.scrollLeft = 0;
+      /* Always open on the FIRST card, and keep doing so until the reader takes
+         over. One reset here is not enough: caw-interactive.js builds the card
+         miniatures in a requestIdleCallback up to 2.5s after load, and inserting
+         them grows every card — with scroll-snap-type:x mandatory the browser
+         then re-snaps and drifts onto a neighbouring card, which is how card 1
+         ("Regulation-grounded lessons") ended up off-screen. Browsers also
+         restore a scroll container's offset across a reload. So re-home on every
+         mutation and on load, and stop the moment the reader scrolls, swipes,
+         clicks an arrow or tabs in — after that the position is theirs. */
+      var taken = false;
+      function home() { if (!taken) { track.scrollLeft = 0; } }
+      function taken_over() { taken = true; }
+      ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (ev) {
+        track.addEventListener(ev, taken_over, { passive: true });
+      });
+      track.addEventListener('focusin', taken_over);
+      home();
+      window.addEventListener('load', home);
+      if (window.MutationObserver) {
+        new MutationObserver(home).observe(track, { childList: true, subtree: true });
+      }
 
       function stride() {
         var s = cards[1].offsetLeft - cards[0].offsetLeft;
@@ -1345,8 +1362,8 @@
         if (prev) { prev.disabled = track.scrollLeft <= 0; }
         if (next) { next.disabled = track.scrollLeft >= max; }
       }
-      if (prev) { prev.addEventListener('click', function () { go(-1); }); }
-      if (next) { next.addEventListener('click', function () { go(1); }); }
+      if (prev) { prev.addEventListener('click', function () { taken = true; go(-1); }); }
+      if (next) { next.addEventListener('click', function () { taken = true; go(1); }); }
       track.addEventListener('scroll', function () { requestAnimationFrame(sync); },
                              { passive: true });
       window.addEventListener('resize', sync);
