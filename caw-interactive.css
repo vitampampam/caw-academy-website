@@ -1745,13 +1745,13 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   /* One source of truth for the frame: the screen's real size (400 x 582 is the
      device's 1200:1747) and the scale. The bezel is then exactly 5px on every
      side by construction — no rounding gap, no fat lip under the screen. */
-  /* A DEVICE has fixed proportions, so the miniature does too — it must not
-     follow the pop-up, whose frame is height-driven and therefore changes with
-     the browser window. 555 x 808 is the width at which the app's 10px body text
-     is 1.8% of the screen, which is what a real iPad shows (834pt wide, ~15pt
-     text). The pop-up compresses that to ~2.35% because it has to fit a dialog,
-     and copying it was what made miniature content look enlarged. */
-  --tw:555px; --th:808px; --tz:.2667; --bezel:5px;
+  /* 426 x 630 is what the pop-up's own screen MEASURES — checked in the browser,
+     not guessed — and it reproduces the reference render exactly: the certificate
+     sheet sits 8% from the top, 78% tall, 86% wide, in both. It is a CONSTANT on
+     purpose. The pop-up's frame is height-driven, so sizing the miniature from the
+     viewport made its content grow on short windows and shrink on tall ones; a
+     device has fixed proportions and the miniature must too. */
+  --tw:426px; --th:630px; --tz:.3474; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
   height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
@@ -1768,6 +1768,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{--tz:.2342}
+  .cawx-thumb-pad{--tz:.3052}
 }
 
