@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=55">
+<link rel="stylesheet" href="style.css?v=56">
 <link rel="stylesheet" href="caw-interactive.css?v=12">
 </head>
 <body>
@@ -928,6 +928,13 @@
       <img src="" alt="">
     </div>
     <div class="lb-cap" id="lbCap"></div>
+    <!-- Stepped zoom. Deliberately not pinch-to-zoom: fixed steps cannot leave
+         the screen collapsed or at some unreadable size. -->
+    <div class="lb-zoom" role="group" aria-label="Zoom">
+      <button type="button" id="lbZoomOut" aria-label="Zoom out">&minus;</button>
+      <span class="lb-zval" id="lbZoomVal" aria-live="polite">100%</span>
+      <button type="button" id="lbZoomIn" aria-label="Zoom in">+</button>
+    </div>
   </div>
   <button class="lb-nav lb-next" type="button" aria-label="Next screen">&#8250;</button>
 </div>
@@ -1024,6 +1031,7 @@
     var idx = -1;
     function show(i){
       if (!pads.length) return;
+      if (typeof setZoom === 'function') { setZoom(0); }   // a new screen starts at fit
       idx = (i + pads.length) % pads.length;          // wrap around
       var img = pads[idx].querySelector('img');
       if (img) { lbimg.src = img.currentSrc || img.src; lbimg.alt = img.alt || ''; }
@@ -1031,7 +1039,26 @@
       var cap = col && col.querySelector('.gcap');
       if (lbCap) lbCap.textContent = cap ? cap.textContent.trim() : '';
     }
-    function open(i){ show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    // Fixed zoom steps: 1x fits the window, and each press is a readable jump.
+    var ZOOM = [1, 1.4, 1.9, 2.5], zi = 0;
+    function applyZoom(){
+      lb.style.setProperty('--lbz', ZOOM[zi]);
+      lb.setAttribute('data-zoomed', zi > 0 ? 'true' : 'false');
+      var val = document.getElementById('lbZoomVal');
+      if (val) val.textContent = Math.round(ZOOM[zi] * 100) + '%';
+      var out = document.getElementById('lbZoomOut'), inn = document.getElementById('lbZoomIn');
+      if (out) out.disabled = zi === 0;
+      if (inn) inn.disabled = zi === ZOOM.length - 1;
+      var stage = lb.querySelector('.lb-stage');
+      if (stage && zi === 0) { stage.scrollTop = 0; stage.scrollLeft = 0; }
+    }
+    function setZoom(i){ zi = Math.max(0, Math.min(ZOOM.length - 1, i)); applyZoom(); }
+    document.getElementById('lbZoomIn').addEventListener('click', function(e){ e.stopPropagation(); setZoom(zi + 1); });
+    document.getElementById('lbZoomOut').addEventListener('click', function(e){ e.stopPropagation(); setZoom(zi - 1); });
+    // clicking the screen steps in, and back to fit once at the top step
+    lbimg.addEventListener('click', function(e){ e.stopPropagation(); setZoom(zi >= ZOOM.length - 1 ? 0 : zi + 1); });
+
+    function open(i){ show(i); setZoom(0); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
     function close(){ lb.classList.remove('open'); document.body.style.overflow = ''; lbimg.removeAttribute('src'); }
     pads.forEach(function(p, i){
       p.setAttribute('role','button'); p.setAttribute('tabindex','0');
@@ -1052,6 +1079,9 @@
       if (e.key === 'Escape') close();
       else if (e.key === 'ArrowLeft') show(idx - 1);
       else if (e.key === 'ArrowRight') show(idx + 1);
+      else if (e.key === '+' || e.key === '=') setZoom(zi + 1);
+      else if (e.key === '-' || e.key === '_') setZoom(zi - 1);
+      else if (e.key === '0') setZoom(0);
     });
   })();
 
