@@ -1355,14 +1355,13 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    under the Done bar. */
 .cawx-certsheet .cawx-cert-wrap{justify-content:flex-start; padding:2px 4px 6px; gap:4px}
 .cawx-certsheet .cawx-cert{width:88%}
-/* The certificate's type is fixed in px and needs more height than its 1.414
-   landscape ratio allows at this width, so the box stretched and the sheet
-   (overflow:hidden) cut the last line of the disclaimer off — measured 532px of
-   content in a 491px sheet, in the pop-up as well as the miniature. A literal
-   zoom shrinks the layout box too, so the whole certificate now fits with the
-   margin below it that the design intends. Literal, never var(): Safari drops
-   `zoom` when its value is a custom property. */
-.cawx-certsheet .cawx-cert{zoom:.85}
+/* NO zoom on the certificate. It was scaled with `zoom:.85` to stop it
+   overflowing its sheet, and Safari mis-placed the absolutely-positioned layers
+   inside it — the seal and the text drew on top of each other. The wider virtual
+   screen above removes the cause instead: at 555px the lines stop wrapping and
+   the certificate fits its sheet unscaled (measured 640px of content in a 640px
+   sheet, no clipping). If it ever overflows again, widen the screen or reduce the
+   type — never zoom a box with absolute children. */
 .cawx-certsheet .cawx-cert-sample{margin:0 0 1px}
 
 /* ---------------------------------------------------------------------------
@@ -1753,13 +1752,17 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   /* One source of truth for the frame: the screen's real size (400 x 582 is the
      device's 1200:1747) and the scale. The bezel is then exactly 5px on every
      side by construction — no rounding gap, no fat lip under the screen. */
-  /* 426 x 630 is what the pop-up's own screen MEASURES — checked in the browser,
-     not guessed — and it reproduces the reference render exactly: the certificate
-     sheet sits 8% from the top, 78% tall, 86% wide, in both. It is a CONSTANT on
-     purpose. The pop-up's frame is height-driven, so sizing the miniature from the
-     viewport made its content grow on short windows and shrink on tall ones; a
-     device has fixed proportions and the miniature must too. */
-  --tw:426px; --th:630px; --tz:.3474; --bezel:5px;
+  /* 555 x 821 — a CONSTANT, and deliberately WIDER than the pop-up's own screen.
+     The app's type is fixed in px, so the virtual screen's width is what decides
+     how large the content reads: at 426 the body text is 2.35% of the width, at
+     555 it is 1.80%, which is what a real iPad shows (834pt wide, ~15pt text).
+     Matching the pop-up instead was wrong twice over — its frame is height-driven,
+     so the miniature's content then grew on short windows and shrank on tall ones,
+     and the pop-up is itself compressed to fit a dialog. The extra width also
+     un-wraps the certificate, which no longer overflows its sheet at all.
+     Percentage geometry (sheet at 8%/78%/86%) is identical at every width, so it
+     cannot be used to check this — measure the text share instead. */
+  --tw:555px; --th:821px; --tz:.2667; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
   height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
@@ -1788,6 +1791,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{--tz:.3052}
+  .cawx-thumb-pad{--tz:.2342}
 }
 
