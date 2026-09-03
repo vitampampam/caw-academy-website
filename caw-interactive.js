@@ -2270,37 +2270,6 @@
      markup is taken, and its timers are stopped immediately. Nothing inside a
      thumbnail is clickable — the card itself is the control.
      ------------------------------------------------------------------------ */
-  /* The pop-up's frame is sized from the dialog's height, so on a tall window the
-     screen is bigger and the app's fixed px sizes look relatively smaller — and on
-     a short one, larger. A miniature pinned to one size therefore matches the
-     pop-up on exactly one window height and looks zoomed in or out on every
-     other. This works the size out the same way the pop-up does, so a miniature
-     is the pop-up's screen on THIS window, reduced.
-
-     Calibrated against the live pop-up: at a 900px viewport the screen measures
-     426 x 630, which the formula below reproduces. */
-  function popupScreenSize() {
-    var vh = (d.documentElement && d.documentElement.clientHeight) || 900;
-    var frameH = vh * 0.96 - 213;               /* dialog, less head/pills/footer */
-    var h = Math.max(300, Math.min(760, frameH - 21));   /* less the frame's bezel */
-    return { w: Math.round(h * 1200 / 1747), h: Math.round(h) };
-  }
-
-  function sizeFeatureThumbnails() {
-    var box = popupScreenSize(), pads = qsa('.cawx-thumb-pad');
-    if (!pads.length) { return; }
-    /* The frame's own width is fixed by the card, so the scale follows the screen.
-       `clientWidth` is 0 where there is no layout yet (or the section is hidden),
-       which would make the scale negative — fall back to the CSS default. */
-    var shown = (pads[0].clientWidth || 158) - 10;
-    if (!(shown > 40)) { shown = 148; }
-    pads.forEach(function (pad) {
-      pad.style.setProperty('--tw', box.w + 'px');
-      pad.style.setProperty('--th', box.h + 'px');
-      pad.style.setProperty('--tz', (shown / box.w).toFixed(4));
-    });
-  }
-
   function buildFeatureThumbnails() {
     var cards = qsa('#features .cawx-trigger');
     if (!cards.length) { return; }
@@ -2331,12 +2300,6 @@
       thumb.innerHTML = '<span class="cawx-thumb-pad"><span class="cawx-thumbscreen">' +
         html + '</span></span>';
       card.insertBefore(thumb, cta);
-    });
-    sizeFeatureThumbnails();
-    var t = null;
-    w.addEventListener('resize', function () {
-      w.clearTimeout(t);
-      t = w.setTimeout(sizeFeatureThumbnails, 200);
     });
   }
 

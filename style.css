@@ -464,9 +464,11 @@ footer .foot-links a:first-child{margin-left:0}
 .lightbox.open{display:flex}
 /* Frame + its caption stacked; the caption shows below in a white pill. */
 .lb-stage{display:flex; flex-direction:column; align-items:center; gap:14px; max-width:92vw;
-  /* the frame can grow past the stage when zoomed in, so the stage scrolls */
-  max-height:calc(100vh - 48px); overflow:auto; overscroll-behavior:contain;
+  /* The stage only scrolls when the screen is zoomed past it. At 100% it fits,
+     so `overflow:auto` was drawing a scrollbar with nothing to scroll. */
+  max-height:calc(100vh - 48px); overflow:hidden; overscroll-behavior:contain;
   scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.45) transparent}
+.lightbox[data-zoomed="true"] .lb-stage{overflow:auto}
 .lb-cap{background:#fff; color:var(--ink); font-weight:600; font-size:15px; line-height:1;
   padding:10px 20px; border-radius:999px; box-shadow:var(--shadow-md); text-align:center}
 .lb-cap:empty{display:none}
@@ -501,7 +503,9 @@ footer .foot-links a:first-child{margin-left:0}
   font-weight:700; font-variant-numeric:tabular-nums}
 .lightbox .lb-frame img{cursor:zoom-in}
 .lightbox[data-zoomed="true"] .lb-frame img{cursor:zoom-out}
-.lb-close{position:absolute; top:-52px; right:-4px; z-index:3; width:40px; height:40px; border-radius:50%; cursor:pointer;
+/* Pinned to the window, not to the frame: it used to sit 52px ABOVE the frame,
+   which put it off-screen as soon as the screen filled the viewport height. */
+.lb-close{position:fixed; top:18px; right:18px; z-index:6; width:40px; height:40px; border-radius:50%; cursor:pointer;
   background:#23264c; border:1px solid rgba(255,255,255,.32); color:#fff; font-size:22px; line-height:1;
   display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.35); transition:background .2s ease}
 .lb-close:hover{background:rgba(255,255,255,.3)}
