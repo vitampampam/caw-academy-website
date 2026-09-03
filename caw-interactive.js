@@ -2298,14 +2298,7 @@
       if (!html) { return; }
       var thumb = el('div', 'cawx-thumb');
       thumb.setAttribute('aria-hidden', 'true');   /* decorative: the card is the control */
-      /* The certificate alone needs a wider virtual screen: it is drawn at
-         aspect-ratio 1.414 and its fixed-px text stretches the box taller than
-         that until the screen reaches ~680px. Every other demo is a list or a
-         card that simply reflows, and at 680 their content reads too small — so
-         the width is per-demo, not one compromise for all six. The FRAME is the
-         same size either way (158 x 229), so the cards do not move. */
-      var pad = 'cawx-thumb-pad' + (id === 'certificate' ? ' cawx-thumb-wide' : '');
-      thumb.innerHTML = '<span class="' + pad + '"><span class="cawx-thumbscreen">' +
+      thumb.innerHTML = '<span class="cawx-thumb-pad"><span class="cawx-thumbscreen">' +
         html + '</span></span>';
       card.insertBefore(thumb, cta);
     });

@@ -1358,6 +1358,28 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    under the Done bar. */
 .cawx-certsheet .cawx-cert-wrap{justify-content:flex-start; padding:2px 4px 6px; gap:4px}
 .cawx-certsheet .cawx-cert{width:88%}
+/* The certificate carries the 73% type scale at EVERY width, not just on phones.
+   At full size its fixed-px text needs more height than the 1.414 landscape ratio
+   allows, so the box stretched taller and the sheet clipped the disclaimer — and
+   even once it fitted, the type read oversized against the certificate around it.
+   These are the same values the narrow-frame block below already defines, so this
+   is one designed scale rather than a second invention. With them the certificate
+   renders at exactly 1.414 with no clipping (measured), which is why the miniature
+   no longer needs a wider screen of its own. */
+.cawx-certsheet .cawx-cert-sample{font-size:4.38px}
+.cawx-certsheet .cawx-cert-brand{font-size:8.76px}
+.cawx-certsheet .cawx-cert-kind{font-size:3.65px}
+.cawx-certsheet .cawx-cert-lede{font-size:4.75px}
+.cawx-certsheet .cawx-cert-name{font-size:11.68px}
+.cawx-certsheet .cawx-cert-course{font-size:7.67px}
+.cawx-certsheet .cawx-cert-meta{font-size:5.11px}
+.cawx-certsheet .cawx-cert-no{font-size:4.38px}
+.cawx-certsheet .cawx-cert-iss small{font-size:4.01px}
+.cawx-certsheet .cawx-cert-iss b{font-size:6.21px}
+.cawx-certsheet .cawx-cert-iss em{font-size:4.01px}
+.cawx-certsheet .cawx-cert-qrwrap small{font-size:3.29px}
+.cawx-certsheet .cawx-cert-disc{font-size:3.29px}
+.cawx-certsheet .cawx-cert-qr{width:21px; height:21px}
 /* NO zoom on the certificate. It was scaled with `zoom:.85` to stop it
    overflowing its sheet, and Safari mis-placed the absolutely-positioned layers
    inside it — the seal and the text drew on top of each other. The wider virtual
@@ -1765,9 +1787,10 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
      un-wraps the certificate, which no longer overflows its sheet at all.
      Percentage geometry (sheet at 8%/78%/86%) is identical at every width, so it
      cannot be used to check this — measure the text share instead.
-     555 is the default: body text lands at 1.80%, a real iPad's proportion, and
-     the lists and cards fill their screens. The certificate is the exception and
-     takes .cawx-thumb-wide below. */
+     555: body text lands at 1.80%, a real iPad's proportion, and the lists and
+     cards fill their screens. ONE width for all six — the certificate needed a
+     wider screen of its own only while its type was too large for its own frame,
+     and that is fixed at the source now (.cawx-certsheet .cawx-cert above). */
   --tw:555px; --th:821px; --tz:.2667; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
@@ -1786,16 +1809,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
    `display:block` here silently cancelled that, and the app then sized to its own
    content — which is why the flashcards miniature stopped two-thirds down and
    left a band of empty screen beneath it. */
-/* THE CERTIFICATE ONLY. It is drawn at aspect-ratio 1.414, but fixed-px text
-   that cannot fit that shape stretches the box taller instead. Sweeping the
-   width against the rendered ratio: 1.11 at 555, 1.24 at 620, and the designed
-   1.414 from 680 up — so below 680 the certificate is visibly squashed. The
-   other five demos reflow and read too small at that width, which is why this is
-   a per-demo override and not the default. The frame is unchanged: 680 x .2176
-   and 555 x .2667 both give 158 x 229. */
-.cawx-thumb-pad.cawx-thumb-wide{--tw:680px; --th:1006px; --tz:.2176}
-@media (max-width:560px){ .cawx-thumb-pad.cawx-thumb-wide{--tz:.1912} }
-
 .cawx-thumb-pad .cawx-thumbscreen{display:flex; width:var(--tw); height:var(--th);
   transform:scale(var(--tz)); transform-origin:0 0;
   border-radius:calc(8px / var(--tz))}
