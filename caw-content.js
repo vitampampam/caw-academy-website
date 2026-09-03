@@ -392,15 +392,16 @@
      ========================================================================= */
   var GROUPS = [
     {
-      id: 'camo-staff',
-      pill: 'CAMO staff & post-holders',
-      title: 'CAMO staff & post-holders',
-      intro: 'For people who manage continuing airworthiness: planners, engineers, records staff and the nominated persons who are responsible for the organisation. The courses follow the same order as the work — the framework first, then the rule set, then the programmes built on it.',
-      courses: ['aof', 'm', 'camo', 'amp', 'reliability', 'p21', 'partis', 'sms', 'hf'],
+      id: 'students',
+      pill: 'Part-147 / Part-66 students',
+      title: 'Part-147 / Part-66 students',
+      intro: 'For people studying towards a licence or working through an approved training course. The material assumes no prior knowledge and builds up to the level the regulations are written at.',
+      courses: ['aof', 'm', 'p145', 'camo', 'sms', 'hf', 'ewis', 'fts'],
       why: [
-        'The exposition, the maintenance programme and the reliability programme are covered as one connected set, not as separate topics. The airworthiness review has its own group above.',
-        'Every article carries its own quiz and flashcards, so a post-holder can check where the gaps are before an audit rather than after one.'
-      ]
+        'The Operating Framework and Part-M courses are free in every framework edition, so a student can start without a licence code.',
+        'Flashcards and a timed assessment with a 75% pass mark give a realistic check of readiness before an examination.'
+      ],
+      note: 'CAW Academy is a study aid. It is not an approved Part-147 course and does not replace one.'
     },
     {
       id: 'p145-engineers',
@@ -411,6 +412,17 @@
       why: [
         'Human Factors, EWIS and Fuel Tank Safety are already structured the way a continuation-training programme needs them, including the EWIS target-group split.',
         'The material works offline on a phone or tablet, so it can be studied in the hangar or at an outstation.'
+      ]
+    },
+    {
+      id: 'camo-staff',
+      pill: 'CAMO staff & post-holders',
+      title: 'CAMO staff & post-holders',
+      intro: 'For people who manage continuing airworthiness: planners, engineers, records staff and the nominated persons who are responsible for the organisation. The courses follow the same order as the work — the framework first, then the rule set, then the programmes built on it.',
+      courses: ['aof', 'm', 'camo', 'amp', 'reliability', 'p21', 'partis', 'sms', 'hf'],
+      why: [
+        'The exposition, the maintenance programme and the reliability programme are covered as one connected set, not as separate topics. The airworthiness review has its own group above.',
+        'Every article carries its own quiz and flashcards, so a post-holder can check where the gaps are before an audit rather than after one.'
       ]
     },
     {
@@ -425,26 +437,14 @@
       ]
     },
     {
-      id: 'students',
-      pill: 'Part-147 / Part-66 students',
-      title: 'Part-147 / Part-66 students',
-      intro: 'For people studying towards a licence or working through an approved training course. The material assumes no prior knowledge and builds up to the level the regulations are written at.',
-      courses: ['aof', 'm', 'p145', 'camo', 'sms', 'hf', 'ewis', 'fts'],
+      id: 'quality-safety',
+      pill: 'Quality & safety teams',
+      title: 'Quality & safety teams',
+      intro: 'For compliance monitoring, quality and safety staff who audit against the regulations rather than work to them directly.',
+      courses: ['sms', 'hf', 'partis', 'p145', 'arc', 'm', 'camo', 'lease'],
       why: [
-        'The Operating Framework and Part-M courses are free in every framework edition, so a student can start without a licence code.',
-        'Flashcards and a timed assessment with a 75% pass mark give a realistic check of readiness before an examination.'
-      ],
-      note: 'CAW Academy is a study aid. It is not an approved Part-147 course and does not replace one.'
-    },
-    {
-      id: 'asset-managers',
-      pill: 'Technical & asset managers',
-      title: 'Technical & asset managers',
-      intro: 'For people responsible for the value of the fleet as well as its airworthiness: cost, contracts, leases, engines and end-of-life decisions.',
-      courses: ['mec', 'lease', 'eng', 'reliability', 'recycle', 'offshore'],
-      why: [
-        'These courses connect the regulatory record to the commercial consequence — a records gap becomes a redelivery cost, a scrapped part becomes a shop-visit variance.',
-        'Worked examples use realistic figures and are kept type-agnostic, so nothing is tied to one manufacturer or one operator.'
+        'Each regulatory lesson ends with a "Where it goes wrong" section written as an audit finding: situation, root cause, consequence and the article breached.',
+        'The same material can be issued to the whole organisation, so auditor and auditee are working from one baseline.'
       ]
     },
     {
@@ -459,15 +459,41 @@
       ]
     },
     {
-      id: 'quality-safety',
-      pill: 'Quality & safety teams',
-      title: 'Quality & safety teams',
-      intro: 'For compliance monitoring, quality and safety staff who audit against the regulations rather than work to them directly.',
-      courses: ['sms', 'hf', 'partis', 'p145', 'arc', 'm', 'camo', 'lease'],
+      id: 'asset-managers',
+      pill: 'Technical & asset managers',
+      title: 'Technical & asset managers',
+      intro: 'For people responsible for the value of the fleet as well as its airworthiness: cost, contracts, leases, engines and end-of-life decisions.',
+      courses: ['mec', 'lease', 'eng', 'reliability', 'recycle', 'offshore'],
       why: [
-        'Each regulatory lesson ends with a "Where it goes wrong" section written as an audit finding: situation, root cause, consequence and the article breached.',
-        'The same material can be issued to the whole organisation, so auditor and auditee are working from one baseline.'
+        'These courses connect the regulatory record to the commercial consequence — a records gap becomes a redelivery cost, a scrapped part becomes a shop-visit variance.',
+        'Worked examples use realistic figures and are kept type-agnostic, so nothing is tied to one manufacturer or one operator.'
       ]
+    },
+    {
+      id: 'leasing',
+      pill: 'Leasing & transition teams',
+      title: 'Leasing & transition teams',
+      intro: 'For the people on either side of an aircraft transaction: lessor technical staff, transition and delivery managers, and the CAMO staff who have to hand an aircraft back in the condition the lease demands. The leasing course is the centre; the rest cover the records and the limits a transition is actually judged on.',
+      courses: ['lease', 'm', 'arc', 'eng', 'offshore', 'recycle'],
+      why: [
+        'Redelivery is treated as a records exercise before a physical one, because that is where the cost usually lands — the maintenance-reserve, back-to-birth and build-standard material is worked through with figures.',
+        'Offshore registries and Article 83 bis are covered in their own course, which is the part of a transaction that most often falls outside a CAMO\u2019s day-to-day experience.'
+      ]
+    },
+    {
+      id: 'authority',
+      /* "Authority inspectors", not "CAA inspectors": the catalogue carries four
+         framework editions, and the CAA is only one of the four authorities. The
+         regulations' own term for the role is the competent authority. */
+      pill: 'Authority inspectors',
+      title: 'Competent-authority inspectors',
+      intro: 'For inspectors and surveyors who oversee approved organisations rather than work inside one. The courses cover the same rule set an oversight visit is measured against, in each authority\u2019s own edition — EASA, UK CAA, UAE GCAA or the FAA.',
+      courses: ['m', 'camo', 'p145', 'arc', 'p21', 'partis', 'sms'],
+      why: [
+        'Each regulatory lesson closes with a "Where it goes wrong" section written as a finding — situation, root cause, consequence and the article breached — which is the shape an inspector already works in.',
+        'The same subject can be read in any of the four editions, so a difference between frameworks can be checked side by side rather than from memory.'
+      ],
+      note: 'CAW Academy is an independent study aid. It is not affiliated with or endorsed by any aviation authority, and it is not authority training.'
     }
   ];
 
