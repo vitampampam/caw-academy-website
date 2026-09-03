@@ -1765,12 +1765,10 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
      un-wraps the certificate, which no longer overflows its sheet at all.
      Percentage geometry (sheet at 8%/78%/86%) is identical at every width, so it
      cannot be used to check this — measure the text share instead.
-     680 is not a taste call: the certificate is drawn at aspect-ratio 1.414, but
-     fixed-px text that cannot fit that shape stretches the box taller. Sweeping
-     the width against the rendered ratio, it reads 1.11 at 555, 1.24 at 620 and
-     locks onto the designed 1.414 from 680 up. Below 680 the certificate is
-     squashed, which is exactly what looked wrong. Body text lands at 1.47%. */
-  --tw:680px; --th:1006px; --tz:.2176; --bezel:5px;
+     555 is the default: body text lands at 1.80%, a real iPad's proportion, and
+     the lists and cards fill their screens. The certificate is the exception and
+     takes .cawx-thumb-wide below. */
+  --tw:555px; --th:821px; --tz:.2667; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
   height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
@@ -1788,6 +1786,16 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
    `display:block` here silently cancelled that, and the app then sized to its own
    content — which is why the flashcards miniature stopped two-thirds down and
    left a band of empty screen beneath it. */
+/* THE CERTIFICATE ONLY. It is drawn at aspect-ratio 1.414, but fixed-px text
+   that cannot fit that shape stretches the box taller instead. Sweeping the
+   width against the rendered ratio: 1.11 at 555, 1.24 at 620, and the designed
+   1.414 from 680 up — so below 680 the certificate is visibly squashed. The
+   other five demos reflow and read too small at that width, which is why this is
+   a per-demo override and not the default. The frame is unchanged: 680 x .2176
+   and 555 x .2667 both give 158 x 229. */
+.cawx-thumb-pad.cawx-thumb-wide{--tw:680px; --th:1006px; --tz:.2176}
+@media (max-width:560px){ .cawx-thumb-pad.cawx-thumb-wide{--tz:.1912} }
+
 .cawx-thumb-pad .cawx-thumbscreen{display:flex; width:var(--tw); height:var(--th);
   transform:scale(var(--tz)); transform-origin:0 0;
   border-radius:calc(8px / var(--tz))}
@@ -1799,6 +1807,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{--tz:.1912}
+  .cawx-thumb-pad{--tz:.2342}
 }
 
