@@ -1355,6 +1355,14 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
    under the Done bar. */
 .cawx-certsheet .cawx-cert-wrap{justify-content:flex-start; padding:2px 4px 6px; gap:4px}
 .cawx-certsheet .cawx-cert{width:88%}
+/* The certificate's type is fixed in px and needs more height than its 1.414
+   landscape ratio allows at this width, so the box stretched and the sheet
+   (overflow:hidden) cut the last line of the disclaimer off — measured 532px of
+   content in a 491px sheet, in the pop-up as well as the miniature. A literal
+   zoom shrinks the layout box too, so the whole certificate now fits with the
+   margin below it that the design intends. Literal, never var(): Safari drops
+   `zoom` when its value is a custom property. */
+.cawx-certsheet .cawx-cert{zoom:.85}
 .cawx-certsheet .cawx-cert-sample{margin:0 0 1px}
 
 /* ---------------------------------------------------------------------------
@@ -1758,8 +1766,20 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   padding:var(--bezel); border-radius:13px;
   background:linear-gradient(160deg,#23264c,#0e1030);
   box-shadow:0 2px 6px rgba(16,22,68,.14), 0 12px 26px rgba(16,22,68,.13)}
-.cawx-thumb-pad .cawx-thumbscreen{display:block; width:var(--tw); height:var(--th);
-  zoom:var(--tz); border-radius:calc(8px / var(--tz))}
+/* SCALE WITH transform, NOT zoom. Safari on iPadOS does not reliably accept a
+   custom property as a `zoom` value, so it dropped the scale entirely and drew
+   the full 426px screen inside a 133px frame — huge clipped text, a shredded
+   sidebar. Chrome accepts it, which is why this only ever showed on iPad.
+   transform takes a var() everywhere, and the pad's box is already sized by
+   calc(), so nothing depends on transform participating in layout. */
+/* display MUST stay flex. `.cawx-screen, .cawx-thumbscreen` makes the screen a
+   flex column so `.cawx-shell` (flex:1 1 auto) stretches to fill it; setting
+   `display:block` here silently cancelled that, and the app then sized to its own
+   content — which is why the flashcards miniature stopped two-thirds down and
+   left a band of empty screen beneath it. */
+.cawx-thumb-pad .cawx-thumbscreen{display:flex; width:var(--tw); height:var(--th);
+  transform:scale(var(--tz)); transform-origin:0 0;
+  border-radius:calc(8px / var(--tz))}
 /* the card lifts its miniature slightly on hover, so it reads as a way in */
 #features .cawx-trigger .cawx-thumb-pad{transition:transform .22s ease, box-shadow .22s ease}
 #features .cawx-trigger:hover .cawx-thumb-pad{transform:translateY(-3px);
