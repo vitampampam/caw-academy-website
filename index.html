@@ -879,8 +879,11 @@
     #features .grid::-webkit-scrollbar{display:none}
     /* Arrows are for pointer machines; touch widths swipe, so they only appear
        where the carousel cannot be dragged with a finger. */
-    /* Arrows are for pointer machines; touch widths swipe instead. */
-    @media (max-width:1024px){ #features .gnav{display:none} }
+    /* No visibility rule here on purpose: style.css already hides every .gnav
+       below 640px, so these arrows follow the gallery's threshold for free and
+       show on iPad, as the gallery's do. They were previously hidden below 1025
+       on the theory that touch devices just swipe — but one carousel with arrows
+       beside another without them reads as a bug rather than a choice. */
     /* The gallery puts its arrows at 45% because its cards carry a caption
        below; a feature card has nothing under it, so centre them properly. */
     #features .gnav{top:50%}
