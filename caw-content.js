@@ -396,9 +396,9 @@
       pill: 'CAMO staff & post-holders',
       title: 'CAMO staff & post-holders',
       intro: 'For people who manage continuing airworthiness: planners, engineers, records staff and the nominated persons who are responsible for the organisation. The courses follow the same order as the work — the framework first, then the rule set, then the programmes built on it.',
-      courses: ['aof', 'm', 'camo', 'amp', 'arc', 'reliability'],
+      courses: ['aof', 'm', 'camo', 'amp', 'reliability', 'p21', 'partis', 'sms', 'hf'],
       why: [
-        'The exposition, the maintenance programme and the airworthiness review are covered as one connected set, not as separate topics.',
+        'The exposition, the maintenance programme and the reliability programme are covered as one connected set, not as separate topics. The airworthiness review has its own group above.',
         'Every article carries its own quiz and flashcards, so a post-holder can check where the gaps are before an audit rather than after one.'
       ]
     },
@@ -407,7 +407,7 @@
       pill: 'Part-145 engineers',
       title: 'Part-145 engineers',
       intro: 'For certifying staff, mechanics, planners and support staff in an approved maintenance organisation. The regulatory course is paired with the continuation-training subjects that a maintenance organisation has to keep current.',
-      courses: ['p145', 'hf', 'ewis', 'fts', 'sms', 'partis'],
+      courses: ['p145', 'm', 'hf', 'ewis', 'fts', 'sms', 'partis'],
       why: [
         'Human Factors, EWIS and Fuel Tank Safety are already structured the way a continuation-training programme needs them, including the EWIS target-group split.',
         'The material works offline on a phone or tablet, so it can be studied in the hangar or at an outstation.'
@@ -429,7 +429,7 @@
       pill: 'Part-147 / Part-66 students',
       title: 'Part-147 / Part-66 students',
       intro: 'For people studying towards a licence or working through an approved training course. The material assumes no prior knowledge and builds up to the level the regulations are written at.',
-      courses: ['aof', 'm', 'p145', 'hf', 'ewis', 'fts'],
+      courses: ['aof', 'm', 'p145', 'camo', 'sms', 'hf', 'ewis', 'fts'],
       why: [
         'The Operating Framework and Part-M courses are free in every framework edition, so a student can start without a licence code.',
         'Flashcards and a timed assessment with a 75% pass mark give a realistic check of readiness before an examination.'
@@ -448,11 +448,22 @@
       ]
     },
     {
+      id: 'doa-staff',
+      pill: 'Design organisation staff',
+      title: 'Design organisation (DOA) staff',
+      intro: 'For people working inside a design organisation approval: design engineers, office of airworthiness staff and the compliance verification engineers who sign against a certification basis. The initial-airworthiness courses are the centre; the management-system courses cover what a DOA has to hold alongside them.',
+      courses: ['p21', 'cs', 'partis', 'sms', 'hf'],
+      why: [
+        'Part-21 and the certification specifications are covered as one path — how the certification basis is fixed, and which code fixes it — rather than as two separate subjects.',
+        'Information security and safety management are included because a design organisation carries both, and they are the parts most often learned on the job rather than taught.'
+      ]
+    },
+    {
       id: 'quality-safety',
       pill: 'Quality & safety teams',
       title: 'Quality & safety teams',
       intro: 'For compliance monitoring, quality and safety staff who audit against the regulations rather than work to them directly.',
-      courses: ['sms', 'hf', 'partis', 'p145', 'arc'],
+      courses: ['sms', 'hf', 'partis', 'p145', 'arc', 'm', 'camo', 'lease'],
       why: [
         'Each regulatory lesson ends with a "Where it goes wrong" section written as an audit finding: situation, root cause, consequence and the article breached.',
         'The same material can be issued to the whole organisation, so auditor and auditee are working from one baseline.'
