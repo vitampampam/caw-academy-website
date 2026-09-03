@@ -1116,7 +1116,11 @@
         idx = idx % cards.length;
         screen.innerHTML = shell({
           tab: 'Home', side: sidebar(current, true, true), title: L.id,
-          tools: 'cards', seg: 'Flashcards', foot: 'live', position: L.position,
+          /* No Previous/Next bar on Flashcards. LessonView.swift gates it to
+             `tab == .lesson || (tab == .quiz && quizFinished)` — on Flashcards it
+             would look like it steps the card when it actually swaps the whole
+             lesson. The sidebar still moves between lessons here, as in the app. */
+          tools: 'cards', seg: 'Flashcards',
           page: '<div class="cawx-fc-wrap">' +
             '<div class="cawx-fc-head"><span>Card ' + (idx + 1) + ' of ' + L.cards + '</span>' +
               '<span>' + Object.keys(mastered).length + ' mastered</span></div>' +
@@ -1192,7 +1196,11 @@
         }
         screen.innerHTML = shell({
           tab: 'Home', side: sidebar(current, true, true), title: L.id,
-          tools: 'short', seg: 'Quiz', foot: 'live', position: L.position,
+          /* Nor mid-quiz. The app shows the bar on the Quiz tab only once the
+             quiz is FINISHED (its result screen), and this demo never reaches
+             that state — it walks one question at a time — so the bar would be
+             showing in the one state the app hides it in. */
+          tools: 'short', seg: 'Quiz',
           page: '<div class="cawx-page" id="cawxQz" aria-live="polite">' + h + '</div>'
         });
         var host = qs('#cawxQz', screen);
