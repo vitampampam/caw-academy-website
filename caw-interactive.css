@@ -726,7 +726,10 @@ button.cawx-srow.on:hover{background:var(--app-primary-fixed)}
 .cawx-result.pass{background:rgba(46,125,50,.08); border-color:rgba(46,125,50,.3)}
 .cawx-result .link{color:var(--app-primary); font-weight:800; display:block; margin-top:4px}
 
-.cawx-subnote{margin:7px 0 0; font-size:8.5px; line-height:1.45; color:var(--app-ink-var)}
+/* A footnote about the PREVIEW, not app UI, so it must read as clearly
+   subordinate. At 8.5px against 10px option text it sat almost level with the
+   exam's own copy and pulled the eye; 6.8px puts it where a caption belongs. */
+.cawx-subnote{margin:7px 0 0; font-size:6.8px; line-height:1.45; color:var(--app-ink-var)}
 
 /* --- sheets that cover the app (glossary, notes) ----------------------------- */
 .cawx-dim{position:absolute; inset:0; z-index:5; background:rgba(11,18,56,.18)}
@@ -1461,7 +1464,7 @@ button.cawx-srow[data-caw-demo] .nm{font-weight:700; color:var(--app-ink)}
   .cawx-ipad .cawx-qn{font-size:6.21px}
   .cawx-ipad .cawx-warn{font-size:6.21px}
   .cawx-ipad .cawx-result{font-size:6.57px}
-  .cawx-ipad .cawx-subnote{font-size:6.21px}
+  .cawx-ipad .cawx-subnote{font-size:4.97px}
   .cawx-ipad .cawx-sheet-h{font-size:8.03px}
   .cawx-ipad .cawx-sheet-h .done{font-size:6.93px}
   .cawx-ipad .cawx-gl-field input{font-size:7.3px}
@@ -1761,8 +1764,13 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
      and the pop-up is itself compressed to fit a dialog. The extra width also
      un-wraps the certificate, which no longer overflows its sheet at all.
      Percentage geometry (sheet at 8%/78%/86%) is identical at every width, so it
-     cannot be used to check this — measure the text share instead. */
-  --tw:555px; --th:821px; --tz:.2667; --bezel:5px;
+     cannot be used to check this — measure the text share instead.
+     680 is not a taste call: the certificate is drawn at aspect-ratio 1.414, but
+     fixed-px text that cannot fit that shape stretches the box taller. Sweeping
+     the width against the rendered ratio, it reads 1.11 at 555, 1.24 at 620 and
+     locks onto the designed 1.414 from 680 up. Below 680 the certificate is
+     squashed, which is exactly what looked wrong. Body text lands at 1.47%. */
+  --tw:680px; --th:1006px; --tz:.2176; --bezel:5px;
   position:relative; display:block; line-height:0; overflow:hidden;
   width:calc(var(--tw) * var(--tz) + var(--bezel) * 2);
   height:calc(var(--th) * var(--tz) + var(--bezel) * 2);
@@ -1791,6 +1799,6 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   #features .cawx-trigger:hover .cawx-thumb-pad{transform:none}
 }
 @media (max-width:560px){
-  .cawx-thumb-pad{--tz:.2342}
+  .cawx-thumb-pad{--tz:.1912}
 }
 
