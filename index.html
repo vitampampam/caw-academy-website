@@ -97,8 +97,8 @@
 <link rel="preload" as="image" href="screens/hero-office-1100.webp"
       imagesrcset="screens/hero-office-768.webp 768w, screens/hero-office-1100.webp 1100w, screens/hero-office-1536.webp 1536w"
       imagesizes="(min-width:1025px) 560px, (min-width:561px) 74vw, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=65">
-<link rel="stylesheet" href="caw-interactive.css?v=24">
+<link rel="stylesheet" href="style.css?v=66">
+<link rel="stylesheet" href="caw-interactive.css?v=25">
 </head>
 <body>
 
@@ -112,6 +112,7 @@
 </nav>
 
 <!-- ============================ HERO ============================ -->
+<div class="stk tone-a stk-first intro-card">
 <header class="hero">
   <div class="hero-grid">
 
@@ -151,13 +152,10 @@
 
   </div>
 
-  <!-- Free-trial CTA: below the whole hero composition, aligned to the page column -->
-  <div class="hero-bottom">
-    <a class="btn btn-light open-trial" href="#">Request a free trial
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-  </div>
 </header>
+</div><!-- /intro card -->
 
+<div class="stk tone-b lap proof-card">
 <div class="ribbon">
   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Aligned with EASA, UK CAA, GCAA &amp; FAA regulations</span>
   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>No ads · No third-party trackers</span>
@@ -165,20 +163,28 @@
   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>iPhone · iPad · Mac<span class="soon-txt"> · Android</span></span>
 </div>
 
-<div class="wrap">
+<!-- outer .wrap removed: each section carries its own column -->
 
   <!-- ============================ STATS ============================ -->
-  <section class="reveal" style="padding-top:8px">
+  <section class="reveal proof-part" style="padding-top:8px">
+    <div class="secw">
     <div class="stats" id="stats">
       <div class="stat"><div class="n" data-count="75" data-suffix="+">75+</div><div class="l">structured courses</div></div>
       <div class="stat"><div class="n" data-count="1600" data-suffix="+">1,600+</div><div class="l">expert lessons</div></div>
       <div class="stat"><div class="n" data-count="10500" data-suffix="+">10,500+</div><div class="l">flashcards</div></div>
       <div class="stat"><div class="n" data-count="24000" data-suffix="+">24,000+</div><div class="l">exam questions</div></div>
     </div>
+    </div>
   </section>
+  <div class="hero-bottom">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div><!-- /proof card -->
 
   <!-- ============================ AUDIENCE ============================ -->
-  <section id="audience">
+  <section class="stk tone-a lap" id="audience">
+    <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">For people</span>
       <h2>Made for the people who keep aircraft airworthy</h2>
@@ -194,10 +200,12 @@
       <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="leasing">Leasing &amp; transition teams<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button type="button" aria-haspopup="dialog" data-caw-open="group" data-caw-id="authority">Authority inspectors<svg class="cawx-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
+    </div>
   </section>
 
   <!-- ============================ FOR ORGANISATIONS ============================ -->
-  <section id="organisations">
+  <section class="stk tone-b lap" id="organisations">
+    <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">For organisations</span>
       <h2>Train your whole airworthiness team to one standard</h2>
@@ -264,16 +272,18 @@
         </button>
       </div>
     </div>
-  </section>
-
-  <!-- CTA centered in the gap between For-organisations and Why -->
-  <div class="reveal" style="text-align:center; margin:6px 0 8px">
+  <div class="reveal sec-cta">
     <a class="btn btn-light open-trial" href="#">Request a free trial
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
+    </div>
+  </section>
+
+  <!-- CTA centered in the gap between For-organisations and Why -->
 
   <!-- ============================ WHY ============================ -->
-  <section id="why">
+  <section class="stk tone-a lap" id="why">
+    <div class="secw">
     <div class="section-head reveal">
       <span class="eyebrow">Why CAW Academy</span>
       <h2>Built to make complex regulations clear</h2>
@@ -324,10 +334,12 @@
         </button>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- ============================ CURRICULUM ============================ -->
-  <section id="curriculum">
+  <section class="stk tone-b lap" id="curriculum">
+    <div class="secw">
     <div class="section-head reveal">
       <span class="eyebrow">The curriculum</span>
       <h2>The whole airworthiness picture in one app</h2>
@@ -402,10 +414,12 @@
       <p class="fw-note-sub">Every track above is grounded in each authority's own references.</p>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- ============================ FEATURES ============================ -->
-  <section id="features">
+  <section class="stk tone-a lap" id="features">
+    <div class="secw">
     <div class="section-head reveal">
       <span class="eyebrow">Features</span>
       <h2>Everything you need to study with confidence</h2>
@@ -476,16 +490,18 @@
       </div>
       <button class="gnav gnext" type="button" aria-label="More features">&#8250;</button>
     </div>
-  </section>
-
-  <!-- Mid-page CTA between Features and the gallery -->
-  <div class="reveal" style="text-align:center; margin:6px 0 8px">
+  <div class="reveal sec-cta">
     <a class="btn btn-light open-trial" href="#">Request a free trial
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
+    </div>
+  </section>
+
+  <!-- Mid-page CTA between Features and the gallery -->
 
   <!-- ============================ INSIDE (gallery) ============================ -->
-  <section id="inside">
+  <section class="stk tone-b lap" id="inside">
+    <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">A look inside</span>
       <h2>See exactly how you'll learn</h2>
@@ -567,10 +583,12 @@
       </div>
       <button class="gnav gnext" type="button" aria-label="Show more screens">&#8250;</button>
     </div>
+    </div>
   </section>
 
   <!-- ============================ FAQ ============================ -->
-  <section id="faq">
+  <section class="stk tone-a lap" id="faq">
+    <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">Questions</span>
       <h2>Good to know</h2>
@@ -644,6 +662,7 @@
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
     </div>
+    </div>
   </section>
 
   <!-- ============================ REVIEWS ============================ -->
@@ -652,7 +671,8 @@
        the `hidden` on the nav "Reviews" link), then replace the placeholder cards with
        genuine reviews and real App Store figures. Do not add aggregateRating structured
        data until the ratings are real. -->
-  <section id="reviews" hidden>
+  <section class="flat" id="reviews" hidden>
+    <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">Reviews</span>
       <h2>What airworthiness professionals say</h2>
@@ -699,6 +719,7 @@
       </div>
       <button class="rev-arrow rev-next" type="button" aria-label="Next review">&#8250;</button>
       <div class="rev-dots" id="revDots" role="group" aria-label="Choose a review"></div>
+    </div>
     </div>
   </section>
 
@@ -840,15 +861,18 @@
   </style>
 
   <!-- ============================ CTA ============================ -->
-  <section class="reveal" id="get">
+<div class="stk tone-b lap stk-last outro-card">
+  <section class="reveal reveal outro-part" id="get">
+    <div class="secw">
     <div class="cta-band">
       <h2><img class="cta-icon" src="logo-header.png?v=4" alt="" width="48" height="48">Equip your team with airworthiness expertise</h2>
       <a class="btn btn-light open-trial cta-trial" href="#">Request a free trial
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
+    </div>
   </section>
 
-</div>
+<!-- /sections -->
 
 <!-- Free-trial enquiry popup: opened by any "Request a free trial" button -->
 <div class="trial-modal" id="trialModal" aria-hidden="true">
@@ -935,6 +959,7 @@
     </div>
   </div>
 </footer>
+</div><!-- /outro card -->
 
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1240,7 +1265,7 @@
 </script>
 <script src="caw-content.js?v=24" defer></script>
 <script src="caw-demo-content.js?v=24" defer></script>
-<script src="caw-interactive.js?v=24" defer></script>
+<script src="caw-interactive.js?v=25" defer></script>
 <script>
   /* ---- Features carousel -------------------------------------------------
      Arrows only, matching the gallery carousel below. A click steps by a PAGE
@@ -1322,5 +1347,6 @@
     } else { init(); }
   })();
 </script>
+
 </body>
 </html>

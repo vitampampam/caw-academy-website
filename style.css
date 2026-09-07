@@ -861,3 +861,181 @@ footer .foot-links a:first-child{margin-left:0}
    block behaviour they were written for; their own max-width still centres them. */
 .page-short > *{width:100%}
 .page-short > footer{margin-top:auto}
+
+/* ============================ SECTION CARD STACK ==========================
+   The page below the sticky header is a stack of cards on the page column.
+   Each card overlaps the one above, so the run is continuous from the hero to
+   the footer and the ground shows only behind the header and in the gutters.
+
+     card 1  hero + trial CTA          (.intro-card)
+     card 2  assurances + stats        (.proof-card)
+     cards   the content sections
+     last    CTA band + footer         (.outro-card)
+
+   Selectors are on .stk, never section.stk: the first and last cards are <div>
+   wrappers, and an element-qualified selector skips them silently.
+========================================================================== */
+:root{
+  /* --stack-lap MUST exceed the rise distance in the script (46px). The
+     entering card is translated DOWN as it animates, so a smaller overlap
+     leaves it below the card above and uncovers that card's square bottom
+     corners for the whole animation. 60 - 46 = 14px of cover at worst. */
+  --stack-lap:60px; --stack-radius:28px; --stack-shadow:rgba(16,22,68,.14);
+  /* every card's bottom padding is this, so nothing can ever land in the strip
+     the next card covers. That is what buried the trial button, twice. */
+  --stack-foot:88px;
+}
+
+.stk{
+  position:relative;
+  max-width:var(--maxw); margin:0 auto;
+  /* NO border. A 1px --line hairline against near-white is a clearly
+     visible seam at every overlap — it was the line under the trial
+     button. The soft upward shadow does this job without an edge. */
+  border:0;
+  border-radius:var(--stack-radius) var(--stack-radius) 0 0;
+  box-shadow:none;   /* an upward shadow reads as a soft band above each
+                        card edge — the intermediate layer. The tone step
+                        between cards is what separates them. */
+  will-change:transform;
+  padding:52px 0 var(--stack-foot);
+}
+.stk[hidden]{display:none}
+.stk.lap{margin-top:calc(var(--stack-lap) * -1)}
+.stk-first{margin-top:0}
+.stk-last{border-radius:var(--stack-radius)}
+
+/* two tones, 2% apart: the run is unbroken, so the step lands only where two
+   cards touch — a fold, not a change of colour.
+   NOTE the doubled class on .intro-card below: these tone rules are (0,2,0),
+   so a single-class .intro-card rule loses to them on specificity no matter
+   where it sits in the file — which silently threw the hero card's whole wash
+   away and left it plain white. */
+.stk.tone-a{background:var(--card)}
+.stk.tone-b{background:#F7F8FD}
+
+/* the column, carried by each section now the outer .wrap is gone */
+.secw{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+#inside .secw{max-width:none; padding:0}
+
+/* a section's own closing CTA, inside the card it concludes */
+.sec-cta{margin:34px 0 0}
+.sec-cta .btn.open-trial{width:100%}
+
+/* ---- card 1: the hero -------------------------------------------------
+   The wash lives inside the card, clipped by its own corners, so there is no
+   ground-to-card boundary under the hero and no rectangle edge for it to stop
+   against. style.css washes the whole BODY; that comes off, or it reappears in
+   the gutters. */
+body{background:var(--bg)}
+/* the trial CTA now closes card 2, under the stats. Its gutters must match
+   .secw exactly, or the button ends up a different width from the stats block
+   directly above it (24px vs 18px on phones = 12px narrower). */
+.proof-card .hero-bottom{max-width:none; margin:30px auto 0; padding:0 24px}
+@media (max-width:560px){ .proof-card .hero-bottom{padding:0 18px} }
+
+.stk.intro-card{
+  overflow:hidden;
+  /* card 1 runs long deliberately: card 2 sits ON it rather than after it,
+     so the hero's background carries on well past where card 2 begins */
+  padding:0 0 96px;
+  /* Sizes are PER CENT OF THE CARD, not pixels. Fixed px radii ran out partway
+     down — the card is taller than 900px, so the wash died just under the trial
+     button and the rest of the card was flat white. Percentages track the
+     card's real height at every viewport, so the wash always reaches the bottom
+     and carries on under card 2, which laps over it. */
+  background:
+    /* Confined to the TOP of the card — the hero's own area. At 118%/112% these
+       reached right down past the trial button, so card 1's lower half kept a
+       warm pink cast while card 2 below it is cool grey: that colour change IS
+       the strip, and it is also what tinted the notches in card 2's corners.
+       Faded out by roughly 40% of the card's height, everything below them is
+       the flat base — the same colour card 2 is. */
+    radial-gradient(95% 58% at 88% -12%, rgba(87,94,207,.15), transparent 70%),
+    radial-gradient(85% 52% at -10% 10%, rgba(244,81,30,.07), transparent 66%),
+    /* The BASE COLOUR — not white. The radials are background *images* over it
+       and both fade to transparent before the card's bottom, so wherever they
+       have run out the base is what shows: the strip under the button, and the
+       notches inside card 2's rounded top corners. With a white base those read
+       as light patches against card 2; matching the base to card 2's colour
+       makes strip and notches alike disappear, since they are then the same
+       colour as the card lying over them. */
+    /* A real surface tone, not near-white. At #FAFAFD this card was LIGHTER
+       than the page ground (#F5F6FB) and 1% off the white button sitting on
+       it, so the strip under the button read as a bright void rather than as
+       card 1's surface — which is what kept looking like a gap however tall or
+       short it was. The stack now steps down in tone, which is what makes it
+       read as layers:
+           button  #FFFFFF   ->  card 1  #F7F8FD  ->  card 2  #EDEFF8
+       with the page ground (#F5F6FB) between them, so both cards read as
+       surfaces above it rather than one glowing and one sinking. */
+    #F7F8FD;
+}
+.intro-card .hero{background:none}
+/* .hero sets overflow:hidden and carries two blurred blobs positioned past its
+   own bottom edge — so it clipped them in a straight line right under the
+   photograph, which is the hard horizontal edge that stopped the wash short.
+   The card carries the wash now, so the hero's own blobs come off inside it. */
+.intro-card .hero::before,
+.intro-card .hero::after{display:none}
+
+/* ---- card 2: assurances + stats ---------------------------------------
+   Laps card 1 by more than the standard overlap, so it clearly sits on top of
+   a longer card rather than butting up against the end of it. */
+/* Card 1 runs 190px past the button and card 2 laps 160px of it, so the extra
+   length is hidden UNDER card 2 — the gap below the button stays ~30px, the
+   same as every other card, while card 1 physically continues beneath card 2.
+   Two classes, and placed after .stk.lap, or that rule wins and the overlap
+   silently reverts to the standard 60px — which is what happened last round. */
+/* Card 2 takes card 1's EXACT surface colour — the flat tint (rgba(87,94,207,.032)
+   over white) that card 1 carries at its bottom edge. Cards 1 and 2 are one
+   block (the hero and its proof points), so a tone step between them is a seam
+   with nothing to say. It also kills the problem in motion: the rise animation
+   drops each entering card 46px, so ANY visible tail of card 1 becomes a strip
+   that grows and shrinks while card 2 settles. Same colour, no strip, in every
+   state. The white/#F7F8FD alternation resumes at card 3. */
+/* Card 2 keeps its OWN colour. Matching it to card 1 removed the strip but
+   also made its rounded top corners invisible — the notches inside them show
+   card 1, so identical colours mean no visible curve and the card reads as a
+   square slab. Distinct colours + the overlap ARE the transition. Card 1's
+   tail is flat and cool now (the radials no longer reach it), so this is a
+   clean tonal step rather than the warm-to-cool clash it used to be. */
+/* Card 2 laps right up to the button. Any tail of card 1 left showing below it
+   is a thin sliver of a colour lighter than BOTH the ground and card 2, which
+   reads as a gap rather than as part of the card — no width of it looks right.
+   So the tail goes to ~4px and the button's breathing room moves INSIDE card 2
+   as top padding: the space is still there, but it belongs to card 2. */
+/* Card 2 stops ~24px short of the button rather than touching it, and card 1
+   continues 236px underneath card 2. That 24px is card 1's own surface — flat
+   #FAFAFD, with the radials confined to the hero so nothing warm reaches it —
+   so it reads as the space under the button, not as a gap between two cards.
+   The intro pair is excluded from the rise animation (see the script), so this
+   distance is fixed: nothing translates down and stretches it while scrolling. */
+.stk.proof-card{background:#EDEFF8}
+.proof-card{padding:42px 0 var(--stack-foot)}
+.proof-card .ribbon{margin:0 auto; padding:0 24px 26px}
+.proof-card > .proof-part{padding:0}
+
+/* ---- last card: CTA band + footer -------------------------------------
+   The band keeps its own border, radius, shadow and gradient from style.css.
+   Flattening it to sit flush with the card is what squared it off. */
+.outro-card{padding:52px 0 0}
+.outro-card > .outro-part{padding:0}
+.outro-card footer.foot-center{margin:38px 0 0; background:none; border-radius:0}
+
+@media (max-width:560px){
+  :root{ --stack-lap:52px; --stack-radius:22px; --stack-foot:76px }
+  .stk{margin-left:10px; margin-right:10px; padding:38px 0 var(--stack-foot)}
+  .secw{padding:0 18px}
+  /* The gallery runs edge-to-edge with margin:0 -18px, which was right when
+     it sat on the page. Inside a card with rounded corners and its own
+     colour it escaped 18px past the card on each side. Aligned to the card
+     edge — it keeps its horizontal scroll and its next-card peek. */
+  #inside .gallery{margin-left:0; margin-right:0}
+  .intro-card{padding:0 0 76px}
+
+  .proof-card{padding:32px 0 var(--stack-foot)}
+  .outro-card{padding:34px 0 0}
+}
+
+@media (prefers-reduced-motion:reduce){ .stk{transform:none !important} }

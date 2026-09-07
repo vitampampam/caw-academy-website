@@ -2320,3 +2320,27 @@
   CAW.closeModal = Modal.close;
 
 })(window, document);
+
+/* cards rise into place as they enter; ported from cisflightsupport/assets/site.js */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var stack=[].slice.call(document.querySelectorAll('.stk:not(.intro-card):not(.proof-card)'));
+  if(!stack.length) return;
+  function clamp(v){ return v<0?0:v>1?1:v; }
+  var ticking=false;
+  function frame(){
+    ticking=false;
+    var vh=innerHeight;
+    stack.forEach(function(el){
+      var top=el.getBoundingClientRect().top;
+      var enter=clamp((vh-top)/(vh*0.4));
+      el.style.transform = enter<1
+        ? 'translate3d(0,'+((1-enter)*46).toFixed(1)+'px,0) scale('+(0.975+0.025*enter).toFixed(4)+')'
+        : '';
+    });
+  }
+  function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(frame); } }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll);
+  frame();
+})();
