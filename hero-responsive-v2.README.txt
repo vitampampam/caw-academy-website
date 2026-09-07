@@ -1,0 +1,1 @@
+Responsive hero CSS created. High-resolution asset deployment follows.
