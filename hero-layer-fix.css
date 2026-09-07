@@ -1,0 +1,8 @@
+/* Ensure the approved generated hero image is visible above the hero background and behind content. */
+.hero{isolation:isolate!important}
+.hero:before{z-index:0!important}
+.hero:after{z-index:1!important}
+.hero-grid{position:relative!important;z-index:2!important}
+.hero-bottom{position:relative!important;z-index:3!important}
+.hero .device-stage{z-index:2!important}
+.hero .hero-copy{z-index:3!important}
