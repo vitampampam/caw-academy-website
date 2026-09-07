@@ -10,6 +10,10 @@
   transform:none!important;
   opacity:1!important;
   inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:none!important;
+  max-height:none!important;
   background-size:100% 100%,auto 100%!important;
   background-position:left center,right center!important;
   background-repeat:no-repeat,no-repeat!important;
@@ -22,6 +26,11 @@
   animation:none!important;
   transform:none!important;
   opacity:.34!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:none!important;
+  max-height:none!important;
 }
 .hero-grid{
   position:relative!important;
