@@ -1,48 +1,55 @@
-/* Homepage hero: preserve the approved photo, constrain it to the content frame, and feather its edges. */
-.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;min-height:610px!important;background:#fbfbfe!important}
+/* Homepage hero: preserve the approved photo, keep it inside the 1120px content frame,
+   render it close to its native pixel density, and feather it into the page. */
+.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;min-height:590px!important;background:#fbfbfe!important}
 .hero:before{
   content:""!important;position:absolute!important;z-index:0!important;
   top:0!important;bottom:0!important;left:50%!important;right:auto!important;
   width:min(1120px,100%)!important;height:auto!important;max-width:1120px!important;max-height:none!important;
   transform:translateX(-50%)!important;filter:none!important;-webkit-filter:none!important;
   border-radius:0!important;animation:none!important;opacity:1!important;
-  background-size:100% 100%,auto 560px!important;
-  background-position:center center,right 8px center!important;
+  /* hero-reference.css supplies two background layers: its soft left fade + the approved photo.
+     The 480x320 web image is deliberately kept near native size here to avoid visible upscaling. */
+  background-size:100% 100%,auto 400px!important;
+  background-position:center center,right 18px center!important;
   background-repeat:no-repeat,no-repeat!important;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 3%,#000 94%,transparent 100%)!important;
-  mask-image:linear-gradient(90deg,transparent 0%,#000 3%,#000 94%,transparent 100%)!important;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 4%,#000 91%,rgba(0,0,0,.72) 95%,transparent 100%)!important;
+  mask-image:linear-gradient(90deg,transparent 0%,#000 4%,#000 91%,rgba(0,0,0,.72) 95%,transparent 100%)!important;
 }
 .hero:after{
   content:""!important;position:absolute!important;z-index:1!important;inset:0!important;
   width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;
   filter:none!important;-webkit-filter:none!important;border-radius:0!important;animation:none!important;transform:none!important;opacity:1!important;
-  background:linear-gradient(180deg,rgba(251,251,254,0) 76%,rgba(251,251,254,.22) 86%,#fbfbfe 100%)!important;
+  background:
+    linear-gradient(90deg,#fbfbfe 0%,rgba(251,251,254,.96) 23%,rgba(251,251,254,.70) 34%,rgba(251,251,254,.18) 45%,rgba(251,251,254,0) 55%),
+    linear-gradient(180deg,rgba(251,251,254,0) 76%,rgba(251,251,254,.28) 86%,#fbfbfe 100%)!important;
   pointer-events:none!important;
 }
-.hero-grid{position:relative!important;z-index:2!important;max-width:1120px!important;min-height:610px!important;margin:0 auto!important;grid-template-columns:minmax(430px,46%) minmax(0,54%)!important;padding:48px 24px 118px!important}
+.hero-grid{position:relative!important;z-index:2!important;max-width:1120px!important;min-height:590px!important;margin:0 auto!important;grid-template-columns:minmax(430px,46%) minmax(0,54%)!important;padding:44px 24px 112px!important}
 .hero-copy{max-width:560px!important;align-self:center!important;z-index:3!important}
 .hero .device-stage{display:none!important}
 .hero-copy h1{font-family:var(--serif)!important;font-weight:600!important;font-size:clamp(44px,4vw,60px)!important;line-height:1.01!important;letter-spacing:-.6px!important;margin:10px 0 18px!important}
 .hero-copy h1 em{font-family:var(--sans)!important;font-style:normal!important;font-weight:800!important;color:var(--indigo)!important;background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;letter-spacing:-.02em!important}
 .hero-copy .lede{font-size:16.5px!important;max-width:39ch!important;margin-bottom:22px!important}
-.hero-bottom{position:relative!important;z-index:4!important;max-width:1120px!important;margin:-88px auto 0!important;padding:0 24px 30px!important;box-sizing:border-box!important}
+.hero-bottom{position:relative!important;z-index:4!important;max-width:1120px!important;margin:-84px auto 0!important;padding:0 24px 28px!important;box-sizing:border-box!important}
 .hero-bottom .btn,.hero-bottom .open-trial{width:100%!important;justify-content:center!important}
 @media(min-width:768px) and (max-width:1100px){
- .hero{min-height:760px!important}
- .hero:before{width:100%!important;max-width:100%!important;background-size:100% 100%,auto 480px!important;background-position:center,center bottom!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important}
- .hero-grid{grid-template-columns:1fr!important;min-height:760px!important;padding:52px 42px 300px!important}
+ .hero{min-height:730px!important}
+ .hero:before{width:100%!important;max-width:100%!important;background-size:100% 100%,auto 360px!important;background-position:center,center bottom!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)!important}
+ .hero:after{background:linear-gradient(180deg,#fbfbfe 0%,rgba(251,251,254,.96) 32%,rgba(251,251,254,.45) 48%,rgba(251,251,254,0) 62%,rgba(251,251,254,.22) 88%,#fbfbfe 100%)!important}
+ .hero-grid{grid-template-columns:1fr!important;min-height:730px!important;padding:48px 42px 270px!important}
  .hero-copy{margin:0 auto!important;text-align:center!important;max-width:650px!important}
  .hero-copy h1{font-size:clamp(46px,7vw,60px)!important}
  .hero-copy .lede{margin-left:auto!important;margin-right:auto!important}
  .hero-apps{justify-content:center!important}
- .hero-bottom{margin:-76px auto 0!important;padding:0 24px 26px!important}
+ .hero-bottom{margin:-72px auto 0!important;padding:0 24px 24px!important}
 }
 @media(max-width:767px){
- .hero{min-height:720px!important}
- .hero:before{width:100%!important;max-width:100%!important;background-size:100% 100%,auto 390px!important;background-position:center,62% bottom!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)!important}
- .hero-grid{grid-template-columns:1fr!important;min-height:720px!important;padding:36px 18px 250px!important}
+ .hero{min-height:690px!important}
+ .hero:before{width:100%!important;max-width:100%!important;background-size:100% 100%,auto 300px!important;background-position:center,62% bottom!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)!important;mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)!important}
+ .hero:after{background:linear-gradient(180deg,#fbfbfe 0%,rgba(251,251,254,.98) 38%,rgba(251,251,254,.62) 51%,rgba(251,251,254,0) 66%,rgba(251,251,254,.24) 89%,#fbfbfe 100%)!important}
+ .hero-grid{grid-template-columns:1fr!important;min-height:690px!important;padding:34px 18px 225px!important}
  .hero-copy{max-width:100%!important;text-align:left!important}
  .hero-copy h1{font-size:clamp(38px,10.8vw,48px)!important;line-height:1.02!important;margin-bottom:16px!important}
  .hero-copy .lede{font-size:15.5px!important;max-width:36ch!important}
- .hero-bottom{margin:-54px auto 0!important;padding:0 18px 20px!important}
+ .hero-bottom{margin:-50px auto 0!important;padding:0 18px 18px!important}
 }
