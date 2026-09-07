@@ -1,0 +1,1 @@
+Use Git blob API for binary hero asset. Responsive CSS is in hero-responsive-v2.css.
