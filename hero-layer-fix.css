@@ -1,8 +1,60 @@
-/* Ensure the approved generated hero image is visible above the hero background and behind content. */
+/* Final homepage hero corrections: show the approved image sharply, keep original headline typography,
+   and align the trial CTA with the content width below. */
 .hero{isolation:isolate!important}
-.hero:before{z-index:0!important}
-.hero:after{z-index:1!important}
+.hero:before{
+  z-index:0!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  border-radius:0!important;
+  animation:none!important;
+  transform:none!important;
+  opacity:1!important;
+}
+.hero:after{
+  z-index:1!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  border-radius:0!important;
+  animation:none!important;
+  transform:none!important;
+}
 .hero-grid{position:relative!important;z-index:2!important}
-.hero-bottom{position:relative!important;z-index:3!important}
+.hero-bottom{
+  position:relative!important;
+  z-index:3!important;
+  max-width:var(--maxw)!important;
+  margin:-96px auto 0!important;
+  padding:0 24px 28px!important;
+  box-sizing:border-box!important;
+}
+.hero-bottom .btn,
+.hero-bottom .open-trial{
+  width:100%!important;
+  justify-content:center!important;
+}
 .hero .device-stage{z-index:2!important}
 .hero .hero-copy{z-index:3!important}
+
+/* Restore the site's original hero type treatment. */
+.hero-copy h1{
+  font-family:var(--serif)!important;
+  font-weight:600!important;
+  letter-spacing:-.6px!important;
+}
+.hero-copy h1 em{
+  font-family:var(--sans)!important;
+  font-style:normal!important;
+  font-weight:800!important;
+  color:var(--indigo)!important;
+  background:none!important;
+  -webkit-background-clip:initial!important;
+  background-clip:initial!important;
+  letter-spacing:-.02em!important;
+}
+
+@media (min-width:768px) and (max-width:1100px){
+  .hero-bottom{margin:-82px auto 0!important;padding:0 24px 26px!important}
+}
+@media (max-width:767px){
+  .hero-bottom{margin:-60px auto 0!important;padding:0 18px 20px!important}
+}
