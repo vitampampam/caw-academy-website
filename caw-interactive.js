@@ -284,6 +284,34 @@
       root.style.scrollBehavior = was;
     }
 
+    /* The pop-up wears the accent of the card that opened it.
+       A curriculum track has a coloured pill, a "Why" card and a Features card
+       have a coloured icon tile; the pop-up header showed neither, so it
+       arrived as plain text with no tie back to what was clicked.
+       The gradient is READ from the source element's own computed background
+       rather than restated here, so the two can never drift apart — the track
+       colours live in style.css as .track:nth-child(n) .badge and nothing has
+       to be kept in sync. Where the card carries its own wording (a track
+       pill), that wording replaces the section eyebrow. */
+    function applyAccent(trigger) {
+      eyebrowEl.classList.remove('cawx-accent');
+      eyebrowEl.style.backgroundImage = '';
+      if (!trigger || !trigger.closest) { return; }
+      var card = trigger.closest('.track, .prop, .card');
+      if (!card) { return; }
+      var swatch = card.querySelector('.badge, .pico, .ico');
+      if (!swatch) { return; }
+      var bg = w.getComputedStyle(swatch).backgroundImage;
+      if (!bg || bg === 'none') { return; }
+      var pill = card.querySelector('.badge');
+      if (pill && pill.textContent.trim()) {
+        eyebrowEl.hidden = false;
+        eyebrowEl.textContent = pill.textContent.trim();
+      }
+      eyebrowEl.style.backgroundImage = bg;
+      eyebrowEl.classList.add('cawx-accent');
+    }
+
     function show(cfg, trigger) {
       if (!root) { build(); }
       if (trigger !== undefined) { lastTrigger = trigger || d.activeElement; }
@@ -295,6 +323,7 @@
       if (cfg.size !== 'wide') { root.classList.remove('cawx-max'); }
       if (cfg.eyebrow) { eyebrowEl.hidden = false; eyebrowEl.textContent = cfg.eyebrow; }
       else { eyebrowEl.hidden = true; eyebrowEl.textContent = ''; }
+      applyAccent(lastTrigger);
       setTitle(cfg);
       subEl.innerHTML = cfg.sub || '';
       subEl.hidden = !cfg.sub;

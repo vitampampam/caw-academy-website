@@ -1837,3 +1837,7 @@ button.cawx-nfilter{border:0; font:inherit; cursor:pointer}
   .cawx-thumb-pad{--tz:.2342}
 }
 
+/* the pop-up's eyebrow wearing the accent of the card that opened it —
+   the gradient itself is set inline from that card's own swatch */
+.cawx-modal .eyebrow.cawx-accent{background-color:transparent; color:#fff}
+.cawx-modal .eyebrow.cawx-accent::before{background:#fff; opacity:.92}
