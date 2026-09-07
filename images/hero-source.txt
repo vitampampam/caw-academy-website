@@ -1,0 +1,1 @@
+Generated hero source: 1536x1024. Intended binary path: images/hero-woman-office-hq.jpg
