@@ -17,10 +17,14 @@
   // registration consent and stored against the account. BUMP IT whenever either
   // document is revised, in step with the apps' LEGAL_DOCUMENTS_VERSION constants.
   var LEGAL_DOCUMENTS_VERSION = "2026-08-28";
-  // Self-serve password reset. FALSE, temporarily: the reset link is delivered by
-  // email and the server ships with SMTP dark, so the message is logged and dropped —
-  // the page would promise "a reset link is on its way" and nothing would arrive.
-  // Flip back to true the moment SMTP is configured; the flow itself already works.
+  // Self-serve password reset. THE SERVER DECIDES, because only it knows whether mail
+  // can actually be sent: with SMTP dark the page would promise "a code is on its way"
+  // and nothing would arrive, which is worse than not offering it at all.
+  //
+  // It used to be this hand-edited false, which made switching the feature on mean
+  // editing this file and re-uploading the site, in step with a server change, from
+  // memory. Now configuring SMTP_HOST lights it up here on the next page load.
+  // Starts false so a server that cannot be reached errs towards not promising.
   var PASSWORD_RESET_ENABLED = false;
   // ────────────────────────────────────────────────────────────────────────
 
@@ -228,10 +232,17 @@
   // Inactive while PASSWORD_RESET_ENABLED is false: the link is shown greyed rather
   // than removed, so the option is visibly coming back rather than looking as though
   // it never existed. Mirrors the two apps.
-  if (!PASSWORD_RESET_ENABLED) {
-    $("forgotLink").classList.add("disabled");
-    $("forgotLink").setAttribute("aria-disabled", "true");
+  function setResetEnabled(on) {
+    PASSWORD_RESET_ENABLED = !!on;
+    $("forgotLink").classList.toggle("disabled", !on);
+    $("forgotLink").setAttribute("aria-disabled", on ? "false" : "true");
   }
+  setResetEnabled(false);
+  request("GET", "/v1/capabilities", null, false)
+    .then(function (c) { setResetEnabled(c && c.passwordReset); })
+    // An unreachable server leaves it off: offering a reset nobody can complete is the
+    // failure this whole flag exists to avoid.
+    .catch(function () {});
 
   $("forgotLink").addEventListener("click", function (e) {
     e.preventDefault();
@@ -244,7 +255,7 @@
     }
     request("POST", "/v1/auth/forgot-password", { email: email }, false)
       .then(function () {
-        showMessage("authMsg", "If that email has an account, a reset link is on its way.", "ok");
+        showMessage("authMsg", "If that email has an account, a reset code is on its way. It expires in an hour.", "ok");
       })
       .catch(function (err) { showMessage("authMsg", err.message, "err"); });
   });
