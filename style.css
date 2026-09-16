@@ -1123,4 +1123,23 @@ body{background:var(--bg)}
   .stk.copy-card{padding:30px 0 var(--stack-foot)}
   .copy-card .hero-grid{padding:0 18px; row-gap:24px}
   .hero-devices .lineup{zoom:.52}
+
+  /* PHONES ARE LEFT-ALIGNED, iPad and desktop already were. Centring is what
+     made this hero look wrong on a phone, and the measurement says why: in a
+     395px column the lede ran 359px wide over four lines and ended on a 57px
+     line — one word, floating alone under three full ones, with a ragged edge
+     on BOTH sides. Left-aligned there is one rag instead of two and one start
+     point for title, paragraph and badges. The measure is capped at 36ch so
+     the rag stays shallow, and text-wrap:pretty keeps the last line off an
+     orphan where the browser supports it.
+     The type comes down with it: the title was clamped to 7.6vw (32.7px at
+     430) with its "learnable" at weight 800, which at this size read as two
+     competing fonts rather than one phrase. 6.6vw and 700 settle it. */
+  .copy-card .hero-grid{text-align:left}
+  .copy-card .hero-copy{text-align:left}
+  .copy-card .lede{margin-left:0; margin-right:0; max-width:36ch; font-size:15px}
+  .copy-card .hero-apps{justify-content:flex-start}
+  .hero h1{font-size:clamp(25px,6.6vw,30px); letter-spacing:-.2px; line-height:1.14}
+  .hero h1 em{font-weight:700}
+  .hero .lede{line-height:1.58; text-wrap:pretty}
 }
