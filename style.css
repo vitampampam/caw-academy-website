@@ -969,42 +969,27 @@ body{background:var(--bg)}
 
 @media (prefers-reduced-motion:reduce){ .stk{transform:none !important} }
 
-/* ================= HERO: banner card + copy card ========================
-   Card 1 is the banner and nothing else; card 2 carries the title, the copy,
-   the store badges and the iPhone/iPad/MacBook lineup, and rides over it.
-   Replaces the masked single-photo hero (.hero-media), whose rules are removed
-   below.
-======================================================================== */
+/* ================= HERO: banner + copy, side by side =====================
+   Card 1 is the photograph, card 2 the title, copy, store badges and the
+   iPhone/iPad/MacBook lineup. Above 1025px they sit SIDE BY SIDE so the whole
+   hero is visible at once; below that they stack, banner first.
 
+   Why side by side: the photo's content (laptop lid to binder spines) renders
+   534px tall at the full page column, and that height follows the WIDTH, not
+   the aspect ratio. Stacked, banner + title therefore always exceeded a
+   laptop's fold. Halving the width halves the height.
+========================================================================== */
+.hero-stack{max-width:var(--maxw); margin:0 auto}
+
+/* ---- the banner card ---- */
 .stk.banner-card{padding:0; overflow:hidden; background:none; border:0}
 .banner-card picture{display:block; line-height:0}
-.banner-card img{
-  display:block; width:100%; height:auto;
-  /* The master is the FULL 4:3 frame, so this is the ONE and only crop.
-     It used to be cropped to 2:1 in the file as well, and cover then cropped
-     that again — two crops compounding, which is why the desk looked zoomed
-     in and the devices came up oversized. With the whole frame behind it, the
-     full width of the scene shows and the devices sit at their true size. */
-  /* A slimmer band. The scene's SCALE is set by the card's width (the frame
-     fits across it), so the devices cannot be drawn smaller without letter-
-     boxing; what this changes is how much vertical room the banner takes —
-     575px at 1.85:1, 463px here — so it reads as a header strip rather than a
-     picture to be studied. 48% keeps the laptop lid and all four binder
-     spines inside the band. */
-  /* Measured, not guessed. At the card's width the photo scales to 840px tall
-     and its content — laptop lid down to the binder spines — occupies rows
-     ~190-880, about 82% of it. The band must clear that PLUS whatever card 2
-     laps over the bottom, so the two numbers are one decision:
-        2.3:1 + 60px lap -> rows 219-771  = spines gone
-        2.0:1 + 24px lap -> rows 188-881  = all four spines intact
-     Which is why the lap below is 24px and not the stack's usual 60. */
-  aspect-ratio:2 / 1;
-  object-fit:cover; object-position:center 52%;
-}
+.banner-card img{display:block; width:100%; height:auto;
+  aspect-ratio:2 / 1; object-fit:cover; object-position:center 52%}
 
+/* ---- the copy card ---- */
 .stk.copy-card{padding:44px 0 var(--stack-foot)}
-/* two classes, so it beats .stk.lap's -60px; see the note on the banner above */
-.stk.copy-card{margin-top:-24px}
+.stk.copy-card{margin-top:-32px}          /* >= --stack-radius, see note below */
 .copy-card .hero{padding:0; overflow:visible}
 .copy-card .hero::before, .copy-card .hero::after{display:none}
 .copy-card .hero-grid{
@@ -1013,24 +998,58 @@ body{background:var(--bg)}
   max-width:var(--maxw); margin:0 auto; padding:0 24px;
 }
 .copy-card h1{margin-top:0}
-
 .hero-devices{min-width:0; display:flex; justify-content:center; align-items:flex-end}
-.hero-devices .lineup{transform:scale(.92); transform-origin:center bottom}
-.hero-devices .dlabel{bottom:-26px}
+.hero-devices .lineup{zoom:.78}
+.hero-devices .dlabel{bottom:-24px}
 
+/* ---- DESKTOP: the two cards become one row ---------------------------- */
+@media (min-width:1025px){
+  .hero-stack{display:grid; grid-template-columns:1.18fr 1fr; align-items:stretch; gap:0}
+
+  .stk.banner-card{margin:0; display:block; background:var(--card);
+    border-radius:var(--stack-radius) 0 0 var(--stack-radius)}
+  .banner-card picture{width:100%; height:100%}
+  /* The photo FILLS the card. At its natural ratio it came out 432px against a
+     525px column, leaving a band of card beneath it that CANNOT be padded away:
+     every pixel added to the copy's foot adds one to the column's height, so
+     the band grows just as fast. Filling means cover, and cover pays for the
+     height by trimming the sides — so the crop is biased RIGHT: the UK CAA
+     binder is the reason this photograph exists, the mug at the left is not.
+     Consequence to know: a taller copy column means a taller card means MORE
+     side trim. The two pull against each other. */
+  .banner-card img{width:100%; height:100%; aspect-ratio:auto;
+    object-fit:cover; object-position:62% 50%}
+
+  .stk.copy-card{margin:0; border-radius:0 var(--stack-radius) var(--stack-radius) 0;
+    /* the foot must clear the lap of the card below (84px) or that card covers
+       the device lineup */
+    padding:20px 0 104px; display:flex; align-items:flex-start}
+  .copy-card .hero-grid{grid-template-columns:minmax(0,1fr); row-gap:18px;
+    column-gap:0; padding:0 34px; align-items:start}
+  .copy-card h1{font-size:clamp(30px,3.2vw,40px); font-weight:470}
+  .copy-card h1 em{font-weight:680}
+  .copy-card .lede{font-weight:340; letter-spacing:.005em;
+    font-size:clamp(14.5px,1.12vw,15.5px); line-height:1.62}
+  .copy-card .hero-apps{justify-content:center}
+
+  /* The card below rides higher than the stack's usual 60px: its rounded top
+     corners leave a notch at each end, and at 60px the hero's own rounded
+     bottom corner sat inside that notch and showed through it. */
+  .proof-card{margin-top:-84px}
+}
+
+/* ---- TABLET / PHONE: stacked, banner first ---------------------------- */
 @media (max-width:1024px){
   .copy-card .hero-grid{grid-template-columns:minmax(0,1fr); row-gap:30px; text-align:center}
   .copy-card .hero-copy{text-align:center}
   .copy-card .lede{margin-left:auto; margin-right:auto}
   .copy-card .hero-apps{justify-content:center}
-  .hero-devices .lineup{transform:scale(.88)}
+  .hero-devices .lineup{zoom:.7}
 }
 @media (max-width:560px){
-  /* a phone is ~340px wide, so a 2:1 slice of this scene keeps almost none of
-     it — the band goes taller here rather than wider */
   .banner-card img{aspect-ratio:1.5 / 1; object-position:center 54%}
-  .stk.copy-card{margin-top:-20px}
+  .stk.copy-card{margin-top:-26px}   /* >= the 22px radius at this width */
   .stk.copy-card{padding:30px 0 var(--stack-foot)}
   .copy-card .hero-grid{padding:0 18px; row-gap:24px}
-  .hero-devices .lineup{transform:scale(.62); transform-origin:center bottom; margin-bottom:-26px}
+  .hero-devices .lineup{zoom:.52}
 }
