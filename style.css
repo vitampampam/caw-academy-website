@@ -1072,14 +1072,27 @@ body{background:var(--bg)}
    the badges floating under a centred paragraph. */
 @media (min-width:561px) and (max-width:1024px){
   .copy-card .hero-grid{
-    grid-template-columns:minmax(0,1fr) minmax(0,40%);
-    column-gap:30px; row-gap:0; align-items:center; text-align:left;
+    grid-template-columns:minmax(0,1fr) minmax(0,44%);
+    column-gap:26px; row-gap:0; align-items:center; text-align:left;
   }
   .copy-card .hero-copy{text-align:left}
   .copy-card .lede{margin-left:0; margin-right:0; max-width:44ch}
   .copy-card .hero-apps{justify-content:flex-start}
   .hero-devices{justify-content:center}
-  .hero-devices .lineup{zoom:.62}
+  .hero-devices .lineup{zoom:.60}
+}
+/* The lineup is ~452px wide unscaled, so its zoom is bounded by how wide the
+   right column actually gets at the NARROWEST width in each band. Those widths
+   were MEASURED, not derived: the page carries body{zoom:.9} here, so the
+   column comes out smaller than the percentage suggests and a single value
+   sized for 1024 overflowed at 768 by 39px. Three bands, each sized to its own
+   floor: col 282 -> .60, col 341 -> .74, col 404 -> .88. */
+@media (min-width:768px) and (max-width:1024px){
+  .copy-card .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,48%); column-gap:24px}
+  .hero-devices .lineup{zoom:.74}
+}
+@media (min-width:900px) and (max-width:1024px){
+  .hero-devices .lineup{zoom:.88}
 }
 @media (max-width:560px){
   .banner-card img{aspect-ratio:1.5 / 1; object-position:center 54%}
