@@ -1023,9 +1023,15 @@ body{background:var(--bg)}
      height by trimming the sides — so the crop is biased RIGHT: the UK CAA
      binder is the reason this photograph exists, the mug at the left is not.
      Consequence to know: a taller copy column means a taller card means MORE
-     side trim. The two pull against each other. */
+     side trim. The two pull against each other.
+     82%, not 62%: the four binders span x 142-1440 of the 1448px master, which
+     is wider than this box can ever show, so the row MUST bleed off both edges.
+     What has to survive is the four LABELS — x 252 (EASA) to 1387 (UK CAA),
+     1135px against ~1156px of visible width. 82% puts the window at 239-1395:
+     both end labels whole with ~8px to spare, and the left bleed falls on the
+     MacBook's edge, which already bled off this frame at 62%. Do not lower it. */
   .banner-card img{width:100%; height:100%; aspect-ratio:auto;
-    object-fit:cover; object-position:62% 50%}
+    object-fit:cover; object-position:82% 50%}
 
   .stk.copy-card{margin:0; border-radius:0 var(--stack-radius) var(--stack-radius) 0;
     /* the foot must clear the lap of the card below (84px) or that card covers
