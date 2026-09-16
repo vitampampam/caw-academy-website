@@ -161,77 +161,6 @@ section{scroll-margin-top:calc(var(--nav-h) + 12px)}
 .platforms span{display:inline-flex; align-items:center; gap:7px}
 .platforms svg{width:16px; height:16px; opacity:.7}
 
-/* ---------- hero photograph ------------------------------------------------
-   A real <img> — never a background on a pseudo-element — so it can be
-   preloaded, sized with srcset, and given width/height against layout shift.
-
-   The rectangle is dissolved with a MASK, not a blur and not a solid-colour
-   overlay: the page background is a soft gradient, so an overlay in one flat
-   colour would show its own edge. Two gradients are intersected, one per
-   axis, which also rounds off the corners. --hero-fade is a variable so a
-   breakpoint can re-tune the fade without restating the mask longhands.
----------------------------------------------------------------------------- */
-.hero-media{position:relative; min-width:0}
-.hero-media picture{display:block}
-.hero-media img{
-  display:block; width:100%; height:auto;
-  aspect-ratio:4 / 3;              /* explicit box => no layout shift on load */
-  object-fit:cover;
-  object-position:62% 45%;         /* holds the laptop + the person in frame */
-
-  /* Feather lengths, in PIXELS on purpose. A percentage feather is a different
-     physical distance at every breakpoint — on a phone a 13% left fade ate a
-     third of the picture. Constant px means the edge is treated identically at
-     1440 and at 375, and no breakpoint has to re-tune it.
-
-     Asymmetric because the edges do different jobs: the left runs into the
-     copy and gets the longest dissolve; the bottom runs into open background;
-     the right and top only need enough to kill the rectangle. A long fade on
-     the right is actively wrong — the subject stands at that edge, and fading
-     a dark figure out over a pale ground smears her rather than blending. */
-  --fl:36px; --fr:18px; --ft:18px; --fb:30px;
-
-  /* The intermediate stops are a smoothstep curve. A plain two-stop gradient
-     ramps linearly, and the eye reads the point where the ramp starts as an
-     edge of its own — a faint band just inside the picture. These stops remove
-     that onset, which is the difference between "blended" and "hazy". */
-  --hero-fade:
-    linear-gradient(to right,
-      rgba(0,0,0,0) 0,
-      rgba(0,0,0,.16) calc(var(--fl) * .25),
-      rgba(0,0,0,.5)  calc(var(--fl) * .5),
-      rgba(0,0,0,.84) calc(var(--fl) * .75),
-      #000 var(--fl),
-      #000 calc(100% - var(--fr)),
-      rgba(0,0,0,.84) calc(100% - var(--fr) * .75),
-      rgba(0,0,0,.5)  calc(100% - var(--fr) * .5),
-      rgba(0,0,0,.16) calc(100% - var(--fr) * .25),
-      rgba(0,0,0,0) 100%),
-    linear-gradient(to bottom,
-      rgba(0,0,0,0) 0,
-      rgba(0,0,0,.16) calc(var(--ft) * .25),
-      rgba(0,0,0,.5)  calc(var(--ft) * .5),
-      rgba(0,0,0,.84) calc(var(--ft) * .75),
-      #000 var(--ft),
-      #000 calc(100% - var(--fb)),
-      rgba(0,0,0,.84) calc(100% - var(--fb) * .75),
-      rgba(0,0,0,.5)  calc(100% - var(--fb) * .5),
-      rgba(0,0,0,.16) calc(100% - var(--fb) * .25),
-      rgba(0,0,0,0) 100%);
-  -webkit-mask-image:var(--hero-fade);          mask-image:var(--hero-fade);
-  -webkit-mask-repeat:no-repeat;                mask-repeat:no-repeat;
-  -webkit-mask-size:100% 100%;                  mask-size:100% 100%;
-  -webkit-mask-composite:source-in;             mask-composite:intersect;
-}
-/* Older engines that can't intersect two mask layers keep the horizontal fade
-   only — still no hard left/right edge, just a square top and bottom. */
-@supports not ((mask-composite:intersect) or (-webkit-mask-composite:source-in)){
-  .hero-media img{
-    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0, #000 var(--fl), #000 calc(100% - var(--fr)), rgba(0,0,0,0) 100%);
-            mask-image:linear-gradient(to right, rgba(0,0,0,0) 0, #000 var(--fl), #000 calc(100% - var(--fr)), rgba(0,0,0,0) 100%);
-  }
-}
-
 /* the free-trial CTA: its own row under the composition, on the page column so
    it lines up with the stats/cards below (both are --maxw + 24px gutters) */
 .hero-bottom{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:16px 24px 10px}
@@ -1039,3 +968,69 @@ body{background:var(--bg)}
 }
 
 @media (prefers-reduced-motion:reduce){ .stk{transform:none !important} }
+
+/* ================= HERO: banner card + copy card ========================
+   Card 1 is the banner and nothing else; card 2 carries the title, the copy,
+   the store badges and the iPhone/iPad/MacBook lineup, and rides over it.
+   Replaces the masked single-photo hero (.hero-media), whose rules are removed
+   below.
+======================================================================== */
+
+.stk.banner-card{padding:0; overflow:hidden; background:none; border:0}
+.banner-card picture{display:block; line-height:0}
+.banner-card img{
+  display:block; width:100%; height:auto;
+  /* The master is the FULL 4:3 frame, so this is the ONE and only crop.
+     It used to be cropped to 2:1 in the file as well, and cover then cropped
+     that again — two crops compounding, which is why the desk looked zoomed
+     in and the devices came up oversized. With the whole frame behind it, the
+     full width of the scene shows and the devices sit at their true size. */
+  /* A slimmer band. The scene's SCALE is set by the card's width (the frame
+     fits across it), so the devices cannot be drawn smaller without letter-
+     boxing; what this changes is how much vertical room the banner takes —
+     575px at 1.85:1, 463px here — so it reads as a header strip rather than a
+     picture to be studied. 48% keeps the laptop lid and all four binder
+     spines inside the band. */
+  /* Measured, not guessed. At the card's width the photo scales to 840px tall
+     and its content — laptop lid down to the binder spines — occupies rows
+     ~190-880, about 82% of it. The band must clear that PLUS whatever card 2
+     laps over the bottom, so the two numbers are one decision:
+        2.3:1 + 60px lap -> rows 219-771  = spines gone
+        2.0:1 + 24px lap -> rows 188-881  = all four spines intact
+     Which is why the lap below is 24px and not the stack's usual 60. */
+  aspect-ratio:2 / 1;
+  object-fit:cover; object-position:center 52%;
+}
+
+.stk.copy-card{padding:44px 0 var(--stack-foot)}
+/* two classes, so it beats .stk.lap's -60px; see the note on the banner above */
+.stk.copy-card{margin-top:-24px}
+.copy-card .hero{padding:0; overflow:visible}
+.copy-card .hero::before, .copy-card .hero::after{display:none}
+.copy-card .hero-grid{
+  grid-template-columns:minmax(0,1fr) minmax(0,520px);
+  column-gap:48px; align-items:center;
+  max-width:var(--maxw); margin:0 auto; padding:0 24px;
+}
+.copy-card h1{margin-top:0}
+
+.hero-devices{min-width:0; display:flex; justify-content:center; align-items:flex-end}
+.hero-devices .lineup{transform:scale(.92); transform-origin:center bottom}
+.hero-devices .dlabel{bottom:-26px}
+
+@media (max-width:1024px){
+  .copy-card .hero-grid{grid-template-columns:minmax(0,1fr); row-gap:30px; text-align:center}
+  .copy-card .hero-copy{text-align:center}
+  .copy-card .lede{margin-left:auto; margin-right:auto}
+  .copy-card .hero-apps{justify-content:center}
+  .hero-devices .lineup{transform:scale(.88)}
+}
+@media (max-width:560px){
+  /* a phone is ~340px wide, so a 2:1 slice of this scene keeps almost none of
+     it — the band goes taller here rather than wider */
+  .banner-card img{aspect-ratio:1.5 / 1; object-position:center 54%}
+  .stk.copy-card{margin-top:-20px}
+  .stk.copy-card{padding:30px 0 var(--stack-foot)}
+  .copy-card .hero-grid{padding:0 18px; row-gap:24px}
+  .hero-devices .lineup{transform:scale(.62); transform-origin:center bottom; margin-bottom:-26px}
+}

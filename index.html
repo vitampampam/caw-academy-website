@@ -94,10 +94,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
-<link rel="preload" as="image" href="screens/hero-office-1100.webp"
-      imagesrcset="screens/hero-office-768.webp 768w, screens/hero-office-1100.webp 1100w, screens/hero-office-1536.webp 1536w"
-      imagesizes="(min-width:1025px) 560px, (min-width:561px) 74vw, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=66">
+<link rel="preload" as="image" href="screens/hero-welcome-1100.webp"
+      imagesrcset="screens/hero-welcome-768.webp 768w, screens/hero-welcome-1100.webp 1100w, screens/hero-welcome-1448.webp 1448w"
+      imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
+<link rel="stylesheet" href="style.css?v=67">
 <link rel="stylesheet" href="caw-interactive.css?v=26">
 </head>
 <body>
@@ -112,16 +112,30 @@
 </nav>
 
 <!-- ============================ HERO ============================ -->
-<div class="stk tone-a stk-first intro-card">
-<header class="hero">
-  <div class="hero-grid">
+<!-- CARD 1 — the banner, nothing else: flush to the top of the card, which
+     clips it to its own rounded corners -->
+<div class="stk stk-first banner-card">
+  <picture>
+    <source type="image/webp"
+            srcset="screens/hero-welcome-768.webp 768w, screens/hero-welcome-1100.webp 1100w, screens/hero-welcome-1448.webp 1448w"
+            sizes="(min-width:1025px) 1064px, 100vw">
+    <img src="screens/hero-welcome-1100.jpg"
+         srcset="screens/hero-welcome-768.jpg 768w, screens/hero-welcome-1100.jpg 1100w, screens/hero-welcome-1448.jpg 1448w"
+         sizes="(min-width:1025px) 1064px, 100vw"
+         width="1448" height="1086"
+         alt="A desk with CAW Academy open on a MacBook and an iPad, four regulatory binders labelled EASA, FAA, GCAA and UK CAA, and an airport apron through the window"
+         fetchpriority="high" decoding="async">
+  </picture>
+</div><!-- /banner card -->
 
-    <div class="hero-copy">
-      <h1>Airworthiness made <em>learnable</em></h1>
-      <p class="lede">Plain-language airworthiness training across the EASA, UK CAA, UAE GCAA and FAA frameworks &mdash; built for teams, from beginners to industry leaders.</p>
-
-      <!-- store badges: under the copy on desktop, under the paragraph when stacked -->
-      <div class="hero-apps">
+<!-- CARD 2 — the title, the copy and the device lineup, riding over the banner -->
+<div class="stk tone-a lap copy-card">
+  <header class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Airworthiness made <em>learnable</em></h1>
+        <p class="lede">Plain-language airworthiness training across the EASA, UK CAA, UAE GCAA and FAA frameworks &mdash; built for teams, from beginners to industry leaders.</p>
+        <div class="hero-apps">
         <a class="store-badge" id="appstore" href="#" aria-disabled="true" aria-label="App Store — coming soon">
           <svg class="logo" viewBox="0 0 24 24" fill="#fff"><path d="M16.4 1.6c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.8-.8 2-1.4 2.8-1.4zM19 17c-.5 1.1-.8 1.6-1.4 2.6-.9 1.3-2.1 3-3.6 3-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.5.9c-1.5 0-2.6-1.5-3.5-2.9C1.5 16.5 1.2 12 2.7 9.7 3.8 8 5.5 7 7.1 7c1.3 0 2.2.9 3.4.9 1.1 0 1.8-.9 3.4-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.8 1.2 7.9z"/></svg>
           <span class="tx"><small>Coming soon on the</small><b>App Store</b></span>
@@ -131,29 +145,90 @@
           <span class="tx"><small>Coming soon on</small><b>Google Play</b></span>
         </a>
       </div>
+      </div>
+      <div class="hero-devices">
+<div class="lineup">
+      <div class="dev iphone" tabindex="0" aria-label="CAW Academy on iPhone">
+        <div class="pscale" style="--s:.28">
+        <div class="phone" aria-hidden="true">
+          <img class="shot" src="screens/hero-iphone.png" alt="CAW Academy home screen on iPhone"
+               onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
+          <div class="scr">
+            <div class="island"></div>
+            <div class="sb"><span>11:34</span><span class="rt"><svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4C5.5 2.4 3.3 3.3 1.7 5l1.1 1.1C4.1 4.8 5.9 4 8 4s3.9.8 5.2 2.1L14.3 5C12.7 3.3 10.5 2.4 8 2.4zM8 6c-1.3 0-2.6.5-3.5 1.5l1.1 1.1C6.4 7.9 7.1 7.5 8 7.5s1.6.4 2.4 1.1l1.1-1.1C10.6 6.5 9.3 6 8 6zm0 3.3l1.5 1.5L8 12l-1.5-1.2z"/></svg><span class="bat"></span></span></div>
+            <div class="nbar">
+              <span class="title">CAW Academy</span>
+              <span class="tools">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 0-2 2z"/><path d="M9 8h6"/></svg>
+              </span>
+            </div>
+            <div class="body">
+              <div class="hb">
+                <div class="t">Airworthiness &amp; Technical Asset Management</div>
+                <div class="s">Airworthiness, maintenance economics &amp; technical asset value — expert lessons, flashcards and assessments.</div>
+              </div>
+              <div class="cc">
+                <div class="k">CONTINUE</div>
+                <div class="v">Findings</div>
+                <div class="r"><span>Part-M · M.A.619</span><span class="res">Resume <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+              </div>
+              <div class="pc">
+                <div class="ring" style="--pct:60%"><i>60%</i></div>
+                <div class="px"><div class="k">CURRENT COURSE</div><b>Part-M</b><small>37 of 62 lessons read</small></div>
+              </div>
+              <div class="slab">Regulatory</div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 3.5 3.5 5.4A1 1 0 0 0 3 6.3v13.2a.6.6 0 0 0 .8.6L9 18.5l6 2 5.2-1.9a1 1 0 0 0 .8-1V4.6a.6.6 0 0 0-.8-.6L15 5.5l-6-2z"/></svg></div>
+                  <div class="nm"><b>Airline Operating Framework</b><small>The operating framework &amp; CAW foundations</small></div>
+                  <span class="seal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.5 1.9 3.1.1 1 2.9 2.5 1.8-1 2.9 1 2.9-2.5 1.8-1 2.9-3.1.1L12 23l-2.5-1.8-3.1-.1-1-2.9L2.9 16.4l1-2.9-1-2.9L5.4 8.8l1-2.9 3.1-.1z"/><path d="M10.4 14.7l-2.1-2.1-1.3 1.3 3.4 3.4 5.7-5.7-1.3-1.3z" fill="#fff"/></svg></span>
+                </div>
+                <div class="meta"><span class="pill">18 LESSONS</span><span class="rd">18/18 read</span></div>
+                <div class="bar"><i style="width:100%"></i></div>
+              </div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5v-1.8l-8-4.9V3.4a1.4 1.4 0 0 0-2.8 0v5.4l-8 4.9v1.8l8-2.4v4.9l-2 1.4v1.4l3.4-.9 3.4.9v-1.4l-2-1.4v-4.9z"/></svg></div>
+                  <div class="nm"><b>Part-M</b><small>Continuing airworthiness requirements</small></div>
+                  <span class="seal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.5 1.9 3.1.1 1 2.9 2.5 1.8-1 2.9 1 2.9-2.5 1.8-1 2.9-3.1.1L12 23l-2.5-1.8-3.1-.1-1-2.9L2.9 16.4l1-2.9-1-2.9L5.4 8.8l1-2.9 3.1-.1z"/><path d="M10.4 14.7l-2.1-2.1-1.3 1.3 3.4 3.4 5.7-5.7-1.3-1.3z" fill="#fff"/></svg></span>
+                </div>
+                <div class="meta"><span class="pill">62 LESSONS</span><span class="rd">37/62 read</span></div>
+                <div class="bar"><i style="width:60%"></i></div>
+              </div>
+              <div class="crd">
+                <div class="top">
+                  <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V7l9-4 9 4v14h-6v-5h-6v5z"/></svg></div>
+                  <div class="nm"><b>Part-CAMO</b><small>Airworthiness management</small></div>
+                </div>
+                <div class="meta"><span class="pill">23 LESSONS</span><span class="rd">0/23 read</span></div>
+                <div class="bar"><i style="width:0%"></i></div>
+              </div>
+            </div>
+            <div class="tabs">
+              <div class="tab on"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 3 10v11h6v-6h6v6h6V10z"/></svg></div>Home</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a1 1 0 0 1 1 1v19l-7-4-7 4V3a1 1 0 0 1 1-1z"/></svg></div>Saved</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="11" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="14" rx="1"/><rect x="17" y="9" width="4" height="11" rx="1"/></svg></div>Stats</div>
+              <div class="tab"><div class="ti"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4.2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg></div>Profile</div>
+            </div>
+          </div>
+        </div>
+        </div>
+        <span class="dlabel">iPhone</span>
+      </div>
+      <div class="dev ipad" aria-hidden="true" tabindex="0" aria-label="CAW Academy on iPad">
+        <div class="ipad-bz"><img src="screens/hero-ipad.png" alt="CAW Academy on iPad" loading="lazy"></div>
+        <span class="dlabel">iPad</span>
+      </div>
+      <div class="dev mac" aria-hidden="true" tabindex="0" aria-label="CAW Academy on Mac">
+        <div class="macbook"><div class="lid"><img src="screens/hero-mac.png" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
+        <span class="dlabel">MacBook</span>
+      </div>
+      </div>
+      </div>
     </div>
-
-    <!-- hero photograph: a real <img>, edge-faded into the page with a CSS mask
-         (see .hero-media in style.css). The pseudo-elements there are the fade
-         only — they never carry the photograph itself. -->
-    <div class="hero-media">
-      <picture>
-        <source type="image/webp"
-                srcset="screens/hero-office-768.webp 768w, screens/hero-office-1100.webp 1100w, screens/hero-office-1536.webp 1536w"
-                sizes="(min-width:1025px) 560px, (min-width:561px) 74vw, 100vw">
-        <img src="screens/hero-office-1100.jpg"
-             srcset="screens/hero-office-768.jpg 768w, screens/hero-office-1100.jpg 1100w, screens/hero-office-1536.jpg 1536w"
-             sizes="(min-width:1025px) 560px, (min-width:561px) 74vw, 100vw"
-             width="1536" height="1024"
-             alt="An airworthiness professional studying CAW Academy at a desk, with the course dashboard open on a laptop and an iPad beside it"
-             fetchpriority="high" decoding="async">
-      </picture>
-    </div>
-
-  </div>
-
-</header>
-</div><!-- /intro card -->
+  </header>
+</div><!-- /copy card -->
 
 <div class="stk tone-b lap proof-card">
 <div class="ribbon">
