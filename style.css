@@ -1039,13 +1039,13 @@ body{background:var(--bg)}
      sides: cover shows exactly (source height x box aspect) pixels of width,
      so trimming the master's left edge gains nothing at all. The 4:3 master
      shows ~79-82% of its width here.
-     10%: the aircraft fills the frame nose to wingtip, so something must go,
+     14%: the aircraft fills the frame nose to wingtip, so something must go,
      and it is the tail end rather than the NOSE — the nose is the subject and
      a sliced nose reads as a mistake, while an engine running off the right
      edge reads as an aeroplane too big for the picture, which is the point.
-     The nose tip sits at x 55 and clears by 24-29px at every desktop size. */
+     The nose tip sits at x 90 and clears by 47-54px at every desktop size. */
   .banner-card img{width:100%; height:100%; aspect-ratio:auto;
-    object-fit:cover; object-position:10% 50%}
+    object-fit:cover; object-position:14% 50%}
 
   .stk.copy-card{margin:0; border-radius:0 var(--stack-radius) var(--stack-radius) 0;
     /* the foot must clear the lap of the card below (84px) or that card covers
@@ -1116,7 +1116,7 @@ body{background:var(--bg)}
 }
 @media (max-width:560px){
   /* 1.5:1 costs only 11% of the height, so the phone keeps both the sky and
-     the gear. 75%, not 55%: this frame leaves just 66px of tarmac below the
+     the gear. 75%, not 55%: this frame leaves just 68px of tarmac below the
      chock, so the crop has to sit low or the wheels go. */
   .banner-card img{aspect-ratio:1.5 / 1; object-position:center 75%}
   .stk.copy-card{margin-top:-26px}   /* >= the 22px radius at this width */
