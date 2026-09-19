@@ -46,6 +46,22 @@
     return;
   }
 
+  // 28-Jun-2026 — written out rather than left to toLocaleDateString(), which
+  // gives 28/06/2026 here and 6/28/2026 to an American scanner. A date on a
+  // certificate must not be ambiguous about which number is the month.
+  // The clock stays LOCAL, as the printed certificate's own date is (it is
+  // rendered by DateFormatter on the holder's device), so a scanner standing
+  // beside the holder reads back the date printed in front of them.
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function formatDate(value) {
+    if (!value) return "—";        // new Date(null) is the epoch, not an error
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return "—";
+    var day = d.getDate();
+    return (day < 10 ? "0" + day : String(day)) + "-" + MONTHS[d.getMonth()] + "-" + d.getFullYear();
+  }
+
   // Renders a labelled detail row into the result box.
   function addRow(el, label, value) {
     var row = document.createElement("div");
@@ -84,7 +100,7 @@
           addRow(el, "Name", data.holderName || "—");
           addRow(el, "Course", data.courseTitle || "—");
           addRow(el, "Certificate No.", data.number || "—");
-          addRow(el, "Issued", data.issuedAt ? new Date(data.issuedAt).toLocaleDateString() : "—");
+          addRow(el, "Issued", data.issuedAt ? formatDate(data.issuedAt) : "—");
           if (typeof data.examScore === "number") addRow(el, "Exam score", data.examScore + "%");
         });
       })

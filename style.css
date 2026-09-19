@@ -473,6 +473,13 @@ footer .foot-links a:first-child{margin-left:0}
   .foot-center{text-align:left}          /* disclaimer left-aligned … */
   .foot-center .foot-nav{justify-content:center}   /* … but keep the links centred */
   .foot-center .disclaim{margin:0; max-width:none}
+  /* … EXCEPT where the disclaimer is a single short line. The rule above is for
+     the long "independent study aid, not affiliated with EASA …" paragraph that
+     most pages carry: several lines of ragged centred text is hard to read, so
+     it goes left. A bare "© 2026 CAW Academy." is not that — one short line,
+     left-aligned under centred links, reads as a mistake. Verify and reset use
+     it; add `short` to any other one-line footer. */
+  .foot-center .disclaim.short{text-align:center}
 }
 
 /* lightbox (tap a gallery screen to enlarge) */
