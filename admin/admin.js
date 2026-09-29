@@ -1011,44 +1011,144 @@
      to exist only as a comma-joined line inside a member card, which cannot be
      searched and does not carry the number anybody would be asked for. */
   var certFilter = "";
+  // Which holders / courses are open. Keyed so the state survives a roster reload —
+  // an admin who opened someone to read a number should not have it shut under them
+  // when the page refreshes.
+  var certOpenHolder = {};   // userId -> true
+  var certOpenCourse = {};   // userId + "|" + courseKey -> true
+
+  function disclosure(open) {
+    var c = document.createElement("span"); c.className = "ms-chev";
+    c.textContent = open ? "▾" : "▸";
+    return c;
+  }
+
   function renderCertificates(members) {
     var host = $("certs"); if (!host) return;
     host.textContent = "";
-    var rows = [];
+
+    // Gather per holder, then per course. A course can hold a SERIES — a learner who
+    // resets their progress and completes it again earns another certificate, with
+    // its own number and date, and both stay valid — so the second level is a real
+    // grouping, not decoration.
+    var holders = [];
     members.forEach(function (m) {
-      (m.certificates || []).forEach(function (c) { rows.push({ m: m, c: c }); });
+      var list = (m.certificates || []).slice();
+      if (!list.length) return;
+      list.sort(function (x, y) { return String(y.issuedAt).localeCompare(String(x.issuedAt)); });
+      var byCourse = {}, order = [];
+      list.forEach(function (c) {
+        if (!byCourse[c.courseKey]) { byCourse[c.courseKey] = []; order.push(c.courseKey); }
+        byCourse[c.courseKey].push(c);
+      });
+      holders.push({
+        m: m,
+        total: list.length,
+        newest: list[0].issuedAt,
+        courses: order.map(function (k) { return { courseKey: k, items: byCourse[k] }; })
+      });
     });
-    rows.sort(function (x, y) { return String(y.c.issuedAt).localeCompare(String(x.c.issuedAt)); });
+    holders.sort(function (a, b) { return String(b.newest).localeCompare(String(a.newest)); });
+
+    var total = holders.reduce(function (n, h) { return n + h.total; }, 0);
     var q = certFilter.trim().toLowerCase();
-    var shown = !q ? rows : rows.filter(function (r) {
-      return (fullName(r.m) + " " + r.m.email + " " + labelFor(r.c.courseKey) + " " + (r.c.number || ""))
-        .toLowerCase().indexOf(q) !== -1;
-    });
-    $("certCount").textContent = rows.length
-      ? (q ? shown.length + " of " + rows.length : String(rows.length)) + (rows.length === 1 && !q ? " certificate" : " certificates")
+    function matches(h, course) {
+      if (!q) return true;
+      var hay = fullName(h.m) + " " + h.m.email + " " + labelFor(course.courseKey) + " " +
+                course.items.map(function (c) { return c.number || ""; }).join(" ");
+      return hay.toLowerCase().indexOf(q) !== -1;
+    }
+
+    var shownHolders = holders
+      .map(function (h) {
+        var courses = h.courses.filter(function (c) { return matches(h, c); });
+        return courses.length ? { m: h.m, courses: courses, total: courses.reduce(function (n, c) { return n + c.items.length; }, 0) } : null;
+      })
+      .filter(Boolean);
+
+    var shownCount = shownHolders.reduce(function (n, h) { return n + h.total; }, 0);
+    $("certCount").textContent = total
+      ? (q ? shownCount + " of " + total : total + " certificate" + (total === 1 ? "" : "s"))
       : "";
-    if (!shown.length) {
+
+    if (!shownHolders.length) {
       var e = document.createElement("div"); e.className = "empty";
-      e.textContent = rows.length
+      e.textContent = total
         ? "No certificate matches that."
         : "No certificates yet. One is issued when a member finishes every lesson in a course and passes its assessment.";
       host.appendChild(e);
       return;
     }
-    shown.forEach(function (r) {
-      var row = document.createElement("div"); row.className = "frow";
-      var who = document.createElement("div"); who.className = "who";
-      who.appendChild(document.createTextNode(fullName(r.m)));
-      var sub = document.createElement("small");
-      sub.textContent = labelFor(r.c.courseKey) + (r.c.examScore != null ? "  ·  assessment " + r.c.examScore + "%" : "");
-      who.appendChild(sub);
-      row.appendChild(who);
-      var num = document.createElement("span"); num.className = "num"; num.textContent = r.c.number || "—";
-      row.appendChild(num);
-      var when = document.createElement("span"); when.className = "when";
-      when.textContent = fmtDate(r.c.issuedAt);
-      row.appendChild(when);
-      host.appendChild(row);
+
+    shownHolders.forEach(function (h) {
+      // A filter forces the matching groups open — the same rule the course picker
+      // uses. Searching for something and being shown a closed box is a dead end.
+      var holderOpen = q ? true : !!certOpenHolder[h.m.userId];
+
+      var head = document.createElement("button");
+      head.type = "button"; head.className = "cgroup";
+      head.setAttribute("aria-expanded", holderOpen ? "true" : "false");
+      head.appendChild(disclosure(holderOpen));
+      var nm = document.createElement("span"); nm.className = "cg-name"; nm.textContent = fullName(h.m);
+      var em = document.createElement("span"); em.className = "cg-sub"; em.textContent = h.m.email;
+      var ct = document.createElement("span"); ct.className = "cg-count";
+      ct.textContent = h.total + " certificate" + (h.total === 1 ? "" : "s");
+      head.appendChild(nm); head.appendChild(em); head.appendChild(ct);
+      head.addEventListener("click", function () {
+        if (certOpenHolder[h.m.userId]) delete certOpenHolder[h.m.userId];
+        else certOpenHolder[h.m.userId] = true;
+        renderCertificates(lastRoster);
+      });
+      host.appendChild(head);
+      if (!holderOpen) return;
+
+      h.courses.forEach(function (c) {
+        var key = h.m.userId + "|" + c.courseKey;
+        var courseOpen = q ? true : !!certOpenCourse[key];
+        var one = c.items.length === 1 ? c.items[0] : null;
+
+        var sub = document.createElement("button");
+        sub.type = "button"; sub.className = "csub";
+        sub.setAttribute("aria-expanded", courseOpen ? "true" : "false");
+        sub.appendChild(disclosure(courseOpen));
+        var cn = document.createElement("span"); cn.className = "cg-name"; cn.textContent = labelFor(c.courseKey);
+        sub.appendChild(cn);
+        // A course with ONE certificate carries its number and date on the row
+        // itself: the number is the thing somebody came here for, and hiding it
+        // behind a second click to keep the shape uniform trades the content for
+        // the container. A SERIES shows how many instead.
+        if (one) {
+          var n1 = document.createElement("span"); n1.className = "num"; n1.textContent = one.number || "—";
+          var d1 = document.createElement("span"); d1.className = "when"; d1.textContent = fmtDate(one.issuedAt);
+          sub.appendChild(n1); sub.appendChild(d1);
+        } else {
+          var many = document.createElement("span"); many.className = "cg-count";
+          many.textContent = c.items.length + " issued";
+          sub.appendChild(many);
+        }
+        sub.addEventListener("click", function () {
+          if (certOpenCourse[key]) delete certOpenCourse[key];
+          else certOpenCourse[key] = true;
+          renderCertificates(lastRoster);
+        });
+        host.appendChild(sub);
+        if (!courseOpen) return;
+
+        c.items.forEach(function (cert) {
+          var row = document.createElement("div"); row.className = "frow cert-row";
+          var who = document.createElement("div"); who.className = "who";
+          who.appendChild(document.createTextNode(labelFor(c.courseKey)));
+          var s2 = document.createElement("small");
+          s2.textContent = cert.examScore != null ? "assessment " + cert.examScore + "%" : "no assessment score recorded";
+          who.appendChild(s2);
+          row.appendChild(who);
+          var num = document.createElement("span"); num.className = "num"; num.textContent = cert.number || "—";
+          row.appendChild(num);
+          var when = document.createElement("span"); when.className = "when"; when.textContent = fmtDate(cert.issuedAt);
+          row.appendChild(when);
+          host.appendChild(row);
+        });
+      });
     });
   }
 

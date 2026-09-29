@@ -206,6 +206,29 @@
   .frow .when{color:var(--muted); font-size:13px; white-space:nowrap; margin-left:auto}
   .frow .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; color:var(--ink-soft); white-space:nowrap}
 
+  /* Certificates are two levels deep, both closed to start: HOLDER, then COURSE.
+     The second level is not decoration — a course can hold a SERIES, because a
+     learner who resets their progress and earns it again gets another certificate
+     with its own number, and both stay valid for ever. */
+  .cgroup, .csub{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    font:inherit; cursor:pointer; border:0; border-top:1px solid var(--line); background:none;
+    padding:10px 4px; color:var(--ink)}
+  .cgroup:first-child{border-top:0}
+  .cgroup:hover, .csub:hover{background:var(--indigo-soft)}
+  .cgroup .cg-name{font-weight:700; font-size:15px}
+  .csub{padding-left:26px; border-top:1px dashed var(--line)}
+  .csub .cg-name{font-weight:600; font-size:14px; color:var(--ink-soft)}
+  .cg-sub{color:var(--muted); font-size:12.5px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .cg-count{margin-left:auto; font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap}
+  .csub .num{margin-left:auto}
+  .csub .when{margin-left:0}
+  /* A certificate itself sits deepest, indented under its course. */
+  .cert-row{padding-left:48px; border-top:1px dashed var(--line)}
+  @media (max-width:560px){
+    .cgroup .cg-sub{display:none}          /* the name is enough on a phone */
+    .csub{padding-left:18px} .cert-row{padding-left:28px}
+  }
+
   /* Roster
      Read top-down: the team's totals, a filter, then a card per member sorted by
      what needs attention. The cards carried all of this before, one member at a
@@ -548,6 +571,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=6" defer></script>
+<script src="admin.js?v=7" defer></script>
 </body>
 </html>
