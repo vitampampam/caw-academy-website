@@ -179,6 +179,33 @@
   /* Phones: stack every field + the button, each full width. */
   @media (max-width:560px){ .assign-foot{grid-template-columns:1fr} .assign-foot .btn{width:100%} }
 
+  /* A caption that tells someone what to DO is a list of steps, not a paragraph —
+     three short lines they can follow with their eyes while their hands are on the
+     form. Prose captions on this page ran to four lines and were skipped. */
+  .steps{margin:0 0 12px; padding-left:20px; color:var(--ink-soft); font-size:14px; line-height:1.55}
+  .steps li{margin:2px 0}
+  .steps li b{color:var(--ink)}
+  /* A group heading INSIDE a card: quieter than the card's own h2, so Overview can
+     hold two subjects without reading as two cards jammed together. */
+  .grouphead{margin:6px 0 8px; font-size:11.5px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--muted)}
+  .grouphead + .rsum{margin-top:0}
+  /* The one-line licence fact in the page header — seats and renewal date, where
+     the eye already is, so the number is seen without scrolling to find it. */
+  .strap{margin-top:6px; font-size:13px; color:var(--ink-soft)}
+  .strap b{color:var(--ink)}
+  .strap .warn{color:#B25E00; font-weight:700}
+  .strap .alert{color:var(--err); font-weight:700}
+
+  /* Needs attention + Certificates: flat rows, because both are RECORDS to scan
+     rather than objects to act on one at a time. */
+  .frow{display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--line); flex-wrap:wrap}
+  .frow:first-child{border-top:0}
+  .frow .who{font-weight:600; flex:1 1 200px; min-width:0}
+  .frow .who small{display:block; color:var(--muted); font-weight:400; font-size:12px}
+  .frow .when{color:var(--muted); font-size:13px; white-space:nowrap; margin-left:auto}
+  .frow .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; color:var(--ink-soft); white-space:nowrap}
+
   /* Roster
      Read top-down: the team's totals, a filter, then a card per member sorted by
      what needs attention. The cards carried all of this before, one member at a
@@ -378,25 +405,53 @@
       <div>
         <h2 style="margin:0" id="orgName">Your organisation</h2>
         <div class="member-email" id="orgDomains"></div>
+        <div class="strap" id="orgStrap"></div>
       </div>
       <button class="btn btn-ghost" id="signOutBtn">Sign out</button>
     </div>
   </div>
 
-  <div class="card" id="licenceCard">
+  <!-- OVERVIEW — the dashboard half of the page: the two questions an admin opens
+       this page with, side by side, before any control is offered. Training state
+       came from the roster and licence state from the licence endpoint; they used
+       to be two stat strips in two cards halfway down the page. -->
+  <div class="card">
     <div class="member-head" style="margin-bottom:6px">
-      <h2 style="margin:0">Licence &amp; seats</h2>
-      <button class="btn btn-ghost" id="licenceReload">Reload</button>
+      <h2 style="margin:0">Overview</h2>
+      <button class="btn btn-ghost" id="overviewReload">Reload</button>
     </div>
-    <p class="sub" style="margin-bottom:4px">What your organisation holds, and how much of it is in use. A seat is claimed when someone redeems their code in the app.</p>
-    <div id="licenceSummary" class="rsum"></div>
-    <div id="licenceDetail"></div>
+
+    <h3 class="grouphead">Training</h3>
+    <div id="overviewTraining" class="rsum"></div>
+
+    <div id="licenceCard">
+      <h3 class="grouphead">Licence &amp; seats</h3>
+      <div id="overviewLicence" class="rsum"></div>
+      <div id="licenceDetail"></div>
+    </div>
     <div id="licenceMsg"></div>
+  </div>
+
+  <!-- NEEDS ATTENTION — the control-centre core: everything late or nearly late,
+       across the whole team, worst first. Reading it off the roster meant opening
+       each member in turn and holding the result in your head. -->
+  <div class="card" id="attentionCard">
+    <div class="member-head" style="margin-bottom:6px">
+      <h2 style="margin:0">Needs attention</h2>
+      <span class="ms-count" id="attentionCount"></span>
+    </div>
+    <p class="sub" style="margin-bottom:4px">Overdue first, then anything due within three days.</p>
+    <div id="attention"></div>
   </div>
 
   <div class="card">
     <h2>Assign courses</h2>
-    <p class="sub">Pick one or more members and one or more courses, then assign. Courses are scheduled in catalogue order: the first is due on the date you set, and each one after it falls due the chosen number of months later — set that to 0 to give them all the same deadline. The order is a soft “next due” hint; nothing is locked for the learner.</p>
+    <ol class="steps">
+      <li>Tick the members, then the courses.</li>
+      <li>Set when the <b>first</b> course is due.</li>
+      <li>Choose the months between courses — <b>0</b> gives them all one deadline.</li>
+    </ol>
+    <p class="sub">Courses are scheduled in catalogue order. The order is a soft “next due” hint; nothing is locked for the learner.</p>
     <form id="assignForm">
       <div class="ms-grid">
         <div>
@@ -449,18 +504,35 @@
       <h2 style="margin:0">Team roster</h2>
       <button class="btn btn-ghost" id="reloadBtn">Reload</button>
     </div>
-    <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Anyone with something overdue or due soon is listed first.</p>
-    <div id="rosterSummary" class="rsum"></div>
+    <p class="sub" style="margin-bottom:4px">Anyone with something overdue or due soon is listed first.</p>
     <div id="rosterFilters" class="rfilters"></div>
     <div id="roster"></div>
   </div>
 
+  <!-- CERTIFICATES — the team's durable completion record. It existed only as a
+       comma-joined line inside each member's card, which is unreadable as a record
+       and impossible to search. -->
   <div class="card">
     <div class="member-head" style="margin-bottom:6px">
-      <h2 style="margin:0">Your signed-in devices</h2>
+      <h2 style="margin:0">Certificates</h2>
+      <span class="ms-count" id="certCount"></span>
+    </div>
+    <p class="sub" style="margin-bottom:8px">Every certificate issued to your team, newest first. Anyone can check one at <a href="../verify.html" target="_blank" rel="noopener">caw-academy.com/verify</a> using its number and the holder's name.</p>
+    <input class="ms-search" id="certSearch" placeholder="Filter by name or course…" autocomplete="off" style="max-width:340px;margin-bottom:6px">
+    <div id="certs"></div>
+  </div>
+
+  <!-- YOUR ACCOUNT — about the admin, not the team, so it sits last and says so. -->
+  <div class="card">
+    <div class="member-head" style="margin-bottom:6px">
+      <h2 style="margin:0">Your account</h2>
       <button class="btn btn-ghost" id="devicesReload">Reload</button>
     </div>
-    <p class="sub" style="margin-bottom:4px">Native app sessions signed in on <b>your</b> account (this admin portal is not counted toward the device limit). Sign out any you no longer use to free a device slot.</p>
+    <ul class="steps">
+      <li>These are the app sessions signed in on <b>your</b> account.</li>
+      <li>This portal does not count toward your device limit.</li>
+      <li>Sign one out to free a slot.</li>
+    </ul>
     <div id="devicesMsg"></div>
     <div id="devices"></div>
   </div>
@@ -476,6 +548,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=5" defer></script>
+<script src="admin.js?v=6" defer></script>
 </body>
 </html>

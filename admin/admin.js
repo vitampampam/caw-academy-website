@@ -268,13 +268,13 @@
      unredeemed code is a credential, and re-sending one belongs in an invite over
      email, not on a page anyone can read over a shoulder. */
   function loadLicence() {
-    var host = $("licenceSummary");
+    var host = $("overviewLicence");
     if (host && !host.children.length) host.textContent = "Loading…";
     return authed("GET", "/v1/org/license", null).then(function (data) {
       var card = $("licenceCard"); if (card) card.classList.remove("hidden");
       renderLicence(data);
     }).catch(function (err) {
-      $("licenceSummary").textContent = "";
+      $("overviewLicence").textContent = "";
       $("licenceDetail").textContent = "";
       /* A 404 means the API this page is talking to predates the endpoint — the
          panel is newer than the server it landed on, which happens whenever the
@@ -300,12 +300,32 @@
     return t;
   }
 
+  /* Seats and renewal date in the page header, where the eye lands first. The
+     Overview tiles carry the detail; this is the one line an admin would otherwise
+     scroll to find. */
+  function renderStrap(t) {
+    var el = $("orgStrap"); if (!el) return;
+    el.textContent = "";
+    if (!t || !t.seatLimit) return;
+    var seats = document.createElement("b");
+    seats.textContent = t.claimed + " of " + t.seatLimit + " seats in use";
+    el.appendChild(seats);
+    if (t.validUntil) {
+      el.appendChild(document.createTextNode("  ·  renews "));
+      var when = document.createElement("span");
+      when.className = t.daysRemaining <= 30 ? "alert" : t.daysRemaining <= 90 ? "warn" : "";
+      when.textContent = fmtDate(t.validUntil) + " (" + t.daysRemaining + " days)";
+      el.appendChild(when);
+    }
+  }
+
   function renderLicence(data) {
     showMessage("licenceMsg", "", "ok");
-    var host = $("licenceSummary"); host.textContent = "";
+    var host = $("overviewLicence"); host.textContent = "";
     var detail = $("licenceDetail"); detail.textContent = "";
     var t = (data && data.totals) || {};
     var rows = (data && data.licenses) || [];
+    renderStrap(t);
     if (!rows.length) {
       var e = document.createElement("div"); e.className = "empty";
       e.textContent = "No live licence found for your organisation.";
@@ -895,7 +915,7 @@
   }
 
   function renderRosterSummary(members) {
-    var host = $("rosterSummary"); if (!host) return;
+    var host = $("overviewTraining"); if (!host) return;
     host.textContent = "";
     var t = { overdue: 0, dueSoon: 0, done: 0, assigned: 0 };
     members.forEach(function (m) {
@@ -948,10 +968,96 @@
     });
   }
 
+  /* Everything late or nearly late, across the whole team, worst first. The same
+     facts the member cards carry — but gathering them meant opening every card and
+     remembering the result, which is the job this page should be doing. */
+  function renderAttention(members) {
+    var host = $("attention"); if (!host) return;
+    host.textContent = "";
+    var rows = [];
+    members.forEach(function (m) {
+      (m.assignments || []).forEach(function (a) {
+        if (a.displayStatus === "overdue" || a.displayStatus === "due_soon") rows.push({ m: m, a: a });
+      });
+    });
+    // Most overdue first; within the same state, the nearest deadline.
+    rows.sort(function (x, y) { return x.a.daysRemaining - y.a.daysRemaining; });
+    $("attentionCount").textContent = rows.length ? rows.length + " item" + (rows.length === 1 ? "" : "s") : "";
+    if (!rows.length) {
+      var e = document.createElement("div"); e.className = "empty";
+      e.textContent = "Nothing overdue, and nothing due in the next three days.";
+      host.appendChild(e);
+      return;
+    }
+    rows.forEach(function (r) {
+      var row = document.createElement("div"); row.className = "frow";
+      var who = document.createElement("div"); who.className = "who";
+      who.appendChild(document.createTextNode(fullName(r.m)));
+      var sub = document.createElement("small"); sub.textContent = labelFor(r.a.courseKey);
+      who.appendChild(sub);
+      row.appendChild(who);
+      row.appendChild(statusPill(r.a));
+      var when = document.createElement("span"); when.className = "when";
+      var d = r.a.daysRemaining;
+      when.textContent = (d < 0 ? Math.abs(d) + " day" + (Math.abs(d) === 1 ? "" : "s") + " late"
+                                : "due in " + d + " day" + (d === 1 ? "" : "s")) +
+                         "  ·  " + fmtDate(r.a.deadline);
+      row.appendChild(when);
+      host.appendChild(row);
+    });
+  }
+
+  /* Every certificate the team holds, newest first — the durable record. It used
+     to exist only as a comma-joined line inside a member card, which cannot be
+     searched and does not carry the number anybody would be asked for. */
+  var certFilter = "";
+  function renderCertificates(members) {
+    var host = $("certs"); if (!host) return;
+    host.textContent = "";
+    var rows = [];
+    members.forEach(function (m) {
+      (m.certificates || []).forEach(function (c) { rows.push({ m: m, c: c }); });
+    });
+    rows.sort(function (x, y) { return String(y.c.issuedAt).localeCompare(String(x.c.issuedAt)); });
+    var q = certFilter.trim().toLowerCase();
+    var shown = !q ? rows : rows.filter(function (r) {
+      return (fullName(r.m) + " " + r.m.email + " " + labelFor(r.c.courseKey) + " " + (r.c.number || ""))
+        .toLowerCase().indexOf(q) !== -1;
+    });
+    $("certCount").textContent = rows.length
+      ? (q ? shown.length + " of " + rows.length : String(rows.length)) + (rows.length === 1 && !q ? " certificate" : " certificates")
+      : "";
+    if (!shown.length) {
+      var e = document.createElement("div"); e.className = "empty";
+      e.textContent = rows.length
+        ? "No certificate matches that."
+        : "No certificates yet. One is issued when a member finishes every lesson in a course and passes its assessment.";
+      host.appendChild(e);
+      return;
+    }
+    shown.forEach(function (r) {
+      var row = document.createElement("div"); row.className = "frow";
+      var who = document.createElement("div"); who.className = "who";
+      who.appendChild(document.createTextNode(fullName(r.m)));
+      var sub = document.createElement("small");
+      sub.textContent = labelFor(r.c.courseKey) + (r.c.examScore != null ? "  ·  assessment " + r.c.examScore + "%" : "");
+      who.appendChild(sub);
+      row.appendChild(who);
+      var num = document.createElement("span"); num.className = "num"; num.textContent = r.c.number || "—";
+      row.appendChild(num);
+      var when = document.createElement("span"); when.className = "when";
+      when.textContent = fmtDate(r.c.issuedAt);
+      row.appendChild(when);
+      host.appendChild(row);
+    });
+  }
+
   function renderRoster(members) {
     lastRoster = members || [];
     var root = $("roster"); root.textContent = "";
     renderRosterSummary(lastRoster);
+    renderAttention(lastRoster);
+    renderCertificates(lastRoster);
     renderRosterFilters(lastRoster);
     if (!lastRoster.length) {
       var e = document.createElement("div"); e.className = "empty";
@@ -1162,7 +1268,11 @@
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
-  $("licenceReload").addEventListener("click", function () { loadLicence(); });
+  $("overviewReload").addEventListener("click", function () { loadLicence(); loadRoster(); });
+  $("certSearch").addEventListener("input", function () {
+    certFilter = $("certSearch").value || "";
+    renderCertificates(lastRoster);
+  });
   $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
   // ── Auth (Sign in / Request admin account tabs) ────────────────────────────
