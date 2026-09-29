@@ -191,8 +191,23 @@
     var n = [m.firstName, m.lastName].filter(Boolean).join(" ").trim();
     return n || m.email;
   }
-  function fmtDate(iso) { return iso ? new Date(iso).toLocaleDateString() : "—"; }
-  function fmtDateTime(iso) { return iso ? new Date(iso).toLocaleString() : "—"; }
+  /* 28-Jun-2026, not toLocaleDateString's 28/06/2026 — which an American admin
+     reads as the 6th of the 28th month, i.e. guesses. Deadlines are the whole
+     point of this page, so the month is spelled. Same rule as verify.js. */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    var day = d.getDate();
+    return (day < 10 ? "0" + day : String(day)) + "-" + MONTHS[d.getMonth()] + "-" + d.getFullYear();
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    return fmtDate(iso) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 
   // ── Your signed-in devices ────────────────────────────────────────────────
   // Lists the admin's OWN native app sessions (the ones that count toward the
@@ -253,9 +268,65 @@
   var CATALOGUE_INDEX = {};   // courseKey -> catalogue position (for default sequencing)
   COURSES.forEach(function (c, i) { CATALOGUE_INDEX[c[0]] = i; });
   var FRAMEWORKS = ["EASA", "UK CAA", "UAE GCAA", "FAA"];
+
+  /* WHAT THIS ORGANISATION MAY ACTUALLY ASSIGN.
+     The picker used to list all four frameworks whatever the licence bought, so an
+     admin licensed for EASA and the FAA could schedule a UK CAA course: the deadline
+     appeared in the learner's app and the course behind it stayed locked. The server
+     now refuses those outright; this hides them, because being told "no" after
+     choosing is a worse way to learn the boundary than not being offered it.
+     `orgScope` is ["__all__"] or the explicit course keys of the org's live licences,
+     from GET /v1/org/context. Null until it loads — nothing is hidden before then. */
+  var orgScope = null;
+  // The eight courses that open with NO licence at all (mirrors CourseKey.free in
+  // the apps and PUBLIC_CONTENT_COURSES on the server).
+  var FREE_ANCHORS = { aof: 1, m: 1, aof_uk: 1, m_uk: 1, aof_gcaa: 1, m_gcaa: 1, aof_faa: 1, p43_faa: 1 };
+  var COURSE_FRAMEWORK = {}; COURSES.forEach(function (c) { COURSE_FRAMEWORK[c[0]] = c[2]; });
+
+  /* Frameworks the licence actually buys into — derived from the scope's NON-anchor
+     keys, because the anchors are free everywhere and would otherwise make every
+     framework look purchased. */
+  function licencedFrameworks() {
+    var out = {};
+    if (!orgScope) { FRAMEWORKS.forEach(function (g) { out[g] = true; }); return out; }
+    if (orgScope.indexOf("__all__") !== -1) { FRAMEWORKS.forEach(function (g) { out[g] = true; }); return out; }
+    orgScope.forEach(function (k) {
+      if (!FREE_ANCHORS[k] && COURSE_FRAMEWORK[k]) out[COURSE_FRAMEWORK[k]] = true;
+    });
+    // A licence of anchors only (or of keys this page doesn't know) still has to show
+    // something to work with, so fall back to whatever frameworks the scope names.
+    if (!Object.keys(out).length) {
+      orgScope.forEach(function (k) { if (COURSE_FRAMEWORK[k]) out[COURSE_FRAMEWORK[k]] = true; });
+    }
+    return out;
+  }
+
+  function assignableCourses() {
+    if (!orgScope) return COURSES;
+    if (orgScope.indexOf("__all__") !== -1) return COURSES;
+    var frameworks = licencedFrameworks();
+    return COURSES.filter(function (c) {
+      if (orgScope.indexOf(c[0]) !== -1) return true;      // named by the licence
+      return !!FREE_ANCHORS[c[0]] && !!frameworks[c[2]];    // free, in a bought framework
+    });
+  }
   // Collapsed-by-framework state so the admin can filter courses by framework. Default
   // all collapsed (compact 4-row list); the admin expands the framework(s) they want.
   var collapsedGroups = {}; FRAMEWORKS.forEach(function (g) { collapsedGroups[g] = true; });
+
+  /* One quiet line saying what the licence covers, so an admin who cannot find
+     UK CAA in the list learns why here rather than by guessing. */
+  function renderLicenceNote() {
+    var el = $("licenceNote"); if (!el) return;
+    if (!orgScope || orgScope.indexOf("__all__") !== -1) {
+      el.textContent = "Your licence covers every framework.";
+      return;
+    }
+    var names = Object.keys(licencedFrameworks());
+    el.textContent = names.length
+      ? "Your licence covers " + names.join(", ") + ". Other frameworks are not listed."
+      : "Your licence does not cover any course yet — contact CAW Academy.";
+  }
 
   function updateMemberCount() {
     var n = Object.keys(selectedUserIds).length;
@@ -311,8 +382,13 @@
   // carries a select-all checkbox + a selected/total count.
   function renderCourseChecklist() {
     var list = $("courseList"); list.textContent = "";
+    var catalogue = assignableCourses();
+    // Drop a selection the licence no longer covers (the scope can change under us
+    // on a reload), so the form can never submit something the server will refuse.
+    var offered = {}; catalogue.forEach(function (c) { offered[c[0]] = true; });
+    Object.keys(selectedCourses).forEach(function (k) { if (!offered[k]) delete selectedCourses[k]; });
     FRAMEWORKS.forEach(function (grp) {
-      var inGroup = COURSES.filter(function (c) { return c[2] === grp; });
+      var inGroup = catalogue.filter(function (c) { return c[2] === grp; });
       if (!inGroup.length) return;
       var selInGroup = inGroup.filter(function (c) { return selectedCourses[c[0]]; }).length;
 
@@ -473,7 +549,8 @@
     }
     var small = document.createElement("small");
     var bits = [];
-    if (typeof a.sequence === "number") bits.push("seq " + a.sequence);
+    // The soft sequence is NOT shown: it is an ordering hint the list already
+    // expresses by being in that order, and "seq 3" on a row read as a grade.
     if (a.status === "completed") bits.push("completed " + fmtDate(a.completedAt) + (a.score != null ? " · " + a.score + "%" : ""));
     else bits.push("due " + fmtDate(a.deadline) + " · " + a.daysRemaining + "d");
     small.textContent = bits.join("  ·  ");
@@ -566,7 +643,11 @@
   }
 
   function renderMember(m) {
-    var card = document.createElement("div"); card.className = "member";
+    var stats = memberStats(m);
+    var card = document.createElement("div");
+    // The left edge carries the verdict, so a long roster is skimmable without
+    // reading a single card.
+    card.className = "member" + (stats.overdue ? " needs" : stats.dueSoon ? " soon" : "");
 
     var head = document.createElement("div"); head.className = "member-head";
     var left = document.createElement("div");
@@ -580,6 +661,36 @@
       ? "Last active " + fmtDate(m.lastActiveAt)
       : "No activity reported yet";
     left.appendChild(active);
+
+    /* This person's assignments in one line, worst first — the same statuses the
+       rows below carry, counted, so the card answers "how are they doing" before
+       it is read in full. Only non-zero states appear; a row of zeroes is noise. */
+    var chips = document.createElement("div"); chips.className = "mchips";
+    function chip(kind, text) {
+      var c = document.createElement("span"); c.className = "mchip " + kind; c.textContent = text;
+      chips.appendChild(c);
+    }
+    if (!stats.total) chip("none", "No assignments");
+    else {
+      if (stats.overdue) chip("overdue", stats.overdue + " overdue");
+      if (stats.dueSoon) chip("due_soon", stats.dueSoon + " due soon");
+      if (stats.upcoming) chip("", stats.upcoming + " upcoming");
+      if (stats.done) chip("done", stats.done + " completed");
+    }
+    left.appendChild(chips);
+
+    if (stats.total) {
+      var bar = document.createElement("div"); bar.className = "mbar";
+      var fill = document.createElement("i");
+      fill.style.width = Math.round((stats.done / stats.total) * 100) + "%";
+      bar.appendChild(fill);
+      bar.setAttribute("role", "img");
+      bar.setAttribute("aria-label", stats.done + " of " + stats.total + " assigned courses completed");
+      left.appendChild(bar);
+    }
+
+    left.style.flex = "1 1 320px";
+    left.style.minWidth = "0";
     head.appendChild(left);
     if (m.orgRole === "admin") {
       var role = document.createElement("span"); role.className = "role-pill"; role.textContent = "Admin";
@@ -655,17 +766,112 @@
     return card;
   }
 
+  // The last roster the server gave us — the assign form reads it to name a member
+  // in the "already scheduled" prompt, which would otherwise show a raw userId.
+  var lastRoster = [];
+  var rosterFilter = "all";   // all | attention | idle
+
+  /** One member's assignments counted by live status. */
+  function memberStats(m) {
+    var s = { total: (m.assignments || []).length, overdue: 0, dueSoon: 0, upcoming: 0, done: 0 };
+    (m.assignments || []).forEach(function (a) {
+      if (a.displayStatus === "done") s.done++;
+      else if (a.displayStatus === "overdue") s.overdue++;
+      else if (a.displayStatus === "due_soon") s.dueSoon++;
+      else s.upcoming++;
+    });
+    return s;
+  }
+
+  /* Attention first: whoever has the most overdue, then the most due soon, then
+     alphabetically. The app sorts a learner's own courses by what they are working
+     on for the same reason — a list in a fixed order makes the reader do the
+     scanning that the order could have done for them. */
+  function byAttention(a, b) {
+    var sa = memberStats(a), sb = memberStats(b);
+    if (sa.overdue !== sb.overdue) return sb.overdue - sa.overdue;
+    if (sa.dueSoon !== sb.dueSoon) return sb.dueSoon - sa.dueSoon;
+    return fullName(a).localeCompare(fullName(b));
+  }
+
+  function renderRosterSummary(members) {
+    var host = $("rosterSummary"); if (!host) return;
+    host.textContent = "";
+    var t = { overdue: 0, dueSoon: 0, done: 0, assigned: 0 };
+    members.forEach(function (m) {
+      var s = memberStats(m);
+      t.overdue += s.overdue; t.dueSoon += s.dueSoon; t.done += s.done; t.assigned += s.total;
+    });
+    [
+      ["Members", members.length, ""],
+      ["Assigned", t.assigned, ""],
+      ["Overdue", t.overdue, "alert"],
+      ["Due soon", t.dueSoon, "warn"],
+      ["Completed", t.done, "good"]
+    ].forEach(function (row) {
+      var tile = document.createElement("div");
+      tile.className = "rstat" + (row[2] ? " " + row[2] : "") + (row[1] === 0 && row[2] ? " zero" : "");
+      var b = document.createElement("b"); b.textContent = String(row[1]);
+      var lab = document.createElement("span"); lab.textContent = row[0];
+      tile.appendChild(b); tile.appendChild(lab);
+      host.appendChild(tile);
+    });
+  }
+
+  function renderRosterFilters(members) {
+    var host = $("rosterFilters"); if (!host) return;
+    host.textContent = "";
+    var attention = members.filter(function (m) {
+      var s = memberStats(m); return s.overdue > 0 || s.dueSoon > 0;
+    }).length;
+    var idle = members.filter(function (m) { return memberStats(m).total === 0; }).length;
+    [
+      ["all", "Everyone (" + members.length + ")", members.length],
+      ["attention", "Needs attention (" + attention + ")", attention],
+      ["idle", "No assignments (" + idle + ")", idle]
+    ].forEach(function (f) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "rchip" + (rosterFilter === f[0] ? " on" : "");
+      b.textContent = f[1];
+      // An empty filter is shown but not clickable: hiding it would make the row
+      // change shape as the team's state changes, which is harder to read than a
+      // greyed count that stays put.
+      b.disabled = f[2] === 0 && f[0] !== "all";
+      b.addEventListener("click", function () { rosterFilter = f[0]; renderRoster(lastRoster); });
+      host.appendChild(b);
+    });
+  }
+
   function renderRoster(members) {
+    lastRoster = members || [];
     var root = $("roster"); root.textContent = "";
-    if (!members.length) {
+    renderRosterSummary(lastRoster);
+    renderRosterFilters(lastRoster);
+    if (!lastRoster.length) {
       var e = document.createElement("div"); e.className = "empty";
       e.textContent = "No members found for your organisation yet. Members appear here once they create an account with a work email on your organisation's domain.";
       root.appendChild(e);
-      renderMemberChecklist(members);
+      renderMemberChecklist(lastRoster);
       return;
     }
-    members.forEach(function (m) { root.appendChild(renderMember(m)); });
-    renderMemberChecklist(members);
+    var shown = lastRoster.filter(function (m) {
+      var s = memberStats(m);
+      if (rosterFilter === "attention") return s.overdue > 0 || s.dueSoon > 0;
+      if (rosterFilter === "idle") return s.total === 0;
+      return true;
+    }).sort(byAttention);
+
+    if (!shown.length) {
+      var none = document.createElement("div"); none.className = "empty";
+      none.textContent = rosterFilter === "attention"
+        ? "Nobody is overdue or due within three days."
+        : "Everyone has at least one assignment.";
+      root.appendChild(none);
+    } else {
+      shown.forEach(function (m) { root.appendChild(renderMember(m)); });
+    }
+    renderMemberChecklist(lastRoster);
   }
 
   function loadRoster() {
@@ -735,11 +941,27 @@
     el.textContent = txt;
   }
 
+  /* POST one assignment. Resolves to {job, created, conflict} rather than rejecting
+     on a conflict, because a conflict is an ANSWER ("they already have this, due
+     then"), not a failure. */
+  function postAssign(job, overwrite) {
+    var body = { courseKey: job.courseKey, deadline: job.deadline, sequence: job.sequence, userId: job.userId };
+    if (overwrite) body.overwrite = true;
+    return authed("POST", "/v1/org/assignments", body).then(function (r) {
+      var conflicts = (r && r.conflicts) || [];
+      return { job: job, created: ((r && r.assignments) || []).length > 0, conflict: conflicts[0] || null };
+    });
+  }
+
+  function nameOf(userId) {
+    for (var i = 0; i < lastRoster.length; i++) if (lastRoster[i].userId === userId) return fullName(lastRoster[i]);
+    return "That member";
+  }
+
   $("assignForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var userIds = Object.keys(selectedUserIds);
     var plan = courseDeadlines();
-    var startSeq = Number($("sequence").value || 0);
     if (!userIds.length) { showMessage("assignMsg", "Select at least one member.", "err"); return; }
     if (!plan.length) { showMessage("assignMsg", "Select at least one course and a first deadline.", "err"); return; }
 
@@ -752,12 +974,14 @@
         " — that may be too short. Assign anyway?")) return;
     }
 
-    // Each member gets the same plan: sequence follows catalogue order; deadlines are
-    // staggered per courseDeadlines().
+    /* Each member gets the same plan. The soft order follows CATALOGUE POSITION —
+       there is no "start sequence at" box any more, because a number the admin had
+       to invent explained nothing and every value except 0 made the roster's order
+       harder to read. */
     var jobs = [];
     userIds.forEach(function (uid) {
       plan.forEach(function (p) {
-        jobs.push({ userId: uid, courseKey: p.courseKey, sequence: startSeq + p.index, deadline: p.date.toISOString() });
+        jobs.push({ userId: uid, courseKey: p.courseKey, sequence: p.index, deadline: p.date.toISOString() });
       });
     });
     var courseCount = plan.length;
@@ -765,23 +989,68 @@
     var btn = $("assignBtn"); btn.disabled = true;
     showMessage("assignMsg", "Assigning " + jobs.length + " …", "ok");
 
-    Promise.allSettled(jobs.map(function (j) {
-      return authed("POST", "/v1/org/assignments", {
-        courseKey: j.courseKey, deadline: j.deadline, sequence: j.sequence, userId: j.userId
-      });
-    })).then(function (results) {
-      var ok = 0, fail = 0, firstErr = "";
+    var created = 0, failed = 0, firstErr = "";
+    var pending = [];   // already scheduled — the admin decides
+    var done = [];      // already completed — never reopened
+
+    function settle(results) {
       results.forEach(function (r) {
-        if (r.status === "fulfilled") ok++;
-        else { fail++; if (!firstErr) firstErr = (r.reason && r.reason.message) || "Some assignments failed."; }
+        if (r.status !== "fulfilled") {
+          failed++; if (!firstErr) firstErr = (r.reason && r.reason.message) || "Some assignments failed.";
+          return;
+        }
+        var v = r.value;
+        if (v.created) { created++; return; }
+        if (v.conflict && v.conflict.reason === "completed") done.push(v.conflict);
+        else if (v.conflict) pending.push({ job: v.job, conflict: v.conflict });
       });
+    }
+
+    function finish() {
       var msg = "Assigned " + courseCount + " course" + (courseCount === 1 ? "" : "s") +
                 " to " + userIds.length + " member" + (userIds.length === 1 ? "" : "s") +
-                " (" + ok + " assignment" + (ok === 1 ? "" : "s") + ").";
-      if (fail) { showMessage("assignMsg", msg + " " + fail + " failed: " + firstErr, "err"); }
-      else { showMessage("assignMsg", msg, "ok"); }
+                " (" + created + " added or updated";
+      if (done.length) msg += ", " + done.length + " already completed and left as " + (done.length === 1 ? "it is" : "they are");
+      if (pending.length) msg += ", " + pending.length + " existing deadline" + (pending.length === 1 ? "" : "s") + " kept";
+      msg += ").";
+      if (failed) showMessage("assignMsg", msg + " " + failed + " failed: " + firstErr, "err");
+      else showMessage("assignMsg", msg, "ok");
+      btn.disabled = false;
       return loadRoster();
-    }).finally(function () { btn.disabled = false; });
+    }
+
+    Promise.allSettled(jobs.map(function (j) { return postAssign(j, false); }))
+      .then(function (results) {
+        settle(results);
+        if (!pending.length) return finish();
+
+        /* ONE prompt for the whole batch, listing who already has what and when.
+           Nothing was written for these — the server reported them and stopped — so
+           Cancel really does keep every existing date. */
+        var lines = pending.slice(0, 6).map(function (p) {
+          return "\u2022 " + nameOf(p.job.userId) + " — " + labelFor(p.conflict.courseKey) +
+                 ", due " + fmtDate(p.conflict.deadline);
+        }).join("\n");
+        if (pending.length > 6) lines += "\n\u2022 …and " + (pending.length - 6) + " more";
+
+        var replace = window.confirm(
+          (pending.length === 1 ? "One of these is already scheduled:" : pending.length + " of these are already scheduled:") +
+          "\n\n" + lines +
+          "\n\nReplace the existing deadline" + (pending.length === 1 ? "" : "s") + " with the new one" +
+          (pending.length === 1 ? "" : "s") + "?\n\nOK — replace     Cancel — keep the existing date" +
+          (pending.length === 1 ? "" : "s"));
+        if (!replace) return finish();
+
+        var retry = pending.slice();
+        pending = [];
+        showMessage("assignMsg", "Replacing " + retry.length + " …", "ok");
+        return Promise.allSettled(retry.map(function (p) { return postAssign(p.job, true); }))
+          .then(function (r2) { settle(r2); return finish(); });
+      })
+      .catch(function (err) {
+        showMessage("assignMsg", err.message || "Couldn't reach the server.", "err");
+        btn.disabled = false;
+      });
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
@@ -928,6 +1197,8 @@
       $("orgName").textContent = ctx.orgName || "Your organisation";
       $("orgDomains").textContent = (ctx.domains || []).join(", ");
       $("who").textContent = "";
+      orgScope = Array.isArray(ctx.scope) ? ctx.scope : null;
+      renderLicenceNote();
       renderCourseChecklist();
       // Default the first deadline to one month out (matches the monthly cadence).
       $("deadline").value = addMonths(new Date(), 1).toISOString().slice(0, 10);

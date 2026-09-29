@@ -154,7 +154,14 @@
   .ms-gname{flex:1 1 auto}
   .ms-gcount{color:var(--muted); font-weight:700; text-transform:none; letter-spacing:0}
   .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; font-size:12px; cursor:pointer; padding:0}
-  .assign-foot{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);
+  /* One quiet line under the course list saying which frameworks the licence covers,
+     so a missing framework reads as a licence boundary rather than a bug. */
+  .ms-note{font-size:12px; color:var(--muted); line-height:1.45;
+    padding:8px 12px; border-top:1px solid var(--line); background:#FAFAFE}
+  .ms-note:empty{display:none}
+  /* Three cells now (the "Start sequence at" box was removed): two fields and the
+     button. The first is widest because a date input needs the room. */
+  .assign-foot{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1.2fr) minmax(0,1fr);
     gap:12px; align-items:end; margin-top:14px}
   /* Drop the field's default 12px bottom margin here, or the button (no margin) ends up
      lower than the input's visible box when bottom-aligned. */
@@ -162,18 +169,64 @@
   /* Match the button's box to the input fields (same vertical padding + a 1px border)
      so, bottom-aligned, its height lines up exactly with the adjacent cells. */
   .assign-foot .btn{width:100%; padding:11px 18px; font-size:15px; line-height:1.2; border:1px solid transparent}
-  /* Tablets: three inputs in an even row, with a full-width Assign button on its own
-     row below (avoids the button floating auto-width in a half cell). */
+  /* Tablets: the two fields share a row, with a full-width Assign button beneath
+     (avoids the button floating auto-width in a narrow cell). */
   @media (min-width:561px) and (max-width:1024px){
-    .assign-foot{grid-template-columns:repeat(3,1fr)}
+    .assign-foot{grid-template-columns:repeat(2,1fr)}
     .assign-foot > div:last-child{grid-column:1 / -1}
     .assign-foot .btn{width:100%}
   }
   /* Phones: stack every field + the button, each full width. */
   @media (max-width:560px){ .assign-foot{grid-template-columns:1fr} .assign-foot .btn{width:100%} }
 
-  /* Roster */
+  /* Roster
+     Read top-down: the team's totals, a filter, then a card per member sorted by
+     what needs attention. The cards carried all of this before, one member at a
+     time — the totals and the ordering are what let an admin see WHERE to look
+     without reading every card. */
+  .rsum{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin:12px 0 14px}
+  @media (max-width:700px){ .rsum{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  .rstat{border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fff}
+  .rstat b{display:block; font-size:22px; line-height:1.15; font-weight:800; color:var(--ink)}
+  .rstat span{font-size:11.5px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; color:var(--muted)}
+  .rstat.alert{background:var(--err-soft); border-color:transparent}
+  .rstat.alert b, .rstat.alert span{color:var(--err)}
+  .rstat.warn{background:var(--amber-soft); border-color:transparent}
+  .rstat.warn b, .rstat.warn span{color:#B25E00}
+  .rstat.good{background:var(--success-soft); border-color:transparent}
+  .rstat.good b, .rstat.good span{color:var(--success)}
+  /* A count of zero is good news, not a number to shout — it keeps the tile's
+     shape but drops the colour, so only real figures draw the eye. */
+  .rstat.zero{background:#fff; border-color:var(--line)}
+  .rstat.zero b{color:var(--muted)} .rstat.zero span{color:var(--muted)}
+
+  .rfilters{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px}
+  .rchip{font:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    padding:6px 13px; border-radius:999px}
+  .rchip:hover{background:var(--indigo-soft)}
+  .rchip.on{background:var(--indigo); border-color:var(--indigo); color:#fff}
+  .rchip:disabled{opacity:.45; cursor:default; background:#fff}
+
+  /* Per-member summary: the same statuses as the tiles, for one person. */
+  .mchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:7px}
+  .mchip{font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; white-space:nowrap;
+    background:var(--indigo-soft); color:var(--indigo)}
+  .mchip.overdue{background:var(--err-soft); color:var(--err)}
+  .mchip.due_soon{background:var(--amber-soft); color:#B25E00}
+  .mchip.done{background:var(--success-soft); color:var(--success)}
+  .mchip.none{background:#F1F2F7; color:var(--muted)}
+  /* One bar for the whole person: courses finished out of courses assigned. Counts,
+     not an average of percentages — an average of four half-read courses and a
+     finished one says "60%" and means nothing anybody can act on. */
+  .mbar{position:relative; height:6px; border-radius:999px; background:var(--line); overflow:hidden; margin-top:9px}
+  .mbar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:999px; background:var(--success)}
+
   .member{border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-top:14px; background:#fff}
+  /* The card itself says whether this person needs attention, so a long roster can
+     be skimmed down the left edge alone. */
+  .member.needs{border-left:3px solid var(--err); padding-left:16px}
+  .member.soon{border-left:3px solid var(--amber); padding-left:16px}
   .member-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
   .member-name{font-weight:700; font-size:16px}
   .member-email{color:var(--muted); font-size:13.5px}
@@ -327,7 +380,7 @@
 
   <div class="card">
     <h2>Assign courses</h2>
-    <p class="sub">Pick one or more members and one or more courses, then assign. Courses follow the catalogue order, and deadlines are staggered by the “Months apart” interval from the first deadline (set it to 0 for one shared deadline). The order is a soft “next due” hint — nothing is locked for the learner.</p>
+    <p class="sub">Pick one or more members and one or more courses, then assign. Courses are scheduled in catalogue order: the first is due on the date you set, and each one after it falls due the chosen number of months later — set that to 0 to give them all the same deadline. The order is a soft “next due” hint; nothing is locked for the learner.</p>
     <form id="assignForm">
       <div class="ms-grid">
         <div>
@@ -350,25 +403,22 @@
               <span class="ms-count" id="courseCount">0 selected</span>
             </div>
             <div class="ms-list" id="courseList"></div>
+            <div class="ms-note" id="licenceNote"></div>
           </div>
         </div>
       </div>
       <div class="assign-foot">
         <div>
-          <label class="lbl" for="deadline">First deadline</label>
+          <label class="lbl" for="deadline">First course due</label>
           <input class="field" id="deadline" type="date" required>
         </div>
         <div>
-          <label class="lbl" for="monthsApart">Months apart</label>
+          <label class="lbl" for="monthsApart">Months between courses</label>
           <input class="field" id="monthsApart" type="number" min="0" max="24" value="1">
         </div>
         <div>
-          <label class="lbl" for="sequence">Start sequence at</label>
-          <input class="field" id="sequence" type="number" min="0" max="9999" value="0">
-        </div>
-        <div>
-          <!-- invisible spacer label so this cell matches the labelled input cells and
-               the button lines up with the "Start sequence at" field -->
+          <!-- invisible spacer label so this cell matches the labelled input cells
+               and the button sits on the same baseline as the two fields -->
           <label class="lbl" aria-hidden="true" style="visibility:hidden">Assign</label>
           <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
         </div>
@@ -383,7 +433,9 @@
       <h2 style="margin:0">Team roster</h2>
       <button class="btn btn-ghost" id="reloadBtn">Reload</button>
     </div>
-    <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Overdue items are shown in red.</p>
+    <p class="sub" style="margin-bottom:4px">Each member's assignments (with live status) and issued certificates. Anyone with something overdue or due soon is listed first.</p>
+    <div id="rosterSummary" class="rsum"></div>
+    <div id="rosterFilters" class="rfilters"></div>
     <div id="roster"></div>
   </div>
 
@@ -408,6 +460,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js" defer></script>
+<script src="admin.js?v=2" defer></script>
 </body>
 </html>
