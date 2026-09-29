@@ -769,7 +769,7 @@
   // The last roster the server gave us — the assign form reads it to name a member
   // in the "already scheduled" prompt, which would otherwise show a raw userId.
   var lastRoster = [];
-  var rosterFilter = "all";   // all | attention | idle
+  var rosterFilter = "all";   // all | attention | assigned | idle
 
   /** One member's assignments counted by live status. */
   function memberStats(m) {
@@ -825,9 +825,14 @@
       var s = memberStats(m); return s.overdue > 0 || s.dueSoon > 0;
     }).length;
     var idle = members.filter(function (m) { return memberStats(m).total === 0; }).length;
+    var assigned = members.length - idle;
     [
       ["all", "Everyone (" + members.length + ")", members.length],
       ["attention", "Needs attention (" + attention + ")", attention],
+      // The one most teams actually want: most of a roster has nothing scheduled
+      // yet, and scrolling past twelve empty cards to reach the one that matters
+      // is the whole complaint this answers.
+      ["assigned", "With assignments (" + assigned + ")", assigned],
       ["idle", "No assignments (" + idle + ")", idle]
     ].forEach(function (f) {
       var b = document.createElement("button");
@@ -858,6 +863,7 @@
     var shown = lastRoster.filter(function (m) {
       var s = memberStats(m);
       if (rosterFilter === "attention") return s.overdue > 0 || s.dueSoon > 0;
+      if (rosterFilter === "assigned") return s.total > 0;
       if (rosterFilter === "idle") return s.total === 0;
       return true;
     }).sort(byAttention);
@@ -866,6 +872,8 @@
       var none = document.createElement("div"); none.className = "empty";
       none.textContent = rosterFilter === "attention"
         ? "Nobody is overdue or due within three days."
+        : rosterFilter === "assigned"
+        ? "Nobody has an assignment yet — assign a course above."
         : "Everyone has at least one assignment.";
       root.appendChild(none);
     } else {
