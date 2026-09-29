@@ -270,9 +270,22 @@
   function loadLicence() {
     var host = $("licenceSummary");
     if (host && !host.children.length) host.textContent = "Loading…";
-    return authed("GET", "/v1/org/license", null).then(renderLicence).catch(function (err) {
+    return authed("GET", "/v1/org/license", null).then(function (data) {
+      var card = $("licenceCard"); if (card) card.classList.remove("hidden");
+      renderLicence(data);
+    }).catch(function (err) {
       $("licenceSummary").textContent = "";
       $("licenceDetail").textContent = "";
+      /* A 404 means the API this page is talking to predates the endpoint — the
+         panel is newer than the server it landed on, which happens whenever the
+         site deploys ahead of the backend, or the backend is rolled back. That is
+         a CONDITION, not a failure: hide the card rather than paint a red "Route
+         not found" across a customer's dashboard for a feature they never asked
+         for. Any other error is a real one and still says so. */
+      if (err.status === 404) {
+        var card = $("licenceCard"); if (card) card.classList.add("hidden");
+        return;
+      }
       showMessage("licenceMsg", err.message || "Couldn't load your licence.", "err");
     });
   }
