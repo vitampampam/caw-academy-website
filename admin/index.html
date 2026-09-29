@@ -199,6 +199,11 @@
      shape but drops the colour, so only real figures draw the eye. */
   .rstat.zero{background:#fff; border-color:var(--line)}
   .rstat.zero b{color:var(--muted)} .rstat.zero span{color:var(--muted)}
+  /* The denominator under a figure — "of 25 purchased" says what 8 is a share of,
+     which the number alone cannot. */
+  .rstat-sub{display:block; margin-top:3px; font-size:11px; color:var(--muted); line-height:1.35}
+  .rstat.alert .rstat-sub{color:var(--err)} .rstat.warn .rstat-sub{color:#B25E00}
+  .rstat.good .rstat-sub{color:var(--success)} .rstat.zero .rstat-sub{color:var(--muted)}
 
   .rfilters{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px}
   .rchip{font:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
@@ -379,6 +384,17 @@
   </div>
 
   <div class="card">
+    <div class="member-head" style="margin-bottom:6px">
+      <h2 style="margin:0">Licence &amp; seats</h2>
+      <button class="btn btn-ghost" id="licenceReload">Reload</button>
+    </div>
+    <p class="sub" style="margin-bottom:4px">What your organisation holds, and how much of it is in use. A seat is claimed when someone redeems their code in the app.</p>
+    <div id="licenceSummary" class="rsum"></div>
+    <div id="licenceDetail"></div>
+    <div id="licenceMsg"></div>
+  </div>
+
+  <div class="card">
     <h2>Assign courses</h2>
     <p class="sub">Pick one or more members and one or more courses, then assign. Courses are scheduled in catalogue order: the first is due on the date you set, and each one after it falls due the chosen number of months later — set that to 0 to give them all the same deadline. The order is a soft “next due” hint; nothing is locked for the learner.</p>
     <form id="assignForm">
@@ -460,6 +476,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=3" defer></script>
+<script src="admin.js?v=4" defer></script>
 </body>
 </html>

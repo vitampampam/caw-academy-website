@@ -261,6 +261,93 @@
     });
   }
 
+  // ── Licence & seats ───────────────────────────────────────────────────────
+  /* Every figure here was already in the database and reached no customer screen:
+     the portal could say who has an account, never how many seats were paid for,
+     how many were redeemed, or when access ends. NO redeem codes are shown — an
+     unredeemed code is a credential, and re-sending one belongs in an invite over
+     email, not on a page anyone can read over a shoulder. */
+  function loadLicence() {
+    var host = $("licenceSummary");
+    if (host && !host.children.length) host.textContent = "Loading…";
+    return authed("GET", "/v1/org/license", null).then(renderLicence).catch(function (err) {
+      $("licenceSummary").textContent = "";
+      $("licenceDetail").textContent = "";
+      showMessage("licenceMsg", err.message || "Couldn't load your licence.", "err");
+    });
+  }
+
+  function statTile(label, value, tone, sub) {
+    var t = document.createElement("div");
+    t.className = "rstat" + (tone ? " " + tone : "") + (value === 0 && tone ? " zero" : "");
+    var b = document.createElement("b"); b.textContent = String(value);
+    var lab = document.createElement("span"); lab.textContent = label;
+    t.appendChild(b); t.appendChild(lab);
+    if (sub) { var s2 = document.createElement("small"); s2.className = "rstat-sub"; s2.textContent = sub; t.appendChild(s2); }
+    return t;
+  }
+
+  function renderLicence(data) {
+    showMessage("licenceMsg", "", "ok");
+    var host = $("licenceSummary"); host.textContent = "";
+    var detail = $("licenceDetail"); detail.textContent = "";
+    var t = (data && data.totals) || {};
+    var rows = (data && data.licenses) || [];
+    if (!rows.length) {
+      var e = document.createElement("div"); e.className = "empty";
+      e.textContent = "No live licence found for your organisation.";
+      detail.appendChild(e);
+      return;
+    }
+
+    /* Seats in use, out of what was bought. Amber at the cap because that is the
+       moment a new colleague cannot be added, and nothing else on this page says so. */
+    var full = t.claimed >= t.seatLimit;
+    host.appendChild(statTile("Seats in use", t.claimed, full ? "warn" : "good",
+      "of " + t.seatLimit + " purchased"));
+    // Invited and never arrived — the gap an admin currently has no way to see.
+    host.appendChild(statTile("Codes unredeemed", t.unredeemed, t.unredeemed ? "warn" : "good",
+      t.unredeemed ? "sent but not yet claimed" : "none outstanding"));
+    host.appendChild(statTile("Seats spare", t.spare, "", "no code issued yet"));
+    // Accounts without a seat: membership is by email domain, so someone can hold
+    // an account on your domain and no entitlement at all.
+    host.appendChild(statTile("Accounts without a seat", data.accountsWithoutSeat, data.accountsWithoutSeat ? "warn" : "",
+      "on your domain"));
+    var days = t.daysRemaining;
+    host.appendChild(statTile("Days left", days == null ? "—" : days,
+      days != null && days <= 30 ? "alert" : days != null && days <= 90 ? "warn" : "good",
+      t.validUntil ? "until " + fmtDate(t.validUntil) : ""));
+
+    // One line per licence, but only when there is more than one to tell apart —
+    // a single-row table below five tiles that already said it is just furniture.
+    if (rows.length > 1) {
+      var ul = document.createElement("ul"); ul.className = "alist";
+      rows.forEach(function (r, i) {
+        var li = document.createElement("li"); li.className = "aitem";
+        var c = document.createElement("div"); c.className = "course";
+        c.appendChild(document.createTextNode("Licence " + (i + 1)));
+        var small = document.createElement("small");
+        small.textContent = r.claimed + " of " + r.seatLimit + " seats in use  ·  " +
+          r.issued + " code" + (r.issued === 1 ? "" : "s") + " issued  ·  expires " +
+          fmtDate(r.validUntil) + " (" + r.daysRemaining + "d)";
+        c.appendChild(small);
+        li.appendChild(c);
+        var pill = document.createElement("span");
+        pill.className = "pill " + (r.daysRemaining <= 30 ? "overdue" : r.daysRemaining <= 90 ? "due_soon" : "upcoming");
+        pill.textContent = r.daysRemaining <= 30 ? "Renew soon" : r.daysRemaining <= 90 ? "Expiring" : "Active";
+        li.appendChild(pill);
+        ul.appendChild(li);
+      });
+      detail.appendChild(ul);
+    }
+
+    var note = document.createElement("p"); note.className = "note";
+    note.style.marginTop = "12px";
+    note.textContent = "Seats and renewals are managed by CAW Academy — contact us to add seats or extend. " +
+      "A member appears in the roster once they create an account on your domain; they can only open paid courses after redeeming a seat code.";
+    detail.appendChild(note);
+  }
+
   // ── Multi-select checklists (members + courses) ───────────────────────────
   // Selection state kept in Sets so members/courses can be toggled independently.
   var selectedUserIds = {};   // userId -> true
@@ -1062,6 +1149,7 @@
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
+  $("licenceReload").addEventListener("click", function () { loadLicence(); });
   $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
   // ── Auth (Sign in / Request admin account tabs) ────────────────────────────
@@ -1214,6 +1302,7 @@
       updateScheduleHint();
       show("dashView");
       loadDevices();
+      loadLicence();
       return loadRoster();
     }).catch(function (err) {
       if (err.status === 403) {
