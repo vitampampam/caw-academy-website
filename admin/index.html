@@ -289,11 +289,18 @@
     border:1px solid var(--line); background:#fff; color:var(--ink-soft); padding:6px 13px; border-radius:999px}
   .doc-mode:hover{background:var(--indigo-soft)}
   .doc-mode.on{background:var(--indigo); border-color:var(--indigo); color:#fff}
-  .doc-people{margin-top:10px; border-top:1px solid var(--line); padding-top:8px}
+  /* The people list is the SAME component the assign form uses — a bordered box with
+     a filter bar and a list that scrolls inside it (`.ms` / `.ms-tools` / `.ms-list`).
+     It used to print every member straight into the card, so a fifty-person roster
+     made one document card taller than the window and buried the next company's
+     heading under it. */
+  .doc-people{margin-top:12px}
   .doc-count{font-size:12px; font-weight:700; color:var(--muted)}
-  /* The tick list reuses the assign form's checklist rows, so granting a document
-     looks like every other "choose some members" on this page. */
-  .doc-people .ms-row{padding:6px 2px}
+
+  /* And the documents themselves scroll, for the same reason one step up: an MRO
+     holding its customers' manuals has a list that is long before any one card is.
+     Both scroll areas are capped, so the page itself stays a page. */
+  .doc-scroll{max-height:min(64vh, 680px); overflow-y:auto; padding-right:6px; margin-right:-6px}
 
   /* Certificates are two levels deep, both closed to start: HOLDER, then COURSE.
      The second level is not decoration — a course can hold a SERIES, because a
@@ -892,6 +899,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=23" defer></script>
+<script src="admin.js?v=24" defer></script>
 </body>
 </html>

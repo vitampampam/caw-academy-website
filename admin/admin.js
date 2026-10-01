@@ -899,6 +899,14 @@
   var docQuery = "";
   var docCompanyQuery = "";
 
+  /* Per-document state for the people list, kept OUT of the DOM because every tick is
+     a server write whose reply rebuilds the whole card. Without this the filter would
+     clear and the list would jump to the top after each one — harmless while the list
+     was short, unmissable now that it scrolls. Keyed by pkgId. */
+  var docPeopleQuery = {};
+  var docPeopleScroll = {};
+  var docsScroll = 0;         // the same, one level up, for the documents list itself
+
   function selectedCompanies() { return Object.keys(docCompanies); }
 
   /** The documents currently shown. Companies and search compose: pick the holders,
@@ -986,6 +994,13 @@
 
   function renderDocs() {
     var host = $("docs"); if (!host) return;
+    /* #docs itself survives every redraw, so its scroll position is recorded as it
+       happens rather than read back just before the list is torn down — which would
+       record a 0 on the redraws that run while the section is hidden. */
+    if (!host.dataset.scrollWatched) {
+      host.dataset.scrollWatched = "1";
+      host.addEventListener("scroll", function () { docsScroll = host.scrollTop; });
+    }
     host.textContent = "";
     renderDocCompanyMenu();
 
@@ -1018,6 +1033,7 @@
         none.appendChild(reset);
       }
       host.appendChild(none);
+      host.classList.remove("doc-scroll");   // nothing to scroll, so no scrollbar
       return;
     }
 
@@ -1086,32 +1102,88 @@
       card.appendChild(modes);
 
       if (doc.mode === "selected") {
-        var people = document.createElement("div"); people.className = "doc-people";
+        var people = document.createElement("div"); people.className = "ms doc-people";
         if (!lastRoster.length) {
           var e = document.createElement("div"); e.className = "empty";
+          e.style.padding = "10px 12px";
           e.textContent = "No members yet.";
           people.appendChild(e);
         } else {
           var granted = {}; doc.grantedUserIds.forEach(function (id) { granted[id] = true; });
-          lastRoster.forEach(function (m) {
-            var row = document.createElement("label"); row.className = "ms-row";
-            var cb = document.createElement("input"); cb.type = "checkbox";
-            cb.checked = !!granted[m.userId];
-            cb.addEventListener("change", function () {
-              cb.disabled = true;
-              setDocGrant(doc.pkgId, m.userId, cb.checked);
+          var list = document.createElement("div"); list.className = "ms-list";
+
+          /* Draws the ROWS only. The filter calls this directly rather than going
+             through renderDocs, which would rebuild the card and take the field's
+             focus away mid-word. */
+          var fillPeople = function () {
+            var q = (docPeopleQuery[doc.pkgId] || "").trim().toLowerCase();
+            list.textContent = "";
+            var visible = q
+              ? lastRoster.filter(function (m) {
+                  return (fullName(m) + " " + m.email).toLowerCase().indexOf(q) !== -1;
+                })
+              : lastRoster;
+            if (!visible.length) {
+              var none = document.createElement("div"); none.className = "empty";
+              none.style.padding = "8px 12px";
+              none.textContent = "No member matches that.";
+              list.appendChild(none);
+            }
+            visible.forEach(function (m) {
+              var row = document.createElement("label"); row.className = "ms-row";
+              var cb = document.createElement("input"); cb.type = "checkbox";
+              cb.checked = !!granted[m.userId];
+              cb.addEventListener("change", function () {
+                cb.disabled = true;
+                setDocGrant(doc.pkgId, m.userId, cb.checked);
+              });
+              var txt = document.createElement("span");
+              var n = document.createElement("span"); n.textContent = fullName(m);
+              var sub = document.createElement("span"); sub.className = "sub"; sub.textContent = "  " + m.email;
+              txt.appendChild(n); txt.appendChild(sub);
+              row.appendChild(cb); row.appendChild(txt);
+              list.appendChild(row);
             });
-            var txt = document.createElement("span");
-            var n = document.createElement("span"); n.textContent = fullName(m);
-            var sub = document.createElement("span"); sub.className = "sub"; sub.textContent = "  " + m.email;
-            txt.appendChild(n); txt.appendChild(sub);
-            row.appendChild(cb); row.appendChild(txt);
-            people.appendChild(row);
-          });
+          };
+
+          /* The filter earns its place the same way the documents one above does: a
+             handful of people is quicker to read than to search, and an empty search
+             box over six names reads as something broken. */
+          if (lastRoster.length > 6) {
+            var tools = document.createElement("div"); tools.className = "ms-tools";
+            var search = document.createElement("input");
+            search.type = "text"; search.className = "ms-search grow";
+            search.placeholder = "Filter members…"; search.autocomplete = "off";
+            search.value = docPeopleQuery[doc.pkgId] || "";
+            search.addEventListener("input", function () {
+              docPeopleQuery[doc.pkgId] = search.value;
+              fillPeople();
+            });
+            tools.appendChild(search);
+            var picked = document.createElement("span"); picked.className = "ms-count";
+            picked.textContent = doc.grantedUserIds.length + " selected";
+            tools.appendChild(picked);
+            people.appendChild(tools);
+          }
+
+          fillPeople();
+          people.appendChild(list);
+          /* Restored at the END of the render, not here: an element that is not in the
+             document yet has no height, so an assignment to scrollTop is discarded. */
+          list.dataset.pkg = doc.pkgId;
+          list.addEventListener("scroll", function () { docPeopleScroll[doc.pkgId] = list.scrollTop; });
         }
         card.appendChild(people);
       }
       host.appendChild(card);
+    });
+
+    /* Cap the list only once it is long enough to need it — a card or two inside a
+       scroll box would put a scrollbar on a list that already fits. */
+    host.classList.toggle("doc-scroll", shown.length > 2);
+    host.scrollTop = docsScroll;
+    Array.prototype.forEach.call(host.querySelectorAll(".ms-list[data-pkg]"), function (l) {
+      l.scrollTop = docPeopleScroll[l.dataset.pkg] || 0;
     });
   }
 
