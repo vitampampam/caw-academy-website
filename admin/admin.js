@@ -209,78 +209,24 @@
     var day = d.getDate();
     return (day < 10 ? "0" + day : String(day)) + "-" + MONTHS[d.getMonth()] + "-" + d.getFullYear();
   }
-  function fmtDateTime(iso) {
-    if (!iso) return "—";
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return "—";
-    return fmtDate(iso) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-
-  // ── Your signed-in devices ────────────────────────────────────────────────
-  // Lists the admin's OWN native app sessions (the ones that count toward the
-  // per-account device limit). The server already excludes this web portal
-  // session, so signing a device out here frees a slot for the mobile app.
-  function loadDevices() {
-    var host = $("devices"); host.textContent = "Loading…";
-    return authed("GET", "/v1/me/devices", null).then(function (r) {
-      renderDevices(r && r.devices ? r.devices : []);
-    }).catch(function (err) {
-      host.textContent = "";
-      showMessage("devicesMsg", err.message || "Couldn't load your devices.", "err");
-    });
-  }
-
-  function renderDevices(devices) {
-    var host = $("devices"); host.textContent = "";
-    if (!devices.length) {
-      var e = document.createElement("div"); e.className = "empty";
-      e.textContent = "No app devices are signed in on your account.";
-      host.appendChild(e); return;
-    }
-    devices.forEach(function (d) {
-      var card = document.createElement("div"); card.className = "member";
-      var head = document.createElement("div"); head.className = "member-head";
-      var left = document.createElement("div");
-      var name = document.createElement("div"); name.className = "member-name";
-      name.textContent = d.deviceName || "Unknown device";
-      var meta = document.createElement("div"); meta.className = "member-email";
-      meta.textContent = "Last used " + fmtDateTime(d.lastUsedAt) + " · signed in " + fmtDate(d.createdAt);
-      left.appendChild(name); left.appendChild(meta);
-
-      var btn = document.createElement("button");
-      btn.className = "btn btn-danger"; btn.type = "button"; btn.textContent = "Sign out";
-      btn.addEventListener("click", function () {
-        if (!window.confirm("Sign out \"" + (d.deviceName || "this device") + "\"? It frees a device slot; that device will need to sign in again.")) return;
-        btn.disabled = true;
-        showMessage("devicesMsg", "", "ok");
-        authed("DELETE", "/v1/me/devices/" + encodeURIComponent(d.id), null).then(function () {
-          showMessage("devicesMsg", "Device signed out — a slot is now free.", "ok");
-          return loadDevices();
-        }).catch(function (err) {
-          btn.disabled = false;
-          showMessage("devicesMsg", err.message || "Couldn't sign out that device.", "err");
-        });
-      });
-
-      head.appendChild(left); head.appendChild(btn);
-      card.appendChild(head);
-      host.appendChild(card);
-    });
-  }
 
   // ── Sections ──────────────────────────────────────────────────────────────
-  /* One page was fine with three cards and is not with eight: an admin looking
-     for their own signed-in devices had to scroll past the entire team. Each tab
-     is one job. The hash records which, so a reload or a bookmark returns to the
-     same place and the browser's Back button works — no router, no new files. */
+  /* One page was fine with three cards and is not with seven: looking for the
+     licence or a certificate meant scrolling past the entire team. Each tab is one
+     job. The hash records which, so a reload or a bookmark returns to the same
+     place and the browser's Back button works — no router, no new files.
+
+     "Your account" was the sixth tab and is gone (SME, Oct 2026): it listed the
+     admin's own signed-in app devices, which is a thing about the person rather
+     than about the team they manage, and the app already has that screen. Sign out
+     lives in the header, so nothing was reachable only from there. */
 
   var SECTIONS = [
     ["overview",     "Overview"],
     ["assign",       "Assign"],
     ["team",         "Team"],
     ["documents",    "Documents"],
-    ["certificates", "Certificates"],
-    ["account",      "Your account"]
+    ["certificates", "Certificates"]
   ];
   var currentSect = "overview";
 
@@ -342,7 +288,13 @@
 
   window.addEventListener("hashchange", function () {
     var id = location.hash.slice(1);
-    if (id && id !== currentSect) showSection(id, true);
+    if (!id || id === currentSect) return;
+    showSection(id, true);
+    /* It may have refused: an unknown name, or a tab this org does not have. Then the
+       address bar still says #account (a bookmark from the build that had that tab)
+       while Overview is on screen, so the two are corrected to agree — the same rule
+       `applyPendingSection` applies at load time, through the same writer. */
+    if (currentSect !== id) showSection(currentSect, false);
   });
 
   /* A link to #documents arrives BEFORE the documents do: the tab exists only for
@@ -1989,7 +1941,6 @@
     certFilter = $("certSearch").value || "";
     renderCertificates(lastRoster);
   });
-  $("devicesReload").addEventListener("click", function () { loadDevices(); });
 
   // ── Auth (Sign in / Request admin account tabs) ────────────────────────────
   var registerMode = false;
@@ -2209,9 +2160,13 @@
   });
 
   // ── Forgot password ────────────────────────────────────────────────────────
-  /* Password reset is disabled on the website for now: the element is rendered
-     inert (see `.link-off`), and the handler is kept but guarded so re-enabling
-     it is a one-line change here and in index.html. */
+  /* LIVE since Oct 2026, when the mailbox was configured. The portal is a browser, so it
+     needs no code screen of its own: the reset email carries both a code and a link, and
+     the link lands on caw-academy.com/reset.html, which is exactly where somebody sitting
+     at this page should finish. The apps type the code instead, because a link opened from
+     a phone's mail app lands in a browser rather than in the app that is waiting.
+     The aria-disabled guard below is kept so the link can be made inert again by markup
+     alone if the mailbox ever goes away. */
   $("forgotLink").addEventListener("click", function (e) {
     if (this.getAttribute("aria-disabled") === "true") { e.preventDefault(); return; }
     e.preventDefault();
@@ -2222,7 +2177,7 @@
       return;
     }
     request("POST", "/v1/auth/forgot-password", { email: email }, false)
-      .then(function () { showMessage("authMsg", "If that email has an account, a reset link is on its way.", "ok"); })
+      .then(function () { showMessage("authMsg", "If that email has an account, a reset link is on its way. Open it on this device to set a new password.", "ok"); })
       .catch(function (err) { showMessage("authMsg", err.message, "err"); });
   });
 
@@ -2249,7 +2204,6 @@
       updateScheduleHint();
       show("dashView");
       showSection(location.hash.slice(1) || "overview", true);
-      loadDevices();
       loadLicence();
       // Documents after the roster: the per-member tick list is drawn from it.
       return loadRoster().then(loadDocs);

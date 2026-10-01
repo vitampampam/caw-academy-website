@@ -554,7 +554,7 @@
       <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin access is for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. This creates your CAW Academy account — the same one you use in the app. Our support team reviews each request. You will be notified by email once your account is activated. For anything else, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
       <div id="authMsg"></div>
       <button class="btn" type="submit" id="authSubmit" style="width:100%">Sign in</button>
-      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><span id="forgotLink" class="link-off" aria-disabled="true" style="font-size:14px">Forgot password?</span></p>
+      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><a href="#" id="forgotLink" style="font-size:14px">Forgot password?</a></p>
     </form>
     <p class="note" id="portalNote">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
   </div>
@@ -770,22 +770,6 @@
 
   </section>
 
-  <section class="sect" data-sect="account">
-  <!-- YOUR ACCOUNT — about the admin, not the team, so it sits last and says so. -->
-  <div class="card">
-    <div class="member-head" style="margin-bottom:6px">
-      <h2 style="margin:0">Your account</h2>
-      <button class="btn btn-ghost" id="devicesReload">Reload</button>
-    </div>
-    <ul class="steps">
-      <li>These are the app sessions signed in on <b>your</b> account.</li>
-      <li>This portal does not count toward your device limit.</li>
-      <li>Sign one out to free a slot.</li>
-    </ul>
-    <div id="devicesMsg"></div>
-    <div id="devices"></div>
-  </div>
-</section>
 
   <!-- THE PRINTED REPORT. Hidden on screen, the only thing printed on paper.
        Built on demand from the roster already in the page and handed to the
@@ -805,6 +789,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=15" defer></script>
+<script src="admin.js?v=18" defer></script>
 </body>
 </html>
