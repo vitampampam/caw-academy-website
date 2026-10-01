@@ -229,7 +229,7 @@
   .grouphead{margin:6px 0 8px; font-size:11.5px; font-weight:800; letter-spacing:.5px;
     text-transform:uppercase; color:var(--muted)}
   .grouphead + .rsum{margin-top:0}
-  /* The one-line licence fact in the page header — seats and renewal date, where
+  /* The one-line licence fact in the page header — licences and renewal date, where
      the eye already is, so the number is seen without scrolling to find it. */
   .strap{margin-top:6px; font-size:13px; color:var(--ink-soft)}
   .strap b{color:var(--ink)}
@@ -246,11 +246,42 @@
   .frow .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; color:var(--ink-soft); white-space:nowrap}
 
   /* Company documents: one block per package, with the two-way choice stated as
-     a choice rather than a switch — "Everyone with a seat" and "Only selected
+     a choice rather than a switch — "Everyone with a licence" and "Only selected
      people" both name what happens, where a toggle labelled "Restricted" would
      leave the reader working out which way is on. */
   .doc{border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin-top:12px; background:#fff}
   .doc-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  /* The owning company, as a heading over its documents. Quiet and small: it is a
+     grouping label, not a title — the DOCUMENT is the heading inside each card, and
+     two competing headings would make the card look like the subordinate thing. */
+  /* Company first and fixed, search second and elastic: the company is the choice
+     being made, the search is the refinement. Stacks on a phone. */
+  .doc-tools{display:flex; gap:10px; align-items:center; margin-bottom:12px}
+  .doc-tools .field{margin:0}
+  .doc-tools .dd{flex:0 0 280px; max-width:50%}
+  .doc-tools #docSearch{flex:1 1 auto; min-width:0}
+  @media (max-width:560px){
+    .doc-tools{flex-direction:column; align-items:stretch}
+    .doc-tools .dd{flex:none; max-width:none}
+  }
+
+  .dd{position:relative}
+  .dd-btn{display:flex; align-items:center; justify-content:space-between; gap:10px;
+    text-align:left; cursor:pointer; font-weight:600}
+  .dd-caret{width:0; height:0; flex:none; border-left:5px solid transparent;
+    border-right:5px solid transparent; border-top:6px solid var(--muted)}
+  /* Floats over the list instead of pushing it down, so opening the filter does not
+     move the thing being filtered out from under the cursor. */
+  .dd-menu{position:absolute; z-index:40; top:calc(100% + 6px); left:0; right:0;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    box-shadow:0 16px 40px rgba(11,18,56,.18); overflow:hidden}
+  .dd-menu .ms-list{max-height:260px}
+
+  .doc-company{display:flex; align-items:baseline; gap:10px; margin:18px 0 8px; padding:0 2px}
+  .doc-company:first-child{margin-top:4px}
+  .doc-company > span:first-child{font-weight:800; font-size:13px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--muted)}
+  .doc-company-n{font-size:12px; color:var(--indigo); font-weight:700}
   .doc-name{font-weight:700; font-size:15px}
   .doc-meta{color:var(--muted); font-size:12.5px}
   .doc-modes{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 0}
@@ -672,7 +703,7 @@
     <div id="overviewTraining" class="rsum"></div>
 
     <div id="licenceCard">
-      <h3 class="grouphead">Licence &amp; seats</h3>
+      <h3 class="grouphead">Licences &amp; renewal</h3>
       <div id="overviewLicence" class="rsum"></div>
       <div id="licenceDetail"></div>
     </div>
@@ -792,6 +823,35 @@
       <li>Changes apply the next time that person's app asks for the document.</li>
     </ul>
     <div id="docsMsg"></div>
+    <!-- A holder's manuals are found by who they belong to, so the company chips lead
+         and the search narrows within. Both are hidden by `renderDocs` when there is
+         only one company and nothing to narrow — a filter over a list of one is noise. -->
+    <!-- A chip per company does not survive an MRO with thirty customers: the row
+         wraps into a block taller than the list it filters. A select stays one line
+         however many there are, and it is the control people already expect for
+         "pick one of a long list". The search sits beside it for the rest. -->
+    <div id="docTools" class="doc-tools hidden">
+      <!-- A dropdown rather than a chip row, because an MRO with thirty customers
+           wraps a chip row into a block taller than the list it filters. It holds
+           CHECKBOXES rather than being a <select multiple>: picking several from a
+           native multi-select means ctrl-clicking, and letting go of ctrl wipes the
+           selection. This is the same ticked list the member and course pickers use. -->
+      <div class="dd" id="docCompanyDD">
+        <button type="button" class="field dd-btn" id="docCompanyBtn"
+                aria-haspopup="listbox" aria-expanded="false">
+          <span id="docCompanyLabel">All companies</span>
+          <span class="dd-caret" aria-hidden="true"></span>
+        </button>
+        <div class="dd-menu hidden" id="docCompanyMenu" role="listbox" aria-multiselectable="true">
+          <div class="ms-tools">
+            <input class="ms-search grow" id="docCompanySearch" placeholder="Find a company…" autocomplete="off">
+            <button type="button" class="linkbtn" id="docCompanyClear">Clear</button>
+          </div>
+          <div class="ms-list" id="docCompanyList"></div>
+        </div>
+      </div>
+      <input class="field" id="docSearch" placeholder="Search document or id…" autocomplete="off">
+    </div>
     <div id="docs"></div>
   </div>
 
@@ -832,6 +892,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=19" defer></script>
+<script src="admin.js?v=23" defer></script>
 </body>
 </html>

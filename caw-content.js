@@ -519,7 +519,7 @@
       items: [
         'Access is granted by licence. A licence has a scope (which courses and which frameworks) and an end date.',
         'A licence can be tied to your email domain, so only people with a company address can use it.',
-        'Each seat is single-use and stays with the account that redeemed it. Codes cannot be passed around.',
+        'Each licence is single-use and stays with the account that redeemed it. Codes cannot be passed around.',
         'A free trial is a normal licence with a short validity. Study progress survives the trial ending.',
         'Completion is evidenced by the certificate: each one carries a unique number and a QR code, confirmable in the public registry on this site.'
       ],
@@ -603,8 +603,8 @@
     },
     {
       id: 'seats',
-      card: 'Manage seats & track progress',
-      title: 'Managing seats',
+      card: 'Manage licences & track progress',
+      title: 'Managing licences',
       intro: 'Access is administered centrally. You decide which courses and which framework a licence covers, how long it runs, and who may redeem it.',
       aof: 'Because the Operating Framework and Part-M courses are free in every edition, you can give a whole department a common starting point before deciding which paid scopes each role needs.',
       extra: B_SHARED.admin

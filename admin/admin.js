@@ -768,7 +768,7 @@
     el.textContent = "";
     if (!t || !t.seatLimit) return;
     var seats = document.createElement("b");
-    seats.textContent = t.claimed + " of " + t.seatLimit + " seats in use";
+    seats.textContent = t.claimed + " of " + t.seatLimit + " licences in use";
     el.appendChild(seats);
     if (t.validUntil) {
       el.appendChild(document.createTextNode("  ·  renews "));
@@ -796,15 +796,15 @@
     /* Seats in use, out of what was bought. Amber at the cap because that is the
        moment a new colleague cannot be added, and nothing else on this page says so. */
     var full = t.claimed >= t.seatLimit;
-    host.appendChild(statTile("Seats in use", t.claimed, full ? "warn" : "good",
+    host.appendChild(statTile("Licences in use", t.claimed, full ? "warn" : "good",
       "of " + t.seatLimit + " purchased"));
     // Invited and never arrived — the gap an admin currently has no way to see.
     host.appendChild(statTile("Codes unredeemed", t.unredeemed, t.unredeemed ? "warn" : "good",
       t.unredeemed ? "sent but not yet claimed" : "none outstanding"));
-    host.appendChild(statTile("Seats spare", t.spare, "", "no code issued yet"));
+    host.appendChild(statTile("Licences spare", t.spare, "", "no code issued yet"));
     // Accounts without a seat: membership is by email domain, so someone can hold
     // an account on your domain and no entitlement at all.
-    host.appendChild(statTile("Accounts without a seat", data.accountsWithoutSeat, data.accountsWithoutSeat ? "warn" : "",
+    host.appendChild(statTile("Accounts without a licence", data.accountsWithoutSeat, data.accountsWithoutSeat ? "warn" : "",
       "on your domain"));
     var days = t.daysRemaining;
     host.appendChild(statTile("Days left", days == null ? "—" : days,
@@ -820,7 +820,7 @@
         var c = document.createElement("div"); c.className = "course";
         c.appendChild(document.createTextNode("Licence " + (i + 1)));
         var small = document.createElement("small");
-        small.textContent = r.claimed + " of " + r.seatLimit + " seats in use  ·  " +
+        small.textContent = r.claimed + " of " + r.seatLimit + " licences in use  ·  " +
           r.issued + " code" + (r.issued === 1 ? "" : "s") + " issued  ·  expires " +
           fmtDate(r.validUntil) + " (" + r.daysRemaining + "d)";
         c.appendChild(small);
@@ -836,15 +836,15 @@
 
     var note = document.createElement("p"); note.className = "note";
     note.style.marginTop = "12px";
-    note.textContent = "Seats and renewals are managed by CAW Academy — contact us to add seats or extend. " +
-      "A member appears in the roster once they create an account on your domain; they can only open paid courses after redeeming a seat code.";
+    note.textContent = "Licences and renewals are managed by CAW Academy — contact us to add licences or extend. " +
+      "A member appears in the roster once they create an account on your domain; they can only open paid courses after redeeming a licence code.";
     detail.appendChild(note);
   }
 
   // ── Company documents ─────────────────────────────────────────────────────
   /* The licence decides WHAT the organisation holds; this decides WHO inside it
      can open each one. An MRO's packages are its customers' controlled documents,
-     so "everyone with a seat" — the only behaviour there used to be — is the wrong
+     so "everyone with a licence" — the only behaviour there used to be — is the wrong
      default for them and the right one for an operator reading its own manual.
      Both are offered by name; neither is a switch the reader has to decode. */
 
@@ -883,22 +883,180 @@
       .catch(function (err) { showMessage("docsMsg", err.message || "Couldn't change that.", "err"); });
   }
 
+  /** The document's own name. The server resolves it (packaged title, else derived
+   *  from the pkgId); an older API that sends none leaves the id, which is still the
+   *  one label we are always sure of. */
+  function docTitleOf(doc) { return doc.title || doc.pkgId; }
+
+  /** The company that owns it. Documents are grouped under this. */
+  function docCompanyOf(doc) { return doc.name || "Not yet loaded on the server"; }
+
+  /* Which companies are ticked, and the free-text filter beside them.
+     EMPTY MEANS ALL, deliberately: an admin who has ticked nothing wants everything,
+     and a filter that starts by hiding the list would be a worse default than no
+     filter at all. */
+  var docCompanies = {};
+  var docQuery = "";
+  var docCompanyQuery = "";
+
+  function selectedCompanies() { return Object.keys(docCompanies); }
+
+  /** The documents currently shown. Companies and search compose: pick the holders,
+   *  then narrow within them. The search reaches the pkgId too, because that is what
+   *  somebody pastes when checking one specific package rather than browsing. */
+  function visibleDocs() {
+    var q = docQuery.trim().toLowerCase();
+    var any = selectedCompanies().length > 0;
+    return lastDocs.filter(function (d) {
+      if (any && !docCompanies[docCompanyOf(d)]) return false;
+      if (!q) return true;
+      return (docCompanyOf(d) + " " + docTitleOf(d) + " " + d.pkgId).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  /** company -> how many documents it holds, counted from the WHOLE list. A number
+   *  that moved because another company was ticked could not be used to compare
+   *  holders, which is most of what it is for. */
+  function companyCounts() {
+    var counts = {}, order = [];
+    lastDocs.forEach(function (d) {
+      var c = docCompanyOf(d);
+      if (counts[c] === undefined) { counts[c] = 0; order.push(c); }
+      counts[c]++;
+    });
+    order.sort(function (a, b) { return a.localeCompare(b, undefined, { sensitivity: "base" }); });
+    return { counts: counts, order: order };
+  }
+
+  function docCompanyLabel() {
+    var picked = selectedCompanies();
+    if (!picked.length) return "All companies";
+    if (picked.length === 1) return picked[0];
+    return picked.length + " companies";
+  }
+
+  function renderDocCompanyMenu() {
+    var list = $("docCompanyList"); if (!list) return;
+    var cc = companyCounts();
+
+    /* A company that is no longer on the licence must not stay ticked: the list would
+       be filtered by something the admin can no longer see to un-tick. */
+    selectedCompanies().forEach(function (c) {
+      if (cc.counts[c] === undefined) delete docCompanies[c];
+    });
+
+    $("docCompanyLabel").textContent = docCompanyLabel();
+    list.textContent = "";
+
+    var q = docCompanyQuery.trim().toLowerCase();
+    var shownCompanies = cc.order.filter(function (c) {
+      return !q || c.toLowerCase().indexOf(q) !== -1;
+    });
+    if (!shownCompanies.length) {
+      var none = document.createElement("div");
+      none.className = "empty"; none.style.padding = "8px 12px";
+      none.textContent = "No company matches that.";
+      list.appendChild(none);
+      return;
+    }
+    shownCompanies.forEach(function (c) {
+      var row = document.createElement("label"); row.className = "ms-row";
+      var cb = document.createElement("input"); cb.type = "checkbox";
+      cb.checked = !!docCompanies[c];
+      cb.addEventListener("change", function () {
+        if (cb.checked) docCompanies[c] = true; else delete docCompanies[c];
+        renderDocs();            // live: the list follows each tick
+      });
+      var txt = document.createElement("span");
+      var nm = document.createElement("span"); nm.textContent = c;
+      var sub = document.createElement("span"); sub.className = "sub";
+      sub.textContent = "  " + cc.counts[c] + (cc.counts[c] === 1 ? " document" : " documents");
+      txt.appendChild(nm); txt.appendChild(sub);
+      row.appendChild(cb); row.appendChild(txt);
+      list.appendChild(row);
+    });
+  }
+
+  function openDocCompany(open) {
+    var menu = $("docCompanyMenu"); if (!menu) return;
+    menu.classList.toggle("hidden", !open);
+    $("docCompanyBtn").setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) { renderDocCompanyMenu(); $("docCompanySearch").focus(); }
+  }
+
   function renderDocs() {
     var host = $("docs"); if (!host) return;
     host.textContent = "";
-    lastDocs.forEach(function (doc) {
+    renderDocCompanyMenu();
+
+    /* The controls earn their place only when there is something to narrow. One
+       company and a handful of documents needs no filter, and an empty filter row
+       above a short list reads as something broken rather than something not needed. */
+    var cc = companyCounts();
+    $("docTools").classList.toggle("hidden", !(cc.order.length > 1 || lastDocs.length > 3));
+
+    var shown = visibleDocs();
+    if (!shown.length) {
+      var none = document.createElement("div");
+      none.className = "empty";
+      if (!lastDocs.length) {
+        none.textContent = "No company documents on your licence yet.";
+      } else {
+        /* NAME WHAT IS FILTERING, and offer the way out. Two filters that each match
+           something can between them match nothing — a search for one company's
+           document while a different company is ticked — and "no match" alone leaves
+           the admin to work out which of the two to undo. */
+        var bits = [];
+        if (docQuery.trim()) bits.push("\u201c" + docQuery.trim() + "\u201d");
+        var picked = selectedCompanies();
+        if (picked.length === 1) bits.push("in " + picked[0]);
+        else if (picked.length > 1) bits.push("in " + picked.length + " selected companies");
+        none.textContent = "No document matches " + (bits.join(" ") || "that filter") + ". ";
+        var reset = document.createElement("button");
+        reset.type = "button"; reset.className = "linkbtn"; reset.textContent = "Clear the filters";
+        reset.addEventListener("click", clearDocFilters);
+        none.appendChild(reset);
+      }
+      host.appendChild(none);
+      return;
+    }
+
+    /* GROUPED BY THE COMPANY THAT OWNS THE DOCUMENT. An MRO holds its customers'
+       manuals, so one list can carry Azerbaijan Airlines' CAME and MEL beside Air
+       Astana's CAME — and what the admin is looking for is "that airline's
+       documents", not a flat run of cards whose headings all read like companies.
+       The server sorts by company then document, so the order here is whatever it
+       sent; this only draws a heading where the company changes. */
+    var currentCompany = null;
+    shown.forEach(function (doc) {
+      var company = docCompanyOf(doc);
+      if (company !== currentCompany) {
+        currentCompany = company;
+        var h = document.createElement("div");
+        h.className = "doc-company";
+        var cn = document.createElement("span"); cn.textContent = company;
+        h.appendChild(cn);
+        // How many that holder has, said once rather than left to be counted.
+        var n = shown.filter(function (d) { return docCompanyOf(d) === company; }).length;
+        if (n > 1) {
+          var c = document.createElement("span");
+          c.className = "doc-company-n";
+          c.textContent = n + " documents";
+          h.appendChild(c);
+        }
+        host.appendChild(h);
+      }
+
       var card = document.createElement("div"); card.className = "doc";
 
       var head = document.createElement("div"); head.className = "doc-head";
       var left = document.createElement("div");
       var name = document.createElement("div"); name.className = "doc-name";
-      // The package id is the only name we are sure of; the manifest's title is
-      // shown when the encrypted package is actually on the host.
-      name.textContent = doc.name || doc.pkgId;
+      // The DOCUMENT, not the company — the company is the heading above it.
+      name.textContent = docTitleOf(doc);
       left.appendChild(name);
       var meta = document.createElement("div"); meta.className = "doc-meta";
-      var bits = [];
-      if (doc.name) bits.push(doc.pkgId);
+      var bits = [doc.pkgId];
       if (doc.rev) bits.push(doc.rev);
       if (doc.updatedAt) bits.push("updated " + fmtDate(doc.updatedAt));
       if (!doc.name && !doc.rev && !doc.updatedAt) bits.push("not yet loaded on the server");
@@ -908,13 +1066,13 @@
 
       var count = document.createElement("span"); count.className = "doc-count";
       count.textContent = doc.mode === "all"
-        ? "Everyone with a seat"
+        ? "Everyone with a licence"
         : doc.grantedUserIds.length + " of " + lastRoster.length + " members";
       head.appendChild(count);
       card.appendChild(head);
 
       var modes = document.createElement("div"); modes.className = "doc-modes";
-      [["all", "Everyone with a seat"], ["selected", "Only selected people"]].forEach(function (m) {
+      [["all", "Everyone with a licence"], ["selected", "Only selected people"]].forEach(function (m) {
         var b = document.createElement("button");
         b.type = "button";
         b.className = "doc-mode" + (doc.mode === m[0] ? " on" : "");
@@ -2013,7 +2171,7 @@
      an empty list means no seat has been redeemed (or it expired) — assignments to them
      are refused by the server, and this is how the admin sees it before trying.
      Absent entirely means an older API that does not send the field; then nothing is
-     claimed, because inventing a "No seat" badge from missing data would be worse than
+     claimed, because inventing a "No licence code" badge from missing data would be worse than
      saying nothing. */
   function hasNoSeat(m) {
     return Array.isArray(m.entitledCourses) && m.entitledCourses.length === 0;
@@ -2199,6 +2357,40 @@
     exportRosterPdf(shownRoster, currentScopeLabel());
   });
   $("overviewReload").addEventListener("click", function () { loadLicence(); loadRoster(); });
+  function clearDocFilters() {
+    docCompanies = {};
+    docQuery = "";
+    docCompanyQuery = "";
+    $("docSearch").value = "";
+    $("docCompanySearch").value = "";
+    renderDocs();
+  }
+
+  $("docSearch").addEventListener("input", function () {
+    docQuery = this.value || "";
+    renderDocs();
+  });
+  $("docCompanySearch").addEventListener("input", function () {
+    docCompanyQuery = this.value || "";
+    renderDocCompanyMenu();     // only the menu: the document list is unaffected
+  });
+  $("docCompanyClear").addEventListener("click", function () {
+    docCompanies = {};
+    renderDocs();               // stays open — clearing is usually the start of re-picking
+  });
+  $("docCompanyBtn").addEventListener("click", function (e) {
+    e.stopPropagation();
+    openDocCompany($("docCompanyMenu").classList.contains("hidden"));
+  });
+  // Keep clicks inside the menu from reaching the close-on-outside handler below.
+  $("docCompanyMenu").addEventListener("click", function (e) { e.stopPropagation(); });
+  document.addEventListener("click", function () { openDocCompany(false); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !$("docCompanyMenu").classList.contains("hidden")) {
+      openDocCompany(false);
+      $("docCompanyBtn").focus();
+    }
+  });
   $("docsReload").addEventListener("click", function () { loadDocs(); });
   $("certSearch").addEventListener("input", function () {
     certFilter = $("certSearch").value || "";
