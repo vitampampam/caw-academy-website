@@ -124,13 +124,19 @@
     wrapped copy of that key: <strong>we cannot read your notes, and neither can anyone
     who obtains the stored data</strong>. The note text also stays in plain form on the
     device you wrote it on, so the feature can never lose a note.</p>
-    <p><strong>One consequence of that design, stated plainly.</strong> Because the key
-    is unlocked by your password, <strong>resetting a forgotten password makes previously
-    synced note text unreadable</strong> — the app creates a new key at the next sign-in
-    and notes encrypted under the old one cannot be recovered by us or by you. Notes
-    still held in plain form on a device you are already using are unaffected. This is
-    the necessary cost of us not holding a key of our own; the app’s export screens let
-    you keep your own copy at any time.</p>
+    <p><strong>How a forgotten password is survived, without us holding a key.</strong>
+    Your note key is also kept in your <strong>iCloud Keychain</strong>, which Apple
+    syncs between your own Apple devices and restores onto a new one, encrypted end to
+    end to your Apple account. <strong>We never receive it.</strong> So when you reset a
+    forgotten password and sign in again, the app finds that key and re-locks it with
+    your new password — your notes, highlights and progress all come back, and we still
+    cannot read a single note.</p>
+    <p>Two cases this does not reach, stated plainly rather than left for you to
+    discover: if you have <strong>iCloud Keychain switched off</strong>, or you move to
+    an <strong>Android device</strong>, the key does not travel, and note text synced
+    before the reset cannot be recovered by us or by you. Your highlights, progress and
+    the notes held in plain form on a device you are already using are unaffected in
+    every case, and the app’s export screens let you keep your own copy at any time.</p>
     <p><strong>Controlled documents (organisations).</strong> Where an organisation’s
     licence includes private controlled documents, the app has a separate reader for
     them. Highlights and notes made there sync in exactly the same way, under the same
@@ -168,9 +174,13 @@
     <p><strong>Account emails.</strong> We use email only to run your account: to verify
     your address, to send a reset link if you ask for one, and — where your organisation
     uses course assignments — to tell your organisation’s administrator when one of their
-    assignments is completed or becomes overdue. These messages are delivered through an
-    email provider acting as our processor. <strong>We send no marketing email</strong>,
-    and there is no mailing list to be added to.</p>
+    assignments is completed or becomes overdue. These messages are delivered by
+    <strong>Resend</strong> (resend.com), a US company acting as our processor under a
+    data processing agreement; the transfer is covered by standard contractual clauses and
+    the EU–US Data Privacy Framework. All it receives is the address the message goes to
+    and the message itself — never your password, your progress, your notes or your
+    highlights. <strong>We send no marketing email</strong>, and there is no mailing list
+    to be added to.</p>
     <p><strong>Retention.</strong> We keep account data while your account exists. Delete
     the account and it goes, along with your certificates and their registry entries, your
     device sessions, your synced progress and your assignments — we keep nothing back
