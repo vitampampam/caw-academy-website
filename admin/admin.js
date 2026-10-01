@@ -168,6 +168,130 @@
     });
   }
 
+  // ── Dialogs ───────────────────────────────────────────────────────────────
+  /* The portal's own confirm/alert. `window.confirm` was doing three things wrong:
+     it is unstyleable, it prefixes "caw-academy.com says" to your own words, and it
+     CLIPS long text — the replace prompt's button legend ("OK — replace, Cancel —
+     keep the existing dates") was cut off, leaving two buttons whose meaning had
+     just been hidden.
+
+     So the buttons carry the verbs themselves. "OK/Cancel" makes the reader hold
+     the question in their head to decode the answer; "Replace the dates" / "Keep
+     existing dates" can be read on their own, which is what someone skimming a
+     dialog actually does.
+
+     Returns a Promise<boolean>. One dialog at a time; a second call replaces the
+     first rather than stacking, because two modal layers is never the intent. */
+  var openDialog = null;
+
+  function dialog(opts) {
+    if (openDialog) openDialog.close(false);
+
+    var resolveWith;
+    var done = new Promise(function (res) { resolveWith = res; });
+
+    var back = document.createElement("div");
+    back.className = "dlg-back";
+    var box = document.createElement("div");
+    box.className = "dlg";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+
+    var head = document.createElement("div"); head.className = "dlg-head";
+    var h = document.createElement("h2"); h.className = "dlg-title"; h.id = "dlgTitle";
+    h.textContent = opts.title;
+    box.setAttribute("aria-labelledby", "dlgTitle");
+    head.appendChild(h); box.appendChild(head);
+
+    var body = document.createElement("div"); body.className = "dlg-body";
+    // Accepts text, a list, or both — the caller never builds DOM, so no caller can
+    // put unescaped server text on the page.
+    (opts.lines || []).forEach(function (t) {
+      var pEl = document.createElement("p"); pEl.textContent = t; body.appendChild(pEl);
+    });
+    if (opts.items && opts.items.length) {
+      var ul = document.createElement("ul");
+      opts.items.forEach(function (t) {
+        var li = document.createElement("li"); li.textContent = t; ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+    if (opts.note) {
+      var n = document.createElement("p"); n.className = "dlg-note"; n.textContent = opts.note;
+      body.appendChild(n);
+    }
+    box.appendChild(body);
+
+    var foot = document.createElement("div"); foot.className = "dlg-foot";
+    var cancelBtn = null;
+    if (opts.cancelLabel) {
+      cancelBtn = document.createElement("button");
+      cancelBtn.type = "button"; cancelBtn.className = "btn-ghost";
+      cancelBtn.textContent = opts.cancelLabel;
+      cancelBtn.addEventListener("click", function () { close(false); });
+      foot.appendChild(cancelBtn);
+    }
+    var okBtn = document.createElement("button");
+    okBtn.type = "button";
+    okBtn.className = opts.danger ? "btn-danger" : "btn";
+    okBtn.textContent = opts.confirmLabel || "OK";
+    okBtn.addEventListener("click", function () { close(true); });
+    foot.appendChild(okBtn);
+    box.appendChild(foot);
+
+    back.appendChild(box);
+    document.body.appendChild(back);
+
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); close(false); }
+      // Enter confirms only when the focus is still on a button — otherwise a
+      // keystroke meant for the page could answer a question nobody read.
+      else if (e.key === "Enter" && document.activeElement &&
+               document.activeElement.tagName === "BUTTON") {
+        e.preventDefault(); document.activeElement.click();
+      } else if (e.key === "Tab") {
+        // Keep focus inside: a tab that escapes a modal leaves the keyboard on a
+        // page the mouse cannot reach.
+        var f = [cancelBtn, okBtn].filter(Boolean);
+        var i = f.indexOf(document.activeElement);
+        if (i === -1) return;
+        e.preventDefault();
+        f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+      }
+    }
+    function close(answer) {
+      if (openDialog !== api) return;
+      openDialog = null;
+      document.removeEventListener("keydown", onKey, true);
+      back.remove();
+      if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+      resolveWith(answer);
+    }
+    var api = { close: close, done: done };
+
+    // Clicking the dim area cancels — but only the dim area, never a stray click
+    // that started inside the card and drifted out.
+    back.addEventListener("mousedown", function (e) { if (e.target === back) close(false); });
+
+    var lastFocus = document.activeElement;
+    openDialog = api;
+    document.addEventListener("keydown", onKey, true);
+    /* Focus the SAFE button on a destructive question, the primary otherwise. A
+       dialog that opens with "Delete" under a waiting Enter key is a trap. */
+    (opts.danger && cancelBtn ? cancelBtn : okBtn).focus();
+
+    return done;
+  }
+
+  /** A question. Resolves true if the admin chose the action. */
+  function confirmDialog(opts) { return dialog(opts); }
+
+  /** A statement with nothing to decide — one button, and it says "Close", because
+   *  "OK" on a message about a failure reads like agreeing to it. */
+  function alertDialog(title, lines, note) {
+    return dialog({ title: title, lines: lines, note: note, confirmLabel: "Close" });
+  }
+
   // ── UI helpers ────────────────────────────────────────────────────────────
   function showMessage(elId, text, kind) {
     var el = $(elId); el.textContent = "";
@@ -1195,7 +1319,10 @@
       if (date.value) body.deadline = new Date(date.value + "T23:59:59").toISOString();
       authed("PATCH", "/v1/org/assignments/" + encodeURIComponent(a.id), body)
         .then(function () { loadRoster(); })
-        .catch(function (err) { alert(err.message); save.disabled = false; });
+        .catch(function (err) {
+          alertDialog("Couldn't save that change", [err.message]);
+          save.disabled = false;
+        });
     });
 
     var cancel = document.createElement("button");
@@ -1210,32 +1337,56 @@
   }
 
   function removeAssignment(a) {
-    if (!window.confirm("Remove the assignment “" + labelFor(a.courseKey) + "”?")) return;
-    authed("DELETE", "/v1/org/assignments/" + encodeURIComponent(a.id), null)
-      .then(function () { loadRoster(); })
-      .catch(function (err) { alert(err.message); });
+    confirmDialog({
+      title: "Remove this assignment?",
+      lines: [labelFor(a.courseKey) + " will be taken off their list."],
+      note: "Any progress they have already made on the course is kept.",
+      confirmLabel: "Remove assignment",
+      cancelLabel: "Keep it",
+      danger: true,
+    }).then(function (yes) {
+      if (!yes) return;
+      authed("DELETE", "/v1/org/assignments/" + encodeURIComponent(a.id), null)
+        .then(function () { loadRoster(); })
+        .catch(function (err) { alertDialog("Couldn't remove that assignment", [err.message]); });
+    });
   }
 
   // Bulk removal: delete every assignment in `list` (one DELETE each — the API has no
   // batch route), then refresh the roster once. Reports any that failed.
   function removeAssignments(list, memberName) {
     if (!list.length) return;
-    var msg = list.length === 1
-      ? "Remove the assignment “" + labelFor(list[0].courseKey) + "”?"
-      : "Remove " + list.length + " assignments from " + memberName + "?\n\n"
-        + list.map(function (a) { return "• " + labelFor(a.courseKey); }).join("\n");
-    if (!window.confirm(msg)) return;
-    var failed = [];
-    var chain = Promise.resolve();
-    list.forEach(function (a) {
-      chain = chain.then(function () {
-        return authed("DELETE", "/v1/org/assignments/" + encodeURIComponent(a.id), null)
-          .catch(function () { failed.push(labelFor(a.courseKey)); });
+    var one = list.length === 1;
+    confirmDialog({
+      title: one ? "Remove this assignment?" : "Remove " + list.length + " assignments?",
+      lines: one
+        ? [labelFor(list[0].courseKey) + " will be taken off " + memberName + "'s list."]
+        : ["These will be taken off " + memberName + "'s list:"],
+      // The courses are listed rather than counted: "remove 6 assignments" is not
+      // something anybody can check before agreeing to it.
+      items: one ? null : list.map(function (a) { return labelFor(a.courseKey); }),
+      note: "Any progress already made is kept.",
+      confirmLabel: one ? "Remove assignment" : "Remove " + list.length + " assignments",
+      cancelLabel: "Keep them",
+      danger: true,
+    }).then(function (yes) {
+      if (!yes) return;
+      var failed = [];
+      var chain = Promise.resolve();
+      list.forEach(function (a) {
+        chain = chain.then(function () {
+          return authed("DELETE", "/v1/org/assignments/" + encodeURIComponent(a.id), null)
+            .catch(function () { failed.push(labelFor(a.courseKey)); });
+        });
       });
-    });
-    chain.then(function () {
-      if (failed.length) alert("Could not remove: " + failed.join(", "));
-      loadRoster();
+      chain.then(function () {
+        if (failed.length) {
+          alertDialog("Some assignments could not be removed",
+                      ["These are still on the list; the rest were removed."],
+                      failed.join(", "));
+        }
+        loadRoster();
+      });
     });
   }
 
@@ -1748,6 +1899,10 @@
     renderRoster(lastRoster);
   });
   $("courseSearch").addEventListener("input", applyCourseFilter);
+  $("memClear").addEventListener("click", function () {
+    selectedUserIds = {};
+    renderMemberChecklist(lastRoster);   // re-renders the ticks and re-syncs "Select all shown"
+  });
   $("courseClear").addEventListener("click", function () {
     selectedCourses = {}; renderCourseChecklist(); updateCourseCount(); updateScheduleHint();
   });
@@ -1879,11 +2034,18 @@
     // Warn (allow override) if the schedule is too short — under ~3 weeks per course.
     var n = plan.length;
     var perCourseDays = Math.round((plan[n - 1].date.getTime() - Date.now()) / DAY_MS / n);
-    if (perCourseDays < 21) {
-      if (!window.confirm("This schedule gives about " + Math.max(0, perCourseDays) +
-        " days per course for " + n + " course" + (n === 1 ? "" : "s") +
-        " — that may be too short. Assign anyway?")) return;
-    }
+    var ask = perCourseDays < 21
+      ? confirmDialog({
+          title: "That is a tight schedule",
+          lines: ["It gives about " + Math.max(0, perCourseDays) + " days per course for "
+                  + n + " course" + (n === 1 ? "" : "s") + ", which may be too short to finish."],
+          note: "You can change the first deadline or the months between courses instead.",
+          confirmLabel: "Assign anyway",
+          cancelLabel: "Change the dates",
+        })
+      : Promise.resolve(true);
+    ask.then(function (go) { if (go) runAssign(); });
+    function runAssign() {
 
     /* Each member gets the same plan. The soft order follows CATALOGUE POSITION —
        there is no "start sequence at" box, because a number the admin had to
@@ -1980,19 +2142,29 @@
       var pending = conflicts.filter(function (c) { return c.reason !== "completed"; });
       if (!pending.length) return report(created, 0, done.length);
 
-      /* ONE prompt for the whole batch. Nothing was written for these — the
-         server reported them and stopped — so Cancel really does keep every date. */
-      var lines = pending.slice(0, 6).map(function (c) {
-        return "\u2022 " + nameOf(c.userId) + " — " + labelFor(c.courseKey) + ", due " + fmtDate(c.deadline);
-      }).join("\n");
-      if (pending.length > 6) lines += "\n\u2022 …and " + (pending.length - 6) + " more";
+      /* ONE prompt for the whole batch. Nothing was written for these — the server
+         reported them and stopped — so "Keep" really does keep every date.
+         The legend this message used to carry ("OK — replace, Cancel — keep the
+         existing dates") is gone, because THE BUTTONS SAY IT NOW. That line existed
+         only because window.confirm cannot label its own buttons, and it was the
+         first thing the browser clipped — leaving OK and Cancel with the sentence
+         that explained them hidden. */
+      var one = pending.length === 1;
+      var items = pending.slice(0, 8).map(function (c) {
+        return nameOf(c.userId) + " — " + labelFor(c.courseKey) + ", due " + fmtDate(c.deadline);
+      });
+      if (pending.length > 8) items.push("…and " + (pending.length - 8) + " more");
 
-      var replace = window.confirm(
-        (pending.length === 1 ? "One of these is already scheduled:" : pending.length + " of these are already scheduled:") +
-        "\n\n" + lines +
-        "\n\nReplace the existing deadline" + (pending.length === 1 ? "" : "s") + " with the new one" +
-        (pending.length === 1 ? "" : "s") + "?\n\nOK — replace     Cancel — keep the existing date" +
-        (pending.length === 1 ? "" : "s"));
+      return confirmDialog({
+        title: one ? "One of these is already scheduled" : pending.length + " are already scheduled",
+        lines: [one
+          ? "This learner already has a deadline for that course:"
+          : "These learners already have a deadline for the course selected:"],
+        items: items,
+        note: "Nothing has been changed for " + (one ? "this one" : "these") + " yet.",
+        confirmLabel: one ? "Replace the date" : "Replace the dates",
+        cancelLabel: one ? "Keep the existing date" : "Keep the existing dates",
+      }).then(function (replace) {
       if (!replace) return report(created, pending.length, done.length);
 
       showMessage("assignMsg", "Replacing " + pending.length + " …", "ok");
@@ -2004,10 +2176,12 @@
       return postBatch(retry, true).then(function (r2) {
         return report(created + (r2.assignments || []).length, 0, done.length);
       });
+      });   // confirmDialog
     }).catch(function (err) {
       showMessage("assignMsg", err.message || "Couldn't reach the server.", "err");
       btn.disabled = false;
     });
+    }   // runAssign
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });

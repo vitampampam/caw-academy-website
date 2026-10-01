@@ -120,6 +120,41 @@
   .btn-danger{background:#fff; color:var(--err); border:1px solid var(--line); padding:7px 12px; font-size:13px; font-weight:700}
   .btn-danger:hover{border-color:var(--err); background:var(--err-soft)}
 
+  /* ── Dialogs ──────────────────────────────────────────────────────────────
+     The portal's own, replacing window.confirm/alert. A browser dialog cannot be
+     styled, says "caw-academy.com says" above your words, and — the reason this
+     exists — CLIPS long text: the replace prompt's own button legend was cut off,
+     leaving OK and Cancel with nothing explaining which was which.
+     Here the body scrolls and the BUTTONS CARRY THE VERBS, so the choice is
+     readable even if nothing else is. */
+  .dlg-back{position:fixed; inset:0; background:rgba(11,18,56,.45); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px)}
+  .dlg{background:var(--card); border-radius:18px; box-shadow:0 24px 60px rgba(11,18,56,.3);
+    width:100%; max-width:520px; max-height:calc(100vh - 40px); display:flex; flex-direction:column;
+    overflow:hidden; animation:dlgIn .13s ease-out}
+  @keyframes dlgIn{from{opacity:0; transform:translateY(6px) scale(.98)} to{opacity:1; transform:none}}
+  .dlg-head{padding:22px 24px 0}
+  .dlg-title{font-family:var(--serif); font-weight:600; font-size:20px; margin:0; color:var(--ink)}
+  .dlg-body{padding:10px 24px 4px; overflow:auto; font-size:14.5px; line-height:1.55; color:var(--ink-soft)}
+  .dlg-body p{margin:0 0 10px}
+  .dlg-body ul{margin:0 0 12px; padding-left:18px}
+  .dlg-body li{margin:3px 0}
+  .dlg-note{font-size:13px; color:var(--muted)}
+  /* Buttons right-aligned, primary last — the resting place for the eye and the
+     thumb, and the same order as every system dialog the admin already uses. */
+  .dlg-foot{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+    padding:16px 24px 20px; border-top:1px solid var(--line); margin-top:8px}
+  .dlg-foot .btn, .dlg-foot .btn-ghost, .dlg-foot .btn-danger{font-size:14px; padding:10px 16px}
+  .dlg-foot .btn-danger{background:var(--err); color:#fff; border-color:var(--err)}
+  .dlg-foot .btn-danger:hover{background:#9E1616; border-color:#9E1616}
+  @media (max-width:560px){
+    /* One per line on a phone, primary on top: a wrapped row puts the destructive
+       button under the thumb by accident. */
+    .dlg-foot{flex-direction:column-reverse}
+    .dlg-foot button{width:100%}
+  }
+
   .msg{font-size:14px; margin:12px 0; padding:11px 13px; border-radius:10px}
   .msg.err{background:var(--err-soft); color:var(--err)}
   .msg.ok{background:var(--success-soft); color:var(--success)}
@@ -674,6 +709,10 @@
           <div class="ms">
             <div class="ms-tools">
               <input class="ms-search grow" id="memSearch" placeholder="Filter members…" autocomplete="off">
+              <!-- Matches the Courses picker beside it. The two lists do the same job and
+                   had different controls: Courses could be cleared in one click, Members
+                   had to be unticked one at a time. -->
+              <button type="button" class="linkbtn" id="memClear">Clear</button>
               <span class="ms-count" id="memCount">0 selected</span>
             </div>
             <div class="ms-tools" style="border-bottom:1px solid var(--line)">
@@ -793,6 +832,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=18" defer></script>
+<script src="admin.js?v=19" defer></script>
 </body>
 </html>
