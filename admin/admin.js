@@ -261,6 +261,201 @@
     });
   }
 
+  // ── Export ────────────────────────────────────────────────────────────────
+  /* A CSV built from the roster already in the page — no endpoint, so it works
+     whatever the API is running. The audit question this answers is "show me what
+     this team was asked to do and what they did", so the row is one MEMBER x COURSE
+     and carries the certificate number beside the status: a status says they
+     finished, the number is what proves it to somebody else. */
+
+  function csvCell(v) {
+    var s = v == null ? "" : String(v);
+    // Quote everything. A name with a comma and a course title with a quote are
+    // both ordinary here, and a half-quoted file opens wrong in exactly one of the
+    // tools people use.
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  function csvDate(iso) {
+    // ISO, not the display format: a spreadsheet sorts 2026-06-28 correctly and
+    // reads 28-Jun-2026 as text. The portal's own screens keep the readable one.
+    return iso ? String(iso).slice(0, 10) : "";
+  }
+
+  function statusWord(a) {
+    return a.displayStatus === "done" ? "Completed"
+      : a.displayStatus === "overdue" ? "Overdue"
+      : a.displayStatus === "due_soon" ? "Due soon" : "Upcoming";
+  }
+
+  function buildRosterCsv(members) {
+    var rows = [[
+      "Member", "Email", "Role", "Course", "Status", "Due", "Days remaining",
+      "Completed", "Assessment %", "Certificate number", "Certificate issued",
+      "Lessons completed", "Lessons total", "Progress %", "Last active"
+    ]];
+    members.forEach(function (m) {
+      var certs = {};
+      (m.certificates || []).forEach(function (c) {
+        // Keep the NEWEST certificate per course: a course can hold a series, and
+        // the current one is what a report is asked for.
+        if (!certs[c.courseKey] || String(c.issuedAt) > String(certs[c.courseKey].issuedAt)) certs[c.courseKey] = c;
+      });
+      var prog = {};
+      (m.progress || []).forEach(function (p) { prog[p.courseKey] = p; });
+
+      // A member with no assignments still gets a row: "nobody assigned them
+      // anything" is a finding, and dropping them makes the report look complete.
+      var list = (m.assignments || []);
+      if (!list.length) {
+        rows.push([fullName(m), m.email, m.orgRole, "", "No assignments", "", "", "", "",
+                   "", "", "", "", "", csvDate(m.lastActiveAt)]);
+        return;
+      }
+      list.forEach(function (a) {
+        var c = certs[a.courseKey], p = prog[a.courseKey];
+        rows.push([
+          fullName(m), m.email, m.orgRole,
+          labelFor(a.courseKey), statusWord(a),
+          csvDate(a.deadline), a.daysRemaining,
+          csvDate(a.completedAt), a.score != null ? a.score : (c && c.examScore != null ? c.examScore : ""),
+          c ? c.number : "", c ? csvDate(c.issuedAt) : "",
+          p ? p.lessonsCompleted : "", p ? p.lessonsTotal : "", p ? p.percent : "",
+          csvDate(m.lastActiveAt)
+        ]);
+      });
+    });
+    return rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n");
+  }
+
+  function downloadCsv(name, text) {
+    // The BOM is for Excel: without it a name with an accent in it arrives mangled,
+    // and the people who open these files open them in Excel.
+    var blob = new Blob(["\ufeff" + text], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function exportRoster(members, label) {
+    if (!members.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    var stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv("caw-training-report-" + stamp + ".csv", buildRosterCsv(members));
+    showMessage("rosterMsg", "Exported " + members.length + " member" +
+      (members.length === 1 ? "" : "s") + " (" + label + ").", "ok");
+  }
+
+  /* ── The printed (PDF) report ──────────────────────────────────────────────
+     The same report as the CSV, laid out for paper and handed to the browser's
+     print dialog, where "Save as PDF" writes the file. No PDF library: this
+     page's CSP would refuse one, the text stays selectable and searchable, and
+     the result matches the app's own export rather than resembling it.
+     The branding mirrors ExportBranding.swift exactly — serif wordmark with CAW
+     in ink and Academy in indigo, the tagline, the title, the amber rule — and
+     the disclaimer is the app's verbatim (StatsExport.disclaimer). */
+
+  var REPORT_DISCLAIMER = "This is a record of in-app study progress only. It does not " +
+    "constitute or confer any aviation-authority licence, qualification, rating or approval. " +
+    "CAW Academy is an independent study aid and is not affiliated with or endorsed by any " +
+    "aviation regulatory authority.";
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function longStamp(d) {
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function buildPrintReport(members, scopeLabel, orgName) {
+    var host = $("printReport"); host.textContent = "";
+    var root = el("div", "prep");
+
+    // Header — the app's, line for line.
+    var mark = el("p", "prep-mark");
+    mark.appendChild(document.createTextNode("CAW "));
+    mark.appendChild(el("span", "ac", "Academy"));
+    root.appendChild(mark);
+    root.appendChild(el("p", "prep-tag", "Airworthiness made learnable"));
+    root.appendChild(el("p", "prep-title", "Team training report"));
+
+    var meta = el("p", "prep-meta");
+    [orgName || "Your organisation",
+     "Exported: " + longStamp(new Date()),
+     "Covering: " + scopeLabel + "  ·  " + members.length + " member" + (members.length === 1 ? "" : "s")
+    ].forEach(function (line, i) {
+      if (i) meta.appendChild(document.createElement("br"));
+      meta.appendChild(document.createTextNode(line));
+    });
+    root.appendChild(meta);
+    root.appendChild(el("div", "prep-rule"));
+
+    members.forEach(function (m) {
+      var block = el("div", "prep-member");
+      block.appendChild(el("p", "prep-name", fullName(m)));
+      var st = memberStats(m);
+      block.appendChild(el("p", "prep-sub", m.email + "  ·  " +
+        (st.total ? st.done + " of " + st.total + " assigned courses completed" : "no assignments") +
+        (m.lastActiveAt ? "  ·  last active " + fmtDate(m.lastActiveAt) : "")));
+
+      if (!st.total) {
+        block.appendChild(el("p", "prep-none", "No courses assigned."));
+      } else {
+        var certs = {};
+        (m.certificates || []).forEach(function (c) {
+          if (!certs[c.courseKey] || String(c.issuedAt) > String(certs[c.courseKey].issuedAt)) certs[c.courseKey] = c;
+        });
+        var prog = {};
+        (m.progress || []).forEach(function (p) { prog[p.courseKey] = p; });
+
+        var table = document.createElement("table");
+        var thead = document.createElement("tr");
+        ["Course", "Status", "Due", "Progress", "Assessment", "Certificate"].forEach(function (h) {
+          thead.appendChild(el("th", null, h));
+        });
+        table.appendChild(thead);
+        (m.assignments || []).forEach(function (a) {
+          var c = certs[a.courseKey], p = prog[a.courseKey];
+          var tr = document.createElement("tr");
+          tr.appendChild(el("td", null, labelFor(a.courseKey)));
+          tr.appendChild(el("td", "st-" + a.displayStatus, statusWord(a)));
+          tr.appendChild(el("td", null, a.status === "completed"
+            ? "completed " + fmtDate(a.completedAt) : fmtDate(a.deadline)));
+          tr.appendChild(el("td", null, p ? p.percent + "%  (" + p.lessonsCompleted + "/" + p.lessonsTotal + ")" : "—"));
+          var score = a.score != null ? a.score : (c && c.examScore != null ? c.examScore : null);
+          tr.appendChild(el("td", null, score != null ? score + "%" : "—"));
+          tr.appendChild(el("td", "num", c ? c.number : "—"));
+          table.appendChild(tr);
+        });
+        block.appendChild(table);
+      }
+      root.appendChild(block);
+    });
+
+    root.appendChild(el("p", "prep-disclaim", REPORT_DISCLAIMER));
+
+    var foot = el("div", "prep-foot");
+    foot.appendChild(el("b", null, "Team training report  ·  " + (orgName || "")));
+    foot.appendChild(el("span", "site", "caw-academy.com"));
+    root.appendChild(foot);
+
+    host.appendChild(root);
+  }
+
+  function exportRosterPdf(members, scopeLabel) {
+    if (!members.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    buildPrintReport(members, scopeLabel, ($("orgName").textContent || "").trim());
+    showMessage("rosterMsg",
+      "Choose \u201cSave as PDF\u201d as the destination in the print dialog.", "ok");
+    // A tick of delay so the message paints before the modal print dialog blocks.
+    setTimeout(function () { window.print(); }, 60);
+  }
+
   // ── Licence & seats ───────────────────────────────────────────────────────
   /* Every figure here was already in the database and reached no customer screen:
      the portal could say who has an account, never how many seats were paid for,
@@ -379,6 +574,120 @@
     note.textContent = "Seats and renewals are managed by CAW Academy — contact us to add seats or extend. " +
       "A member appears in the roster once they create an account on your domain; they can only open paid courses after redeeming a seat code.";
     detail.appendChild(note);
+  }
+
+  // ── Company documents ─────────────────────────────────────────────────────
+  /* The licence decides WHAT the organisation holds; this decides WHO inside it
+     can open each one. An MRO's packages are its customers' controlled documents,
+     so "everyone with a seat" — the only behaviour there used to be — is the wrong
+     default for them and the right one for an operator reading its own manual.
+     Both are offered by name; neither is a switch the reader has to decode. */
+
+  var lastDocs = [];
+
+  function loadDocs() {
+    return authed("GET", "/v1/org/documents", null).then(function (r) {
+      lastDocs = (r && r.documents) || [];
+      // No documents, no card. An org that has never bought one should not be
+      // shown a control for a thing it does not have.
+      $("docsCard").classList.toggle("hidden", lastDocs.length === 0);
+      renderDocs();
+    }).catch(function (err) {
+      // An older API has no /documents route; the card simply stays hidden, the
+      // same rule the licence panel follows.
+      if (err.status === 404) { $("docsCard").classList.add("hidden"); return; }
+      $("docsCard").classList.remove("hidden");
+      showMessage("docsMsg", err.message || "Couldn't load your documents.", "err");
+    });
+  }
+
+  function setDocMode(pkgId, mode) {
+    showMessage("docsMsg", "", "ok");
+    return authed("PUT", "/v1/org/documents/" + encodeURIComponent(pkgId) + "/mode", { mode: mode })
+      .then(function (r) { lastDocs = (r && r.documents) || lastDocs; renderDocs(); })
+      .catch(function (err) { showMessage("docsMsg", err.message || "Couldn't change that.", "err"); });
+  }
+
+  function setDocGrant(pkgId, userId, granted) {
+    showMessage("docsMsg", "", "ok");
+    return authed("PUT", "/v1/org/documents/" + encodeURIComponent(pkgId) + "/grant",
+      { userId: userId, granted: granted })
+      .then(function (r) { lastDocs = (r && r.documents) || lastDocs; renderDocs(); })
+      .catch(function (err) { showMessage("docsMsg", err.message || "Couldn't change that.", "err"); });
+  }
+
+  function renderDocs() {
+    var host = $("docs"); if (!host) return;
+    host.textContent = "";
+    lastDocs.forEach(function (doc) {
+      var card = document.createElement("div"); card.className = "doc";
+
+      var head = document.createElement("div"); head.className = "doc-head";
+      var left = document.createElement("div");
+      var name = document.createElement("div"); name.className = "doc-name";
+      // The package id is the only name we are sure of; the manifest's title is
+      // shown when the encrypted package is actually on the host.
+      name.textContent = doc.name || doc.pkgId;
+      left.appendChild(name);
+      var meta = document.createElement("div"); meta.className = "doc-meta";
+      var bits = [];
+      if (doc.name) bits.push(doc.pkgId);
+      if (doc.rev) bits.push(doc.rev);
+      if (doc.updatedAt) bits.push("updated " + fmtDate(doc.updatedAt));
+      if (!doc.name && !doc.rev && !doc.updatedAt) bits.push("not yet loaded on the server");
+      meta.textContent = bits.join("  ·  ");
+      left.appendChild(meta);
+      head.appendChild(left);
+
+      var count = document.createElement("span"); count.className = "doc-count";
+      count.textContent = doc.mode === "all"
+        ? "Everyone with a seat"
+        : doc.grantedUserIds.length + " of " + lastRoster.length + " members";
+      head.appendChild(count);
+      card.appendChild(head);
+
+      var modes = document.createElement("div"); modes.className = "doc-modes";
+      [["all", "Everyone with a seat"], ["selected", "Only selected people"]].forEach(function (m) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "doc-mode" + (doc.mode === m[0] ? " on" : "");
+        b.textContent = m[1];
+        b.addEventListener("click", function () {
+          if (doc.mode === m[0]) return;
+          setDocMode(doc.pkgId, m[0]);
+        });
+        modes.appendChild(b);
+      });
+      card.appendChild(modes);
+
+      if (doc.mode === "selected") {
+        var people = document.createElement("div"); people.className = "doc-people";
+        if (!lastRoster.length) {
+          var e = document.createElement("div"); e.className = "empty";
+          e.textContent = "No members yet.";
+          people.appendChild(e);
+        } else {
+          var granted = {}; doc.grantedUserIds.forEach(function (id) { granted[id] = true; });
+          lastRoster.forEach(function (m) {
+            var row = document.createElement("label"); row.className = "ms-row";
+            var cb = document.createElement("input"); cb.type = "checkbox";
+            cb.checked = !!granted[m.userId];
+            cb.addEventListener("change", function () {
+              cb.disabled = true;
+              setDocGrant(doc.pkgId, m.userId, cb.checked);
+            });
+            var txt = document.createElement("span");
+            var n = document.createElement("span"); n.textContent = fullName(m);
+            var sub = document.createElement("span"); sub.className = "sub"; sub.textContent = "  " + m.email;
+            txt.appendChild(n); txt.appendChild(sub);
+            row.appendChild(cb); row.appendChild(txt);
+            people.appendChild(row);
+          });
+        }
+        card.appendChild(people);
+      }
+      host.appendChild(card);
+    });
   }
 
   // ── Multi-select checklists (members + courses) ───────────────────────────
@@ -812,10 +1121,22 @@
     left.style.flex = "1 1 320px";
     left.style.minWidth = "0";
     head.appendChild(left);
+    var headRight = document.createElement("div");
+    headRight.style.cssText = "display:flex;align-items:center;gap:10px";
     if (m.orgRole === "admin") {
       var role = document.createElement("span"); role.className = "role-pill"; role.textContent = "Admin";
-      head.appendChild(role);
+      headRight.appendChild(role);
     }
+    // One person's report, from where that person is — an admin asked for someone's
+    // record is looking at their card, not at a filter.
+    var onePdf = document.createElement("button");
+    onePdf.className = "btn-ghost"; onePdf.type = "button"; onePdf.textContent = "PDF";
+    onePdf.addEventListener("click", function () { exportRosterPdf([m], fullName(m)); });
+    var oneCsv = document.createElement("button");
+    oneCsv.className = "btn-ghost"; oneCsv.type = "button"; oneCsv.textContent = "CSV";
+    oneCsv.addEventListener("click", function () { exportRoster([m], fullName(m)); });
+    headRight.appendChild(onePdf); headRight.appendChild(oneCsv);
+    head.appendChild(headRight);
     card.appendChild(head);
 
     // Assignments (nextUp = first not-done in the sorted list).
@@ -890,6 +1211,9 @@
   // in the "already scheduled" prompt, which would otherwise show a raw userId.
   var lastRoster = [];
   var rosterFilter = "all";   // all | attention | assigned | idle
+  // What the roster is CURRENTLY showing, so Export follows the screen rather than
+  // quietly exporting everyone — the filter is how an admin says who they mean.
+  var shownRoster = [];
 
   /** One member's assignments counted by live status. */
   function memberStats(m) {
@@ -1166,13 +1490,14 @@
       renderMemberChecklist(lastRoster);
       return;
     }
-    var shown = lastRoster.filter(function (m) {
+    shownRoster = lastRoster.filter(function (m) {
       var s = memberStats(m);
       if (rosterFilter === "attention") return s.overdue > 0 || s.dueSoon > 0;
       if (rosterFilter === "assigned") return s.total > 0;
       if (rosterFilter === "idle") return s.total === 0;
       return true;
     }).sort(byAttention);
+    var shown = shownRoster;
 
     if (!shown.length) {
       var none = document.createElement("div"); none.className = "empty";
@@ -1255,16 +1580,26 @@
     el.textContent = txt;
   }
 
-  /* POST one assignment. Resolves to {job, created, conflict} rather than rejecting
-     on a conflict, because a conflict is an ANSWER ("they already have this, due
-     then"), not a failure. */
-  function postAssign(job, overwrite) {
-    var body = { courseKey: job.courseKey, deadline: job.deadline, sequence: job.sequence, userId: job.userId };
+  /* ONE request for the whole assign — members x courses — instead of one per
+     pair. The server answers with everything it wrote and everything it refused
+     to overwrite, so the conflict prompt is asked once; and because the server
+     sees the whole action it can send each learner ONE email listing their
+     courses rather than one per course. */
+  function postBatch(jobs, overwrite) {
+    var body = {
+      items: jobs.map(function (j) {
+        return {
+          userId: j.userId, courseKey: j.courseKey, deadline: j.deadline,
+          sequence: j.sequence,
+          // The display name, for the learner's email only. The server has no
+          // course-title table — its only titles are snapshots on issued
+          // certificates — and "p145_faa" is not a course name to a learner.
+          title: labelFor(j.courseKey)
+        };
+      })
+    };
     if (overwrite) body.overwrite = true;
-    return authed("POST", "/v1/org/assignments", body).then(function (r) {
-      var conflicts = (r && r.conflicts) || [];
-      return { job: job, created: ((r && r.assignments) || []).length > 0, conflict: conflicts[0] || null };
-    });
+    return authed("POST", "/v1/org/assignments/batch", body);
   }
 
   function nameOf(userId) {
@@ -1289,9 +1624,8 @@
     }
 
     /* Each member gets the same plan. The soft order follows CATALOGUE POSITION —
-       there is no "start sequence at" box any more, because a number the admin had
-       to invent explained nothing and every value except 0 made the roster's order
-       harder to read. */
+       there is no "start sequence at" box, because a number the admin had to
+       invent explained nothing. */
     var jobs = [];
     userIds.forEach(function (uid) {
       plan.forEach(function (p) {
@@ -1303,72 +1637,71 @@
     var btn = $("assignBtn"); btn.disabled = true;
     showMessage("assignMsg", "Assigning " + jobs.length + " …", "ok");
 
-    var created = 0, failed = 0, firstErr = "";
-    var pending = [];   // already scheduled — the admin decides
-    var done = [];      // already completed — never reopened
-
-    function settle(results) {
-      results.forEach(function (r) {
-        if (r.status !== "fulfilled") {
-          failed++; if (!firstErr) firstErr = (r.reason && r.reason.message) || "Some assignments failed.";
-          return;
-        }
-        var v = r.value;
-        if (v.created) { created++; return; }
-        if (v.conflict && v.conflict.reason === "completed") done.push(v.conflict);
-        else if (v.conflict) pending.push({ job: v.job, conflict: v.conflict });
-      });
-    }
-
-    function finish() {
+    function report(created, kept, done) {
       var msg = "Assigned " + courseCount + " course" + (courseCount === 1 ? "" : "s") +
                 " to " + userIds.length + " member" + (userIds.length === 1 ? "" : "s") +
                 " (" + created + " added or updated";
-      if (done.length) msg += ", " + done.length + " already completed and left as " + (done.length === 1 ? "it is" : "they are");
-      if (pending.length) msg += ", " + pending.length + " existing deadline" + (pending.length === 1 ? "" : "s") + " kept";
+      if (done) msg += ", " + done + " already completed and left as " + (done === 1 ? "it is" : "they are");
+      if (kept) msg += ", " + kept + " existing deadline" + (kept === 1 ? "" : "s") + " kept";
       msg += ").";
-      if (failed) showMessage("assignMsg", msg + " " + failed + " failed: " + firstErr, "err");
-      else showMessage("assignMsg", msg, "ok");
+      showMessage("assignMsg", msg, "ok");
       btn.disabled = false;
       return loadRoster();
     }
 
-    Promise.allSettled(jobs.map(function (j) { return postAssign(j, false); }))
-      .then(function (results) {
-        settle(results);
-        if (!pending.length) return finish();
+    postBatch(jobs, false).then(function (r) {
+      var created = (r.assignments || []).length;
+      var conflicts = r.conflicts || [];
+      var done = conflicts.filter(function (c) { return c.reason === "completed"; });
+      var pending = conflicts.filter(function (c) { return c.reason !== "completed"; });
+      if (!pending.length) return report(created, 0, done.length);
 
-        /* ONE prompt for the whole batch, listing who already has what and when.
-           Nothing was written for these — the server reported them and stopped — so
-           Cancel really does keep every existing date. */
-        var lines = pending.slice(0, 6).map(function (p) {
-          return "\u2022 " + nameOf(p.job.userId) + " — " + labelFor(p.conflict.courseKey) +
-                 ", due " + fmtDate(p.conflict.deadline);
-        }).join("\n");
-        if (pending.length > 6) lines += "\n\u2022 …and " + (pending.length - 6) + " more";
+      /* ONE prompt for the whole batch. Nothing was written for these — the
+         server reported them and stopped — so Cancel really does keep every date. */
+      var lines = pending.slice(0, 6).map(function (c) {
+        return "\u2022 " + nameOf(c.userId) + " — " + labelFor(c.courseKey) + ", due " + fmtDate(c.deadline);
+      }).join("\n");
+      if (pending.length > 6) lines += "\n\u2022 …and " + (pending.length - 6) + " more";
 
-        var replace = window.confirm(
-          (pending.length === 1 ? "One of these is already scheduled:" : pending.length + " of these are already scheduled:") +
-          "\n\n" + lines +
-          "\n\nReplace the existing deadline" + (pending.length === 1 ? "" : "s") + " with the new one" +
-          (pending.length === 1 ? "" : "s") + "?\n\nOK — replace     Cancel — keep the existing date" +
-          (pending.length === 1 ? "" : "s"));
-        if (!replace) return finish();
+      var replace = window.confirm(
+        (pending.length === 1 ? "One of these is already scheduled:" : pending.length + " of these are already scheduled:") +
+        "\n\n" + lines +
+        "\n\nReplace the existing deadline" + (pending.length === 1 ? "" : "s") + " with the new one" +
+        (pending.length === 1 ? "" : "s") + "?\n\nOK — replace     Cancel — keep the existing date" +
+        (pending.length === 1 ? "" : "s"));
+      if (!replace) return report(created, pending.length, done.length);
 
-        var retry = pending.slice();
-        pending = [];
-        showMessage("assignMsg", "Replacing " + retry.length + " …", "ok");
-        return Promise.allSettled(retry.map(function (p) { return postAssign(p.job, true); }))
-          .then(function (r2) { settle(r2); return finish(); });
-      })
-      .catch(function (err) {
-        showMessage("assignMsg", err.message || "Couldn't reach the server.", "err");
-        btn.disabled = false;
+      showMessage("assignMsg", "Replacing " + pending.length + " …", "ok");
+      var retry = pending.map(function (c) {
+        var job = null;
+        jobs.forEach(function (j) { if (j.userId === c.userId && j.courseKey === c.courseKey) job = j; });
+        return job;
+      }).filter(Boolean);
+      return postBatch(retry, true).then(function (r2) {
+        return report(created + (r2.assignments || []).length, 0, done.length);
       });
+    }).catch(function (err) {
+      showMessage("assignMsg", err.message || "Couldn't reach the server.", "err");
+      btn.disabled = false;
+    });
   });
 
   $("reloadBtn").addEventListener("click", function () { loadRoster(); });
+  /* Export follows the FILTER. "Everyone" exports the team; "Needs attention"
+     exports the people who are behind — which is the report somebody actually asks
+     for before a review, and it needs no second control to say so. */
+  function currentScopeLabel() {
+    var chip = document.querySelector(".rchip.on");
+    return chip ? chip.textContent.replace(/\s*\(\d+\)$/, "") : "everyone";
+  }
+  $("exportBtn").addEventListener("click", function () {
+    exportRoster(shownRoster, currentScopeLabel());
+  });
+  $("exportPdfBtn").addEventListener("click", function () {
+    exportRosterPdf(shownRoster, currentScopeLabel());
+  });
   $("overviewReload").addEventListener("click", function () { loadLicence(); loadRoster(); });
+  $("docsReload").addEventListener("click", function () { loadDocs(); });
   $("certSearch").addEventListener("input", function () {
     certFilter = $("certSearch").value || "";
     renderCertificates(lastRoster);
@@ -1526,7 +1859,8 @@
       show("dashView");
       loadDevices();
       loadLicence();
-      return loadRoster();
+      // Documents after the roster: the per-member tick list is drawn from it.
+      return loadRoster().then(loadDocs);
     }).catch(function (err) {
       if (err.status === 403) {
         $("deniedMsg").textContent = err.message || "This account is not an organisation administrator.";
