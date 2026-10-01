@@ -289,6 +289,14 @@
     border:1px solid var(--line); background:#fff; color:var(--ink-soft); padding:6px 13px; border-radius:999px}
   .doc-mode:hover{background:var(--indigo-soft)}
   .doc-mode.on{background:var(--indigo); border-color:var(--indigo); color:#fff}
+  /* Unsaved access changes: a ticked box or a mode button changes nothing on the
+     server until this bar's Save. Amber, because "not saved yet" is a warning. */
+  .doc-save{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin-top:10px; padding:10px 12px; border:1px solid #F5C77E; background:#FFF8EC; border-radius:10px}
+  .doc-save.hidden{display:none}
+  .doc-save-txt{font-size:13px; color:var(--ink-soft); flex:1 1 260px; min-width:0}
+  .doc-save-btns{display:flex; gap:8px; flex:none}
+  .doc-save-go{padding:7px 14px; font-size:13px; border-radius:10px; background:var(--indigo)}
   /* The people list is the SAME component the assign form uses — a bordered box with
      a filter bar and a list that scrolls inside it (`.ms` / `.ms-tools` / `.ms-list`).
      It used to print every member straight into the card, so a fifty-person roster
@@ -899,6 +907,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=24" defer></script>
+<script src="admin.js?v=25" defer></script>
 </body>
 </html>

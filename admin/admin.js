@@ -868,20 +868,98 @@
     });
   }
 
-  function setDocMode(pkgId, mode) {
-    showMessage("docsMsg", "", "ok");
-    return authed("PUT", "/v1/org/documents/" + encodeURIComponent(pkgId) + "/mode", { mode: mode })
-      .then(function (r) { lastDocs = (r && r.documents) || lastDocs; renderDocs(); })
-      .catch(function (err) { showMessage("docsMsg", err.message || "Couldn't change that.", "err"); });
+  /* NOTHING IS WRITTEN ON A TICK. Every mode button and every box used to be a live
+     server write, so an admin who was only looking around - ticking a name to see what
+     happens - gave or cut someone's access to a controlled document without meaning
+     to. Changes now collect in a per-document draft and reach the server only through
+     an explicit "Save access changes", with a plain summary of what will change beside
+     it and a Discard next to it. Keyed by pkgId and kept out of the DOM, like the filter
+     and scroll state below, so a re-render does not lose it. */
+  var docDraft = {};   // pkgId -> { mode: "all"|"selected", grants: { userId: true } }
+
+  function serverGrants(doc) {
+    var g = {}; (doc.grantedUserIds || []).forEach(function (id) { g[id] = true; }); return g;
+  }
+  function draftFor(doc) {
+    if (!docDraft[doc.pkgId]) docDraft[doc.pkgId] = { mode: doc.mode, grants: serverGrants(doc) };
+    return docDraft[doc.pkgId];
+  }
+  /** What saving would change, against what the server last said. Grant changes only
+   *  count while the draft is "Only selected people": under "Everyone with a licence"
+   *  the list is not in force, so ticks there change nothing the reader would notice. */
+  function docChanges(doc) {
+    var d = docDraft[doc.pkgId];
+    var out = { mode: null, add: [], remove: [], n: 0 };
+    if (!d) return out;
+    if (d.mode !== doc.mode) { out.mode = d.mode; out.n += 1; }
+    if (d.mode === "selected") {
+      var srv = serverGrants(doc);
+      Object.keys(d.grants).forEach(function (id) { if (!srv[id]) out.add.push(id); });
+      Object.keys(srv).forEach(function (id) { if (!d.grants[id]) out.remove.push(id); });
+      out.n += out.add.length + out.remove.length;
+    }
+    return out;
+  }
+  function anyDocChanges() {
+    return lastDocs.some(function (doc) { return docChanges(doc).n > 0; });
+  }
+  /** Drop a draft that has drifted back to what the server holds, so the bar goes away
+   *  when the admin un-ticks what they ticked. */
+  function pruneDraft(doc) { if (docDraft[doc.pkgId] && docChanges(doc).n === 0) delete docDraft[doc.pkgId]; }
+
+  function memberLabel(userId) {
+    var m = lastRoster.filter(function (x) { return x.userId === userId; })[0];
+    return m ? fullName(m) : "a former member";
   }
 
-  function setDocGrant(pkgId, userId, granted) {
-    showMessage("docsMsg", "", "ok");
-    return authed("PUT", "/v1/org/documents/" + encodeURIComponent(pkgId) + "/grant",
-      { userId: userId, granted: granted })
-      .then(function (r) { lastDocs = (r && r.documents) || lastDocs; renderDocs(); })
-      .catch(function (err) { showMessage("docsMsg", err.message || "Couldn't change that.", "err"); });
+  /** One sentence naming what Save will do, in the admin's words, not counts alone. */
+  function describeChanges(doc, ch) {
+    var parts = [];
+    if (ch.mode === "all") parts.push("open it to everyone with a licence");
+    if (ch.mode === "selected") parts.push("limit it to the people ticked");
+    if (ch.add.length) parts.push("give access to " + ch.add.map(memberLabel).join(", "));
+    if (ch.remove.length) parts.push("remove access from " + ch.remove.map(memberLabel).join(", "));
+    var t = parts.join("; ");
+    return t.charAt(0).toUpperCase() + t.slice(1) + ".";
   }
+
+  /* Save = the mode first, then each grant, one request at a time (the API takes one
+     change per call). Each reply carries the full document list, so if one call fails
+     part-way the list already reflects what DID land; the draft is kept, and the bar
+     then shows only what is still outstanding. */
+  function saveDocDraft(doc) {
+    var ch = docChanges(doc);
+    if (!ch.n) return Promise.resolve();
+    showMessage("docsMsg", "", "ok");
+    var base = "/v1/org/documents/" + encodeURIComponent(doc.pkgId);
+    var steps = [];
+    if (ch.mode) steps.push(function () { return authed("PUT", base + "/mode", { mode: ch.mode }); });
+    ch.add.forEach(function (id) {
+      steps.push(function () { return authed("PUT", base + "/grant", { userId: id, granted: true }); });
+    });
+    ch.remove.forEach(function (id) {
+      steps.push(function () { return authed("PUT", base + "/grant", { userId: id, granted: false }); });
+    });
+    var summary = describeChanges(doc, ch);
+    return steps.reduce(function (p, step) {
+      return p.then(step).then(function (r) { lastDocs = (r && r.documents) || lastDocs; });
+    }, Promise.resolve()).then(function () {
+      delete docDraft[doc.pkgId];
+      renderDocs();
+      showMessage("docsMsg", "Saved for " + docTitleOf(doc) + ". " + summary, "ok");
+    }).catch(function (err) {
+      var fresh = lastDocs.filter(function (d) { return d.pkgId === doc.pkgId; })[0];
+      if (fresh) pruneDraft(fresh);
+      renderDocs();
+      showMessage("docsMsg", (err.message || "Couldn't save that.") +
+        " Anything still listed as not saved did not reach the server.", "err");
+    });
+  }
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!anyDocChanges()) return;
+    e.preventDefault(); e.returnValue = "";
+  });
 
   /** The document's own name. The server resolves it (packaged title, else derived
    *  from the pkgId); an older API that sends none leaves the id, which is still the
@@ -1080,10 +1158,17 @@
       left.appendChild(meta);
       head.appendChild(left);
 
+      var draft = docDraft[doc.pkgId];
+      var mode = draft ? draft.mode : doc.mode;
       var count = document.createElement("span"); count.className = "doc-count";
-      count.textContent = doc.mode === "all"
-        ? "Everyone with a licence"
-        : doc.grantedUserIds.length + " of " + lastRoster.length + " members";
+      var setCount = function () {
+        var d = docDraft[doc.pkgId];
+        var n = d ? Object.keys(d.grants).length : (doc.grantedUserIds || []).length;
+        count.textContent = mode === "all"
+          ? "Everyone with a licence"
+          : n + " of " + lastRoster.length + " members";
+      };
+      setCount();
       head.appendChild(count);
       card.appendChild(head);
 
@@ -1091,17 +1176,49 @@
       [["all", "Everyone with a licence"], ["selected", "Only selected people"]].forEach(function (m) {
         var b = document.createElement("button");
         b.type = "button";
-        b.className = "doc-mode" + (doc.mode === m[0] ? " on" : "");
+        b.className = "doc-mode" + (mode === m[0] ? " on" : "");
         b.textContent = m[1];
         b.addEventListener("click", function () {
-          if (doc.mode === m[0]) return;
-          setDocMode(doc.pkgId, m[0]);
+          if (mode === m[0]) return;
+          draftFor(doc).mode = m[0];
+          pruneDraft(doc);
+          renderDocs();
         });
         modes.appendChild(b);
       });
       card.appendChild(modes);
 
-      if (doc.mode === "selected") {
+      /* The save bar. Built before the list so the ticks can refresh it in place
+         instead of rebuilding the card (which would take the filter's focus). */
+      var bar = document.createElement("div"); bar.className = "doc-save hidden";
+      var barTxt = document.createElement("div"); barTxt.className = "doc-save-txt";
+      var barBtns = document.createElement("div"); barBtns.className = "doc-save-btns";
+      var discard = document.createElement("button");
+      discard.type = "button"; discard.className = "btn-ghost"; discard.textContent = "Discard";
+      discard.addEventListener("click", function () { delete docDraft[doc.pkgId]; renderDocs(); });
+      var save = document.createElement("button");
+      save.type = "button"; save.className = "btn doc-save-go"; save.textContent = "Save access changes";
+      save.addEventListener("click", function () {
+        save.disabled = true; discard.disabled = true; save.textContent = "Saving\u2026";
+        saveDocDraft(doc);
+      });
+      barBtns.appendChild(discard); barBtns.appendChild(save);
+      bar.appendChild(barTxt); bar.appendChild(barBtns);
+      var picked = null;
+      var refreshBar = function () {
+        var ch = docChanges(doc);
+        bar.classList.toggle("hidden", ch.n === 0);
+        barTxt.textContent = ch.n
+          ? "Not saved yet. " + describeChanges(doc, ch)
+          : "";
+        setCount();
+        if (picked) {
+          var d = docDraft[doc.pkgId];
+          picked.textContent = (d ? Object.keys(d.grants).length : (doc.grantedUserIds || []).length) + " selected";
+        }
+      };
+
+      if (mode === "selected") {
         var people = document.createElement("div"); people.className = "ms doc-people";
         if (!lastRoster.length) {
           var e = document.createElement("div"); e.className = "empty";
@@ -1109,7 +1226,7 @@
           e.textContent = "No members yet.";
           people.appendChild(e);
         } else {
-          var granted = {}; doc.grantedUserIds.forEach(function (id) { granted[id] = true; });
+          var granted = draft ? draft.grants : serverGrants(doc);
           var list = document.createElement("div"); list.className = "ms-list";
 
           /* Draws the ROWS only. The filter calls this directly rather than going
@@ -1134,8 +1251,11 @@
               var cb = document.createElement("input"); cb.type = "checkbox";
               cb.checked = !!granted[m.userId];
               cb.addEventListener("change", function () {
-                cb.disabled = true;
-                setDocGrant(doc.pkgId, m.userId, cb.checked);
+                var d = draftFor(doc);
+                if (cb.checked) d.grants[m.userId] = true; else delete d.grants[m.userId];
+                granted = d.grants;
+                pruneDraft(doc);
+                refreshBar();
               });
               var txt = document.createElement("span");
               var n = document.createElement("span"); n.textContent = fullName(m);
@@ -1160,8 +1280,7 @@
               fillPeople();
             });
             tools.appendChild(search);
-            var picked = document.createElement("span"); picked.className = "ms-count";
-            picked.textContent = doc.grantedUserIds.length + " selected";
+            picked = document.createElement("span"); picked.className = "ms-count";
             tools.appendChild(picked);
             people.appendChild(tools);
           }
@@ -1175,6 +1294,8 @@
         }
         card.appendChild(people);
       }
+      card.appendChild(bar);
+      refreshBar();
       host.appendChild(card);
     });
 
