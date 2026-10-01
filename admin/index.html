@@ -348,50 +348,133 @@
   .editor{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; padding:10px; background:var(--bg); border-radius:10px}
   .editor .field{margin:0; width:auto}
 
+  /* The section tabs. A scroll-and-hope page is fine with three cards; with eight
+     it buries the one an admin came for. */
+  .tabsnav{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 4px; padding:5px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow-sm)}
+  .tabbtn{font:inherit; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap;
+    border:0; background:none; color:var(--ink-soft); padding:9px 15px; border-radius:10px}
+  .tabbtn:hover{background:var(--indigo-soft)}
+  .tabbtn.on{background:var(--indigo); color:#fff}
+  /* A count beside the name, so the tab says how much is behind it — and the one
+     that needs attention says so in red before it is opened. */
+  .tabbtn .tcount{font-size:11px; font-weight:800; margin-left:6px; opacity:.75}
+  .tabbtn.alert{color:var(--err)}
+  .tabbtn.alert.on{background:var(--err); color:#fff}
+  .sect{display:none}
+  .sect.on{display:block}
+  @media (max-width:560px){
+    .tabsnav{gap:4px; padding:4px}
+    .tabbtn{font-size:13px; padding:8px 11px}
+  }
+
+  /* Roster paging: a team of fifty is not a scroll. */
+  .pager{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px}
+  .pager button{font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    padding:7px 14px; border-radius:999px}
+  .pager button:hover:not(:disabled){background:var(--indigo-soft)}
+  .pager button:disabled{opacity:.4; cursor:default}
+  .pager .pinfo{font-size:13px; color:var(--muted); font-weight:600}
+
   /* ── The printed report ───────────────────────────────────────────────────
-     Mirrors the app's own export (ExportBranding.swift): serif wordmark with CAW
-     in ink and Academy in indigo, the tagline beneath it, the report title, and
-     an AMBER 1.5pt rule under the header — then a repeating footer carrying the
-     label and the site. The palette is the app's fixed PRINT palette, not the
-     page's tokens: a report is a white page with dark ink whatever the screen
-     was set to. */
+     A document, not a screen dump. It uses the BRAND FACES the page already
+     loads (Fraunces for the wordmark, Inter for everything else) and the app
+     mark itself, so a report from the portal and one from the app are plainly
+     the same product — and it follows the app's own export (ExportBranding.swift)
+     on the two structural decisions: the masthead is page 1 ONLY, and every page
+     carries the branded footer.
+
+     The palette is the app's fixed PRINT palette, not this page's tokens: a
+     report is dark ink on white paper whatever the screen was set to. */
   #printReport{display:none}
   @media print{
-    /* Everything on screen goes; only the report prints. */
     body > *{display:none !important}
     #dashView{display:block !important; padding:0; margin:0; max-width:none}
     #dashView > *{display:none !important}
     #printReport{display:block !important}
-    @page{size:A4; margin:14mm}
+    @page{size:A4; margin:13mm 13mm 16mm}
     html,body{background:#fff !important}
-    .prep{font-family:Arial,Helvetica,sans-serif; color:#0C1843; font-size:10pt; line-height:1.45}
-    .prep-mark{font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:21pt; margin:0}
-    .prep-mark .ac{color:#3E44B5}
-    .prep-tag{font-size:8pt; color:#6B7390; letter-spacing:.4pt; margin:2pt 0 0}
-    .prep-title{font-size:15pt; font-weight:700; margin:12pt 0 0}
-    .prep-meta{font-size:9.5pt; color:#6B7390; margin:4pt 0 0; line-height:1.5}
-    .prep-rule{height:1.5pt; background:#FB8C00; margin:9pt 0 14pt}
-    /* A member is a unit: never split their heading from their table. */
-    .prep-member{break-inside:avoid; page-break-inside:avoid; margin:0 0 14pt}
-    .prep-name{font-size:12pt; font-weight:700; color:#3E44B5; margin:0}
-    .prep-sub{font-size:9pt; color:#6B7390; margin:1pt 0 5pt}
-    .prep table{width:100%; border-collapse:collapse; font-size:9pt}
-    .prep th{text-align:left; font-size:8pt; letter-spacing:.3pt; text-transform:uppercase;
-      color:#6B7390; border-bottom:.75pt solid #D9DBE6; padding:0 6pt 3pt 0}
-    .prep td{padding:3pt 6pt 3pt 0; border-bottom:.5pt solid #EDEEF4; vertical-align:top}
-    .prep td.num{font-family:ui-monospace,Menlo,monospace; font-size:8.5pt; white-space:nowrap}
-    .prep .st-overdue{color:#BA1A1A; font-weight:700}
-    .prep .st-due_soon{color:#B25E00; font-weight:700}
-    .prep .st-done{color:#2E7D32; font-weight:700}
-    .prep-none{font-size:9pt; color:#6B7390; font-style:italic; margin:2pt 0 0}
-    .prep-disclaim{font-size:7.5pt; color:#6B7390; line-height:1.5; margin:16pt 0 0}
-    /* position:fixed repeats on every printed page in the browsers this portal
-       supports — the nearest thing CSS has to the app's per-page footer. */
-    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:8pt; color:#6B7390;
-      border-top:.5pt solid #D9DBE6; padding-top:3pt;
+    /* WITHOUT THIS CHROME DROPS EVERY BACKGROUND — the status pills, the summary
+       band and the table's banding all print as blank boxes. It is the single
+       line that decides whether this looks designed or broken. */
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
+
+    .prep{font-family:"Inter",Arial,Helvetica,sans-serif; color:#0C1843; font-size:9.5pt; line-height:1.45}
+
+    /* Masthead: mark + wordmark on the left, what this report IS on the right. */
+    .prep-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16pt}
+    .prep-brand{display:flex; align-items:center; gap:8pt}
+    .prep-logo{width:30pt; height:30pt; border-radius:7pt}
+    .prep-mark{font-family:"Fraunces",Georgia,serif; font-weight:700; font-size:19pt;
+      line-height:1.1; margin:0; letter-spacing:-.2pt}
+    .prep-mark span{color:#3E44B5}
+    .prep-tag{font-size:6.5pt; font-weight:700; letter-spacing:1pt; text-transform:uppercase;
+      color:#6B7390; margin:3pt 0 0}
+    .prep-id{text-align:right}
+    .prep-title{font-size:13pt; font-weight:800; margin:0; letter-spacing:-.1pt}
+    .prep-org{font-size:10pt; font-weight:600; color:#3E44B5; margin:2pt 0 0}
+    .prep-when{font-size:8pt; color:#6B7390; margin:2pt 0 0; line-height:1.5}
+    .prep-rule{height:2pt; background:#FB8C00; margin:9pt 0 0; border-radius:1pt}
+
+    /* The report opens with the ANSWER — the same five figures as the dashboard,
+       so the person who ran it and the person who reads it see one thing. */
+    .prep-summary{display:flex; gap:6pt; margin:12pt 0 16pt}
+    .ps{flex:1; border:.75pt solid #E1E3EE; border-radius:5pt; padding:6pt 8pt; background:#FBFBFE}
+    .ps b{display:block; font-size:16pt; font-weight:800; line-height:1.1}
+    .ps span{display:block; font-size:6.5pt; font-weight:700; letter-spacing:.6pt;
+      text-transform:uppercase; color:#6B7390; margin-top:2pt}
+    .ps.alert{background:#FDECEC; border-color:#F6D5D3} .ps.alert b{color:#BA1A1A}
+    .ps.warn{background:#FFF3E0; border-color:#F6E2C2} .ps.warn b{color:#B25E00}
+    .ps.good{background:#E7F4E8; border-color:#CFE6D1} .ps.good b{color:#2E7D32}
+    .ps.zero{background:#FBFBFE; border-color:#E1E3EE} .ps.zero b{color:#6B7390}
+
+    /* A member is one unit of reading: never split the heading from the table. */
+    .prep-member{break-inside:avoid; page-break-inside:avoid; margin:0 0 11pt;
+      border:.75pt solid #E1E3EE; border-radius:6pt; overflow:hidden}
+    .pm-head{display:flex; align-items:center; justify-content:space-between; gap:12pt;
+      background:#F4F5FC; border-bottom:.75pt solid #E1E3EE; padding:6pt 9pt}
+    .pm-name{font-size:11pt; font-weight:700; margin:0; color:#0C1843}
+    .pm-mail{font-size:8pt; color:#6B7390; margin:1pt 0 0}
+    .pm-chips{display:flex; gap:4pt; flex-wrap:wrap; justify-content:flex-end}
+    .pm-chip{font-size:7pt; font-weight:800; letter-spacing:.2pt; padding:1.5pt 6pt;
+      border-radius:99pt; background:#E6E7FB; color:#3E44B5; white-space:nowrap}
+    .pm-chip.overdue{background:#FDECEC; color:#BA1A1A}
+    .pm-chip.due_soon{background:#FFF3E0; color:#B25E00}
+    .pm-chip.done{background:#E7F4E8; color:#2E7D32}
+    .pm-chip.none{background:#EFF0F6; color:#6B7390}
+
+    .prep table{width:100%; border-collapse:collapse; font-size:8.5pt}
+    .prep th{text-align:left; font-size:6.5pt; font-weight:800; letter-spacing:.6pt;
+      text-transform:uppercase; color:#6B7390; padding:5pt 8pt 4pt;
+      border-bottom:1pt solid #3E44B5; background:#fff}
+    .prep td{padding:4.5pt 8pt; border-bottom:.5pt solid #EDEEF4; vertical-align:middle}
+    .prep tbody tr:nth-child(even) td{background:#FAFAFD}   /* banding: the eye keeps its row */
+    .prep tbody tr:last-child td{border-bottom:0}
+    .prep td.course{font-weight:600}
+    .prep td.num{font-family:ui-monospace,Menlo,monospace; font-size:7.5pt; white-space:nowrap; color:#3A3F63}
+    .prep td.right{text-align:right; white-space:nowrap}
+    .st{display:inline-block; font-size:7pt; font-weight:800; padding:1.5pt 6pt;
+      border-radius:99pt; background:#E6E7FB; color:#3E44B5; white-space:nowrap}
+    .st.overdue{background:#FDECEC; color:#BA1A1A}
+    .st.due_soon{background:#FFF3E0; color:#B25E00}
+    .st.done{background:#E7F4E8; color:#2E7D32}
+    /* A printed progress bar: the number is there too, because a bar alone cannot
+       be read off a photocopy. */
+    .pbar{display:inline-block; width:42pt; height:3.5pt; border-radius:99pt;
+      background:#E4E6F3; vertical-align:middle; margin-right:5pt; overflow:hidden}
+    .pbar i{display:block; height:100%; background:#3E44B5; border-radius:99pt}
+    .pbar.full i{background:#2E7D32}
+    .prep-none{font-size:8.5pt; color:#6B7390; font-style:italic; padding:7pt 9pt; margin:0}
+
+    .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
+      border-top:.5pt solid #E1E3EE; padding-top:7pt}
+    /* position:fixed repeats on every printed page — the nearest thing CSS has to
+       the app's per-page footer. */
+    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
+      border-top:.5pt solid #E1E3EE; padding-top:3pt;
       display:flex; justify-content:space-between}
-    .prep-foot b{font-weight:400}
-    .prep-foot .site{color:#3E44B5}
+    .prep-foot .site{color:#3E44B5; font-weight:600}
   }
 
   /* Phones: a cohesive smaller scale — tighter spacing, right-sized fonts and
@@ -499,6 +582,13 @@
     </div>
   </div>
 
+  <!-- SECTIONS. One page was fine with three cards and is not with eight: an
+       admin looking for their own devices had to scroll past the whole team to
+       reach them. Each tab shows one job; the hash records which, so a reload or
+       a bookmark comes back to the same place and Back works. -->
+  <nav class="tabsnav" id="tabs" role="tablist"></nav>
+
+  <section class="sect" data-sect="overview">
   <!-- OVERVIEW — the dashboard half of the page: the two questions an admin opens
        this page with, side by side, before any control is offered. Training state
        came from the roster and licence state from the licence endpoint; they used
@@ -532,6 +622,9 @@
     <div id="attention"></div>
   </div>
 
+  </section>
+
+  <section class="sect" data-sect="assign">
   <div class="card">
     <h2>Assign courses</h2>
     <ol class="steps">
@@ -546,9 +639,11 @@
           <label class="lbl">Members</label>
           <div class="ms">
             <div class="ms-tools">
-              <label class="ms-row" style="padding:0" for="memAll"><input type="checkbox" id="memAll"> <b>Select all</b></label>
-              <span class="grow"></span>
+              <input class="ms-search grow" id="memSearch" placeholder="Filter members…" autocomplete="off">
               <span class="ms-count" id="memCount">0 selected</span>
+            </div>
+            <div class="ms-tools" style="border-bottom:1px solid var(--line)">
+              <label class="ms-row" style="padding:0" for="memAll"><input type="checkbox" id="memAll"> <b>Select all shown</b></label>
             </div>
             <div class="ms-list" id="memList"></div>
           </div>
@@ -587,6 +682,9 @@
     </form>
   </div>
 
+  </section>
+
+  <section class="sect" data-sect="team">
   <div class="card">
     <div class="member-head" style="margin-bottom:6px">
       <h2 style="margin:0">Team roster</h2>
@@ -598,10 +696,16 @@
     </div>
     <p class="sub" style="margin-bottom:4px">Anyone with something overdue or due soon is listed first.</p>
     <div id="rosterFilters" class="rfilters"></div>
+    <input class="ms-search" id="rosterSearch" placeholder="Search name or email…" autocomplete="off"
+           style="max-width:340px;margin:8px 0 2px">
     <div id="rosterMsg"></div>
     <div id="roster"></div>
+    <div class="pager" id="rosterPager"></div>
   </div>
 
+  </section>
+
+  <section class="sect" data-sect="documents">
   <!-- COMPANY DOCUMENTS — hidden entirely unless the licence holds one, so an
        organisation that has never bought a document never sees a control for it. -->
   <div class="card hidden" id="docsCard">
@@ -618,6 +722,9 @@
     <div id="docs"></div>
   </div>
 
+  </section>
+
+  <section class="sect" data-sect="certificates">
   <!-- CERTIFICATES — the team's durable completion record. It existed only as a
        comma-joined line inside each member's card, which is unreadable as a record
        and impossible to search. -->
@@ -631,6 +738,9 @@
     <div id="certs"></div>
   </div>
 
+  </section>
+
+  <section class="sect" data-sect="account">
   <!-- YOUR ACCOUNT — about the admin, not the team, so it sits last and says so. -->
   <div class="card">
     <div class="member-head" style="margin-bottom:6px">
@@ -645,6 +755,8 @@
     <div id="devicesMsg"></div>
     <div id="devices"></div>
   </div>
+</section>
+
   <!-- THE PRINTED REPORT. Hidden on screen, the only thing printed on paper.
        Built on demand from the roster already in the page and handed to the
        browser's own print dialog, whose "Save as PDF" writes the file — no PDF
@@ -663,6 +775,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=9" defer></script>
+<script src="admin.js?v=14" defer></script>
 </body>
 </html>

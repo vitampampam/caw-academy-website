@@ -261,6 +261,101 @@
     });
   }
 
+  // ── Sections ──────────────────────────────────────────────────────────────
+  /* One page was fine with three cards and is not with eight: an admin looking
+     for their own signed-in devices had to scroll past the entire team. Each tab
+     is one job. The hash records which, so a reload or a bookmark returns to the
+     same place and the browser's Back button works — no router, no new files. */
+
+  var SECTIONS = [
+    ["overview",     "Overview"],
+    ["assign",       "Assign"],
+    ["team",         "Team"],
+    ["documents",    "Documents"],
+    ["certificates", "Certificates"],
+    ["account",      "Your account"]
+  ];
+  var currentSect = "overview";
+
+  function sectionVisible(id) {
+    // Documents exists only for an org that holds one (see loadDocs).
+    if (id === "documents") return !$("docsCard").classList.contains("hidden");
+    return true;
+  }
+
+  function showSection(id, fromHash) {
+    if (!SECTIONS.some(function (x) { return x[0] === id; }) || !sectionVisible(id)) id = "overview";
+    currentSect = id;
+    document.querySelectorAll(".sect").forEach(function (sec) {
+      sec.classList.toggle("on", sec.dataset.sect === id);
+    });
+    renderTabs();
+    if (!fromHash && location.hash.slice(1) !== id) {
+      // replaceState, not a hash assignment: switching tabs should not fill the
+      // Back history with every tab the admin glanced at.
+      try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; }
+    }
+    // A tab change is a new screen; start it at the top.
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function renderTabs() {
+    var host = $("tabs"); if (!host) return;
+    host.textContent = "";
+    // Counts come from the roster, so a tab says how much sits behind it.
+    var attention = lastRoster.filter(function (m) {
+      var st = memberStats(m); return st.overdue > 0 || st.dueSoon > 0;
+    }).length;
+    var certCount = lastRoster.reduce(function (n, m) { return n + ((m.certificates || []).length); }, 0);
+
+    SECTIONS.forEach(function (sec) {
+      if (!sectionVisible(sec[0])) return;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "tab");
+      b.className = "tabbtn" + (currentSect === sec[0] ? " on" : "") +
+        (sec[0] === "overview" && attention ? " alert" : "");
+      b.appendChild(document.createTextNode(sec[1]));
+      var n = sec[0] === "team" ? lastRoster.length
+            : sec[0] === "certificates" ? certCount
+            : sec[0] === "documents" ? lastDocs.length
+            : sec[0] === "overview" ? attention
+            : 0;
+      if (n) {
+        var c = document.createElement("span"); c.className = "tcount";
+        // On Overview the number is what NEEDS something, so it is prefixed —
+        // "3" beside Team is a size, "!3" beside Overview is a problem.
+        c.textContent = sec[0] === "overview" ? "!" + n : String(n);
+        b.appendChild(c);
+      }
+      b.addEventListener("click", function () { showSection(sec[0]); });
+      host.appendChild(b);
+    });
+  }
+
+  window.addEventListener("hashchange", function () {
+    var id = location.hash.slice(1);
+    if (id && id !== currentSect) showSection(id, true);
+  });
+
+  /* A link to #documents arrives BEFORE the documents do: the tab exists only for
+     an org that holds a package, and that answer comes from the API, so at load
+     time showSection can only refuse it and fall back to Overview — leaving the
+     address bar saying #documents while another screen is on display. loadDocs
+     calls this once it knows, on both paths (it must also run on the 404 path, or
+     an older API would leave the intent pending forever). */
+  function applyPendingSection() {
+    var id = location.hash.slice(1);
+    if (!id || id === currentSect) return;
+    var known = SECTIONS.some(function (x) { return x[0] === id; });
+    if (known && sectionVisible(id)) showSection(id, true);
+    // The hash names a tab this org does not have, or nothing at all. Correct the
+    // URL to what is actually on screen rather than leave the two disagreeing —
+    // through showSection, which is the one place that knows how to write the hash
+    // (and how to fall back when replaceState is refused).
+    else showSection(currentSect, false);
+  }
+
   // ── Export ────────────────────────────────────────────────────────────────
   /* A CSV built from the roster already in the page — no endpoint, so it works
      whatever the API is running. The audit question this answers is "show me what
@@ -376,32 +471,81 @@
     var host = $("printReport"); host.textContent = "";
     var root = el("div", "prep");
 
-    // Header — the app's, line for line.
+    // ── Masthead: the mark and wordmark, then what this report IS. Page 1 only,
+    //    the same decision the app's export makes; every page gets the footer.
+    var head = el("div", "prep-head");
+    var brand = el("div", "prep-brand");
+    var logo = document.createElement("img");
+    logo.className = "prep-logo"; logo.src = "logo-header.png?v=4"; logo.alt = "";
+    brand.appendChild(logo);
+    var words = document.createElement("div");
     var mark = el("p", "prep-mark");
     mark.appendChild(document.createTextNode("CAW "));
-    mark.appendChild(el("span", "ac", "Academy"));
-    root.appendChild(mark);
-    root.appendChild(el("p", "prep-tag", "Airworthiness made learnable"));
-    root.appendChild(el("p", "prep-title", "Team training report"));
+    mark.appendChild(el("span", null, "Academy"));
+    words.appendChild(mark);
+    words.appendChild(el("p", "prep-tag", "Airworthiness made learnable"));
+    brand.appendChild(words);
+    head.appendChild(brand);
 
-    var meta = el("p", "prep-meta");
-    [orgName || "Your organisation",
-     "Exported: " + longStamp(new Date()),
-     "Covering: " + scopeLabel + "  ·  " + members.length + " member" + (members.length === 1 ? "" : "s")
-    ].forEach(function (line, i) {
-      if (i) meta.appendChild(document.createElement("br"));
-      meta.appendChild(document.createTextNode(line));
-    });
-    root.appendChild(meta);
+    var id = el("div", "prep-id");
+    id.appendChild(el("p", "prep-title", "Team training report"));
+    id.appendChild(el("p", "prep-org", orgName || "Your organisation"));
+    var when = el("p", "prep-when");
+    when.appendChild(document.createTextNode("Exported " + longStamp(new Date())));
+    when.appendChild(document.createElement("br"));
+    when.appendChild(document.createTextNode(
+      scopeLabel + "  ·  " + members.length + " member" + (members.length === 1 ? "" : "s")));
+    id.appendChild(when);
+    head.appendChild(id);
+    root.appendChild(head);
     root.appendChild(el("div", "prep-rule"));
 
+    /* The report OPENS WITH THE ANSWER — the same five figures the dashboard
+       shows, so whoever ran it and whoever reads it are looking at one thing.
+       A report that starts with row one of a table makes the reader do the
+       summing the page could have done. */
+    var t = { total: 0, overdue: 0, dueSoon: 0, done: 0 };
     members.forEach(function (m) {
-      var block = el("div", "prep-member");
-      block.appendChild(el("p", "prep-name", fullName(m)));
       var st = memberStats(m);
-      block.appendChild(el("p", "prep-sub", m.email + "  ·  " +
-        (st.total ? st.done + " of " + st.total + " assigned courses completed" : "no assignments") +
-        (m.lastActiveAt ? "  ·  last active " + fmtDate(m.lastActiveAt) : "")));
+      t.total += st.total; t.overdue += st.overdue; t.dueSoon += st.dueSoon; t.done += st.done;
+    });
+    var summary = el("div", "prep-summary");
+    [["Members", members.length, ""],
+     ["Assigned", t.total, ""],
+     ["Overdue", t.overdue, "alert"],
+     ["Due soon", t.dueSoon, "warn"],
+     ["Completed", t.done, "good"]
+    ].forEach(function (row) {
+      var box = el("div", "ps" + (row[2] ? " " + row[2] : "") + (row[1] === 0 && row[2] ? " zero" : ""));
+      box.appendChild(el("b", null, String(row[1])));
+      box.appendChild(el("span", null, row[0]));
+      summary.appendChild(box);
+    });
+    root.appendChild(summary);
+
+    members.forEach(function (m) {
+      var st = memberStats(m);
+      var block = el("div", "prep-member");
+
+      var mh = el("div", "pm-head");
+      var who = document.createElement("div");
+      who.appendChild(el("p", "pm-name", fullName(m)));
+      who.appendChild(el("p", "pm-mail", m.email +
+        (m.lastActiveAt ? "  ·  last active " + fmtDate(m.lastActiveAt) : "  ·  no activity reported")));
+      mh.appendChild(who);
+
+      // The same chips the roster card carries, so the paper and the screen agree.
+      var chips = el("div", "pm-chips");
+      function chip(kind, text) { chips.appendChild(el("span", "pm-chip " + kind, text)); }
+      if (!st.total) chip("none", "No assignments");
+      else {
+        if (st.overdue) chip("overdue", st.overdue + " overdue");
+        if (st.dueSoon) chip("due_soon", st.dueSoon + " due soon");
+        if (st.upcoming) chip("", st.upcoming + " upcoming");
+        if (st.done) chip("done", st.done + " completed");
+      }
+      mh.appendChild(chips);
+      block.appendChild(mh);
 
       if (!st.total) {
         block.appendChild(el("p", "prep-none", "No courses assigned."));
@@ -414,24 +558,47 @@
         (m.progress || []).forEach(function (p) { prog[p.courseKey] = p; });
 
         var table = document.createElement("table");
-        var thead = document.createElement("tr");
-        ["Course", "Status", "Due", "Progress", "Assessment", "Certificate"].forEach(function (h) {
-          thead.appendChild(el("th", null, h));
+        var thead = document.createElement("thead");
+        var hrow = document.createElement("tr");
+        ["Course", "Status", "Due", "Progress", "Assessment", "Certificate"].forEach(function (h, i) {
+          var th = el("th", i >= 4 ? "right" : null, h);
+          hrow.appendChild(th);
         });
-        table.appendChild(thead);
+        thead.appendChild(hrow); table.appendChild(thead);
+
+        var tbody = document.createElement("tbody");
         (m.assignments || []).forEach(function (a) {
           var c = certs[a.courseKey], p = prog[a.courseKey];
           var tr = document.createElement("tr");
-          tr.appendChild(el("td", null, labelFor(a.courseKey)));
-          tr.appendChild(el("td", "st-" + a.displayStatus, statusWord(a)));
+          tr.appendChild(el("td", "course", labelFor(a.courseKey)));
+
+          var tdSt = document.createElement("td");
+          tdSt.appendChild(el("span", "st " + a.displayStatus, statusWord(a)));
+          tr.appendChild(tdSt);
+
           tr.appendChild(el("td", null, a.status === "completed"
-            ? "completed " + fmtDate(a.completedAt) : fmtDate(a.deadline)));
-          tr.appendChild(el("td", null, p ? p.percent + "%  (" + p.lessonsCompleted + "/" + p.lessonsTotal + ")" : "—"));
+            ? fmtDate(a.completedAt) : fmtDate(a.deadline)));
+
+          // A bar AND the number: a bar alone cannot be read off a photocopy.
+          var tdP = document.createElement("td");
+          if (p) {
+            var bar = el("div", "pbar" + (p.percent >= 100 ? " full" : ""));
+            var fill = document.createElement("i");
+            fill.style.width = Math.max(0, Math.min(100, p.percent)) + "%";
+            bar.appendChild(fill);
+            tdP.appendChild(bar);
+            tdP.appendChild(document.createTextNode(p.percent + "%  (" + p.lessonsCompleted + "/" + p.lessonsTotal + ")"));
+          } else {
+            tdP.textContent = "not reported";
+          }
+          tr.appendChild(tdP);
+
           var score = a.score != null ? a.score : (c && c.examScore != null ? c.examScore : null);
-          tr.appendChild(el("td", null, score != null ? score + "%" : "—"));
-          tr.appendChild(el("td", "num", c ? c.number : "—"));
-          table.appendChild(tr);
+          tr.appendChild(el("td", "right", score != null ? score + "%" : "—"));
+          tr.appendChild(el("td", "num right", c ? c.number : "—"));
+          tbody.appendChild(tr);
         });
+        table.appendChild(tbody);
         block.appendChild(table);
       }
       root.appendChild(block);
@@ -440,7 +607,8 @@
     root.appendChild(el("p", "prep-disclaim", REPORT_DISCLAIMER));
 
     var foot = el("div", "prep-foot");
-    foot.appendChild(el("b", null, "Team training report  ·  " + (orgName || "")));
+    foot.appendChild(el("span", null, "Team training report  ·  " + (orgName || "") +
+      "  ·  " + longStamp(new Date())));
     foot.appendChild(el("span", "site", "caw-academy.com"));
     root.appendChild(foot);
 
@@ -452,8 +620,22 @@
     buildPrintReport(members, scopeLabel, ($("orgName").textContent || "").trim());
     showMessage("rosterMsg",
       "Choose \u201cSave as PDF\u201d as the destination in the print dialog.", "ok");
-    // A tick of delay so the message paints before the modal print dialog blocks.
-    setTimeout(function () { window.print(); }, 60);
+    /* WAIT FOR THE MASTHEAD MARK before opening the dialog. print() captures the
+       page as it stands, so on a cold load — where the logo has not decoded yet —
+       the report would go to paper with an empty box where the brand should be.
+       Capped at 1.5s so a missing or slow image delays the dialog rather than
+       withholding it. */
+    var logo = $("printReport").querySelector(".prep-logo");
+    var ready = (logo && !logo.complete)
+      ? new Promise(function (done) {
+          var go = function () { done(); };
+          logo.addEventListener("load", go, { once: true });
+          logo.addEventListener("error", go, { once: true });
+          setTimeout(go, 1500);
+        })
+      : Promise.resolve();
+    // A tick after that so the message paints before the modal dialog blocks.
+    ready.then(function () { setTimeout(function () { window.print(); }, 60); });
   }
 
   // ── Licence & seats ───────────────────────────────────────────────────────
@@ -592,10 +774,12 @@
       // shown a control for a thing it does not have.
       $("docsCard").classList.toggle("hidden", lastDocs.length === 0);
       renderDocs();
+      renderTabs();   // the Documents tab exists only when there is one
+      applyPendingSection();
     }).catch(function (err) {
       // An older API has no /documents route; the card simply stays hidden, the
       // same rule the licence panel follows.
-      if (err.status === 404) { $("docsCard").classList.add("hidden"); return; }
+      if (err.status === 404) { $("docsCard").classList.add("hidden"); renderTabs(); applyPendingSection(); return; }
       $("docsCard").classList.remove("hidden");
       showMessage("docsMsg", err.message || "Couldn't load your documents.", "err");
     });
@@ -774,19 +958,35 @@
   }
 
   // Build the members checklist from the roster. "Select all" toggles every member.
+  var memQuery = "";
   function renderMemberChecklist(members) {
     var list = $("memList"); list.textContent = "";
     // Drop any previously-selected ids that are no longer members.
     var present = {}; members.forEach(function (m) { present[m.userId] = true; });
     Object.keys(selectedUserIds).forEach(function (id) { if (!present[id]) delete selectedUserIds[id]; });
 
-    members.forEach(function (m) {
+    /* A fifty-person list needs a way in. The filter narrows what is SHOWN;
+       ticks already made stay made, so an admin can search, tick, search again
+       and assign to both — "Select all shown" is scoped to the filter for the
+       same reason, since ticking fifty people by accident is not recoverable
+       with one click. */
+    var mq = memQuery.trim().toLowerCase();
+    var visible = mq
+      ? members.filter(function (m) { return (fullName(m) + " " + m.email).toLowerCase().indexOf(mq) !== -1; })
+      : members;
+    if (!visible.length) {
+      var none = document.createElement("div"); none.className = "empty";
+      none.style.padding = "8px 12px";
+      none.textContent = "No member matches that.";
+      list.appendChild(none);
+    }
+    visible.forEach(function (m) {
       var rowEl = document.createElement("label"); rowEl.className = "ms-row";
       var cb = document.createElement("input"); cb.type = "checkbox";
       cb.checked = !!selectedUserIds[m.userId];
       cb.addEventListener("change", function () {
         if (cb.checked) selectedUserIds[m.userId] = true; else delete selectedUserIds[m.userId];
-        syncMemAll(members); updateMemberCount();
+        syncMemAll(visible); updateMemberCount();
       });
       var txt = document.createElement("span");
       var name = document.createElement("span"); name.textContent = fullName(m);
@@ -795,7 +995,7 @@
       rowEl.appendChild(cb); rowEl.appendChild(txt);
       list.appendChild(rowEl);
     });
-    syncMemAll(members); updateMemberCount();
+    syncMemAll(visible); updateMemberCount();
   }
 
   function syncMemAll(members) {
@@ -1211,6 +1411,9 @@
   // in the "already scheduled" prompt, which would otherwise show a raw userId.
   var lastRoster = [];
   var rosterFilter = "all";   // all | attention | assigned | idle
+  var rosterQuery = "";       // free-text search over name + email
+  var rosterPage = 0;         // zero-based
+  var ROSTER_PAGE_SIZE = 20;  // a screen's worth; a 60-person org is three pages
   // What the roster is CURRENTLY showing, so Export follows the screen rather than
   // quietly exporting everyone — the filter is how an admin says who they mean.
   var shownRoster = [];
@@ -1287,7 +1490,7 @@
       // change shape as the team's state changes, which is harder to read than a
       // greyed count that stays put.
       b.disabled = f[2] === 0 && f[0] !== "all";
-      b.addEventListener("click", function () { rosterFilter = f[0]; renderRoster(lastRoster); });
+      b.addEventListener("click", function () { rosterFilter = f[0]; rosterPage = 0; renderRoster(lastRoster); });
       host.appendChild(b);
     });
   }
@@ -1490,14 +1693,26 @@
       renderMemberChecklist(lastRoster);
       return;
     }
+    var q = rosterQuery.trim().toLowerCase();
     shownRoster = lastRoster.filter(function (m) {
       var s = memberStats(m);
+      if (q && (fullName(m) + " " + m.email).toLowerCase().indexOf(q) === -1) return false;
       if (rosterFilter === "attention") return s.overdue > 0 || s.dueSoon > 0;
       if (rosterFilter === "assigned") return s.total > 0;
       if (rosterFilter === "idle") return s.total === 0;
       return true;
     }).sort(byAttention);
-    var shown = shownRoster;
+
+    /* PAGE the cards, but never the EXPORT: `shownRoster` is everything the
+       filter and the search matched, and that is what a report of "needs
+       attention" has to contain — exporting only the twenty on screen would be a
+       quietly wrong document. */
+    var pages = Math.max(1, Math.ceil(shownRoster.length / ROSTER_PAGE_SIZE));
+    if (rosterPage > pages - 1) rosterPage = pages - 1;
+    if (rosterPage < 0) rosterPage = 0;
+    var from = rosterPage * ROSTER_PAGE_SIZE;
+    var shown = shownRoster.slice(from, from + ROSTER_PAGE_SIZE);
+    renderPager(shownRoster.length, pages, from, shown.length);
 
     if (!shown.length) {
       var none = document.createElement("div"); none.className = "empty";
@@ -1511,6 +1726,30 @@
       shown.forEach(function (m) { root.appendChild(renderMember(m)); });
     }
     renderMemberChecklist(lastRoster);
+    renderTabs();
+  }
+
+  function renderPager(total, pages, from, count) {
+    var host = $("rosterPager"); if (!host) return;
+    host.textContent = "";
+    if (total === 0) return;
+    if (pages <= 1) {
+      var only = document.createElement("span"); only.className = "pinfo";
+      only.textContent = total + " member" + (total === 1 ? "" : "s");
+      host.appendChild(only);
+      return;
+    }
+    var prev = document.createElement("button");
+    prev.type = "button"; prev.textContent = "\u2039 Previous";
+    prev.disabled = rosterPage === 0;
+    prev.addEventListener("click", function () { rosterPage--; renderRoster(lastRoster); });
+    var info = document.createElement("span"); info.className = "pinfo";
+    info.textContent = (from + 1) + "\u2013" + (from + count) + " of " + total;
+    var next = document.createElement("button");
+    next.type = "button"; next.textContent = "Next \u203a";
+    next.disabled = rosterPage >= pages - 1;
+    next.addEventListener("click", function () { rosterPage++; renderRoster(lastRoster); });
+    host.appendChild(prev); host.appendChild(info); host.appendChild(next);
   }
 
   function loadRoster() {
@@ -1523,9 +1762,19 @@
   // "Select all" members toggle.
   $("memAll").addEventListener("change", function () {
     var on = $("memAll").checked;
+    // Only the rows the filter is SHOWING — see renderMemberChecklist.
     $("memList").querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
       cb.checked = on; cb.dispatchEvent(new Event("change"));
     });
+  });
+  $("memSearch").addEventListener("input", function () {
+    memQuery = $("memSearch").value || "";
+    renderMemberChecklist(lastRoster);
+  });
+  $("rosterSearch").addEventListener("input", function () {
+    rosterQuery = $("rosterSearch").value || "";
+    rosterPage = 0;
+    renderRoster(lastRoster);
   });
   $("courseSearch").addEventListener("input", applyCourseFilter);
   $("courseClear").addEventListener("click", function () {
@@ -1599,7 +1848,34 @@
       })
     };
     if (overwrite) body.overwrite = true;
-    return authed("POST", "/v1/org/assignments/batch", body);
+    return authed("POST", "/v1/org/assignments/batch", body).catch(function (err) {
+      /* THE SITE DEPLOYS SEPARATELY FROM THE API, so this page can land on a
+         server that predates the batch route — and unlike the licence panel,
+         which can simply hide itself, ASSIGN IS WHAT THIS PAGE IS FOR. A 404
+         here would leave an admin staring at "Route not found" with no way to
+         assign anything.
+         So fall back to the per-assignment endpoint that has been live all
+         along, one call per pair, and reassemble the same { assignments,
+         conflicts } answer the batch route returns. Everything downstream — the
+         conflict prompt, the counts, the retry with overwrite — is unchanged.
+         What is lost on this path is the LEARNER EMAIL: only the batch endpoint
+         sees the whole action, and one-email-per-course is exactly what it was
+         built to avoid. It comes back the moment the API catches up. */
+      if (err.status !== 404) throw err;
+      var assignments = [], conflicts = [];
+      return jobs.reduce(function (chain, j) {
+        return chain.then(function () {
+          var one = { courseKey: j.courseKey, deadline: j.deadline, sequence: j.sequence, userId: j.userId };
+          if (overwrite) one.overwrite = true;
+          return authed("POST", "/v1/org/assignments", one).then(function (r) {
+            assignments = assignments.concat((r && r.assignments) || []);
+            conflicts = conflicts.concat((r && r.conflicts) || []);
+          });
+        });
+      }, Promise.resolve()).then(function () {
+        return { assignments: assignments, conflicts: conflicts };
+      });
+    });
   }
 
   function nameOf(userId) {
@@ -1857,6 +2133,7 @@
       $("deadline").min = new Date().toISOString().slice(0, 10);
       updateScheduleHint();
       show("dashView");
+      showSection(location.hash.slice(1) || "overview", true);
       loadDevices();
       loadLicence();
       // Documents after the roster: the per-member tick list is drawn from it.
