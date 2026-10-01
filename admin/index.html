@@ -123,6 +123,10 @@
   .msg{font-size:14px; margin:12px 0; padding:11px 13px; border-radius:10px}
   .msg.err{background:var(--err-soft); color:var(--err)}
   .msg.ok{background:var(--success-soft); color:var(--success)}
+  /* Amber, not red: the assignment that DID save is fine, and some people were skipped.
+     Red would read as "nothing worked", which is the wrong instruction. */
+  .msg.warn{background:#FFF3E0; color:#B25E00}
+  .msg.warn ul{color:#7A4A00}
   .msg a{color:var(--indigo); font-weight:600; text-decoration:underline}
 
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:0 14px}

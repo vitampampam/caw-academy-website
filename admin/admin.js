@@ -951,6 +951,15 @@
       var name = document.createElement("span"); name.textContent = fullName(m);
       var sub = document.createElement("span"); sub.className = "sub"; sub.textContent = "  " + m.email;
       txt.appendChild(name); txt.appendChild(sub);
+      // Said at the point of choosing, not only after the attempt fails. The row stays
+      // tickable on purpose: the admin may be about to send that person a code, and a
+      // disabled row with no explanation is harder to act on than a labelled one.
+      if (hasNoSeat(m)) {
+        var warn = document.createElement("span");
+        warn.className = "sub"; warn.style.color = "#B25E00"; warn.style.fontWeight = "600";
+        warn.textContent = "  no licence code";
+        txt.appendChild(warn);
+      }
       rowEl.appendChild(cb); rowEl.appendChild(txt);
       list.appendChild(rowEl);
     });
@@ -1258,6 +1267,9 @@
       var c = document.createElement("span"); c.className = "mchip " + kind; c.textContent = text;
       chips.appendChild(c);
     }
+    // Before anything about their progress: can they open a course at all? An admin
+    // reading "0 assignments" and one reading "no licence" need to do different things.
+    if (hasNoSeat(m)) chip("needs", "No licence code");
     if (!stats.total) chip("none", "No assignments");
     else {
       if (stats.overdue) chip("overdue", stats.overdue + " overdue");
@@ -1821,7 +1833,7 @@
          sees the whole action, and one-email-per-course is exactly what it was
          built to avoid. It comes back the moment the API catches up. */
       if (err.status !== 404) throw err;
-      var assignments = [], conflicts = [];
+      var assignments = [], conflicts = [], refusals = [];
       return jobs.reduce(function (chain, j) {
         return chain.then(function () {
           var one = { courseKey: j.courseKey, deadline: j.deadline, sequence: j.sequence, userId: j.userId };
@@ -1829,12 +1841,27 @@
           return authed("POST", "/v1/org/assignments", one).then(function (r) {
             assignments = assignments.concat((r && r.assignments) || []);
             conflicts = conflicts.concat((r && r.conflicts) || []);
+            refusals = refusals.concat((r && r.refusals) || []);
           });
         });
       }, Promise.resolve()).then(function () {
-        return { assignments: assignments, conflicts: conflicts };
+        return { assignments: assignments, conflicts: conflicts, refusals: refusals };
       });
     });
+  }
+
+  /** Refusals from the last assign attempt — people the server would not write an
+   *  assignment for because they could not open the course. */
+  var lastRefusals = [];
+
+  /* A member with NO live licence. `entitledCourses` is what that account can open, so
+     an empty list means no seat has been redeemed (or it expired) — assignments to them
+     are refused by the server, and this is how the admin sees it before trying.
+     Absent entirely means an older API that does not send the field; then nothing is
+     claimed, because inventing a "No seat" badge from missing data would be worse than
+     saying nothing. */
+  function hasNoSeat(m) {
+    return Array.isArray(m.entitledCourses) && m.entitledCourses.length === 0;
   }
 
   function nameOf(userId) {
@@ -1879,13 +1906,75 @@
       if (done) msg += ", " + done + " already completed and left as " + (done === 1 ? "it is" : "they are");
       if (kept) msg += ", " + kept + " existing deadline" + (kept === 1 ? "" : "s") + " kept";
       msg += ").";
-      showMessage("assignMsg", msg, "ok");
+      /* A refusal outranks the tally, because it is the only part the admin has to DO
+         something about, and the something is outside this screen: send that person a
+         licence code. So it is shown as a warning with the names, not folded into the
+         sentence above as another number. */
+      if (lastRefusals.length) {
+        showRefusals(created === 0 ? "err" : "warn");
+      } else {
+        showMessage("assignMsg", msg, "ok");
+      }
       btn.disabled = false;
       return loadRoster();
     }
 
+    /* Names the people and says what to do. Grouped BY PERSON rather than by course: an
+       admin assigning five courses to a seatless member does not need five lines telling
+       them the same thing about the same person. */
+    function showRefusals(kind) {
+      var byUser = {};
+      lastRefusals.forEach(function (r) {
+        (byUser[r.userId] = byUser[r.userId] || { email: r.email, reason: r.reason, courses: [] })
+          .courses.push(labelFor(r.courseKey));
+      });
+      var ids = Object.keys(byUser);
+      var noSeat = ids.filter(function (id) { return byUser[id].reason === "no_seat"; });
+
+      var el = $("assignMsg"); el.textContent = "";
+      var box = document.createElement("div");
+      box.className = "msg " + (kind === "err" ? "err" : "warn");
+
+      var head = document.createElement("div");
+      head.style.fontWeight = "700";
+      head.textContent = ids.length === 1
+        ? "1 person could not be assigned"
+        : ids.length + " people could not be assigned";
+      box.appendChild(head);
+
+      var why = document.createElement("div");
+      why.style.margin = "4px 0 6px";
+      why.textContent = noSeat.length === ids.length
+        ? "They have not redeemed a licence code, so the courses would appear in their app locked. Send them a code, then assign again."
+        : "Their licence does not cover every course selected, so those would appear locked. Nothing was saved for them.";
+      box.appendChild(why);
+
+      var ul = document.createElement("ul");
+      ul.style.margin = "0"; ul.style.paddingLeft = "18px";
+      ids.slice(0, 8).forEach(function (id) {
+        var u = byUser[id];
+        var li = document.createElement("li");
+        li.textContent = nameOf(id) + " (" + u.email + ") - "
+          + (u.reason === "no_seat" ? "no licence code redeemed" : "outside their licence: " + u.courses.join(", "));
+        ul.appendChild(li);
+      });
+      if (ids.length > 8) {
+        var more = document.createElement("li");
+        more.textContent = "…and " + (ids.length - 8) + " more";
+        ul.appendChild(more);
+      }
+      box.appendChild(ul);
+      el.appendChild(box);
+    }
+
     postBatch(jobs, false).then(function (r) {
       var created = (r.assignments || []).length;
+      /* REFUSED is not CONFLICTED, and the difference is who can act. A conflict is a
+         question for the admin ("replace the date?"); a refusal is a fact about the
+         account — they hold no seat, so the course would sit in their list locked. No
+         answer here fixes it, so it is reported rather than prompted, and it names the
+         people so the admin knows who needs a code. */
+      lastRefusals = r.refusals || [];
       var conflicts = r.conflicts || [];
       var done = conflicts.filter(function (c) { return c.reason === "completed"; });
       var pending = conflicts.filter(function (c) { return c.reason !== "completed"; });
