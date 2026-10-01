@@ -560,6 +560,36 @@
   </div>
 </main>
 
+<!--
+  Confirm your email. A sign-up now returns no session until the six-digit code from the
+  email is entered, so the portal needs this step as much as the apps do: without it a
+  request for an admin account ends on a sign-in form that refuses the password that was
+  just chosen, with nothing on screen explaining why.
+-->
+<main class="signin-wrap hidden" id="confirmView">
+  <div class="card">
+    <h1>Check your email</h1>
+    <p class="sub">We sent a six-digit code to <b id="confirmAddr"></b>. Enter it below to finish setting up your account.</p>
+    <form id="confirmForm" autocomplete="off">
+      <label for="confirmCode">Confirmation code</label>
+      <!-- inputmode numeric, and one-time-code so a password manager or the OS can
+           offer it straight from the notification. maxlength 6, but the server
+           normalises anyway: a pasted "123 456" must not be refused over a space. -->
+      <input id="confirmCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" placeholder="123456" style="letter-spacing:.22em;font-weight:700">
+      <p class="note" style="margin:6px 0 0">The code expires in 15 minutes.</p>
+      <div id="confirmMsg"></div>
+      <button class="btn" type="submit" id="confirmSubmit" style="width:100%">Confirm and sign in</button>
+    </form>
+    <p style="text-align:center;margin:12px 0 0">
+      <a href="#" id="resendLink" style="font-size:14px">Send a new code</a>
+      <span style="color:var(--muted)"> · </span>
+      <a href="#" id="confirmBackLink" style="font-size:14px">Use a different email</a>
+    </p>
+    <p class="note">Didn't get it? Check your spam folder, or send a new code. If the address above is wrong, go back and sign up again with the right one.</p>
+  </div>
+</main>
+
 <!-- Not an admin -->
 <main class="signin-wrap hidden" id="deniedView">
   <div class="card">
@@ -775,6 +805,6 @@
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=14" defer></script>
+<script src="admin.js?v=15" defer></script>
 </body>
 </html>

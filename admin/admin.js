@@ -141,7 +141,14 @@
         var json = text ? JSON.parse(text) : {};
         if (!res.ok) {
           var msg = (json && json.error && json.error.message) || "Something went wrong.";
-          var err = new Error(msg); err.status = res.status; throw err;
+          var err = new Error(msg);
+          err.status = res.status;
+          /* The server's machine-readable reason, carried beside the HTTP status because
+             some refusals are a step the UI must ROUTE on rather than a message to print:
+             "email_unconfirmed" is the code screen, and a bare 403 is indistinguishable
+             from a disabled account. Matches what the two apps already read. */
+          err.code = (json && json.error && json.error.code) || null;
+          throw err;
         }
         return json;
       });
@@ -183,7 +190,7 @@
     el.appendChild(box);
   }
   function show(view) {
-    ["signinView", "deniedView", "dashView"].forEach(function (v) {
+    ["signinView", "confirmView", "deniedView", "dashView"].forEach(function (v) {
       $(v).classList.toggle("hidden", v !== view);
     });
   }
@@ -2080,8 +2087,30 @@
     }
     btn.disabled = true;
     request("POST", path, body, false)
-      .then(function (b) { accessToken = b.accessToken || null; $("password").value = ""; return enter(); })
+      .then(function (b) {
+        /* TWO SHAPES. A sign-up whose mailbox has to be proved first returns no token at
+           all (202 `{status:"confirm_required"}`), so the test is whether a token came
+           back, not what the status said — that also keeps working against a server
+           predating the feature, which sends no `status` field. Without this the portal
+           set accessToken to null and called enter(), which asked for the org context
+           unauthenticated and dropped the person back on the sign-in form. */
+        if (!b.accessToken) {
+          beginConfirmation(b.email || $("email").value.trim());
+          return;
+        }
+        accessToken = b.accessToken;
+        $("password").value = "";
+        return enter();
+      })
       .catch(function (err) {
+        /* The server refuses a sign-in on an unconfirmed account with its own code, and
+           has already sent a fresh one. That is a STEP, not a failure. */
+        if (err && err.code === "email_unconfirmed") {
+          beginConfirmation($("email").value.trim());
+          showMessage("confirmMsg", "We've sent a new code to " + $("email").value.trim() + ".", "ok");
+          btn.disabled = false;
+          return;
+        }
         /* The commonest case: they already have a CAW Academy account from the
            app. It is the SAME account here, so the answer is to sign in, not to
            make another one. */
@@ -2091,6 +2120,92 @@
         showMessage("authMsg", msg, "err");
       })
       .finally(function () { btn.disabled = false; });
+  });
+
+  // ── Confirm your email ─────────────────────────────────────────────────────
+  /* A sign-up returns no session until the six digits from the email are entered, so this
+     is a step in the middle of creating an account rather than a page of its own. The
+     address being confirmed is held in one variable: it is also the only thing the confirm
+     and resend calls need, and re-reading the email FIELD would break the moment somebody
+     edited it while the code was in flight. */
+  var confirmEmailAddr = "";
+
+  function beginConfirmation(address) {
+    confirmEmailAddr = address;
+    $("confirmAddr").textContent = address;
+    $("confirmCode").value = "";
+    $("password").value = "";
+    showMessage("authMsg", "", "err");
+    showMessage("confirmMsg", "", "err");
+    show("confirmView");
+    $("confirmCode").focus();
+  }
+
+  // Keep the digits and stop at six: people paste "123 456" out of a mail client, and the
+  // separator is a measure of how carefully they copied, not of whether the account is
+  // theirs. The server normalises too, so this is for the eye, not for correctness.
+  $("confirmCode").addEventListener("input", function () {
+    var digits = this.value.replace(/\D/g, "").slice(0, 6);
+    if (digits !== this.value) this.value = digits;
+  });
+
+  $("confirmForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var code = $("confirmCode").value.trim();
+    if (code.length < 6) {
+      showMessage("confirmMsg", "Enter the six-digit code from the email.", "err");
+      return;
+    }
+    var btn = $("confirmSubmit");
+    btn.disabled = true;
+    showMessage("confirmMsg", "", "err");
+    // Confirming IS the sign-in - having just proved they hold the mailbox, nobody is
+    // asked for the password they chose a minute ago. The device object uses the request
+    // spelling {id, name}: the devices LIST returns {deviceId, deviceName}, and sending
+    // that shape back parses as {} and silently leaves an "Unknown device" row.
+    request("POST", "/v1/auth/confirm-email", {
+      email: confirmEmailAddr,
+      code: code,
+      device: { id: deviceId(), name: "Team admin portal" },
+    }, false)
+      .then(function (b) {
+        accessToken = b.accessToken || null;
+        $("confirmCode").value = "";
+        return enter();
+      })
+      .catch(function (err) {
+        // The code stays in the field: a wrong digit is the likely cause, and clearing it
+        // would make them re-enter all six to fix one.
+        showMessage("confirmMsg", err.message || "That code didn't work.", "err");
+      })
+      .finally(function () { btn.disabled = false; });
+  });
+
+  $("resendLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    showMessage("confirmMsg", "", "err");
+    request("POST", "/v1/auth/resend-confirmation", { email: confirmEmailAddr }, false)
+      .then(function () {
+        $("confirmCode").value = "";
+        // Deliberately non-committal: the server does not say whether the address has an
+        // account waiting, because saying so would let anyone test which of a company's
+        // staff have signed up.
+        showMessage("confirmMsg", "If that account still needs confirming, a new code is on its way.", "ok");
+      })
+      .catch(function (err) {
+        showMessage("confirmMsg", err.message || "Couldn't send a new code.", "err");
+      });
+  });
+
+  /* The way out. Without it one mistyped character in the address is a dead end: no code
+     can ever arrive, and the account holding that address is unconfirmed - which is
+     exactly the account the server lets a fresh sign-up take over. */
+  $("confirmBackLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    confirmEmailAddr = "";
+    $("confirmCode").value = "";
+    show("signinView");
+    $("email").focus();
   });
 
   // ── Forgot password ────────────────────────────────────────────────────────
