@@ -587,12 +587,21 @@
       "Lessons completed", "Lessons total", "Progress %", "Last active"
     ]];
     members.forEach(function (m) {
-      var certs = {};
-      (m.certificates || []).forEach(function (c) {
-        // Keep the NEWEST certificate per course: a course can hold a series, and
-        // the current one is what a report is asked for.
-        if (!certs[c.courseKey] || String(c.issuedAt) > String(certs[c.courseKey].issuedAt)) certs[c.courseKey] = c;
-      });
+      /* THE SAME RULE AS THE PRINTED REPORT, and it has to be the same or the
+         two exports of one roster disagree about whether somebody is done: a
+         certificate belongs to an assignment only if it was issued AFTER that
+         assignment was created. A course can hold a series, so the newest
+         QUALIFYING one wins; an award from a previous round is reported on its
+         own row instead of being attached to the current obligation. */
+      var certFor = function (key, assignedAt) {
+        var best = null;
+        (m.certificates || []).forEach(function (c) {
+          if (c.courseKey !== key) return;
+          if (assignedAt && !(String(c.issuedAt) >= String(assignedAt))) return;
+          if (!best || String(c.issuedAt) > String(best.issuedAt)) best = c;
+        });
+        return best;
+      };
       var prog = {};
       (m.progress || []).forEach(function (p) { prog[p.courseKey] = p; });
 
@@ -606,7 +615,7 @@
         return;
       }
       list.forEach(function (a) {
-        var c = certs[a.courseKey], p = prog[a.courseKey];
+        var c = certFor(a.courseKey, a.assignedAt), p = prog[a.courseKey];
         rows.push([
           fullName(m), m.email, m.orgRole,
           "Course", labelFor(a.courseKey), "", statusWord(a),
@@ -614,6 +623,25 @@
           csvDate(a.completedAt), a.score != null ? a.score : (c && c.examScore != null ? c.examScore : ""),
           c ? c.number : "", c ? csvDate(c.issuedAt) : "",
           p ? p.lessonsCompleted : "", p ? p.lessonsTotal : "", p ? p.percent : "",
+          csvDate(m.lastActiveAt)
+        ]);
+      });
+
+      /* EARLIER CERTIFICATES AS THEIR OWN ROWS. Dropping them would make the
+         CSV a worse record than the database; attaching them to a current
+         assignment would make it a wrong one. "Certificate" is its own Kind,
+         beside "Course" and "Document". */
+      (m.certificates || []).forEach(function (c) {
+        var claimed = list.some(function (a) {
+          var q = certFor(a.courseKey, a.assignedAt);
+          return q && q.number === c.number;
+        });
+        if (claimed) return;
+        rows.push([
+          fullName(m), m.email, m.orgRole,
+          "Certificate", labelFor(c.courseKey), "", "Issued",
+          "", "", csvDate(c.issuedAt), c.examScore != null ? c.examScore : "",
+          c.number, csvDate(c.issuedAt), "", "", "",
           csvDate(m.lastActiveAt)
         ]);
       });
@@ -760,10 +788,27 @@
       if (!st.total) {
         block.appendChild(el("p", "prep-none", "No courses assigned."));
       } else {
-        var certs = {};
-        (m.certificates || []).forEach(function (c) {
-          if (!certs[c.courseKey] || String(c.issuedAt) > String(certs[c.courseKey].issuedAt)) certs[c.courseKey] = c;
-        });
+        /* A CERTIFICATE IS DURABLE; AN ASSIGNMENT IS NOT. The same person can
+           hold an award earned last year for a course they have just been
+           assigned again — and matching the two by course key alone printed
+           that old award, and its score, against a row reading "Upcoming, 0%".
+           A report that says a 0% assignment carries 100% is the kind of
+           document somebody has to explain afterwards.
+
+           So a certificate belongs to THIS round only if it was issued after
+           the assignment was created. The rest are not discarded — they are
+           the person's record — they move to their own line below the table,
+           where they are a fact about the holder rather than a claim about
+           the work in hand. */
+        var certsFor = function (key, assignedAt) {
+          var best = null;
+          (m.certificates || []).forEach(function (c) {
+            if (c.courseKey !== key) return;
+            if (assignedAt && !(String(c.issuedAt) >= String(assignedAt))) return;
+            if (!best || String(c.issuedAt) > String(best.issuedAt)) best = c;
+          });
+          return best;
+        };
         var prog = {};
         (m.progress || []).forEach(function (p) { prog[p.courseKey] = p; });
 
@@ -778,7 +823,7 @@
 
         var tbody = document.createElement("tbody");
         (m.assignments || []).forEach(function (a) {
-          var c = certs[a.courseKey], p = prog[a.courseKey];
+          var c = certsFor(a.courseKey, a.assignedAt), p = prog[a.courseKey];
           var tr = document.createElement("tr");
           tr.appendChild(el("td", "course", labelFor(a.courseKey)));
 
@@ -812,6 +857,26 @@
         });
         table.appendChild(tbody);
         block.appendChild(table);
+
+        /* EARLIER AWARDS, named rather than dropped. An admin reading this
+           wants to know the person has done the course before — just not in a
+           column that implies the current assignment is finished. */
+        var earlier = (m.certificates || []).filter(function (c) {
+          return !(m.assignments || []).some(function (a) {
+            return a.courseKey === c.courseKey && certsFor(a.courseKey, a.assignedAt) &&
+                   certsFor(a.courseKey, a.assignedAt).number === c.number;
+          });
+        });
+        if (earlier.length) {
+          var note = el("p", "prep-earlier");
+          note.appendChild(el("b", null, "Earlier certificates: "));
+          note.appendChild(document.createTextNode(
+            earlier.map(function (c) {
+              return labelFor(c.courseKey) + " \u2014 " + c.number +
+                (c.issuedAt ? ", " + fmtDate(c.issuedAt) : "");
+            }).join("  \u00b7  ")));
+          block.appendChild(note);
+        }
       }
       root.appendChild(block);
     });

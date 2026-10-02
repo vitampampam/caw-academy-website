@@ -1320,6 +1320,10 @@
       vertical-align:top}
     .prep-rows tr{break-inside:avoid; page-break-inside:avoid}
     .prep-rows thead{display:table-header-group}
+    /* Earlier awards, under a member's table: a fact about the holder, set
+       quietly apart from the assignments it is NOT a statement about. */
+    .prep-earlier{font-size:7.5pt; color:#6B7390; margin:5pt 0 0; line-height:1.5}
+    .prep-earlier b{color:#454952; font-weight:700}
 
     /* STICKY IS A SCREEN IDEA, AND IT LEAKED ONTO PAPER. The global `thead th`
        rule pins a header while its body scrolls — right for every table in the
@@ -1908,6 +1912,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=50" defer></script>
+<script src="admin.js?v=51" defer></script>
 </body>
 </html>
