@@ -90,7 +90,11 @@
        see and anything pinned to its bottom — the name and Sign out — sits
        under Safari's toolbar. `dvh` follows the visible height. The vh line
        stays first as the fallback for anything that does not know dvh. */
-    height:100vh; height:100dvh; overflow:auto}
+    /* FIXED, NOT SCROLLING. The rail holds a brand, an organisation card,
+       seven items and a foot — it fits, and a navigation that scrolls away
+       from under your finger is a navigation you have to find twice. If it
+       ever cannot fit, the nav list is what gives. */
+    height:100vh; height:100dvh; overflow:hidden}
   .rail-brand{display:flex; align-items:center; gap:10px; padding:2px 8px 14px}
   .rail-brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm); flex:none}
   .rail-name{font-family:var(--serif); font-size:18px; font-weight:600; line-height:1.1; color:var(--ink)}
@@ -116,7 +120,9 @@
   /* Section navigation. `renderTabs` fills this; the buttons keep their old
      class names so the one place that writes them did not have to learn a new
      vocabulary to move from a tab strip into a rail. */
-  .tabsnav{display:flex; flex-direction:column; gap:2px}
+  .tabsnav{display:flex; flex-direction:column; gap:2px; min-height:0; overflow-y:auto;
+    scrollbar-width:none}
+  .tabsnav::-webkit-scrollbar{display:none}
   .navhead{font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
     color:var(--muted); padding:10px 10px 5px}
   .tabbtn{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
@@ -711,10 +717,22 @@
     font-size:11px; font-weight:800; display:grid; place-items:center; flex:none}
   .step-k b{font-size:12.5px; font-weight:700; letter-spacing:-.01em}
   .step-k .lbl{font-size:12px; color:var(--muted); font-weight:500; margin:0}
-  .assign-foot{display:flex; gap:12px; margin-top:10px; flex-wrap:wrap}
-  .assign-foot > div{flex:0 0 190px}
-  .assign-foot > .rec-xp{flex:1 1 auto; display:flex; flex-direction:column; align-items:flex-end}
-  .assign-foot > .rec-xp .pacts{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+  /* NOWRAP IS WHAT MAKES THE MIN-WIDTHS WORK. With `flex-wrap:wrap` a flex item
+     breaks to a new line INSTEAD of shrinking, so the fields never gave up the
+     50px that would have kept Reset on the row — it simply dropped below,
+     looking like a different control. Nowrap lets them shrink to their floors
+     first, which is the behaviour the floors were written for. Phones wrap,
+     where one row genuinely cannot hold four things. */
+  .assign-foot{display:flex; gap:12px; margin-top:10px; flex-wrap:nowrap; align-items:flex-end}
+  @media (max-width:760px){ .assign-foot{flex-wrap:wrap} }
+  /* The fields shrink before the row wraps: four fixed 190s plus two buttons
+     is wider than the panel, and a wrapped Reset ends up on a line of its own
+     looking like a different control. */
+  .assign-foot > div{flex:0 1 190px; min-width:140px}
+  /* Exports beside the dates; the reset pushed to the far right. */
+  .assign-foot > .rec-xp{flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-start}
+  .assign-foot > .rec-xp .pacts{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start}
+  .assign-foot > .rec-reset{flex:0 1 150px; min-width:108px; margin-left:auto}
   .assign-foot .field{margin:0}
   /* The consequence stated before the button is reachable: how many assignments
      this makes, on what dates. The button then carries the count itself. */
@@ -1138,11 +1156,18 @@
 
        Desktop only: below 1181px the page itself scrolls, and a bar pinned to
        the viewport there would hover over the footer for the whole page. */
-    .sumbar{position:sticky; bottom:0; z-index:4; margin-bottom:0;
+    /* THE PINNED BAR SITS ON THE CARD'S PADDING, NOT ON ITS EDGE. It was stuck
+       to bottom:0 of a scrolling card whose body ends flush there, so the bar's
+       own bottom — its rounded corners and its border — was cut off by the
+       card's overflow. A masking strip was painted under it to hide the seam,
+       which hid the symptom and kept the cause.
+
+       The bar now stops 14px short of the bottom and the form reserves that
+       much below it, so the whole control is inside the card with air under
+       it, the way it looks when the card does not scroll. */
+    .sumbar{position:sticky; bottom:14px; z-index:4; margin-bottom:0;
       box-shadow:0 -10px 14px -10px rgba(20,22,28,.14)}
-    .sumbar::after{content:""; position:absolute; left:-16px; right:-16px; bottom:-14px;
-      height:14px; background:var(--card)}
-    #famForm, .sect[data-sect="assign"] form{padding-bottom:2px}
+    #famForm, .sect[data-sect="assign"] form{padding-bottom:16px}
 
     /* Where the LAST control belongs with the button, the two are pinned as one
        block instead of the bar alone — otherwise the bar lands on top of the
@@ -1272,12 +1297,10 @@
      out of room. */
   @media (max-width:1180px){
     .av{display:none}
-    /* AND IT FOLLOWS THE NAV rather than being pushed to the floor. The rail is
-       a full viewport tall, so `margin-top:auto` parked the name and the button
-       at the very bottom — past the fold on a device whose browser eats the
-       last 80 pixels. There are seven nav items; there is no reason for the
-       foot to be anywhere but under them. */
-    .rail-foot{margin-top:18px; flex-wrap:wrap; gap:8px; justify-content:center}
+    /* THE FOOT IS AT THE BOTTOM AGAIN (SME), which is where it belongs — it
+       was only moved up because 100vh put it under Safari's toolbar, and the
+       rail is measured in dvh now, so the bottom IS the bottom. */
+    .rail-foot{flex-wrap:wrap; gap:8px; justify-content:center}
     .rail-foot .rail-av{display:none}
     .rail-foot #who{flex:1 1 100%; order:1; text-align:center}
     .rail-foot .btn-ghost{order:2; flex:1 1 100%; justify-content:center; margin-left:0}
@@ -1999,10 +2022,6 @@
             <label class="lbl" for="recTo">To</label>
             <input class="field" id="recTo" type="date">
           </div>
-          <div>
-            <label class="lbl" aria-hidden="true" style="visibility:hidden">Reset</label>
-            <button class="btn btn-ghost" type="button" id="recReset" style="width:100%">Reset filters</button>
-          </div>
           <!-- THE REPORT'S OWN EXPORTS, inside the panel that defines it. The
                page-header pair sits beside the page title and reads as the
                page's, so with filters set it was unclear which of the two sets
@@ -2016,6 +2035,14 @@
               <button class="btn btn-ghost" type="button" id="recExportCustomCsv">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
             </div>
+          </div>
+          <!-- RESET LAST, at the far right (SME). The two exports are what the
+               panel is FOR, so they sit with the filters that feed them; the
+               reset is the way out, and a way out belongs at the end of a row,
+               not between the dates and the thing they produce. -->
+          <div class="rec-reset">
+            <label class="lbl" aria-hidden="true" style="visibility:hidden">Reset</label>
+            <button class="btn btn-ghost" type="button" id="recReset" style="width:100%">Reset filters</button>
           </div>
         </div>
       </div>
@@ -2076,6 +2103,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=59" defer></script>
+<script src="admin.js?v=60" defer></script>
 </body>
 </html>
