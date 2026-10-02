@@ -314,7 +314,7 @@
   /* A scrolling body needs its own inner padding — the padding that was on the
      card would scroll away with the content. */
   .card-b.card-scroll{padding-top:12px}
-  @media (max-width:1180px){
+  @media (max-width:1023px){
     /* One column now, so nothing is competing for height: let them run. */
     .card-scroll{max-height:none; overflow:visible}
   }
@@ -496,11 +496,29 @@
   .frow > .pill{justify-self:start}
   /* course | number | issued — fixed for the same reason as above. */
   .frow-cert{grid-template-columns:minmax(0,1fr) 190px 120px}
-  /* Narrow: the actions drop to their own line rather than squeezing the date
-     into two words per line. */
-  @media (max-width:980px){
-    .frow-att{grid-template-columns:minmax(0,1fr) 84px auto; row-gap:6px}
-    .frow-att .actions{grid-column:1/-1; justify-content:flex-start}
+  /* THE CARD'S WIDTH DECIDES, NOT THE WINDOW'S — and that distinction is the
+     whole bug. These four tracks need 457px before the name gets anything, and
+     on an iPad in landscape the window is 1180 (so a `max-width:980px` rule
+     never fires) while the card, sharing the row with the licence panel, is
+     about 490. The name track was left FIVE PIXELS, so "Airworthiness Review
+     (ARC)" came out as three stacked fragments.
+
+     A container query asks the question that matters. Below 640px of card the
+     row becomes two lines: who and the status above, the date and the buttons
+     below, each still in a column that lines up down the list. */
+  #attentionCard{container-type:inline-size; container-name:att}
+  @container att (max-width:640px){
+    .frow-att{grid-template-columns:minmax(0,1fr) auto; row-gap:7px}
+    .frow-att .when{grid-column:1; white-space:nowrap}
+    .frow-att .actions{grid-column:2; justify-content:flex-end}
+  }
+  /* Fallback for a browser without container queries: the viewport rule that
+     was here before, which is right whenever the window itself is narrow. */
+  @supports not (container-type:inline-size){
+    @media (max-width:980px){
+      .frow-att{grid-template-columns:minmax(0,1fr) 84px auto; row-gap:6px}
+      .frow-att .actions{grid-column:1/-1; justify-content:flex-start}
+    }
   }
 
   /* A standing fact in the Licence panel: label left, value right, nothing to
@@ -1004,7 +1022,13 @@
 
      SCREEN ONLY. The printed report is laid out by its own rules further down,
      and a 100vh column with hidden overflow would clip it to one page. */
-  @media screen and (min-width:1181px){
+  /* THE FULL CONSOLE STARTS AT 1024, NOT 1181. An iPad in landscape is 1180 CSS
+     pixels wide — one short — so the device this is most used on fell to the
+     compact layout by a single pixel, and the difference between "designed for
+     a tablet" and "a phone page on a big screen" was that pixel. 1024 leaves a
+     244px rail and 780 of canvas, which the two-column Overview and every table
+     fit inside. */
+  @media screen and (min-width:1024px){
     .shell{height:100vh; overflow:hidden}
     /* No bottom padding: the column ends AT the viewport, so the footer sits on
        the bottom edge instead of floating with dead space beneath it. */
@@ -1160,33 +1184,57 @@
 
   /* ── Narrow.  The rail loses its labels at 1180 and becomes a top bar on a
         phone. Nothing is hidden, only re-shaped. ───────────────────────────── */
-  @media (max-width:1180px){
-    .shell{grid-template-columns:70px minmax(0,1fr)}
-    .rail{padding:16px 10px 12px; align-items:center}
-    .rail-brand{padding:2px 0 14px; justify-content:center}
-    .rail-brand .rail-text{display:none}
-    .org,.navhead{display:none}
-    .tabsnav{width:100%}
-    .tabbtn{justify-content:center; padding:10px 0}
-    .tabbtn .tlabel{display:none}
-    /* Hidden, except the one that is a warning — a bare icon cannot say "3". */
-    .tabbtn .tcount{display:none; margin:0}
-    .tabbtn.alert .tcount{display:inline; position:absolute; transform:translate(12px,-10px);
-      font-size:9.5px; padding:0 5px}
-    .tabbtn{position:relative}
-    .rail-foot{justify-content:center} #who{display:none}
+  /* TABLET PORTRAIT KEEPS A SIDEBAR — just a narrower one, and it keeps its
+     WORDS. The first attempt at this shrank the rail to a 70px strip of bare
+     icons with every label, the organisation card and the section headings
+     hidden; the second threw the rail away entirely for a top bar. Both lost
+     something portrait has room for: at 820px a 200px rail still leaves 620 of
+     canvas, and the Overview is one column at this width anyway. A navigation
+     you can read is worth 200 pixels. */
+  @media (max-width:1023px){
+    .shell{grid-template-columns:200px minmax(0,1fr)}
+    .rail{padding:14px 10px 12px}
+    .rail-brand{padding:2px 2px 12px}
+    .org{padding:9px 10px; margin-bottom:12px}
+    .tabbtn{font-size:13px; padding:8px 9px; gap:9px}
+    .navhead{padding:9px 9px 4px}
+    .rail-foot{padding-top:10px}
     .rsum{grid-template-columns:repeat(2,minmax(0,1fr))}
     .ovgrid{grid-template-columns:minmax(0,1fr)}
     .wrap{padding:20px 18px 48px}
+
+    /* THE TWO THINGS THAT PUSHED THE PAGE SIDEWAYS, and neither was a table —
+       the tables scroll inside their own box and always did. It was the page
+       header's button group, which is `flex:none` so it refuses to give any
+       width back, and the segmented view bars, which are `inline-flex` with
+       four nowrap options. Both now wrap onto a second line instead of
+       standing on the page's right edge.
+
+       Measured at 820: the header group ran to 503px beside a title in a
+       805px page, and the Records view bar to 661. */
+    .phead{flex-wrap:wrap; align-items:flex-start}
+    .phead > div:first-child{flex:1 1 320px; min-width:0}
+    .pacts{flex:0 1 auto; justify-content:flex-start}
+    .seg{flex-wrap:wrap}
   }
+
+  /* PHONES: a sidebar of any width is most of the screen, so here the rail does
+     lie down — and the labels survive, because the bar scrolls sideways rather
+     than shrinking to glyphs. */
   @media (max-width:760px){
     .shell{grid-template-columns:minmax(0,1fr)}
-    .rail{position:static; height:auto; flex-direction:row; align-items:center;
-      padding:9px 12px; gap:8px; border-right:0; border-bottom:1px solid var(--line); overflow:visible}
-    .rail-brand{padding:0}
-    .tabsnav{flex-direction:row; width:auto; overflow-x:auto; gap:4px; flex:1}
-    .tabbtn{padding:9px 11px}
-    .rail-foot{margin:0 0 0 auto; border:0; padding:0}
+    .rail{position:sticky; top:0; z-index:30; height:auto; flex-direction:row;
+      align-items:center; padding:9px 12px; gap:8px; border-right:0;
+      border-bottom:1px solid var(--line); overflow:visible}
+    .rail-brand{padding:0; flex:none}
+    .org,.navhead{display:none}
+    .tabsnav{flex-direction:row; width:auto; overflow-x:auto; gap:4px; flex:1;
+      scrollbar-width:none}
+    .tabsnav::-webkit-scrollbar{display:none}
+    .tabbtn{padding:9px 11px; white-space:nowrap; flex:none}
+    .tabbtn.child{padding-left:11px}
+    .rail-foot{margin:0 0 0 auto; border:0; padding:0; flex:none}
+    #who{display:none}
     .phead{flex-direction:column; align-items:stretch; gap:10px}
     .pacts{justify-content:flex-start}
     /* Stacked, the band is taller, so the table header has further to fall. */
@@ -1912,6 +1960,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=51" defer></script>
+<script src="admin.js?v=54" defer></script>
 </body>
 </html>
