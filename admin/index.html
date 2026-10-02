@@ -1400,6 +1400,41 @@
        the header now stops the content at the very top edge. */
     .wrap{padding-top:0}
     .phead{margin-top:0}
+
+    /* THE SECTION FILLS THE CANVAS, AND THE TABLE TAKES THE SPARE HEIGHT.
+       Measured at 834x1194 with a member open: the card stopped at 838px with
+       228px of empty canvas beneath it, while the table inside it was held to
+       665px by its own cap and scrolled 1600px of rows through that slot. A
+       cramped scroller floating above a quarter-screen of nothing is exactly
+       the "loose" complaint — the viewport-relative cap was written for the
+       desktop two-column page, where something else wants the rest.
+
+       `min-height:100%`, not `height`: a section that fits is stretched to the
+       canvas so there is no dead space, and one that does not — the one-column
+       Overview at this width — still grows and lets the canvas scroll. The
+       cap is lifted only for the LAST card, the one holding the table; a
+       filter card above it keeps its own height.
+
+       A SECTION THAT ENDS IN A TABLE IS PINNED TO THE CANVAS (`height:100%`),
+       so the table scrolls inside its card and the search box and filter chips
+       above it stay put — the property the cap was there to protect. Every
+       other section keeps `min-height` and grows. Lifting the cap without
+       pinning was measured too: the table then grew to its full 1600px and
+       took the controls off the top of the screen with it. */
+    .wrap{display:flex; flex-direction:column}
+    .sect.on{display:flex; flex-direction:column}
+    .sect.on:has(> .card:last-of-type .table-scroll){flex:1 1 auto; min-height:0}
+    .sect.on > .card:last-of-type{flex:1 1 auto; min-height:0;
+      display:flex; flex-direction:column}
+    /* :not(.hidden) is load-bearing — this selector outweighs `.hidden`. */
+    .sect.on > .card:last-of-type > .card-b:not(.hidden){flex:1 1 auto; min-height:0;
+      display:flex; flex-direction:column}
+    /* A card ABOVE the table keeps its own height up to a ceiling, as on the
+       desktop page: Records' custom report, open, would otherwise take the
+       column and leave the results nothing. */
+    .sect.on > .card:not(:last-of-type){flex:0 0 auto; max-height:58%;
+      overflow-y:auto; overscroll-behavior:contain}
+    .table-scroll{max-height:none; flex:1 1 auto; min-height:0}
   }
 
   /* PHONES: a sidebar of any width is most of the screen, so here the rail does
@@ -2142,6 +2177,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=62" defer></script>
+<script src="admin.js?v=66" defer></script>
 </body>
 </html>
