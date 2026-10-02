@@ -85,7 +85,12 @@
 
   .rail{background:var(--rail-bg); border-right:1px solid var(--line);
     display:flex; flex-direction:column; padding:16px 12px 12px; position:sticky; top:0;
-    height:100vh; overflow:auto}
+    /* 100dvh, not 100vh. On iOS `vh` is measured against the viewport with the
+       browser chrome RETRACTED, so a 100vh rail is taller than what you can
+       see and anything pinned to its bottom — the name and Sign out — sits
+       under Safari's toolbar. `dvh` follows the visible height. The vh line
+       stays first as the fallback for anything that does not know dvh. */
+    height:100vh; height:100dvh; overflow:auto}
   .rail-brand{display:flex; align-items:center; gap:10px; padding:2px 8px 14px}
   .rail-brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm); flex:none}
   .rail-name{font-family:var(--serif); font-size:18px; font-weight:600; line-height:1.1; color:var(--ink)}
@@ -357,7 +362,16 @@
   .member-email{display:block; color:var(--muted); font-size:11.5px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .member-active{font-size:12.5px; color:var(--ink-soft); white-space:nowrap}
-  .chev{color:#AFB4D0; font-size:11px}
+  /* THE DISCLOSURE MARK IS THE ONLY SIGN A ROW OPENS, so it was the one thing
+     on the row that must not be the faintest. At 11px in #AFB4D0 it was two
+     steps lighter than the text beside it and smaller than everything else —
+     an affordance you have to hunt for is not an affordance. Same weight as
+     the muted text now, half again the size, and it goes indigo with the row
+     under the cursor so the whole row reads as one target. */
+  .chev{color:var(--muted); font-size:16px; font-weight:700; line-height:1;
+    width:18px; text-align:center}
+  tr.rowlink:hover .chev{color:var(--indigo)}
+  tr.rowlink.open .chev{color:var(--indigo)}
   .csub{display:block; color:var(--muted); font-size:11.5px; font-weight:400}
 
   /* THE EXPANDED MEMBER. The detail that used to print on all twenty-five cards,
@@ -757,8 +771,21 @@
      sort, and nothing else. */
   /* TWO CONTROLS: a search, and the view. Four dropdowns in a tinted tray read
      as a control panel for a list of six things; this reads as a toolbar. */
-  .tbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px}
-  .tbar-search{flex:0 1 300px; min-width:180px; height:32px;
+  /* THE FILTER BAR IS ONE ROW: the search, then three views of equal width.
+     They were content-sized, so "All" was a third of "Overdue familiarisation"
+     and the three read as a ragged group rather than as one control with three
+     positions — and on a tablet the set wrapped under the search. Equal tracks
+     make the segmented control look like what it is: a switch, where the three
+     options are the same KIND of thing and so should be the same size. */
+  .tbar{display:flex; align-items:center; gap:12px; flex-wrap:nowrap; margin-bottom:12px}
+  .tbar .seg{flex:0 1 330px; display:flex; min-width:0}
+  .tbar .seg-btn{flex:1 1 0; min-width:0; justify-content:center; padding:6px 8px}
+  @media (max-width:560px){
+    /* Only where one row genuinely cannot hold both. */
+    .tbar{flex-wrap:wrap}
+    .tbar .seg{flex:1 1 100%}
+  }
+  .tbar-search{flex:1 1 200px; min-width:140px; height:32px;
     border:1px solid var(--line); border-radius:8px; background:#fff;
     color:var(--ink); font:inherit; font-size:13px; padding:0 11px}
   .tbar-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
@@ -1228,7 +1255,12 @@
      out of room. */
   @media (max-width:1180px){
     .av{display:none}
-    .rail-foot{flex-wrap:wrap; gap:8px; justify-content:center}
+    /* AND IT FOLLOWS THE NAV rather than being pushed to the floor. The rail is
+       a full viewport tall, so `margin-top:auto` parked the name and the button
+       at the very bottom — past the fold on a device whose browser eats the
+       last 80 pixels. There are seven nav items; there is no reason for the
+       foot to be anywhere but under them. */
+    .rail-foot{margin-top:18px; flex-wrap:wrap; gap:8px; justify-content:center}
     .rail-foot .rail-av{display:none}
     .rail-foot #who{flex:1 1 100%; order:1; text-align:center}
     .rail-foot .btn-ghost{order:2; flex:1 1 100%; justify-content:center; margin-left:0}
@@ -1251,7 +1283,8 @@
     .rail-foot{padding-top:10px}
     .rsum{grid-template-columns:repeat(2,minmax(0,1fr))}
     .ovgrid{grid-template-columns:minmax(0,1fr)}
-    .wrap{padding:20px 18px 48px}
+    /* Less dead space under the last card before the footer. */
+    .wrap{padding:20px 18px 26px}
 
     /* THE TWO THINGS THAT PUSHED THE PAGE SIDEWAYS, and neither was a table —
        the tables scroll inside their own box and always did. It was the page
@@ -1272,11 +1305,23 @@
     .seg-btn .t-long{display:none}
     .seg-btn .t-short{display:inline}
 
-    /* THE PICKERS ARE SHORTER HERE. 440px each was sized for a desktop where
-       they sit side by side; stacked in one column on a tablet that is most of
-       the screen before the dates and the button are reached. 300 still shows
-       seven or eight rows, which is what a picker is for. */
-    .ms-grid > div{max-height:300px}
+    /* THE PICKERS TAKE A SHARE OF THE HEIGHT, not a fixed 440. That number was
+       sized for a desktop where the two sit side by side; stacked in one column
+       on a tablet it was most of the screen before the dates were reached. A
+       flat 300 then left the page ending well short of the fold on a 1180-tall
+       portrait iPad. A third of the viewport is the honest answer to both: it
+       fills a tall screen and shrinks on a short one. */
+    .ms-grid > div{max-height:min(420px, 34vh)}
+
+    /* AND A PICKER IS AS TALL AS WHAT IS IN IT. The two columns are forced to
+       equal height on a desktop, where they sit side by side and a ragged pair
+       looks broken. Stacked one above the other that reason disappears, and the
+       cost shows: four folded frameworks were followed by a hand's width of
+       empty box, because the list was still stretching to a height set by the
+       column rather than by its rows. Capped above, content-sized below. */
+    .ms-grid > div{align-self:start}
+    .ms-grid .ms{flex:0 1 auto}
+    .ms-grid .ms-list{flex:0 1 auto; min-height:0}
 
     /* THE RAIL FOOT STACKS. At 200px the avatar, the name and the button could
        not share a line, so "Sign out" broke across two — a two-word button on
@@ -2020,6 +2065,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=55" defer></script>
+<script src="admin.js?v=58" defer></script>
 </body>
 </html>

@@ -2197,13 +2197,12 @@
     });
     bar.appendChild(views);
 
-    if (docQuery.trim() || docView) {
-      var clear = document.createElement("button");
-      clear.type = "button"; clear.className = "linkbtn"; clear.style.marginLeft = "auto";
-      clear.textContent = "Clear";
-      clear.addEventListener("click", clearDocFilters);
-      bar.appendChild(clear);
-    }
+    /* NO "CLEAR" (SME). It appeared only once a filter was on, which put a
+       link in the far corner of the bar that was absent most of the time — and
+       it undid something the controls beside it already undo: "All" is the
+       cleared state of the views, and the search box clears itself. A control
+       whose whole job is to return two neighbours to a state those neighbours
+       can reach on their own is one more thing on screen, not one fewer. */
 
     if (refocus) {
       var fresh = $("docSearch");
