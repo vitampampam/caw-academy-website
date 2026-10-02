@@ -474,7 +474,12 @@
     text-transform:uppercase; color:var(--muted)}
   .mstat-v{margin-top:4px; font-size:13px; font-weight:650; color:var(--ink);
     font-variant-numeric:tabular-nums}
-  .mcard-meta .mcell{width:140px}
+  /* THE BAR AND ITS COUNT STAY UNDER THEIR OWN HEADING. At 140px the pair ran
+     wider than "COURSE PROGRESS" above it, so the count drifted along until it
+     sat under "DOCUMENTS" and looked like that column's figure. Measured: the
+     heading's text is 106px, so that is the pair's width and the count now ends
+     where the heading ends. */
+  .mcard-meta .mcell{width:106px; gap:7px}
   .mcard-meta .mbar{flex:1 1 auto}
   .mcard > .member-body{margin:0 14px 14px; width:auto; cursor:default}
   @media (max-width:760px){ .mlist{padding:10px 10px 14px} .mcard-meta{gap:10px 16px} }
@@ -2355,6 +2360,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=84" defer></script>
+<script src="admin.js?v=86" defer></script>
 </body>
 </html>
