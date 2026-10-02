@@ -70,7 +70,18 @@
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
-  body{margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+  /* FIRM, NOT LOOSE. Two separate things made a page that has nothing to
+     scroll still move under your finger on iPad:
+     (1) `vh` is measured against the viewport with the browser chrome
+         RETRACTED, so a 100vh shell is TALLER than what you can see — the
+         page had a real scroll range of about a toolbar's height, holding
+         nothing. Every full-height figure here is `dvh`, with the `vh` line
+         first as the fallback.
+     (2) the elastic overscroll bounce, which happens whether or not there is
+         anywhere to go. `overscroll-behavior:none` stops it at the page edge.
+     So a scrollbar now means there is genuinely something below. */
+  html,body{overscroll-behavior:none}
+  body{margin:0; min-height:100vh; min-height:100dvh; background:var(--bg); color:var(--ink);
     font-family:var(--sans); font-size:14px; line-height:1.5; letter-spacing:-.005em;
     -webkit-font-smoothing:antialiased}
   /* Every figure here is compared with the figure above it, so digits must sit
@@ -81,7 +92,8 @@
 
   /* ── Shell ──────────────────────────────────────────────────────────────
      The rail is its own scroll context and never moves; the canvas scrolls. */
-  .shell{display:grid; grid-template-columns:244px minmax(0,1fr); min-height:100vh}
+  .shell{display:grid; grid-template-columns:244px minmax(0,1fr);
+    min-height:100vh; min-height:100dvh}
 
   .rail{background:var(--rail-bg); border-right:1px solid var(--line);
     display:flex; flex-direction:column; padding:16px 12px 12px; position:sticky; top:0;
@@ -1024,7 +1036,8 @@
   .dlg-back{position:fixed; inset:0; background:rgba(11,18,56,.45); z-index:100;
     display:flex; align-items:center; justify-content:center; padding:20px}
   .dlg{background:#fff; border-radius:14px; box-shadow:var(--shadow-pop);
-    width:100%; max-width:520px; max-height:calc(100vh - 40px); display:flex; flex-direction:column;
+    width:100%; max-width:520px; max-height:calc(100vh - 40px); max-height:calc(100dvh - 40px);
+    display:flex; flex-direction:column;
     overflow:hidden; animation:dlgIn .13s ease-out}
   @keyframes dlgIn{from{opacity:0; transform:translateY(6px) scale(.99)} to{opacity:1; transform:none}}
   .dlg-head{padding:18px 24px 0}
@@ -1095,10 +1108,11 @@
      244px rail and 780 of canvas, which the two-column Overview and every table
      fit inside. */
   @media screen and (min-width:1024px){
-    .shell{height:100vh; overflow:hidden}
+    .shell{height:100vh; height:100dvh; overflow:hidden}
     /* No bottom padding: the column ends AT the viewport, so the footer sits on
        the bottom edge instead of floating with dead space beneath it. */
-    .wrap{height:100vh; overflow:hidden; display:flex; flex-direction:column; padding-bottom:0}
+    .wrap{height:100vh; height:100dvh; overflow:hidden;
+      display:flex; flex-direction:column; padding-bottom:0}
     .sect.on{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
     .phead{position:static; flex:none; margin:-24px 0 14px}
 
@@ -1361,6 +1375,21 @@
        not share a line, so "Sign out" broke across two — a two-word button on
        two lines is the clearest possible sign that a layout has run out of
        room. The name sits above, the button spans the width below it. */
+  }
+
+  /* TABLET PORTRAIT IS FIRM TOO — the canvas scrolls, the page does not.
+     Between 761 and 1023 the page was an ordinary document: the rail is a
+     fixed 100dvh column, so scrolling the DOCUMENT dragged the whole layout
+     and took the navigation off the top with it. The shell is now exactly the
+     visible height and the canvas is the one scroller, so the rail stays put
+     and a scrollbar appears only when the section is genuinely taller than
+     the window.
+
+     `min-width:761px` keeps phones out: there the rail lies down as a bar and
+     the document is the right thing to scroll. */
+  @media screen and (min-width:761px) and (max-width:1023px){
+    .shell{height:100vh; height:100dvh; overflow:hidden}
+    .wrap{height:100%; min-height:0; overflow-y:auto; overscroll-behavior:none}
   }
 
   /* PHONES: a sidebar of any width is most of the screen, so here the rail does
@@ -2103,6 +2132,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=60" defer></script>
+<script src="admin.js?v=61" defer></script>
 </body>
 </html>
