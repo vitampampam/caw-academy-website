@@ -593,8 +593,18 @@
      checking whether a colleague can be given Part-145 needs to know WHICH
      seven, so the summary opens to the list — eighty titles cannot be the
      default state of a sidebar, but they must be reachable without asking us. */
+  /* A BUTTON CENTRES ITS TEXT BY DEFAULT, and that is the whole of this bug:
+     "75 courses · EASA, UK CAA, UAE GCAA, FAA" wraps on a narrow panel, and
+     the orphaned "FAA" sat in the middle of the line under a left-aligned
+     first line. Inline-flex made it worse — the chevron is a sibling item, so
+     it parked at the far right of the whole two-line block instead of
+     following the last word.
+
+     Inline display, left-aligned, with the arrow as an inline-block that flows
+     after the text it opens. */
   .lic-more{border:0; background:none; font:inherit; font-size:12.5px; font-weight:700;
-    color:var(--indigo); cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:6px}
+    color:var(--indigo); cursor:pointer; padding:0; display:inline; text-align:left}
+  .lic-more .fold-chev{display:inline-block; margin-left:6px; vertical-align:middle}
   .lic-more:hover{color:var(--indigo-ink)}
   .lic-more[aria-expanded="false"] .fold-chev{transform:rotate(-90deg)}
   .lic-more .fold-chev{border-top-color:currentColor}
@@ -778,14 +788,17 @@
      make the segmented control look like what it is: a switch, where the three
      options are the same KIND of thing and so should be the same size. */
   .tbar{display:flex; align-items:center; gap:12px; flex-wrap:nowrap; margin-bottom:12px}
-  .tbar .seg{flex:0 1 330px; display:flex; min-width:0}
-  .tbar .seg-btn{flex:1 1 0; min-width:0; justify-content:center; padding:6px 8px}
+  /* THE SEARCH GIVES WAY, NOT THE BUTTONS. The views had flex-shrink, so when
+     the row ran short they compressed and their labels overlapped — a control
+     that is unreadable is worse than a search box that is narrow. */
+  .tbar .seg{flex:0 0 auto; display:flex; min-width:0}
+  .tbar .seg-btn{flex:1 1 auto; min-width:104px; justify-content:center; padding:6px 10px}
   @media (max-width:560px){
     /* Only where one row genuinely cannot hold both. */
     .tbar{flex-wrap:wrap}
     .tbar .seg{flex:1 1 100%}
   }
-  .tbar-search{flex:1 1 200px; min-width:140px; height:32px;
+  .tbar-search{flex:1 1 140px; min-width:120px; height:32px;
     border:1px solid var(--line); border-radius:8px; background:#fff;
     color:var(--ink); font:inherit; font-size:13px; padding:0 11px}
   .tbar-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
@@ -793,8 +806,6 @@
 
   /* The views are mutually exclusive, so they are a segmented control, not
      three checkboxes pretending otherwise. */
-  /* A view button carries both its names; the width decides which is read. */
-  .seg-btn .t-short{display:none}
   .seg{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px}
   .seg-btn{display:inline-flex; align-items:center; gap:7px; border:0; background:none;
     border-radius:7px; padding:6px 13px; font:inherit; font-size:12.5px; font-weight:650;
@@ -1238,6 +1249,12 @@
     #recFilterBody .ms-list{min-height:210px}
     .form-open #famForm{overflow-y:auto; overscroll-behavior:contain}
     .form-open #famForm .ms-list{min-height:210px}
+
+    /* ASSIGN'S PICKERS COME DOWN TOO. 440 apiece is right on a deep screen and
+       pushes step 3 under the fold on a short one — the dates were half-hidden
+       behind the pinned bar, which is the one step you cannot skip. 300 still
+       shows eight rows, and the card scrolls for the rest. */
+    #assignForm > .ms-grid > div{max-height:300px}
   }
 
   /* ── iPad, BOTH WAYS UP ─────────────────────────────────────────────────
@@ -1298,12 +1315,6 @@
     .phead{flex-wrap:wrap; align-items:center}
     .phead > div:first-child{flex:1 1 auto; min-width:0}
     .pacts{flex:0 0 auto; justify-content:flex-end}
-
-    /* SHORT VIEW NAMES, so the row stays a row. "Document familiarisation" is
-       230px of a 584px canvas; four of them wrapped and left one button alone
-       on a second line, which reads as a mistake rather than as a choice. */
-    .seg-btn .t-long{display:none}
-    .seg-btn .t-short{display:inline}
 
     /* THE PICKERS TAKE A SHARE OF THE HEIGHT, not a fixed 440. That number was
        sized for a desktop where the two sit side by side; stacked in one column
@@ -2065,6 +2076,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=58" defer></script>
+<script src="admin.js?v=59" defer></script>
 </body>
 </html>

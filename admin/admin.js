@@ -373,19 +373,25 @@
     ["overview",     "Overview",
       '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/>' +
       '<rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'],
-    /* ASSIGN HAS TWO CHILDREN: Courses and Documents. Same verb, two objects.
+    /* TEAM PROGRESS SITS BETWEEN THEM (SME). Overview says how the team is
+       doing in four figures; Team progress is the same question answered
+       person by person, so it belongs beside the summary rather than after the
+       thing you do about it. Assign follows, which is the order of the work:
+       see where everyone is, then act on it.
+
+       ASSIGN HAS TWO CHILDREN: Courses and Documents. Same verb, two objects.
        There is only ONE Documents entry in the whole rail — the library and
        the bulk "require familiarisation" live on one screen, because a second
        item with the same name could only be told apart by its position. */
+    ["team",         "Team progress",
+      '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>' +
+      '<path d="M16 11.2A3 3 0 0 0 16 5.4M18 20c0-2.1-.8-3.8-2-5"/>'],
     ["assign",       "Assign",
       '<path d="M12 5v14M5 12h14"/>', { parent: true }],
     ["assign",       "Courses",
       '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v14H6.5A2.5 2.5 0 0 0 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H19v4H6.5A2.5 2.5 0 0 1 4 19.5z"/>', { child: true }],
     ["documents",    "Documents",
       '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>', { child: true }],
-    ["team",         "Team progress",
-      '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>' +
-      '<path d="M16 11.2A3 3 0 0 0 16 5.4M18 20c0-2.1-.8-3.8-2-5"/>'],
     /* RECORDS is the history: course completions, document familiarisation and
        certificates in one list, because an auditor's question spans all three.
        Certificates keeps its own screen — it is the one record people look up
@@ -2177,10 +2183,8 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "seg-btn" + (docView === v[0] ? " on" : "");
-      var dl = document.createElement("span"); dl.className = "t-long"; dl.textContent = v[1];
-      var ds = document.createElement("span"); ds.className = "t-short"; ds.textContent = v[3];
-      btn.appendChild(dl); btn.appendChild(ds);
-      if (v[2]) btn.title = v[2];
+      btn.textContent = v[3];
+      btn.title = v[2] || v[1];
       btn.setAttribute("aria-pressed", docView === v[0] ? "true" : "false");
       // The count rides the view, so "Overdue" says how much is overdue before
       // it is chosen — a view you have to enter to find out is empty is a
@@ -2578,9 +2582,14 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "seg-btn" + (recKind === k[0] ? " on" : "");
-      var long = document.createElement("span"); long.className = "t-long"; long.textContent = k[1];
-      var short = document.createElement("span"); short.className = "t-short"; short.textContent = k[2];
-      btn.appendChild(long); btn.appendChild(short);
+      /* ONE LABEL, the short one, at every width. The long form was shown on a
+         desktop and swapped out below 1024 — but an iPad in landscape is 1180
+         and takes the desktop path, so four long names were squeezed into a
+         bar sized for short ones and overlapped each other. "Courses" is no
+         less clear than "Courses completed" above a list of courses; the long
+         form survives as the tooltip, where it costs nothing. */
+      btn.textContent = k[2];
+      btn.title = k[1];
       var n = k[0] ? all.filter(function (r) { return r.kind === k[0]; }).length : all.length;
       if (n) {
         var tag = document.createElement("span"); tag.className = "seg-n"; tag.textContent = String(n);
