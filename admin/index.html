@@ -689,14 +689,17 @@
      act on. Deliberately not a .frow — it has two cells, not four, and feeding
      it the attention grid would leave two empty tracks holding the value out in
      the middle of the card. */
+  /* ONE LINE, NOT TWO, AND THE RULE BELONGS BETWEEN THE ROWS. A row drawing its
+     own top border needed an exception wherever something else already ended in
+     a line — under the licence meter, under a contract heading — and the
+     exception was written `:first-of-type`, which selects the first DIV among
+     its siblings, not the first `.kv`. The meter's own div came first, so no
+     row ever matched and the double line stayed. A separator between adjacent
+     rows needs no exception anywhere: the first row of any run simply has
+     nothing above it to separate from. */
   .kv{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-    padding:7px 0; border-top:1px solid var(--line-2)}
-  .kv:first-child{border-top:0}
-  /* ONE LINE, NOT TWO. The licence meter is a 6px rule in its own right, and
-     the first figure row drew its own hairline directly beneath it — two
-     horizontal lines a few pixels apart, reading as a mistake. The meter is the
-     separator there; the row below it does not need a second one. */
-  #licenceDetail .kv:first-of-type{border-top:0}
+    padding:7px 0}
+  .kv + .kv{border-top:1px solid var(--line-2)}
   .kv span{color:var(--muted); font-size:12.5px; min-width:0}
   .kv b{font-size:13px; white-space:nowrap; display:inline-flex; align-items:center}
 
@@ -1356,8 +1359,15 @@
        each list scrolls inside itself as it always has. */
     .form-open #famForm{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
     .form-open #famForm > .ms-grid{flex:1 1 auto; min-height:0}
-    .form-open #famForm > .ms-grid > div{max-height:none}
-    .form-open #famForm > .ms-grid > div{min-height:140px}
+    /* THE FLOOR GOES ON THE GRID, NOT ON THE COLUMN. Inside this scrolling
+       body the grid is a flex ITEM with a height of its own, so a column taller
+       than it overflows the grid's box — and the grid does not clip, so the
+       column painted straight over step 3 and its date fields. Measured: a
+       274px floor on the column against a 232px grid put 42px of member list on
+       top of "When". On the grid the same floor makes the BODY scroll, which it
+       is built to do, and the column stretches to the row it is given. */
+    .form-open #famForm > .ms-grid > div{max-height:none; min-height:0}
+    .form-open #famForm > .ms-grid{min-height:140px}
     .form-open #famForm .ms-list{min-height:0}
 
     .form-open .formfoot{position:static; flex:none; box-shadow:none; margin:14px -16px 0}
@@ -1390,8 +1400,8 @@
     #recFilterBody:not(.hidden){display:flex; flex-direction:column; flex:1 1 auto;
       min-height:0; overflow:hidden}
     #recFilterBody > .ms-grid{flex:1 1 auto; min-height:0}
-    #recFilterBody > .ms-grid > div{max-height:none}
-    #recFilterBody > .ms-grid > div{min-height:140px}
+    #recFilterBody > .ms-grid > div{max-height:none; min-height:0}
+    #recFilterBody > .ms-grid{min-height:140px}
     #recFilterBody .ms-list{min-height:0}
 
     /* ASSIGN SCROLLS AS ONE PIECE, and the attempt to make it not do so is why
@@ -1431,9 +1441,9 @@
      is the worst way for CSS to fail. */
   @media screen and (min-width:1024px) and (max-height:900px){
     #recFilterBody:not(.hidden){overflow-y:auto; overscroll-behavior:contain}
-    #recFilterBody > .ms-grid > div{min-height:274px}
+    #recFilterBody > .ms-grid{min-height:274px}
     .form-open #famForm{overflow-y:auto; overscroll-behavior:contain}
-    .form-open #famForm > .ms-grid > div{min-height:274px}
+    .form-open #famForm > .ms-grid{min-height:274px}
 
     /* ASSIGN'S PICKERS COME DOWN TOO. 440 apiece is right on a deep screen and
        pushes step 3 under the fold on a short one — the dates were half-hidden
@@ -2345,6 +2355,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=82" defer></script>
+<script src="admin.js?v=84" defer></script>
 </body>
 </html>
