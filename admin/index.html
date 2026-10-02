@@ -194,6 +194,9 @@
   .phead h1{margin:0; font-size:20px; font-weight:700; letter-spacing:-.02em}
   .phead .sub{margin:3px 0 0; color:var(--muted); font-size:13px}
   .pacts{display:flex; gap:8px; flex:none; flex-wrap:wrap; justify-content:flex-end}
+  /* A button may carry a long label and a short one; the width decides which
+     is shown, and the full phrase is always in the tooltip. */
+  .btn-s{display:none}
 
   /* ── Controls ───────────────────────────────────────────────────────────── */
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:7px;
@@ -420,6 +423,95 @@
   .role-pill{font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
     color:var(--indigo); background:var(--indigo-soft); padding:2px 7px; border-radius:99px}
 
+  /* ── The roster as cards ──────────────────────────────────────────────────
+     ONE PERSON, ONE CARD. The roster was a table, on the argument that a record
+     is read by comparing down a column — true on a wide screen, and the reason
+     the table is still what the PDF and the CSV produce. On screen it had two
+     costs the columns could not pay: at tablet width the row ran 312px past the
+     pane, so an open member showed its left third, and a row of bare figures
+     needs its heading three screens up to mean anything.
+
+     A card carries its own labels and cannot overflow sideways, and the detail
+     opens INSIDE it — so an open member is a card that grew, rather than two
+     table rows styled into looking joined. */
+  .mlist{display:flex; flex-direction:column; gap:10px; padding:10px 16px 16px}
+  /* TWO BANDS: who, on a grey header; what they have done, on white beneath.
+     A card of uniform white made the name and the four figures one undivided
+     block of text — the tint does the separating that a heading would. */
+  .mcard{background:#fff; border:1px solid var(--line); border-radius:var(--r-card);
+    cursor:pointer; box-shadow:var(--shadow-sm); overflow:hidden;
+    transition:border-color .12s ease, box-shadow .12s ease}
+  .mcard:hover{border-color:#C9CDEA}
+  .mcard:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+  /* Open: the indigo bar the table row used to carry, so "this is the one I
+     opened" survives the change of container. The card stops being a button. */
+  .mcard.open{border-color:#C9CDEA; cursor:default;
+    box-shadow:inset 3px 0 0 var(--indigo), var(--shadow-sm)}
+  .mcard-sum{display:flex; align-items:center; gap:12px;
+    background:#F6F7F9; padding:12px 14px; border-bottom:1px solid var(--line-2)}
+  .mcard-right{display:flex; align-items:center; gap:10px; margin-left:auto}
+  .mcard-right .chev{font-size:16px; font-weight:700; line-height:1; width:18px;
+    text-align:center; color:var(--muted)}
+  .mcard:hover .chev, .mcard.open .chev{color:var(--indigo)}
+  /* THE FIGURES CARRY THEIR OWN LABELS. A column heading says "Courses" once for
+     twenty-five rows; a card has to say it itself or the numbers are a row of
+     digits whose meaning is somewhere else on the page. */
+  /* The four fit one line at 820 with these numbers — measured; they wrapped
+     at a 26px gap and a 168px bar, and "Last active" alone on a second row
+     reads as a different kind of thing from the three above it. */
+  .mcard-meta{display:flex; flex-wrap:wrap; gap:10px 20px;
+    background:#fff; padding:11px 14px}
+  .mstat{min-width:86px}
+  .mstat-l{display:block; font-size:9.5px; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted)}
+  .mstat-v{margin-top:4px; font-size:13px; font-weight:650; color:var(--ink);
+    font-variant-numeric:tabular-nums}
+  .mcard-meta .mcell{width:140px}
+  .mcard-meta .mbar{flex:1 1 auto}
+  .mcard > .member-body{margin:0 14px 14px; width:auto; cursor:default}
+  @media (max-width:760px){ .mlist{padding:10px 10px 14px} .mcard-meta{gap:10px 16px} }
+
+
+  /* ── Certificates as records ───────────────────────────────────────────────
+     Holder, course, number, date and score each had a narrow column, so below a
+     wide desktop every one of them wrapped — a course title over three lines
+     beside a number broken across two, in a row 114px tall. The row now reads
+     the way the record reads: what was earned, by whom, and the number and date
+     that prove it. */
+  .certlist{display:flex; flex-direction:column}
+  .certrow{display:flex; align-items:center; gap:12px; padding:11px 16px;
+    border-top:1px solid var(--line-2)}
+  .certrow:first-child{border-top:0}
+  .certrow:hover{background:#FAFAFB}
+  .certmark{flex:none; width:30px; height:30px; border-radius:9px;
+    background:var(--indigo-soft); display:flex; align-items:center; justify-content:center}
+  .certmark svg{width:16px; height:16px; stroke:var(--indigo); fill:none;
+    stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+  .certmain{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px}
+  .certcourse{font-size:13px; font-weight:650; color:var(--ink); line-height:1.3}
+  /* The holder is the SECOND fact here — the list is of certificates — so the
+     name sits under the course rather than in a column of its own, with the
+     address after it where it can be truncated without losing the name. */
+  .certwho{font-size:11.5px; color:var(--muted); display:flex; gap:6px; min-width:0}
+  .certwho .member-email{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .certmeta{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:1px}
+  .certmeta .num{font-size:11.5px; font-weight:700; color:var(--ink-soft);
+    font-variant-numeric:tabular-nums; white-space:nowrap}
+  .certdate{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;
+    white-space:nowrap}
+  .certscore{flex:none; width:52px; display:flex; justify-content:flex-end}
+  @media (max-width:760px){ .certrow{padding:11px 10px; gap:9px} .certscore{display:none} }
+
+  /* The order is one control, because a card has no column heading to click. */
+  .rsortbar{display:flex; align-items:center; gap:6px}
+  .rsort-l{font-size:9.5px; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted)}
+  .rsort-sel{font:inherit; font-size:12.5px; font-weight:600; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:99px; padding:6px 10px}
+  .rsort-dir{font-size:10px; line-height:1; color:var(--muted); background:#fff;
+    border:1px solid var(--line); border-radius:99px; padding:8px 9px; cursor:pointer}
+  .rsort-dir:hover{color:var(--indigo); border-color:#C9CDEA}
+
   /* Per-member chips, kept for the expanded body. */
   .mchips{display:flex; flex-wrap:wrap; gap:6px}
   .mchip{font-size:11px; font-weight:750; padding:2px 9px; border-radius:99px; white-space:nowrap;
@@ -438,7 +530,25 @@
   .mcell{display:flex; align-items:center; gap:9px}
   .mcell small{color:var(--muted); font-size:11.5px; white-space:nowrap; font-variant-numeric:tabular-nums}
 
-  .rfilters{display:flex; flex-wrap:wrap; gap:6px}
+  /* ONE WRAPPING GROUP, FLOWING LIKE TEXT. `display:contents` on the filters
+     puts the chips and the sort control in the SAME flex line rather than in
+     two boxes, so the sort follows "Unassigned" directly and, when the width
+     runs out, drops to the next line LEFT-ALIGNED under the chips instead of
+     being pushed to the far right on a line of its own. A group that wraps is
+     fine; a group that wraps and changes alignment is the staircase.
+
+     The sort cannot share the line at 820 — four chips and the control come to
+     ~750px in a ~520px row — so on a tablet it sits under them, which is the
+     best available and still reads as one cluster. */
+  .rctrls{display:flex; flex-wrap:wrap; align-items:center; gap:8px; width:100%}
+  .rfilters{display:contents}
+  /* The count rides inside the chip as its own quiet badge rather than as part
+     of the label, so the words line up and the numbers do too. */
+  .rchip-n{margin-left:6px; padding:1px 6px; border-radius:99px; font-size:10.5px;
+    font-weight:800; background:#EDEEF2; color:var(--muted);
+    font-variant-numeric:tabular-nums}
+  .rchip.on .rchip-n{background:rgba(255,255,255,.22); color:#fff}
+  .rchip:disabled .rchip-n{background:#F0F1F3}
   .rchip{font:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
     border:1px solid var(--line); background:#fff; color:var(--ink-soft); padding:5px 11px; border-radius:99px}
   .rchip:hover{background:var(--indigo-soft)}
@@ -447,7 +557,18 @@
 
   /* ── Assignment rows (inside an expanded member) ────────────────────────── */
   .alist{margin:10px 0 0; padding:0; list-style:none}
-  .abulk{display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap}
+  /* ONE TOOLBAR ROW: select-all and Remove on the left, the two exports on the
+     right. They only fit if the exports are compact — at the page's normal
+     button size the row ran ~10px over the panel and the exports dropped to a
+     line of their own, right-aligned under left-aligned controls, which is the
+     staircase this replaces. They keep the word "Export": bare "PDF" next to
+     Edit and Remove reads as something to open, not something that produces a
+     file. */
+  .abulk{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap}
+  .abulk > div:last-child{margin-left:auto; display:flex; gap:7px}
+  .abulk .btn-ghost{font-size:11.5px; padding:6px 9px; gap:5px}
+  .abulk .btn-ghost svg{width:13px; height:13px}
+  .abulk-count{margin-left:0}
   .abulk-all{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--ink-soft); cursor:pointer}
   .abulk-all input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
   .abulk-count{font-size:11.5px; font-weight:700; color:var(--muted); white-space:nowrap}
@@ -1349,8 +1470,23 @@
 
        Measured at 820: the header group ran to 503px beside a title in a
        805px page, and the Records view bar to 661. */
-    .phead{flex-wrap:wrap; align-items:center}
+    /* THE ACTIONS STAY ON THE TITLE'S LINE, as on every other page. Team has
+       four buttons where the others have two, and at full size they came to
+       ~670px in a ~580px row, so the whole group dropped under the heading and
+       this one page looked different from the rest. Measured: compact buttons,
+       "Invite" for "Invite a colleague", and Reload as its icon alone bring the
+       group to ~350px, which fits beside the heading with room to spare. Both
+       shortened buttons keep the full wording in their tooltip, and the two
+       exports keep their labels — "Export" is the word that says a file is
+       about to be produced. */
+    .phead{flex-wrap:nowrap; align-items:center}
     .phead > div:first-child{flex:1 1 auto; min-width:0}
+    .pacts{flex-wrap:nowrap}
+    .pacts .btn{font-size:12px; padding:7px 10px; gap:6px}
+    .pacts .btn svg{width:14px; height:14px}
+    .pacts #inviteBtn .btn-t{display:none}
+    .pacts #inviteBtn .btn-s{display:inline}
+    .pacts #reloadBtn .btn-t{display:none}
     .pacts{flex:0 0 auto; justify-content:flex-end}
 
     /* THE PICKERS TAKE A SHARE OF THE HEIGHT, not a fixed 440. That number was
@@ -1435,6 +1571,7 @@
     .sect.on > .card:not(:last-of-type){flex:0 0 auto; max-height:58%;
       overflow-y:auto; overscroll-behavior:contain}
     .table-scroll{max-height:none; flex:1 1 auto; min-height:0}
+
   }
 
   /* PHONES: a sidebar of any width is most of the screen, so here the rail does
@@ -1908,23 +2045,28 @@
              the app at all, and the roster can only ever list accounts that
              already exist — so until now that step happened over chat, or not
              at all. -->
-        <button class="btn" id="inviteBtn">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Invite a colleague</button>
+        <button class="btn" id="inviteBtn" title="Invite a colleague">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg><span class="btn-t">Invite a colleague</span><span class="btn-s">Invite</span></button>
         <!-- The download mark, matched by the per-member buttons inside an open
              row, so "this produces a file" looks the same wherever it is offered. -->
         <button class="btn btn-ghost" id="exportPdfBtn">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export PDF</button>
         <button class="btn btn-ghost" id="exportBtn">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
-        <button class="btn btn-ghost" id="reloadBtn">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>Reload</button>
+        <button class="btn btn-ghost" id="reloadBtn" title="Reload">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg><span class="btn-t">Reload</span></button>
       </div>
     </div>
 
     <div class="card">
       <div class="card-h">
         <input class="ms-search" id="rosterSearch" placeholder="Search name or email…" autocomplete="off" style="max-width:260px">
-        <div id="rosterFilters" class="rfilters" style="margin-left:auto"></div>
+        <!-- The filters and the sort are one group on one line: both narrow the
+             same list, and the sort sitting up beside the search made the row
+             above the chips look like a second, unrelated bar. -->
+        <div class="rctrls">
+          <div id="rosterFilters" class="rfilters"></div>
+        </div>
       </div>
       <div id="rosterMsg" style="padding:0 16px"></div>
       <div id="roster" class="table-scroll"></div>
@@ -2150,6 +2292,7 @@
     <div class="card">
       <div class="card-h">
         <input class="ms-search" id="certSearch" placeholder="Filter by name or course…" autocomplete="off" style="max-width:280px">
+        <div id="certSortBar" class="rsortbar"></div>
         <span class="ms-count" id="certCount" style="margin-left:auto"></span>
       </div>
       <div id="certs" class="table-scroll"></div>
@@ -2177,6 +2320,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=66" defer></script>
+<script src="admin.js?v=78" defer></script>
 </body>
 </html>

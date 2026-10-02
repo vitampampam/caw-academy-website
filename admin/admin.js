@@ -3696,14 +3696,20 @@
      comparing down a column. */
   function renderMember(m, open, onToggle) {
     var stats = memberStats(m);
+    var fsm = famStatsFor(m.userId);
 
-    var tr = document.createElement("tr");
-    tr.className = "rowlink" + (open ? " open" : "");
+    /* ONE PERSON, ONE CARD. The summary line and the detail that opens under it
+       are now the same object, so an open member is a card that grew rather
+       than two table rows that have to be styled into looking joined. */
+    var tr = document.createElement("article");
+    tr.className = "mcard" + (open ? " open" : "");
     tr.tabIndex = 0;
     tr.setAttribute("aria-expanded", open ? "true" : "false");
 
-    // Member
-    var tdWho = document.createElement("td");
+    var sum = document.createElement("div"); sum.className = "mcard-sum";
+    tr.appendChild(sum);
+
+    // Who — the one thing that must never be abbreviated away.
     var person = document.createElement("div"); person.className = "person";
     var av = document.createElement("div"); av.className = "av"; av.textContent = initialsOf(m);
     var pn = document.createElement("div"); pn.className = "pn";
@@ -3717,77 +3723,89 @@
     var email = document.createElement("span"); email.className = "member-email"; email.textContent = m.email;
     pn.appendChild(name); pn.appendChild(email);
     person.appendChild(av); person.appendChild(pn);
-    tdWho.appendChild(person);
-    tr.appendChild(tdWho);
+    sum.appendChild(person);
 
-    // Assigned
-    var tdN = document.createElement("td");
-    tdN.className = "member-active col-c";
-    tdN.textContent = stats.total ? String(stats.total) : "—";
-    if (!stats.total) tdN.style.color = "var(--muted)";
-    tr.appendChild(tdN);
+    // The status pill and the open/close mark sit together on the right of the
+    // name, where the eye already is after reading it.
+    var right = document.createElement("div"); right.className = "mcard-right";
+    right.appendChild(memberStatusPill(m, stats));
+    var chev = document.createElement("span"); chev.className = "chev";
+    chev.textContent = open ? "\u25be" : "\u203a";
+    right.appendChild(chev);
+    sum.appendChild(right);
+
+    /* THE FOUR FIGURES, each labelled. A column heading can say "Courses" once
+       for twenty-five rows; a card has to carry its own labels, or the numbers
+       are a row of digits whose meaning is three cards away. */
+    var meta = document.createElement("div"); meta.className = "mcard-meta";
+    tr.appendChild(meta);
+
+    function stat(label, build) {
+      var b = document.createElement("div"); b.className = "mstat";
+      var l = document.createElement("span"); l.className = "mstat-l"; l.textContent = label;
+      b.appendChild(l);
+      var v = document.createElement("div"); v.className = "mstat-v";
+      build(v);
+      b.appendChild(v);
+      meta.appendChild(b);
+      return b;
+    }
+
+    stat("Courses", function (v) {
+      v.textContent = stats.total ? String(stats.total) : "\u2014";
+      if (!stats.total) v.style.color = "var(--muted)";
+    });
 
     /* Progress: courses FINISHED out of courses assigned. Counts, never an
        average of percentages — an average of four half-read courses and one
        finished says "60%" and means nothing anybody can act on. */
-    var tdP = document.createElement("td"); tdP.className = "col-c";
-    var cell = document.createElement("div"); cell.className = "mcell";
-    var bar = document.createElement("div"); bar.className = "mbar";
-    var fill = document.createElement("i");
-    fill.style.width = stats.total ? Math.round((stats.done / stats.total) * 100) + "%" : "0";
-    bar.appendChild(fill);
-    bar.setAttribute("role", "img");
-    bar.setAttribute("aria-label", stats.done + " of " + stats.total + " assigned courses completed");
-    var small = document.createElement("small");
-    small.textContent = stats.total ? stats.done + "/" + stats.total : "—";
-    cell.appendChild(bar); cell.appendChild(small);
-    tdP.appendChild(cell);
-    tr.appendChild(tdP);
+    stat("Course progress", function (v) {
+      var cell = document.createElement("div"); cell.className = "mcell";
+      var bar = document.createElement("div"); bar.className = "mbar";
+      var fill = document.createElement("i");
+      fill.style.width = stats.total ? Math.round((stats.done / stats.total) * 100) + "%" : "0";
+      bar.appendChild(fill);
+      bar.setAttribute("role", "img");
+      bar.setAttribute("aria-label", stats.done + " of " + stats.total + " assigned courses completed");
+      var small = document.createElement("small");
+      small.textContent = stats.total ? stats.done + "/" + stats.total : "\u2014";
+      cell.appendChild(bar); cell.appendChild(small);
+      v.appendChild(cell);
+    });
 
-      /* DOCUMENTS, beside the courses. A member's obligations are not only
-         courses — a revised manual they have not read is the same kind of
-         debt, and a progress screen that shows one and not the other is the
-         screen somebody trusts and is wrong about. */
-      var fsm = famStatsFor(m.userId);
-      var tdDoc = document.createElement("td"); tdDoc.className = "col-c member-active";
-      if (!fsm.total) { tdDoc.textContent = "\u2014"; tdDoc.style.color = "var(--muted)"; }
-      else {
-        tdDoc.textContent = fsm.done + " of " + fsm.total;
-        if (fsm.overdue) { tdDoc.style.color = "var(--err)"; tdDoc.style.fontWeight = "650"; }
-        else if (fsm.done === fsm.total) { tdDoc.style.color = "var(--success)"; tdDoc.style.fontWeight = "650"; }
-      }
-      tr.appendChild(tdDoc);
-
-    // Status
-    var tdS = document.createElement("td"); tdS.className = "col-c";
-    tdS.appendChild(memberStatusPill(m, stats));
-    tr.appendChild(tdS);
+    /* DOCUMENTS, beside the courses. A member's obligations are not only
+       courses — a revised manual they have not read is the same kind of debt,
+       and a progress screen that shows one and not the other is the screen
+       somebody trusts and is wrong about. */
+    stat("Documents", function (v) {
+      if (!fsm.total) { v.textContent = "\u2014"; v.style.color = "var(--muted)"; return; }
+      v.textContent = fsm.done + " of " + fsm.total;
+      if (fsm.overdue) { v.style.color = "var(--err)"; v.style.fontWeight = "650"; }
+      else if (fsm.done === fsm.total) { v.style.color = "var(--success)"; v.style.fontWeight = "650"; }
+    });
 
     // Last active — is this person using the app at all? Never what they read.
-    var tdA = document.createElement("td"); tdA.className = "member-active col-c";
-    if (m.lastActiveAt) tdA.textContent = fmtDate(m.lastActiveAt);
-    else { tdA.textContent = "never"; tdA.style.color = "var(--muted)"; }
-    tr.appendChild(tdA);
-
-    var tdC = document.createElement("td"); tdC.className = "r chev";
-    tdC.textContent = open ? "▾" : "›";
-    tr.appendChild(tdC);
+    stat("Last active", function (v) {
+      v.className = "mstat-v member-active";
+      if (m.lastActiveAt) v.textContent = fmtDate(m.lastActiveAt);
+      else { v.textContent = "never"; v.style.color = "var(--muted)"; }
+    });
 
     tr.addEventListener("click", function (e) {
       if (e.target.closest("button, a, input, label")) return;
+      if (e.target.closest(".member-body")) return;
       onToggle(m.userId);
     });
     tr.addEventListener("keydown", function (e) {
+      if (e.target !== tr) return;
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(m.userId); }
     });
 
     if (!open) return [tr];
 
     // ── The open detail ────────────────────────────────────────────────────
-    var trx = document.createElement("tr"); trx.className = "member";
-    var tdx = document.createElement("td"); tdx.colSpan = 7;
     var card = document.createElement("div"); card.className = "member-body";
-    tdx.appendChild(card); trx.appendChild(tdx);
+    tr.appendChild(card);
 
     var head = document.createElement("div"); head.className = "member-head";
     head.style.cssText = "display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:10px";
@@ -3824,7 +3842,9 @@
     var onePdf = exportButton("Export PDF", function () { exportRosterPdf([m], fullName(m)); });
     var oneCsv = exportButton("Export CSV", function () { exportRoster([m], fullName(m)); });
     headRight.appendChild(onePdf); headRight.appendChild(oneCsv);
-    head.appendChild(headRight);
+    /* The exports ride the TOOLBAR ROW, not the chips row — see the comment on
+       `bulk` below. With no assignments there is no toolbar, so they stay here
+       and the chips line has the width to itself. */
     card.appendChild(head);
 
     // Assignments (nextUp = first not-done in the sorted list).
@@ -3848,6 +3868,14 @@
       delSel.disabled = true;
       var cnt = document.createElement("span"); cnt.className = "abulk-count";
       bulk.appendChild(allLbl); bulk.appendChild(delSel); bulk.appendChild(cnt);
+      /* ONE TOOLBAR, NOT A STAIRCASE. The chips and the two export buttons
+         shared a line that was too narrow for both, so the exports wrapped onto
+         a line of their own, right-aligned, with the select-all controls
+         left-aligned under them: three bands, each starting somewhere
+         different. The exports belong with the other controls anyway — they
+         produce this person's record, which is what the row is for — so the
+         panel now reads as status, then one toolbar, then the list. */
+      bulk.appendChild(headRight);
 
       var ul = document.createElement("ul"); ul.className = "alist";
 
@@ -3982,7 +4010,7 @@
         card.appendChild(row);
       });
     }
-    return [tr, trx];
+    return [tr];
   }
 
   // The last roster the server gave us — the assign form reads it to name a member
@@ -4134,23 +4162,32 @@
     }).length;
     var idle = members.filter(function (m) { return memberStats(m).total === 0; }).length;
     var assigned = members.length - idle;
+    /* SHORT ON THE CHIP, FULL IN THE TOOLTIP. "Needs attention (3)" and "With
+       assignments (20)" ran the four chips onto two lines with a 3-and-1 break,
+       which reads as a mistake rather than as a row of equals. The adjective is
+       the only part doing work once they sit side by side — the same trade the
+       Records view bar already makes. */
     [
-      ["all", "Everyone (" + members.length + ")", members.length],
-      ["attention", "Needs attention (" + attention + ")", attention],
+      ["all", "Everyone", "Everyone in the team", members.length],
+      ["attention", "Attention", "Overdue or due within three days", attention],
       // The one most teams actually want: most of a roster has nothing scheduled
       // yet, and scrolling past twelve empty cards to reach the one that matters
       // is the whole complaint this answers.
-      ["assigned", "With assignments (" + assigned + ")", assigned],
-      ["idle", "No assignments (" + idle + ")", idle]
+      ["assigned", "Assigned", "Has at least one assignment", assigned],
+      ["idle", "Unassigned", "Has nothing assigned yet", idle]
     ].forEach(function (f) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "rchip" + (rosterFilter === f[0] ? " on" : "");
       b.textContent = f[1];
+      var n = document.createElement("span"); n.className = "rchip-n";
+      n.textContent = String(f[3]);
+      b.appendChild(n);
+      b.title = f[2];
       // An empty filter is shown but not clickable: hiding it would make the row
       // change shape as the team's state changes, which is harder to read than a
       // greyed count that stays put.
-      b.disabled = f[2] === 0 && f[0] !== "all";
+      b.disabled = f[3] === 0 && f[0] !== "all";
       b.addEventListener("click", function () { rosterFilter = f[0]; rosterPage = 0; renderRoster(lastRoster); });
       host.appendChild(b);
     });
@@ -4371,83 +4408,92 @@
       return;
     }
 
-    function th(key, label, centred, width) {
-      var el = document.createElement("th");
-      if (width) el.style.width = width;
-      if (centred) el.className = "col-c";
-      if (!CERT_SORTS[key]) { el.textContent = label; return el; }
-      el.className = (centred ? "col-c " : "") + "sortable";
-      el.textContent = label;
-      if (certSort === key) {
-        var car = document.createElement("span"); car.className = "car";
-        car.textContent = certSortDesc ? "▼" : "▲";
-        el.appendChild(car);
-      }
-      el.addEventListener("click", function () {
-        if (certSort === key) certSortDesc = !certSortDesc;
-        else { certSort = key; certSortDesc = false; }
+    /* A CERTIFICATE IS ONE RECORD, NOT FIVE COLUMNS. Holder, course, number,
+       date and score each had a narrow column of their own, so at anything less
+       than a wide desktop every one of them wrapped: "Part-M Continuing
+       Airworthiness" over three lines beside a number broken across two, in a
+       row 114px tall that said very little.
+
+       The row now reads the way the record does — what was earned, by whom, and
+       the number and date that prove it — with the ordering moved to the one
+       control the roster already uses. */
+    var sortHost = $("certSortBar");
+    if (sortHost) {
+      sortHost.textContent = "";
+      var sl = document.createElement("span"); sl.className = "rsort-l"; sl.textContent = "Sort";
+      var ssel = document.createElement("select"); ssel.className = "rsort-sel";
+      ssel.setAttribute("aria-label", "Sort certificates by");
+      [["issued", "Date issued"], ["holder", "Holder"], ["course", "Course"]].forEach(function (pair) {
+        if (!CERT_SORTS[pair[0]]) return;
+        var o = document.createElement("option");
+        o.value = pair[0]; o.textContent = pair[1];
+        if (certSort === pair[0]) o.selected = true;
+        ssel.appendChild(o);
+      });
+      ssel.addEventListener("change", function () {
+        certSort = ssel.value; certSortDesc = certSort === "issued";
         renderCertificates(lastRoster);
       });
-      return el;
+      var sdir = document.createElement("button");
+      sdir.type = "button"; sdir.className = "rsort-dir";
+      sdir.textContent = certSortDesc ? "\u25bc" : "\u25b2";
+      sdir.title = certSortDesc ? "Descending" : "Ascending";
+      sdir.setAttribute("aria-label", sdir.title);
+      sdir.addEventListener("click", function () {
+        certSortDesc = !certSortDesc; renderCertificates(lastRoster);
+      });
+      sortHost.appendChild(sl); sortHost.appendChild(ssel); sortHost.appendChild(sdir);
     }
 
-    var table = document.createElement("table");
-    var head = document.createElement("thead"); var hr = document.createElement("tr");
-    hr.appendChild(th("holder", "Holder", false, "27%"));
-    hr.appendChild(th("course", "Course", false, "30%"));
-    hr.appendChild(th(null, "Number"));
-    hr.appendChild(th("issued", "Issued", true));
-    hr.appendChild(th(null, "Score", true));
-    head.appendChild(hr); table.appendChild(head);
-
-    var body = document.createElement("tbody");
+    var list = document.createElement("div"); list.className = "certlist";
     shown.forEach(function (r) {
-      var tr = document.createElement("tr");
+      var row = document.createElement("div"); row.className = "certrow";
 
-      var tdH = document.createElement("td");
-      var person = document.createElement("div"); person.className = "person";
-      var av = document.createElement("div"); av.className = "av"; av.textContent = initialsOf(r.m);
-      var pn = document.createElement("div"); pn.className = "pn";
-      var nm = document.createElement("span"); nm.className = "member-name"; nm.textContent = fullName(r.m);
-      var em = document.createElement("span"); em.className = "member-email"; em.textContent = r.m.email;
-      pn.appendChild(nm); pn.appendChild(em);
-      person.appendChild(av); person.appendChild(pn);
-      tdH.appendChild(person); tr.appendChild(tdH);
+      // The rosette, so a page of records is scannable as records.
+      var mark = document.createElement("div"); mark.className = "certmark";
+      mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 22l5-2.5 5 2.5-1.5-9.5"/></svg>';
+      row.appendChild(mark);
 
-      var tdC = document.createElement("td");
-      tdC.appendChild(document.createTextNode(labelFor(r.c.courseKey)));
+      var main = document.createElement("div"); main.className = "certmain";
+      var course = document.createElement("span"); course.className = "certcourse";
+      course.textContent = labelFor(r.c.courseKey);
+      main.appendChild(course);
       // Only a real series is marked; "#1 of 1" would be noise on every row.
       if (r.of > 1) {
-        var s = document.createElement("small"); s.className = "csub";
-        s.textContent = "certificate " + r.seq + " of " + r.of + " for this course";
-        tdC.appendChild(s);
+        var ser = document.createElement("small"); ser.className = "csub";
+        ser.textContent = "certificate " + r.seq + " of " + r.of + " for this course";
+        main.appendChild(ser);
       }
-      tr.appendChild(tdC);
+      var who = document.createElement("span"); who.className = "certwho";
+      who.textContent = fullName(r.m);
+      var mail = document.createElement("small"); mail.className = "member-email";
+      mail.textContent = r.m.email;
+      who.appendChild(mail);
+      main.appendChild(who);
+      row.appendChild(main);
 
-      var tdN = document.createElement("td");
+      /* The number and the date are what somebody checks a printed copy
+         against, so they travel together and stay on one line each. */
+      var meta = document.createElement("div"); meta.className = "certmeta";
       var num = document.createElement("span"); num.className = "num";
-      num.textContent = r.c.number || "—";
-      tdN.appendChild(num); tr.appendChild(tdN);
+      num.textContent = r.c.number || "\u2014";
+      var when = document.createElement("span"); when.className = "certdate";
+      when.textContent = fmtDate(r.c.issuedAt);
+      meta.appendChild(num); meta.appendChild(when);
+      row.appendChild(meta);
 
-      var tdD = document.createElement("td"); tdD.className = "member-active col-c";
-      tdD.textContent = fmtDate(r.c.issuedAt);
-      tr.appendChild(tdD);
-
-      var tdS = document.createElement("td"); tdS.className = "col-c";
+      var score = document.createElement("div"); score.className = "certscore";
       if (r.c.examScore != null) {
         var pill = document.createElement("span"); pill.className = "pill done";
         pill.textContent = r.c.examScore + "%";
-        tdS.appendChild(pill);
-      } else {
-        tdS.textContent = "—";
-        tdS.style.color = "var(--muted)";
+        score.appendChild(pill);
       }
-      tr.appendChild(tdS);
+      row.appendChild(score);
 
-      body.appendChild(tr);
+      list.appendChild(row);
     });
-    table.appendChild(body);
-    host.appendChild(table);
+    host.appendChild(list);
   }
 
   /* Which member's detail is open, and how the table is ordered. Both live out
@@ -4481,27 +4527,12 @@
     }
   };
 
-  function sortHeader(key, label, width, centred) {
-    var th = document.createElement("th");
-    if (width) th.style.width = width;
-    if (centred) th.className = "col-c";
-    if (!SORTS[key]) { th.textContent = label; return th; }
-    th.className = (centred ? "col-c " : "") + "sortable";
-    th.setAttribute("scope", "col");
-    th.textContent = label;
-    if (rosterSort === key) {
-      var car = document.createElement("span"); car.className = "car";
-      car.textContent = rosterSortDesc ? "▼" : "▲";
-      th.appendChild(car);
-    }
-    th.addEventListener("click", function () {
-      if (rosterSort === key) rosterSortDesc = !rosterSortDesc;
-      else { rosterSort = key; rosterSortDesc = false; }
-      rosterPage = 0;
-      renderRoster(lastRoster);
-    });
-    return th;
-  }
+  /* NO SORT CONTROL ON THE ROSTER (removed by the SME, Oct 2026). The order
+     is "needs attention first" and stays that way; the four filter chips are
+     how a group is isolated, and a second control offering six orderings put a
+     dropdown reading "Needs attention" directly above a chip reading
+     "Attention", which is two different ideas wearing one phrase. `SORTS` and
+     `rosterSort` stay — they are what produces the default order. */
 
   function toggleMember(userId) {
     openMemberId = openMemberId === userId ? null : userId;
@@ -4555,27 +4586,12 @@
         : "Everyone has at least one assignment.";
       root.appendChild(none);
     } else {
-      var table = document.createElement("table");
-      var thead = document.createElement("thead");
-      var hr = document.createElement("tr");
-      hr.appendChild(sortHeader("name", "Member", "30%"));
-      hr.appendChild(sortHeader("assigned", "Courses", null, true));
-      hr.appendChild(sortHeader("progress", "Course progress", "18%", true));
-      hr.appendChild(sortHeader("documents", "Documents", null, true));
-      // Status has no sort of its own: "attention" IS that sort, and two
-      // controls for one ordering is how they end up disagreeing.
-      hr.appendChild(sortHeader("attention", "Status", null, true));
-      hr.appendChild(sortHeader("active", "Last active", null, true));
-      hr.appendChild(sortHeader(null, ""));
-      thead.appendChild(hr); table.appendChild(thead);
-
-      var tbody = document.createElement("tbody");
+      var list = document.createElement("div"); list.className = "mlist";
       shown.forEach(function (m) {
         renderMember(m, m.userId === openMemberId, toggleMember)
-          .forEach(function (row) { tbody.appendChild(row); });
+          .forEach(function (el) { list.appendChild(el); });
       });
-      table.appendChild(tbody);
-      root.appendChild(table);
+      root.appendChild(list);
     }
     renderMemberChecklist(lastRoster);
     renderTabs();
