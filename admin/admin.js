@@ -2438,8 +2438,13 @@
     if (blocked) {
       var warn = document.createElement("div");
       warn.style.cssText = "color:var(--warn);font-weight:650;margin-top:3px";
-      warn.textContent = blocked + " " + (blocked === 1 ? "pairing is" : "pairings are") +
-        " skipped: those people cannot open that document yet. Grant them access first.";
+      /* Said in the admin's own terms (SME wording, Oct 2026): "pairing" is how
+         the count is computed, not a thing anybody selected. The sentence names
+         what was picked — the people and the documents — and what to do. */
+      warn.textContent = (users.length === 1 ? "The selected user does not have access"
+                                            : "The selected users do not have access") +
+        (docs.length === 1 ? " to the selected document." : " to the selected documents.") +
+        " Grant the access first.";
       hint.appendChild(warn);
     }
     if (btn) btn.textContent = "Require " + pairs + " reading" + (pairs === 1 ? "" : "s");

@@ -445,8 +445,16 @@
   .mcard:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
   /* Open: the indigo bar the table row used to carry, so "this is the one I
      opened" survives the change of container. The card stops being a button. */
-  .mcard.open{border-color:#C9CDEA; cursor:default;
-    box-shadow:inset 3px 0 0 var(--indigo), var(--shadow-sm)}
+  /* THE BAR RUNS THE WHOLE CARD. As an inset shadow on the card it was painted
+     UNDER the children, so the grey summary band and the white figures band
+     covered it and it only appeared beside the detail panel, which has no
+     background of its own — it looked like a bar on the panel rather than a
+     mark on the card. A positioned strip paints above them, and the card's
+     overflow:hidden keeps it inside the corner radius. */
+  .mcard{position:relative}
+  .mcard.open{border-color:#C9CDEA; cursor:default; box-shadow:var(--shadow-sm)}
+  .mcard.open::before{content:""; position:absolute; left:0; top:0; bottom:0;
+    width:3px; background:var(--indigo); z-index:2; pointer-events:none}
   .mcard-sum{display:flex; align-items:center; gap:12px;
     background:#F6F7F9; padding:12px 14px; border-bottom:1px solid var(--line-2)}
   .mcard-right{display:flex; align-items:center; gap:10px; margin-left:auto}
@@ -684,6 +692,11 @@
   .kv{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
     padding:7px 0; border-top:1px solid var(--line-2)}
   .kv:first-child{border-top:0}
+  /* ONE LINE, NOT TWO. The licence meter is a 6px rule in its own right, and
+     the first figure row drew its own hairline directly beneath it — two
+     horizontal lines a few pixels apart, reading as a mistake. The meter is the
+     separator there; the row below it does not need a second one. */
+  #licenceDetail .kv:first-of-type{border-top:0}
   .kv span{color:var(--muted); font-size:12.5px; min-width:0}
   .kv b{font-size:13px; white-space:nowrap; display:inline-flex; align-items:center}
 
@@ -800,7 +813,16 @@
      the extra room goes where it is useful, to the names. */
   .ms-grid > div{display:flex; flex-direction:column; min-height:0; max-height:440px}
   .ms-grid .ms{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
-  .ms-grid .ms-list{flex:1 1 auto; min-height:200px; max-height:none}
+  /* A FLOOR BELONGS ON THE COLUMN, NEVER ON THE LIST. `.ms` clips (it has the
+     rounded border), so a list that cannot shrink below its floor overflows the
+     box it sits in and the overflowing part is clipped away — and because the
+     list's OWN scrollport is the full floor height, scrolling never brings
+     those rows into the visible part. The bottom of the member picker was
+     unreachable: not a scrolling bug, a row that was never on screen to scroll
+     to. The column carries the floor instead, so a short window makes the form
+     scroll — which works — and the list always fits its box exactly. */
+  .ms-grid > div{min-height:248px}
+  .ms-grid .ms-list{flex:1 1 auto; min-height:0; max-height:none}
   .ms{border:1px solid var(--line); border-radius:var(--r-card); background:#fff; overflow:hidden}
   .ms-tools{display:flex; align-items:center; gap:9px; padding:8px 11px; border-bottom:1px solid var(--line); background:#FAFAFB}
   .ms-tools .grow{flex:1; min-width:0}
@@ -808,7 +830,8 @@
   .ms-search{width:100%; border:1px solid var(--line); border-radius:7px; padding:6px 10px;
     font:inherit; font-size:13px; background:#fff; color:var(--ink)}
   .ms-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
-  .ms-list{max-height:240px; overflow-y:auto; padding:3px 0}
+  .ms-list{max-height:240px; overflow-y:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch; padding:3px 0}
   .ms-row{display:flex; align-items:center; gap:10px; padding:6px 11px; font-size:13px; cursor:pointer}
   .ms-row:hover{background:#FAFAFB}
   .ms-row input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
@@ -1334,7 +1357,8 @@
     .form-open #famForm{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
     .form-open #famForm > .ms-grid{flex:1 1 auto; min-height:0}
     .form-open #famForm > .ms-grid > div{max-height:none}
-    .form-open #famForm .ms-list{min-height:76px}
+    .form-open #famForm > .ms-grid > div{min-height:140px}
+    .form-open #famForm .ms-list{min-height:0}
 
     .form-open .formfoot{position:static; flex:none; box-shadow:none; margin:14px -16px 0}
 
@@ -1367,7 +1391,8 @@
       min-height:0; overflow:hidden}
     #recFilterBody > .ms-grid{flex:1 1 auto; min-height:0}
     #recFilterBody > .ms-grid > div{max-height:none}
-    #recFilterBody .ms-list{min-height:76px}
+    #recFilterBody > .ms-grid > div{min-height:140px}
+    #recFilterBody .ms-list{min-height:0}
 
     /* ASSIGN SCROLLS AS ONE PIECE, and the attempt to make it not do so is why
        it became unreadable. Squeezing five sections — two pickers, two chip
@@ -1406,9 +1431,9 @@
      is the worst way for CSS to fail. */
   @media screen and (min-width:1024px) and (max-height:900px){
     #recFilterBody:not(.hidden){overflow-y:auto; overscroll-behavior:contain}
-    #recFilterBody .ms-list{min-height:210px}
+    #recFilterBody > .ms-grid > div{min-height:274px}
     .form-open #famForm{overflow-y:auto; overscroll-behavior:contain}
-    .form-open #famForm .ms-list{min-height:210px}
+    .form-open #famForm > .ms-grid > div{min-height:274px}
 
     /* ASSIGN'S PICKERS COME DOWN TOO. 440 apiece is right on a deep screen and
        pushes step 3 under the fold on a short one — the dates were half-hidden
@@ -2320,6 +2345,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=78" defer></script>
+<script src="admin.js?v=82" defer></script>
 </body>
 </html>
