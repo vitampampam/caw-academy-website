@@ -449,8 +449,17 @@
   .prog{display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap}
   .prog .bar{position:relative; flex:1 1 110px; max-width:170px; height:5px; border-radius:99px;
     background:#EBECEE; overflow:hidden}
-  .prog .bar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px; background:var(--indigo)}
-  .prog .bar.done i{background:var(--success)}
+  /* PROGRESS IS GREEN AT EVERY LEVEL (SME). It was indigo until complete and
+     green after, which made the bar carry the done/not-done signal — a signal
+     already stated twice beside it, by the status pill and by the percentage.
+     Spending a colour on a third copy of it left the common case, a course
+     part-finished, looking like brand furniture rather than like progress.
+
+     RED STAYS, because at-risk is the one thing the bar says that nothing next
+     to it does. A colour earns its place by being the only carrier of
+     something. */
+  .prog .bar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px;
+    background:var(--success)}
   .prog .bar.risk i{background:var(--err)}
   .prog small{color:var(--muted); font-size:11.5px}
   .prog .flag{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--err)}
@@ -1286,8 +1295,10 @@
        be read off a photocopy. */
     .pbar{display:inline-block; width:42pt; height:3.5pt; border-radius:99pt;
       background:#E3E4E7; vertical-align:middle; margin-right:5pt; overflow:hidden}
-    .pbar i{display:block; height:100%; background:#3E44B5; border-radius:99pt}
-    .pbar.full i{background:#2E7D32}
+    /* The printed sheet follows the screen: green at every level. A report that
+       colours the same figure differently from the console it was run from is
+       a report somebody has to reconcile. */
+    .pbar i{display:block; height:100%; background:#2E7D32; border-radius:99pt}
     .prep-none{font-size:8.5pt; color:#6B7390; font-style:italic; padding:7pt 9pt; margin:0}
 
     .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
@@ -1309,6 +1320,29 @@
       vertical-align:top}
     .prep-rows tr{break-inside:avoid; page-break-inside:avoid}
     .prep-rows thead{display:table-header-group}
+
+    /* STICKY IS A SCREEN IDEA, AND IT LEAKED ONTO PAPER. The global `thead th`
+       rule pins a header while its body scrolls — right for every table in the
+       console, meaningless on a page that cannot scroll, and actively wrong
+       here: the pinned header floated over the FIRST COURSE ROW of every
+       member's table, so the top line of each block printed half-hidden behind
+       the column names.
+
+       It is scoped to `.prep` rather than the one table class because every
+       printed sheet — team, records, certificates — builds its own table and
+       would meet this the same way. The inset shadow goes too: it was drawn as
+       a shadow precisely because a sticky cell leaves its collapsed border
+       behind, and the real border above is what prints. */
+    .prep thead th{position:static !important; box-shadow:none !important;
+      z-index:auto !important}
+
+    /* AND EVERY PRINTED TABLE GETS THE PAGE-BREAK RULES, not just the one with
+       a class. The team report builds a bare <table>, so it had neither — a
+       member with more courses than fit on a page split with no header on the
+       continuation, and a row could break across the fold. `.prep-member`
+       avoids breaking as a block, which hid this until a team grew. */
+    .prep table thead{display:table-header-group}
+    .prep table tr{break-inside:avoid; page-break-inside:avoid}
   }
 </style>
 </head>
@@ -1874,6 +1908,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=49" defer></script>
+<script src="admin.js?v=50" defer></script>
 </body>
 </html>

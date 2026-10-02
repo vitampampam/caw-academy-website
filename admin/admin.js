@@ -792,7 +792,9 @@
           // A bar AND the number: a bar alone cannot be read off a photocopy.
           var tdP = document.createElement("td");
           if (p) {
-            var bar = el("div", "pbar" + (p.percent >= 100 ? " full" : ""));
+            // No "full" variant any more: the bar is green at every level, and
+            // 100% is said by the figure beside it.
+            var bar = el("div", "pbar");
             var fill = document.createElement("i");
             fill.style.width = Math.max(0, Math.min(100, p.percent)) + "%";
             bar.appendChild(fill);
@@ -3382,7 +3384,10 @@
     }
     var behind = isBehind(a, p);
     var bar = document.createElement("div");
-    bar.className = "bar" + (p.percent >= 100 ? " done" : behind ? " risk" : "");
+    // Green at every level, so there is no "done" variant to add — only the
+    // at-risk one, which is the single thing this bar says that the pill and
+    // the percentage beside it do not.
+    bar.className = "bar" + (behind ? " risk" : "");
     var fill = document.createElement("i");
     fill.style.width = Math.max(0, Math.min(100, p.percent)) + "%";
     bar.appendChild(fill);
