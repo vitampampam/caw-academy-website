@@ -1390,6 +1390,16 @@
   @media screen and (min-width:761px) and (max-width:1023px){
     .shell{height:100vh; height:100dvh; overflow:hidden}
     .wrap{height:100%; min-height:0; overflow-y:auto; overscroll-behavior:none}
+
+    /* A STICKY HEADER STICKS TO ITS SCROLLER'S PADDING EDGE, NOT TO THE TOP OF
+       THE BOX. While the PAGE was the scroller this did not arise — the
+       document has no padding — but the canvas has 20px of it, so `top:0`
+       parked the page header 20px down and the cards scrolled through the
+       strip above it, arriving clipped. The canvas gives its top padding to
+       the header, which already carries 18px of its own; nothing moves, and
+       the header now stops the content at the very top edge. */
+    .wrap{padding-top:0}
+    .phead{margin-top:0}
   }
 
   /* PHONES: a sidebar of any width is most of the screen, so here the rail does
@@ -2132,6 +2142,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=61" defer></script>
+<script src="admin.js?v=62" defer></script>
 </body>
 </html>
