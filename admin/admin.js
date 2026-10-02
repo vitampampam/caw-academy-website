@@ -1060,28 +1060,34 @@
     }
   }
 
-  /** The code list for one contract: unused first, spent ones struck through. */
+  /** Every seat on one contract: unreadable first (they need action), then
+   *  unused, then spent. */
   function codesPanel(row, data) {
     var panel = document.createElement("div"); panel.className = "codes";
 
-    if (!data.available) {
+    /* ONE LIST OF SEATS, not a list of codes. The old panel listed only the
+       codes it could read and said one sentence about the rest, so the seats
+       that actually needed doing something about were the ones it left out.
+       A seat whose code cannot be recovered is still a seat — it is shown, and
+       it carries the only thing that fixes it. */
+    var seats = data.seats || (data.codes || []).map(function (c) {
+      return { id: null, code: c.code, claimedAt: c.claimedAt };   // older server
+    });
+
+    if (!seats.length) {
       var e = document.createElement("div"); e.className = "empty";
       e.style.padding = "9px";
-      /* Honest about WHY. A licence minted before codes were kept encrypted
-         holds only a hash, and no amount of asking brings the text back — so
-         the message says to contact us rather than implying a retry. */
-      e.textContent = data.total
-        ? "These codes were issued before they could be stored for recall — contact CAW Academy for a copy."
-        : "No codes have been minted on this contract yet.";
+      e.textContent = "No codes have been minted on this contract yet.";
       panel.appendChild(e);
       return panel;
     }
 
-    var unused = data.codes.filter(function (c) { return !c.claimedAt; });
+    var unused = seats.filter(function (s) { return !s.claimedAt && s.code; });
+    var lost = seats.filter(function (s) { return !s.claimedAt && !s.code; });
 
     var head = document.createElement("div"); head.className = "codes-h";
     var n = document.createElement("span"); n.className = "n";
-    n.textContent = unused.length + " unused of " + data.codes.length;
+    n.textContent = unused.length + " unused of " + seats.length;
     head.appendChild(n);
     if (unused.length) {
       var all = document.createElement("button");
@@ -1090,33 +1096,77 @@
       all.addEventListener("click", function () {
         // Only the unused ones: a spent code pasted into an email to a new
         // colleague is a support ticket waiting to happen.
-        copyTo(all, unused.map(function (c) { return c.code; }).join("\n"),
+        copyTo(all, unused.map(function (s) { return s.code; }).join("\n"),
                "Copied " + unused.length);
       });
       head.appendChild(all);
     }
     panel.appendChild(head);
 
-    data.codes
-      .slice()
-      .sort(function (a, b) { return (a.claimedAt ? 1 : 0) - (b.claimedAt ? 1 : 0); })
-      .forEach(function (c) {
-        var line = document.createElement("div");
-        line.className = "code-row" + (c.claimedAt ? " used" : "");
-        var code = document.createElement("code"); code.textContent = c.code;
-        line.appendChild(code);
-        if (c.claimedAt) {
-          var tag = document.createElement("span"); tag.className = "used-tag";
-          tag.textContent = "redeemed";
-          line.appendChild(tag);
-        } else {
-          var b = document.createElement("button");
-          b.type = "button"; b.className = "code-copy"; b.textContent = "Copy";
-          b.addEventListener("click", function () { copyTo(b, c.code); });
-          line.appendChild(b);
-        }
-        panel.appendChild(line);
-      });
+    /* WHY SOME CANNOT BE SHOWN, said once above the rows rather than per row.
+       It is a property of when they were minted, not of any one seat. */
+    if (lost.length) {
+      var note = document.createElement("div"); note.className = "codes-note";
+      note.textContent = data.encryptionEnabled === false
+        ? lost.length + " code" + (lost.length === 1 ? " was" : "s were") +
+          " stored without a readable copy and cannot be shown. Contact CAW Academy."
+        : lost.length + " code" + (lost.length === 1 ? " was" : "s were") +
+          " issued before codes could be stored for recall. Re-issue to get a working one — " +
+          "the old code stops working.";
+      panel.appendChild(note);
+    }
+
+    var order = function (s) { return !s.claimedAt && !s.code ? 0 : s.claimedAt ? 2 : 1; };
+    seats.slice().sort(function (a, b) { return order(a) - order(b); }).forEach(function (s) {
+      var line = document.createElement("div");
+      line.className = "code-row" + (s.claimedAt ? " used" : "");
+
+      var code = document.createElement("code");
+      code.textContent = s.code || "\u2014\u2014\u2014\u2014  \u2014\u2014\u2014\u2014";
+      if (!s.code) code.className = "code-lost";
+      line.appendChild(code);
+
+      if (s.claimedAt) {
+        var tag = document.createElement("span"); tag.className = "used-tag";
+        tag.textContent = "redeemed";
+        line.appendChild(tag);
+      } else if (s.code) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "code-copy"; b.textContent = "Copy";
+        b.addEventListener("click", function () { copyTo(b, s.code); });
+        line.appendChild(b);
+      } else if (s.id && data.encryptionEnabled !== false) {
+        /* THE REMEDY, on the row that needs it. The old code is replaced, so
+           this is asked for rather than done on a single click: a code already
+           emailed to a colleague who has not redeemed it yet dies here. */
+        var re = document.createElement("button");
+        re.type = "button"; re.className = "code-copy"; re.textContent = "Re-issue";
+        re.addEventListener("click", function () {
+          if (!window.confirm(
+            "Issue a new code for this licence?\n\n" +
+            "The current code stops working immediately. If you have already sent it " +
+            "to someone who has not signed up yet, send them the new one.")) return;
+          re.disabled = true; re.textContent = "Issuing\u2026";
+          authed("POST", "/v1/org/licenses/" + encodeURIComponent(row.id) +
+                         "/seats/" + encodeURIComponent(s.id) + "/reissue", {})
+            .then(function () {
+              // Re-read rather than patching the row: the server is the record
+              // of what the code now is, and a local guess can disagree with it.
+              return authed("GET", "/v1/org/licenses/" + encodeURIComponent(row.id) + "/codes", null)
+                .then(function (fresh) {
+                  var holder = panel.parentElement;
+                  if (holder) holder.replaceChild(codesPanel(row, fresh), panel);
+                });
+            })
+            .catch(function (err) {
+              re.disabled = false; re.textContent = "Re-issue";
+              showMessage("licenceMsg", err.message || "Couldn't issue a new code.", "err");
+            });
+        });
+        line.appendChild(re);
+      }
+      panel.appendChild(line);
+    });
     return panel;
   }
 
@@ -1316,9 +1366,13 @@
       top.appendChild(pill);
       box.appendChild(top);
 
+      /* "Ends in 365 days" is GONE. The summary above states the renewal date
+         with the same count beside it as a pill, and this block's own header
+         grades it a third time (Active / Expiring / Renew soon) — three
+         statements of one fact in one card, which is what made it read as a
+         list rather than as a contract. The term keeps the START date, which
+         is the one thing here the summary does not say. */
       box.appendChild(licRow("Term", (r.validFrom ? fmtDate(r.validFrom) + " – " : "to ") + fmtDate(r.validUntil), ""));
-      box.appendChild(licRow("Ends in", r.daysRemaining + " day" + (r.daysRemaining === 1 ? "" : "s"),
-        r.daysRemaining <= 30 ? "alert" : r.daysRemaining <= 90 ? "warn" : ""));
       box.appendChild(licRow("Licences", String(r.seatLimit), ""));
       box.appendChild(licRow("Redeemed", r.claimed + " of " + r.issued + " code" + (r.issued === 1 ? "" : "s") + " issued",
         r.issued > r.claimed ? "warn" : ""));
@@ -1333,8 +1387,18 @@
          sidebar — and opens to the list, grouped by framework because that is
          how the catalogue is sold and how the names disambiguate (Part-M and
          UK Part-M are different courses). */
-      var incl = licRow("Includes", "", "");
-      var inclVal = incl.lastChild;
+      /* NOT A LABEL-AND-VALUE ROW. Every other line here is a short right-
+         aligned figure; this one is a sentence — "75 courses · EASA, UK CAA,
+         UAE GCAA, FAA" — and right-aligning a sentence wraps it into a ragged
+         block with the disclosure arrow stranded at the far edge, away from
+         the words it opens. It gets its own full-width line under a quiet
+         label, reading left to right like the prose it is. */
+      var incl = document.createElement("div"); incl.className = "lic-incl";
+      var inclLab = document.createElement("span"); inclLab.className = "lic-incl-k";
+      inclLab.textContent = "Includes";
+      incl.appendChild(inclLab);
+      var inclVal = document.createElement("div"); inclVal.className = "lic-incl-v";
+      incl.appendChild(inclVal);
       var wide = !r.scope || r.scope.indexOf("__all__") !== -1;
       if (wide) {
         inclVal.textContent = scopeLabel(r.scope);
