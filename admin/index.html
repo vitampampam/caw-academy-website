@@ -152,6 +152,9 @@
   #who{min-width:0; font-size:12px; line-height:1.3; color:var(--muted)}
   #who b{display:block; font-weight:650; color:var(--ink); font-size:12.5px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  /* Pushed right in CSS rather than inline, so the narrow layout can stack it
+     without fighting a style attribute it cannot see. */
+  .rail-foot .btn-ghost{margin-left:auto}
 
   /* ── Canvas ─────────────────────────────────────────────────────────────── */
   .wrap{padding:24px 28px 56px; max-width:1280px; width:100%}
@@ -691,6 +694,11 @@
   .assign-foot .field{margin:0}
   /* The consequence stated before the button is reachable: how many assignments
      this makes, on what dates. The button then carries the count itself. */
+  /* THE LAST STEP NEEDS AIR ABOVE IT. `.formfoot` is given its spacing inside
+     the desktop block, where it is also pinned — so on a tablet it had none at
+     all and step 3 sat hard against the picker above it. The margin belongs
+     here, where every width gets it; the desktop block only adds the pinning. */
+  .formfoot{margin-top:20px}
   .sumbar{display:flex; align-items:center; gap:14px; margin-top:16px; padding:12px 16px;
     background:var(--indigo-soft); border:1px solid #D7D9F5; border-radius:var(--r-card); flex-wrap:wrap}
   .sumbar .t{flex:1 1 320px; font-size:13px; color:var(--indigo-ink); line-height:1.5}
@@ -758,6 +766,8 @@
 
   /* The views are mutually exclusive, so they are a segmented control, not
      three checkboxes pretending otherwise. */
+  /* A view button carries both its names; the width decides which is read. */
+  .seg-btn .t-short{display:none}
   .seg{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px}
   .seg-btn{display:inline-flex; align-items:center; gap:7px; border:0; background:none;
     border-radius:7px; padding:6px 13px; font:inherit; font-size:12.5px; font-weight:650;
@@ -1127,6 +1137,7 @@
     .form-open #famForm > .ms-grid{flex:1 1 auto; min-height:0}
     .form-open #famForm > .ms-grid > div{max-height:none}
     .form-open #famForm .ms-list{min-height:76px}
+
     .form-open .formfoot{position:static; flex:none; box-shadow:none; margin:14px -16px 0}
 
 
@@ -1184,6 +1195,45 @@
 
   /* ── Narrow.  The rail loses its labels at 1180 and becomes a top bar on a
         phone. Nothing is hidden, only re-shaped. ───────────────────────────── */
+  /* A SHORT SCREEN CANNOT HAVE BOTH. The no-scroll forms fit everything by
+     shrinking the pickers — right on a desktop, wrong on an iPad in landscape,
+     where 820px of height left the Records pickers 80px each. A list showing
+     one and a half rows is not a list. Under 900px of viewport the panels
+     scroll instead and the lists keep a floor you can read: something has to
+     give on a short screen, and it should be the thing that scrolls rather
+     than the thing you are reading.
+
+     WRITTEN FLAT, NOT NESTED inside the desktop block. As a nested @media it
+     parsed and simply never applied — both of its rules lost silently, which
+     is the worst way for CSS to fail. */
+  @media screen and (min-width:1024px) and (max-height:900px){
+    #recFilterBody:not(.hidden){overflow-y:auto; overscroll-behavior:contain}
+    #recFilterBody .ms-list{min-height:210px}
+    .form-open #famForm{overflow-y:auto; overscroll-behavior:contain}
+    .form-open #famForm .ms-list{min-height:210px}
+  }
+
+  /* ── iPad, BOTH WAYS UP ─────────────────────────────────────────────────
+     1180 is an iPad in landscape and 820 in portrait, so these two are keyed
+     to the DEVICE rather than to the layout breakpoint at 1024 — landscape
+     gets the desktop layout, and would otherwise have kept both of these.
+
+     NO INITIALS. A two-letter disc beside a name that is already written out
+     is decoration standing where a column of names should start; the names are
+     what the eye runs down, and the discs make it do that twice.
+
+     AND THE RAIL FOOT STACKS, CENTRED. At 200px the avatar, the name and the
+     button could not share a line, so "Sign out" broke across two — a two-word
+     button on two lines is the clearest possible sign that a layout has run
+     out of room. */
+  @media (max-width:1180px){
+    .av{display:none}
+    .rail-foot{flex-wrap:wrap; gap:8px; justify-content:center}
+    .rail-foot .rail-av{display:none}
+    .rail-foot #who{flex:1 1 100%; order:1; text-align:center}
+    .rail-foot .btn-ghost{order:2; flex:1 1 100%; justify-content:center; margin-left:0}
+  }
+
   /* TABLET PORTRAIT KEEPS A SIDEBAR — just a narrower one, and it keeps its
      WORDS. The first attempt at this shrank the rail to a 70px strip of bare
      icons with every label, the organisation card and the section headings
@@ -1212,10 +1262,26 @@
 
        Measured at 820: the header group ran to 503px beside a title in a
        805px page, and the Records view bar to 661. */
-    .phead{flex-wrap:wrap; align-items:flex-start}
-    .phead > div:first-child{flex:1 1 320px; min-width:0}
-    .pacts{flex:0 1 auto; justify-content:flex-start}
-    .seg{flex-wrap:wrap}
+    .phead{flex-wrap:wrap; align-items:center}
+    .phead > div:first-child{flex:1 1 auto; min-width:0}
+    .pacts{flex:0 0 auto; justify-content:flex-end}
+
+    /* SHORT VIEW NAMES, so the row stays a row. "Document familiarisation" is
+       230px of a 584px canvas; four of them wrapped and left one button alone
+       on a second line, which reads as a mistake rather than as a choice. */
+    .seg-btn .t-long{display:none}
+    .seg-btn .t-short{display:inline}
+
+    /* THE PICKERS ARE SHORTER HERE. 440px each was sized for a desktop where
+       they sit side by side; stacked in one column on a tablet that is most of
+       the screen before the dates and the button are reached. 300 still shows
+       seven or eight rows, which is what a picker is for. */
+    .ms-grid > div{max-height:300px}
+
+    /* THE RAIL FOOT STACKS. At 200px the avatar, the name and the button could
+       not share a line, so "Sign out" broke across two — a two-word button on
+       two lines is the clearest possible sign that a layout has run out of
+       room. The name sits above, the button spans the width below it. */
   }
 
   /* PHONES: a sidebar of any width is most of the screen, so here the rail does
@@ -1519,7 +1585,7 @@
     <div class="rail-foot">
       <div class="rail-av" id="whoAv"></div>
       <div id="who"></div>
-      <button class="btn-ghost" id="signOutBtn" title="Sign out" style="margin-left:auto">Sign out</button>
+      <button class="btn-ghost" id="signOutBtn" title="Sign out">Sign out</button>
     </div>
   </aside>
 
@@ -1532,7 +1598,6 @@
     <div class="phead">
       <div>
         <h1>Overview</h1>
-        <p class="sub" style="margin:0">Where the team stands right now.</p>
       </div>
       <div class="pacts">
         <button class="btn btn-ghost" id="overviewReload">
@@ -1598,7 +1663,6 @@
     <div class="phead">
       <div>
         <h1>Assign courses</h1>
-        <p class="sub" style="margin:0">Courses are scheduled in catalogue order — a soft “next due” hint; nothing is locked for the learner.</p>
       </div>
     </div>
 
@@ -1685,7 +1749,6 @@
     <div class="phead">
       <div>
         <h1>Team progress</h1>
-        <p class="sub" style="margin:0">Anyone overdue or due soon is listed first. Open a row for that person's courses.</p>
       </div>
       <div class="pacts">
         <!-- The first step of running a team's training is getting the team into
@@ -1723,7 +1786,6 @@
     <div class="phead">
       <div>
         <h1>Company documents</h1>
-        <p class="sub" style="margin:0">Your licence decides which documents you hold. You decide who can open each one, and who must be familiar with a revision by a date.</p>
       </div>
       <div class="pacts"><button class="btn btn-ghost" id="docsReload">Reload</button></div>
     </div>
@@ -1828,7 +1890,6 @@
     <div class="phead">
       <div>
         <h1>Records</h1>
-        <p class="sub" style="margin:0">Course completions, document familiarisation and certificates — the durable history, filtered how you need it and exported to keep.</p>
       </div>
       <div class="pacts">
         <button class="btn btn-ghost" id="recExportPdf">
@@ -1895,9 +1956,9 @@
             <label class="lbl" aria-hidden="true" style="visibility:hidden">Export</label>
             <div class="pacts">
               <button class="btn btn-ghost" type="button" id="recExportCustomPdf">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export this report (PDF)</button>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export PDF</button>
               <button class="btn btn-ghost" type="button" id="recExportCustomCsv">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export this report (CSV)</button>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
             </div>
           </div>
         </div>
@@ -1917,7 +1978,6 @@
     <div class="phead">
       <div>
         <h1>Certificates</h1>
-        <p class="sub" style="margin:0">Every certificate issued to your team, newest first. Anyone can check one at <a href="../verify.html" target="_blank" rel="noopener">caw-academy.com/verify</a> using its number and the holder's name.</p>
       </div>
       <!-- The export is WHAT IS ON SCREEN, filter and sort included, and the
            file says so in its name. A register of certificates is the thing an
@@ -1960,6 +2020,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=54" defer></script>
+<script src="admin.js?v=55" defer></script>
 </body>
 </html>

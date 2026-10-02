@@ -2144,10 +2144,11 @@
      So: a search that covers name, id and holder, and three VIEWS that are
      mutually exclusive because nobody needs "restricted AND overdue" — they
      need to see one list at a time. */
+  // Short names too, for the same reason the Records views carry them.
   var DOC_VIEWS = [
-    ["", "All documents", null],
-    ["restricted", "Restricted access", "Only documents limited to named people"],
-    ["overdue", "Overdue familiarisation", "Only documents somebody is late reading"]
+    ["", "All documents", null, "All"],
+    ["restricted", "Restricted access", "Only documents limited to named people", "Restricted"],
+    ["overdue", "Overdue familiarisation", "Only documents somebody is late reading", "Overdue"]
   ];
 
   function renderDocFilters() {
@@ -2176,7 +2177,9 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "seg-btn" + (docView === v[0] ? " on" : "");
-      btn.textContent = v[1];
+      var dl = document.createElement("span"); dl.className = "t-long"; dl.textContent = v[1];
+      var ds = document.createElement("span"); ds.className = "t-short"; ds.textContent = v[3];
+      btn.appendChild(dl); btn.appendChild(ds);
       if (v[2]) btn.title = v[2];
       btn.setAttribute("aria-pressed", docView === v[0] ? "true" : "false");
       // The count rides the view, so "Overdue" says how much is overdue before
@@ -2459,11 +2462,17 @@
      the fold. Same shape as the framework picker on Assign. */
   var recWhatCollapsed = { Courses: true, Documents: true };
 
+  /* EACH VIEW CARRIES A SHORT NAME AS WELL. "Document familiarisation" is the
+     right words on a desktop and 230 pixels of a tablet's 584 — four of these
+     came to 661px and wrapped, leaving "Certificates" alone on a second row
+     looking like a mistake. Both labels are rendered and CSS shows one, so the
+     choice is made by the width at the moment rather than by a resize listener
+     that has to be told when to run. */
   var REC_KINDS = [
-    ["", "Everything"],
-    ["course", "Courses completed"],
-    ["document", "Document familiarisation"],
-    ["certificate", "Certificates"]
+    ["", "Everything", "All"],
+    ["course", "Courses completed", "Courses"],
+    ["document", "Document familiarisation", "Documents"],
+    ["certificate", "Certificates", "Certificates"]
   ];
 
   /** Every record the org holds, newest first. */
@@ -2570,7 +2579,9 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "seg-btn" + (recKind === k[0] ? " on" : "");
-      btn.textContent = k[1];
+      var long = document.createElement("span"); long.className = "t-long"; long.textContent = k[1];
+      var short = document.createElement("span"); short.className = "t-short"; short.textContent = k[2];
+      btn.appendChild(long); btn.appendChild(short);
       var n = k[0] ? all.filter(function (r) { return r.kind === k[0]; }).length : all.length;
       if (n) {
         var tag = document.createElement("span"); tag.className = "seg-n"; tag.textContent = String(n);
