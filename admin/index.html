@@ -41,17 +41,30 @@
     --indigo-soft:#ECEDFB; --indigo-ink:#2A2F86;
     --amber:#FB8C00; --amber-soft:#FFF4E3;
 
-    --ink:#0E1330; --ink-soft:#434966; --muted:#6A7093;
-    --bg:#F6F7FB; --card:#FFFFFF; --line:#E7E9F4; --line-2:#F0F1F8;
-    --rail-bg:#FFFFFF; --rail-sel:#F2F3FC;
+    /* THE NEUTRALS ARE NEUTRAL. Every grey here used to carry a blue tint
+       borrowed from the brand indigo — the page background, both hairlines, the
+       muted text and even the shadows. On a wide-gamut display (Safari renders
+       it honestly) the whole console read as faintly cold and slightly purple,
+       which is not a brand colour, just a cast. The indigo, amber, green and
+       red below are untouched: the brand belongs on the things that mean
+       something, not on the paper they sit on.
+
+       AND GREYER PAPER IS NOT DULLER PAPER — the first pass at this made both
+       mistakes at once. The page sits a step DEEPER in grey so the white cards
+       lift off it instead of floating on near-white, and the text sits a step
+       DARKER so the type carries the contrast the colour used to fake. Washed
+       out and cold are different faults and they need opposite fixes. */
+    --ink:#111318; --ink-soft:#3F444D; --muted:#656A74;
+    --bg:#EFF0F2; --card:#FFFFFF; --line:#E3E5E8; --line-2:#EDEEF0;
+    --rail-bg:#FFFFFF; --rail-sel:#F0F1F3;
 
     --success:#2E7D32; --success-soft:#E8F4E9;
     --err:#C62828; --err-soft:#FDECEC; --err-ink:#8E1C1C;
     --warn:#B25E00; --warn-soft:#FFF4E3;
 
     --r-card:12px; --r-ctl:9px;
-    --shadow-sm:0 1px 2px rgba(14,19,48,.05);
-    --shadow-pop:0 18px 44px rgba(14,19,48,.16), 0 2px 8px rgba(14,19,48,.08);
+    --shadow-sm:0 1px 2px rgba(20,22,28,.05);
+    --shadow-pop:0 18px 44px rgba(20,22,28,.16), 0 2px 8px rgba(20,22,28,.08);
     --serif:"Fraunces",Georgia,"Times New Roman",serif;
     --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -81,12 +94,12 @@
 
   /* The organisation and what its licence covers: the two facts an admin needs
      on every screen, which is exactly why they must not cost the canvas a band. */
-  .org{background:#FBFBFE; border:1px solid var(--line); border-radius:var(--r-card);
+  .org{background:#FAFAFB; border:1px solid var(--line); border-radius:var(--r-card);
     padding:10px 12px; margin-bottom:12px}
   #orgName{font-weight:700; font-size:13.5px; letter-spacing:-.01em; margin:0}
   #orgDomains{font-size:11.5px; color:var(--muted); margin-top:1px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .org-meter{height:5px; border-radius:99px; background:#E9EAF5; margin:9px 0 6px; overflow:hidden}
+  .org-meter{height:5px; border-radius:99px; background:#E8E9EC; margin:9px 0 6px; overflow:hidden}
   .org-meter i{display:block; height:100%; border-radius:99px;
     background:linear-gradient(90deg,var(--indigo),var(--indigo-3))}
   .org-meter.full i{background:linear-gradient(90deg,#C25B00,var(--amber))}
@@ -122,9 +135,13 @@
   .tabbtn.parent:hover{background:none; color:var(--muted)}
   .tabbtn.parent.open{color:var(--ink)}
   .tabbtn.child{padding-left:38px; font-size:13px}
-  .tabbtn.child::before{content:""; position:absolute; left:22px; top:50%;
-    width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.35}
-  .tabbtn.child.on::before{opacity:0}
+  /* A CHILD CARRIED A BULLET AND IT HAD ESCAPED. The dot was absolutely
+     positioned with no positioned ancestor to resolve against, so instead of
+     sitting beside its own row it landed against the rail — both children's
+     dots in the same wrong place, reading as one stray mark under Team
+     progress. Anchoring it would have been one line, but the comment above
+     already says why it is not wanted: THE INDENT IS THE RELATIONSHIP. A
+     bullet beside an indented item states it a second time. */
   .tabbtn.alert.on{background:var(--err)}
   .tabbtn.alert.on .tcount{background:rgba(255,255,255,.22); color:#fff}
 
@@ -179,7 +196,7 @@
      this rule declared a background of its own, hovering a ghost button
      painted it near-black indigo and then wrote mid-indigo text on top of it.
      A hover state must name every property the state it overrides sets. */
-  .btn-ghost:hover:not(:disabled){background:#F7F8FD; border-color:#C9CDEA;
+  .btn-ghost:hover:not(:disabled){background:#F6F7F8; border-color:#C9CDEA;
     color:var(--indigo-ink)}
   .btn-ghost:active:not(:disabled){background:var(--indigo-soft)}
   .btn svg,.btn-ghost svg{width:15px; height:15px; stroke:currentColor; fill:none;
@@ -221,9 +238,16 @@
      opaque because a transparent header shows the rows passing under it. */
   .card-fold > .card-h{width:100%; cursor:pointer; user-select:none; border:0;
     border-bottom:1px solid var(--line); background:var(--card); text-align:left; font:inherit;
-    position:sticky; top:0; z-index:3}
-  .card-fold > .card-h:hover{background:#FBFBFE}
-  .card-fold > .card-h[aria-expanded="false"]{border-bottom:0}
+    position:sticky; top:0; z-index:3;
+    /* THE RADIUS GOES WITH THE BACKGROUND. Making this header sticky meant
+       giving it an opaque fill — a transparent one shows the rows passing
+       under it — and an opaque square laid over a rounded card paints its
+       corners back on. Open, it owns the top two; collapsed, it IS the card
+       and owns all four. */
+    border-radius:var(--r-card) var(--r-card) 0 0}
+  .card-fold > .card-h:hover{background:#FAFAFB}
+  .card-fold > .card-h[aria-expanded="false"]{border-bottom:0;
+    border-radius:var(--r-card)}
   .fold-chev{width:0; height:0; flex:none; border-left:5px solid transparent;
     border-right:5px solid transparent; border-top:6px solid var(--muted);
     transition:transform .14s ease}
@@ -303,7 +327,7 @@
      border, because a sticky cell leaves its collapsed border behind. */
   thead th{font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
     color:var(--muted); text-align:left; padding:9px 16px;
-    white-space:nowrap; background:#FBFBFE;
+    white-space:nowrap; background:#FAFAFB;
     position:sticky; z-index:3; box-shadow:inset 0 -1px 0 var(--line)}
   thead th.sortable{cursor:pointer; user-select:none}
   thead th.sortable:hover{color:var(--indigo)}
@@ -318,8 +342,8 @@
   td.col-c .mcell{justify-content:center}
   tbody tr:last-child td{border-bottom:0}
   tr.rowlink{cursor:pointer}
-  tr.rowlink:hover{background:#FAFAFE}
-  tr.rowlink.open{background:#F7F8FD}
+  tr.rowlink:hover{background:#FAFAFB}
+  tr.rowlink.open{background:#F6F7F8}
   td.r{text-align:right; white-space:nowrap}
   .person{display:flex; align-items:center; gap:10px; min-width:0}
   .av{width:30px; height:30px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo-ink);
@@ -342,9 +366,9 @@
      summary row takes the tint and loses its bottom rule (the two are one
      object), an indigo bar runs down the left of both, and the detail itself is
      a bordered white panel inside the tinted cell. */
-  tr.rowlink.open td{background:#F4F5FD; border-bottom:0; box-shadow:none}
+  tr.rowlink.open td{background:#F4F5F6; border-bottom:0; box-shadow:none}
   tr.rowlink.open td:first-child{box-shadow:inset 3px 0 0 var(--indigo)}
-  tr.member td{background:#F4F5FD; padding:0 16px 14px;
+  tr.member td{background:#F4F5F6; padding:0 16px 14px;
     border-bottom:1px solid var(--line); box-shadow:inset 3px 0 0 var(--indigo)}
   .member-body{background:#fff; border:1px solid #DFE2F2; border-radius:var(--r-card);
     padding:4px 14px 14px; margin-left:42px}
@@ -356,7 +380,7 @@
   .pill.overdue{background:var(--err-soft); color:var(--err)}
   .pill.due_soon{background:var(--warn-soft); color:var(--warn)}
   .pill.upcoming{background:var(--indigo-soft); color:var(--indigo-ink)}
-  .pill.idle{background:#F1F2F8; color:var(--muted)}
+  .pill.idle{background:#F0F1F3; color:var(--muted)}
   .pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
   .role-pill{font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
     color:var(--indigo); background:var(--indigo-soft); padding:2px 7px; border-radius:99px}
@@ -369,11 +393,11 @@
   .mchip.due_soon{background:var(--warn-soft); color:var(--warn)}
   .mchip.done{background:var(--success-soft); color:var(--success)}
   .mchip.needs{background:var(--err-soft); color:var(--err)}
-  .mchip.none{background:#F1F2F8; color:var(--muted)}
+  .mchip.none{background:#F0F1F3; color:var(--muted)}
 
   /* Counts, not an average of percentages: an average of four half-read courses
      and one finished says "60%" and means nothing anybody can act on. */
-  .mbar{position:relative; height:5px; border-radius:99px; background:#EDEEF6; overflow:hidden;
+  .mbar{position:relative; height:5px; border-radius:99px; background:#EBECEE; overflow:hidden;
     min-width:74px; flex:1}
   .mbar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px; background:var(--success)}
   .mcell{display:flex; align-items:center; gap:9px}
@@ -424,7 +448,7 @@
     letter-spacing:.06em; margin-left:4px}
   .prog{display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap}
   .prog .bar{position:relative; flex:1 1 110px; max-width:170px; height:5px; border-radius:99px;
-    background:#EDEEF6; overflow:hidden}
+    background:#EBECEE; overflow:hidden}
   .prog .bar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px; background:var(--indigo)}
   .prog .bar.done i{background:var(--success)}
   .prog .bar.risk i{background:var(--err)}
@@ -490,7 +514,7 @@
   .lic-fig.full b{color:var(--warn)}
   .lic-cap{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
     color:var(--muted); margin-top:1px}
-  .lic-meter{height:6px; border-radius:99px; background:#EDEEF6; overflow:hidden; margin:10px 0 0}
+  .lic-meter{height:6px; border-radius:99px; background:#EBECEE; overflow:hidden; margin:10px 0 0}
   .lic-meter i{display:block; height:100%; border-radius:99px;
     background:linear-gradient(90deg,var(--indigo),var(--indigo-3))}
   /* Amber at the cap, because that is the moment a new colleague cannot be
@@ -503,7 +527,7 @@
      that reference is what an admin quotes when they email us, and what they
      match against an invoice. */
   .contract{border:1px solid var(--line); border-radius:var(--r-ctl);
-    padding:9px 11px 4px; margin-bottom:9px; background:#FBFBFE}
+    padding:9px 11px 4px; margin-bottom:9px; background:#FAFAFB}
   .contract-h{display:flex; align-items:center; justify-content:space-between;
     gap:8px; padding-bottom:7px; border-bottom:1px solid var(--line-2)}
   .contract-h b{font-size:12.5px; font-weight:750; letter-spacing:-.01em; min-width:0;
@@ -585,7 +609,7 @@
   .ms-grid .ms{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
   .ms-grid .ms-list{flex:1 1 auto; min-height:200px; max-height:none}
   .ms{border:1px solid var(--line); border-radius:var(--r-card); background:#fff; overflow:hidden}
-  .ms-tools{display:flex; align-items:center; gap:9px; padding:8px 11px; border-bottom:1px solid var(--line); background:#FBFBFE}
+  .ms-tools{display:flex; align-items:center; gap:9px; padding:8px 11px; border-bottom:1px solid var(--line); background:#FAFAFB}
   .ms-tools .grow{flex:1; min-width:0}
   .ms-count{font-size:11.5px; font-weight:700; color:var(--muted); white-space:nowrap}
   .ms-search{width:100%; border:1px solid var(--line); border-radius:7px; padding:6px 10px;
@@ -593,7 +617,7 @@
   .ms-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
   .ms-list{max-height:240px; overflow-y:auto; padding:3px 0}
   .ms-row{display:flex; align-items:center; gap:10px; padding:6px 11px; font-size:13px; cursor:pointer}
-  .ms-row:hover{background:#FAFAFE}
+  .ms-row:hover{background:#FAFAFB}
   .ms-row input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
   .ms-row .sub{color:var(--muted); font-size:11.5px}
   /* THE FRAMEWORK HEADER. It was 10px uppercase micro-caps with a text-glyph
@@ -604,7 +628,7 @@
      group still says whether it holds any of the selection. */
   .ms-group{font-size:13px; font-weight:700; letter-spacing:-.01em; color:var(--ink);
     padding:9px 11px; display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none;
-    border-top:1px solid var(--line); background:#FBFBFE}
+    border-top:1px solid var(--line); background:#FAFAFB}
   .ms-group:first-child{border-top:0}
   .ms-group:hover{background:var(--indigo-soft)}
   .ms-group.open{background:#fff}
@@ -618,13 +642,13 @@
   .ms-gname{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   /* The count, as a badge rather than a parenthesis. */
   .ms-gcount{flex:none; font-size:11px; font-weight:750; color:var(--muted);
-    background:#EEEFF7; padding:2px 8px; border-radius:99px; font-variant-numeric:tabular-nums}
+    background:#EDEEF0; padding:2px 8px; border-radius:99px; font-variant-numeric:tabular-nums}
   .ms-group.picked .ms-gcount{background:var(--indigo); color:#fff}
   /* Courses sit UNDER their framework, so the hierarchy is visible without
      reading the headers. */
   .ms-list .ms-row[data-key]{padding-left:34px}
   .ms-note{font-size:11.5px; color:var(--muted); line-height:1.45; padding:8px 11px;
-    border-top:1px solid var(--line); background:#FBFBFE}
+    border-top:1px solid var(--line); background:#FAFAFB}
   .ms-note:empty{display:none}
 
   /* ── Assign: Who → What → When, read left to right. ──────────────────────── */
@@ -644,7 +668,7 @@
     background:var(--indigo-soft); border:1px solid #D7D9F5; border-radius:var(--r-card); flex-wrap:wrap}
   .sumbar .t{flex:1 1 320px; font-size:13px; color:var(--indigo-ink); line-height:1.5}
   .sumbar .t b{font-weight:750}
-  .sumbar.idle{background:#FBFBFE; border-color:var(--line)}
+  .sumbar.idle{background:#FAFAFB; border-color:var(--line)}
   .sumbar.idle .t{color:var(--muted)}
 
   /* Who is picked, kept in sight while the dates are set. */
@@ -655,7 +679,7 @@
   .seeplan{display:inline-flex; align-items:center; gap:7px; flex:none; cursor:pointer;
     border:1px solid #C9CDEA; background:#fff; color:var(--indigo); border-radius:var(--r-ctl);
     font:inherit; font-size:12.5px; font-weight:650; padding:6px 11px; white-space:nowrap}
-  .seeplan:hover{background:#F7F8FD; color:var(--indigo-ink); border-color:var(--indigo-3)}
+  .seeplan:hover{background:#F6F7F8; color:var(--indigo-ink); border-color:var(--indigo-3)}
   .seeplan-chev{width:0; height:0; flex:none; border-left:4.5px solid transparent;
     border-right:4.5px solid transparent; border-top:6px solid currentColor;
     animation:seeplan-nudge 1.8s ease-in-out 3}
@@ -678,7 +702,7 @@
   .plan{margin-top:12px; border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden}
   .plan:empty{display:none}
   .plan-h{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
-    color:var(--muted); padding:8px 13px; background:#FBFBFE; border-bottom:1px solid var(--line)}
+    color:var(--muted); padding:8px 13px; background:#FAFAFB; border-bottom:1px solid var(--line)}
   .plan-r{display:grid; grid-template-columns:22px minmax(0,1fr) 120px; align-items:center;
     gap:10px; padding:7px 13px; border-top:1px solid var(--line-2); font-size:13px}
   .plan-r:first-of-type{border-top:0}
@@ -707,12 +731,12 @@
 
   /* The views are mutually exclusive, so they are a segmented control, not
      three checkboxes pretending otherwise. */
-  .seg{display:inline-flex; background:#F1F2F8; border-radius:9px; padding:3px; gap:3px}
+  .seg{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px}
   .seg-btn{display:inline-flex; align-items:center; gap:7px; border:0; background:none;
     border-radius:7px; padding:6px 13px; font:inherit; font-size:12.5px; font-weight:650;
     color:var(--ink-soft); cursor:pointer; white-space:nowrap}
   .seg-btn:hover:not(:disabled):not(.on){color:var(--ink)}
-  .seg-btn.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(14,19,48,.12)}
+  .seg-btn.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(20,22,28,.12)}
   /* A view with nothing in it is offered, greyed, rather than hidden: a control
      that comes and goes is harder to learn than one that is sometimes inert. */
   .seg-btn:disabled{opacity:.45; cursor:default}
@@ -740,7 +764,7 @@
      FAMILIARISATION and read as a value in that column. Tinted, with its own
      rule above, it reads as a divider between runs rather than as a row of
      data that has drifted out of alignment. */
-  .docgroup td{padding:0; background:#F4F5FD; border-top:1px solid var(--line);
+  .docgroup td{padding:0; background:#F4F5F6; border-top:1px solid var(--line);
     border-bottom:1px solid var(--line)}
   .docgroup:first-child td{border-top:0}
   .doc-detail{padding:12px 14px}
@@ -774,7 +798,7 @@
      restricted — so it can be read without opening it. */
   .doc-company{display:flex; align-items:center; gap:9px; margin:0; width:100%;
     border:0; background:none; padding:9px 16px; cursor:pointer; text-align:left}
-  .doc-company:hover{background:#FBFBFE}
+  .doc-company:hover{background:#FAFAFB}
   .doc-company .fold-chev{flex:none}
   .doc-company > .co-name{font-weight:800; font-size:11px; letter-spacing:.1em;
     text-transform:uppercase; color:var(--ink-soft); min-width:0;
@@ -792,11 +816,11 @@
   /* Stated as a CHOICE rather than a switch: both halves name what happens,
      where a toggle labelled "Restricted" leaves the reader working out which
      way is on. The selected half is a raised white chip on a sunken track. */
-  .doc-modes{display:inline-flex; background:#F1F2F8; border-radius:9px; padding:3px; gap:3px; margin:11px 0 0}
+  .doc-modes{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px; margin:11px 0 0}
   .doc-mode{font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; white-space:nowrap;
     border:0; background:none; color:var(--muted); padding:5px 12px; border-radius:7px}
   .doc-mode:hover{color:var(--ink-soft)}
-  .doc-mode.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(14,19,48,.12)}
+  .doc-mode.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(20,22,28,.12)}
   .doc-people{margin-top:11px}
   .doc-save{display:flex; align-items:center; gap:12px; margin-top:11px; padding:10px 12px;
     background:var(--indigo-soft); border:1px solid #D7D9F5; border-radius:var(--r-ctl); flex-wrap:wrap}
@@ -871,7 +895,7 @@
   .cgroup{border-top:1px solid var(--line-2)}
   .cgroup:first-child{border-top:0}
   .cg-name{display:flex; align-items:center; gap:9px; padding:9px 16px; cursor:pointer; font-size:13px; font-weight:650}
-  .cg-name:hover{background:#FAFAFE}
+  .cg-name:hover{background:#FAFAFB}
   .cg-count{margin-left:auto; font-size:11.5px; font-weight:700; color:var(--muted)}
   .cg-sub{color:var(--muted); font-size:12px; font-weight:400; min-width:0;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -921,7 +945,7 @@
   /* ── Sign in / confirm / denied.  These three ARE the front door, so they keep
         the marketing page's centred card and serif heading. ────────────────── */
   .signin-wrap{max-width:540px; margin:7vh auto 48px; padding:0 20px; width:100%}
-  .signin-wrap .card{padding:26px 26px 24px; box-shadow:0 12px 34px rgba(14,19,48,.07)}
+  .signin-wrap .card{padding:26px 26px 24px; box-shadow:0 12px 34px rgba(20,22,28,.07)}
   .auth-brand{display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:18px}
   .auth-brand img{width:32px; height:32px; border-radius:9px; box-shadow:var(--shadow-sm)}
   .auth-brand .bn{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--ink)}
@@ -1034,7 +1058,7 @@
        Desktop only: below 1181px the page itself scrolls, and a bar pinned to
        the viewport there would hover over the footer for the whole page. */
     .sumbar{position:sticky; bottom:0; z-index:4; margin-bottom:0;
-      box-shadow:0 -10px 14px -10px rgba(14,19,48,.14)}
+      box-shadow:0 -10px 14px -10px rgba(20,22,28,.14)}
     .sumbar::after{content:""; position:absolute; left:-16px; right:-16px; bottom:-14px;
       height:14px; background:var(--card)}
     #famForm, .sect[data-sect="assign"] form{padding-bottom:2px}
@@ -1046,7 +1070,7 @@
        other fight over the same edge. */
     .formfoot{position:sticky; bottom:0; z-index:4; background:var(--card);
       margin:18px -16px 0; padding:0 16px 14px;
-      box-shadow:0 -10px 14px -10px rgba(14,19,48,.14)}
+      box-shadow:0 -10px 14px -10px rgba(20,22,28,.14)}
     .formfoot .sumbar{position:static; box-shadow:none; margin-top:14px}
     .formfoot .sumbar::after{display:none}
 
@@ -1219,20 +1243,20 @@
     /* The report opens with the ANSWER — the same five figures as the dashboard,
        so the person who ran it and the person who reads it see one thing. */
     .prep-summary{display:flex; gap:6pt; margin:12pt 0 16pt}
-    .ps{flex:1; border:.75pt solid #E1E3EE; border-radius:5pt; padding:6pt 8pt; background:#FBFBFE}
+    .ps{flex:1; border:.75pt solid #E2E3E6; border-radius:5pt; padding:6pt 8pt; background:#FAFAFB}
     .ps b{display:block; font-size:16pt; font-weight:800; line-height:1.1}
     .ps span{display:block; font-size:6.5pt; font-weight:700; letter-spacing:.6pt;
       text-transform:uppercase; color:#6B7390; margin-top:2pt}
     .ps.alert{background:#FDECEC; border-color:#F6D5D3} .ps.alert b{color:#BA1A1A}
     .ps.warn{background:#FFF3E0; border-color:#F6E2C2} .ps.warn b{color:#B25E00}
     .ps.good{background:#E7F4E8; border-color:#CFE6D1} .ps.good b{color:#2E7D32}
-    .ps.zero{background:#FBFBFE; border-color:#E1E3EE} .ps.zero b{color:#6B7390}
+    .ps.zero{background:#FAFAFB; border-color:#E2E3E6} .ps.zero b{color:#6B7390}
 
     /* A member is one unit of reading: never split the heading from the table. */
     .prep-member{break-inside:avoid; page-break-inside:avoid; margin:0 0 11pt;
-      border:.75pt solid #E1E3EE; border-radius:6pt; overflow:hidden}
+      border:.75pt solid #E2E3E6; border-radius:6pt; overflow:hidden}
     .pm-head{display:flex; align-items:center; justify-content:space-between; gap:12pt;
-      background:#F4F5FC; border-bottom:.75pt solid #E1E3EE; padding:6pt 9pt}
+      background:#F4F5F6; border-bottom:.75pt solid #E2E3E6; padding:6pt 9pt}
     .pm-name{font-size:11pt; font-weight:700; margin:0; color:#0C1843}
     .pm-mail{font-size:8pt; color:#6B7390; margin:1pt 0 0}
     .pm-chips{display:flex; gap:4pt; flex-wrap:wrap; justify-content:flex-end}
@@ -1241,14 +1265,14 @@
     .pm-chip.overdue{background:#FDECEC; color:#BA1A1A}
     .pm-chip.due_soon{background:#FFF3E0; color:#B25E00}
     .pm-chip.done{background:#E7F4E8; color:#2E7D32}
-    .pm-chip.none{background:#EFF0F6; color:#6B7390}
+    .pm-chip.none{background:#EEEFF1; color:#6B7390}
 
     .prep table{width:100%; border-collapse:collapse; font-size:8.5pt}
     .prep th{text-align:left; font-size:6.5pt; font-weight:800; letter-spacing:.6pt;
       text-transform:uppercase; color:#6B7390; padding:5pt 8pt 4pt;
       border-bottom:1pt solid #3E44B5; background:#fff}
-    .prep td{padding:4.5pt 8pt; border-bottom:.5pt solid #EDEEF4; vertical-align:middle}
-    .prep tbody tr:nth-child(even) td{background:#FAFAFD}   /* banding: the eye keeps its row */
+    .prep td{padding:4.5pt 8pt; border-bottom:.5pt solid #ECEDEF; vertical-align:middle}
+    .prep tbody tr:nth-child(even) td{background:#FAFAFB}   /* banding: the eye keeps its row */
     .prep tbody tr:last-child td{border-bottom:0}
     .prep td.course{font-weight:600}
     .prep td.num{font-family:ui-monospace,Menlo,monospace; font-size:7.5pt; white-space:nowrap; color:#3A3F63}
@@ -1261,17 +1285,17 @@
     /* A printed progress bar: the number is there too, because a bar alone cannot
        be read off a photocopy. */
     .pbar{display:inline-block; width:42pt; height:3.5pt; border-radius:99pt;
-      background:#E4E6F3; vertical-align:middle; margin-right:5pt; overflow:hidden}
+      background:#E3E4E7; vertical-align:middle; margin-right:5pt; overflow:hidden}
     .pbar i{display:block; height:100%; background:#3E44B5; border-radius:99pt}
     .pbar.full i{background:#2E7D32}
     .prep-none{font-size:8.5pt; color:#6B7390; font-style:italic; padding:7pt 9pt; margin:0}
 
     .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
-      border-top:.5pt solid #E1E3EE; padding-top:7pt}
+      border-top:.5pt solid #E2E3E6; padding-top:7pt}
     /* position:fixed repeats on every printed page — the nearest thing CSS has to
        the app's per-page footer. */
     .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
-      border-top:.5pt solid #E1E3EE; padding-top:3pt;
+      border-top:.5pt solid #E2E3E6; padding-top:3pt;
       display:flex; justify-content:space-between}
     .prep-foot .site{color:#3E44B5; font-weight:600}
 
@@ -1281,7 +1305,7 @@
     .prep-rows{width:100%; border-collapse:collapse; margin-top:8pt}
     .prep-rows th{font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
       color:#6B7390; text-align:left; padding:4pt 6pt 3pt 0; border-bottom:.75pt solid #B9BEDC}
-    .prep-rows td{font-size:8.5pt; padding:3.5pt 6pt 3.5pt 0; border-bottom:.5pt solid #E1E3EE;
+    .prep-rows td{font-size:8.5pt; padding:3.5pt 6pt 3.5pt 0; border-bottom:.5pt solid #E2E3E6;
       vertical-align:top}
     .prep-rows tr{break-inside:avoid; page-break-inside:avoid}
     .prep-rows thead{display:table-header-group}
@@ -1850,6 +1874,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=47" defer></script>
+<script src="admin.js?v=49" defer></script>
 </body>
 </html>
