@@ -1045,14 +1045,24 @@ body{background:var(--bg)}
      The ramp is long (38%) and shallow at the start — flat black to 44%, then
      an eased curve — because a short fade reads as a band and a linear one
      reads as a ruler. Desktop only: below 1025 the photo is a full-width banner
-     ABOVE the copy, where there is no vertical seam to hide. */
-  .banner-card picture{
+     ABOVE the copy, where there is no vertical seam to hide.
+
+     THE MASK GOES ON THE <img>, WITH ITS SIZE AND REPEAT WRITTEN OUT. On the
+     <picture> it worked in Chrome and did nothing in Safari on iPad: a
+     <picture> is a wrapper that paints nothing itself, and Safari declines to
+     mask an element whose own box is empty — the image inside goes on drawing.
+     Masking the element that actually paints fixes it, and the explicit
+     -webkit-mask-size / -repeat are there because Safari does not always infer
+     them from the shorthand's gradient. */
+  .banner-card img{
     -webkit-mask-image:linear-gradient(90deg, #000 0%, #000 62%,
       rgba(0,0,0,.92) 72%, rgba(0,0,0,.72) 81%, rgba(0,0,0,.42) 89%,
       rgba(0,0,0,.18) 95%, rgba(0,0,0,0) 100%);
+    -webkit-mask-size:100% 100%; -webkit-mask-repeat:no-repeat;
             mask-image:linear-gradient(90deg, #000 0%, #000 62%,
       rgba(0,0,0,.92) 72%, rgba(0,0,0,.72) 81%, rgba(0,0,0,.42) 89%,
-      rgba(0,0,0,.18) 95%, rgba(0,0,0,0) 100%)}
+      rgba(0,0,0,.18) 95%, rgba(0,0,0,0) 100%);
+            mask-size:100% 100%; mask-repeat:no-repeat}
   .banner-card picture{width:100%; height:100%}
   /* The photo FILLS the card. At its natural ratio it came out 432px against a
      525px column, leaving a band of card beneath it that CANNOT be padded away:
@@ -1223,7 +1233,22 @@ body{background:var(--bg)}
 .console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff}
 .console-frame iframe{display:block; border:0; background:#fff;
   width:1180px; height:820px; transform-origin:top left}
-@media (max-width:760px){ .console-frame{padding:7px; border-radius:12px} }
+/* BELOW THE DESKTOP BREAKPOINT THE CONSOLE SHOWS ITS OWN TABLET LAYOUT.
+   Forcing the 1180px desktop console into a narrow column and scaling it down
+   advertises a layout the reader is not going to get: on an iPad they will see
+   the console's tablet shape, so that is what the frame should contain. The
+   iframe is then sized to the column in CSS pixels and NOT transformed — the
+   console lays itself out at that width, exactly as it would in the browser.
+
+   The laptop goes with it. A MacBook drawn around a tablet layout is a picture
+   of two different machines; a plain bezel says "a screen" and makes no claim
+   about which. */
+@media (max-width:1024px){
+  .console-mac .base{display:none}
+  .console-mac .lid{width:100%; border-radius:16px; padding:10px}
+  .console-frame{border-radius:8px}
+}
+@media (max-width:760px){ .console-mac .lid{padding:7px; border-radius:12px} }
 
 /* A qualifier inside an answer, set a size down and in the muted ink: it is a
    condition on the sentence above it, not another sentence. */

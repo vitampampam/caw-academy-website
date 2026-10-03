@@ -1508,23 +1508,48 @@
 </script>
 
 <script>
-/* THE CONSOLE IS RENDERED AT ITS OWN WIDTH AND SCALED. It is designed for a
-   1180px window; letting it reflow into a 600px column would advertise the
-   tablet layout instead of the console. So the iframe keeps 1180x820 and the
-   frame scales it to whatever the column gives, taking its own height from the
-   result so no gap is left underneath. */
+/* THE CONSOLE IS SHOWN AT THE WIDTH THE READER WOULD SEE IT.
+   On a wide screen it is drawn at its desktop width (1180) and scaled into the
+   laptop, because that is the layout a desktop visitor will get. Below the
+   console's own breakpoint the iframe is instead SIZED to the column and not
+   transformed, so the console lays itself out as it would on that device — an
+   iPad visitor sees the tablet console, not a shrunken desktop one.
+
+   Re-fitted on load, on resize, and whenever the frame's own box changes: the
+   iframe is lazy, so the first fit can land before the element has a width,
+   and a scale computed from a width of zero is how it came out thumbnail-sized
+   on an iPad. */
 (function () {
   var frame = document.querySelector('.console-frame');
   if (!frame) { return; }
   var f = frame.querySelector('iframe');
+  var DESKTOP = 1180, DESK_H = 820;
   function fit() {
-    /* The screen is the frame's own box — the laptop lid supplies the bezel
-       around it, so no padding has to be guessed here. */
-    var k = Math.min(1, frame.clientWidth / 1180);
-    f.style.transform = 'scale(' + k + ')';
-    frame.style.height = Math.round(820 * k) + 'px';
+    var w = frame.clientWidth;
+    if (!w) { return; }                       /* not laid out yet — wait */
+    if (window.matchMedia('(min-width:1025px)').matches) {
+      var k = Math.min(1, w / DESKTOP);
+      f.style.width = DESKTOP + 'px';
+      f.style.height = DESK_H + 'px';
+      f.style.transform = 'scale(' + k + ')';
+      frame.style.height = Math.round(DESK_H * k) + 'px';
+    } else {
+      /* The console's own layout, at this width. The WIDTH is left to CSS —
+         100% of the frame — rather than written in pixels: a measured width is
+         a race, and it lost. Setting the height resizes the frame, which fires
+         the observer, which measures again, and the iframe was left 103px wider
+         than the box that clips it. Only the height is computed here. */
+      var h = Math.round(Math.min(Math.max(w * 1.25, 560), 900));
+      f.style.transform = 'none';
+      f.style.width = '100%';
+      f.style.height = h + 'px';
+      frame.style.height = h + 'px';
+    }
   }
   addEventListener('resize', fit);
+  addEventListener('orientationchange', fit);
+  f.addEventListener('load', fit);
+  if (window.ResizeObserver) { new ResizeObserver(fit).observe(frame); }
   fit();
 })();
 </script>
