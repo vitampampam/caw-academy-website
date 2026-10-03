@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=95">
+<link rel="stylesheet" href="style.css?v=97">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1683,12 +1683,28 @@
       /* The bezel is part of the device, so it comes out of the column
          before the screen is measured: total = screen * (1 + 2 * 0.0469). */
       var screenW = Math.round(box / 1.0938);
-      /* AND THE SCREEN DOES NOT GO BELOW THE CONSOLE'S OWN LINE. At 761 it
-         switches to the phone page, and a tablet drawn around a phone layout
-         is the thing this section kept getting wrong. Where a few pixels
-         decide it, the bezel gives them up - a slightly thinner border is a
-         smaller error than the wrong layout. */
-      if (!phone && screenW < 761 && box >= 761 + 12) { screenW = 761; }
+
+      /* THE FLOOR IS IN PAINTED PIXELS, NOT LAID-OUT ONES, AND THAT ONE WORD
+         IS THE BUG THAT OUTLIVED EVERY OTHER FIX.
+
+         This site sets body{zoom:0.9} between 561 and 1024px. Everything
+         under it is laid out at 910 and painted at 819, so a 762px iframe
+         arrives on screen 686 wide - and WebKit gives the inner document its
+         PAINTED width. The console measured 686, which is under its own
+         761px line, and drew its phone page. Chromium uses the laid-out 762
+         and showed the sidebar, which is why every measurement I could take
+         said the thing was fixed.
+
+         So the floor is applied after the zoom: the screen must PAINT at 775
+         or more (761 plus slack for rounding on a real device), and the
+         bezel gives up whatever that costs. A slightly thinner border is a
+         far smaller error than the wrong layout. */
+      var z = mac.getBoundingClientRect().width / (mac.clientWidth || 1);
+      if (!(z > 0.1 && z <= 1)) { z = 1; }
+      var FLOOR = 775;
+      if (!phone && screenW * z < FLOOR && box * z >= FLOOR * 1.02) {
+        screenW = Math.ceil(FLOOR / z);
+      }
       want = { w: screenW,
                h: Math.round(screenW * (H >= W ? PORTRAIT : 1 / PORTRAIT)) };
     }
@@ -1718,7 +1734,13 @@
          4.69% of the screen and it only thins where the floor above bit. */
       var bez = Math.max(6, Math.min(Math.round(shown * 0.0469),
                                      Math.floor((box - shown) / 2)));
-      var inner = Math.round(shown * 0.0677);
+      /* THE CORNER IS THE REAL DEVICE'S, NOT THE THUMBNAIL'S. `.gpad`'s
+         13-on-192 is 6.77%, which reads correctly at 192px wide and turns
+         into a 52px sweep at 762 - a rounded rectangle, not an iPad. An
+         11-inch iPad's display corner is about 18 of its 834 points: 2.2%.
+         The body's corner is that plus the bezel, so the two are concentric
+         and the border keeps an even width around the turn. */
+      var inner = Math.round(shown * 0.022);
       lid.style.padding = bez + 'px';
       lid.style.borderRadius = (inner + bez) + 'px';
       frame.style.borderRadius = inner + 'px';
