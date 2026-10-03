@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=99">
+<link rel="stylesheet" href="style.css?v=100">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1564,47 +1564,44 @@
 </script>
 
 <script>
-/* TWO FIXED PICTURES, AND THE READER'S DEVICE PICKS WHICH.
+/* THE ADMIN CONSOLE, SHOWN IN A DEVICE.
 
-   Every version that worked the console's width out FROM the reader's
-   viewport got some device wrong, because the result then depended on the
-   reader's width, the scale, and which of those two the engine hands to the
-   iframe's inner document - and WebKit and Blink disagree about the last one.
-   So each fix measured in one engine was a regression in the other. Both
-   sizes below are constants, which is what ends that.
+   One rule: the console is always given a REAL DEVICE'S viewport, and the
+   picture of that device is then scaled to fit the column. The reader sees
+   what they would see opening the console on that device, only smaller.
 
-   DESKTOP: the desktop console, 1280 x 820, in the MacBook. This is the one
-   that was right all along and it is restored unchanged.
+   WHAT TOOK A DAY TO FIND, so that nobody re-derives it: WebKit lays an
+   iframe's inner document out at the width it is PAINTED when the scale is
+   on the IFRAME, and the same goes for a CSS `zoom` anywhere above it - this
+   site carries body{zoom:0.9} between 561 and 1024px. A transform on a
+   WRAPPER around the iframe does not do that. Measured on the live page: an
+   iframe given 834 inside a wrapper at scale 0.698 still reports innerWidth
+   834 and draws its 200px sidebar. So the scale goes on `.console-scale`,
+   never on the iframe, and never as `zoom`.
 
-   PHONE AND TABLET: the console's MOBILE layout, 430 x 932, in a tablet
-   bezel. A reader on a touch device is being shown what the console does on
-   a touch device.
-
-   The scale never goes above 1: a mobile layout blown up past its own size is
-   the oversized console we already had once. On an iPad the picture is
-   therefore 430 wide inside a wider column, which is correct - it is a small
-   screen, drawn at its real size.
-
-   THE SCALE IS ON THE WRAPPER, NEVER ON THE IFRAME. An iframe carrying its
-   own transform has two defensible widths, styled and painted, and that
-   ambiguity is exactly what showed a phone console inside a tablet frame. */
+   `FOLDED` is the safety net. After the frame loads, the console is asked
+   what width it believes it has; if an engine disagrees with the above, the
+   embed drops to an unscaled, full-width form, which works everywhere. */
 (function () {
   var frame = document.querySelector('.console-frame');
   if (!frame) { return; }
   var f = frame.querySelector('iframe');
   var scaler = f.parentElement;
   var mac = frame.closest('.console-mac');
-  if (!mac) { return; }
+  if (!mac || !scaler) { return; }
 
-  /* Four fixed pictures. Each is a real device's own viewport, so the
-     console lays itself out exactly as it does on that device - measured:
-     834 gives the 200px sidebar, 430 gives the dedicated mobile page whose
-     rail is a horizontal bar. The bezel needs no orientation of its own: the
-     lid is width:fit-content, so it takes the shape of whatever it holds. */
-  var DESKTOP  = { w: 1280, h: 820 };   // the laptop console, in the MacBook
-  var TABLET_P = { w: 834,  h: 1194 };  // iPad upright: sidebar
-  var TABLET_L = { w: 1194, h: 834 };   // iPad on its side: sidebar, wider
-  var MOBILE   = { w: 430,  h: 932 };   // the dedicated mobile page
+  /* Real devices. The console reads each of these exactly as it does on the
+     machine itself: measured, 834 and 1194 give the sidebar, 390 the
+     dedicated mobile page. */
+  var DESKTOP  = { w: 1280, h: 820 };
+  var TABLET_P = { w: 834,  h: 1194 };
+  var TABLET_L = { w: 1194, h: 834 };
+  var PHONE_P  = { w: 390,  h: 844 };
+  var PHONE_L  = { w: 844,  h: 390 };
+
+  var SHARE = 0.7;        /* of the column, on a touch device */
+  var FOLDED = false;     /* set by the check below if an engine folds the scale in */
+  var last = '';
 
   function isTouch() {
     try {
@@ -1613,108 +1610,49 @@
     } catch (e) { return false; }
   }
 
-  /* THE OBSERVER MUST NOT WATCH WHAT THIS FUNCTION WRITES. It watched the
-     frame, which fit() resizes, so every pass fed the next one: on a device
-     where a value lands between two pixels the two answers alternate and the
-     device shakes at frame rate. It now watches the CONTAINER, whose width
-     fit() never touches, and `last` makes the whole function a no-op when
-     nothing has actually changed - so even a stray call writes nothing. */
-  var last = '';
-
   function fit() {
     var lid = frame.parentElement;
     var W = window.innerWidth || 1180, H = window.innerHeight || 820;
     var narrow = isTouch() || W < 1025;
     /* A phone is the SHORT side, not the width: an iPhone held sideways is
-       390 tall and 844 wide, and it is still a phone. */
+       844 wide and still a phone. */
     var phone = Math.min(W, H) < 600;
+    var portrait = H >= W;
     var want = !narrow ? DESKTOP
-             : phone   ? MOBILE
-             : (H >= W ? TABLET_P : TABLET_L);
+             : phone   ? (portrait ? PHONE_P : PHONE_L)
+                       : (portrait ? TABLET_P : TABLET_L);
 
     /* The bezel follows the content: a MacBook body only around the desktop
-       console. `pad` is the plain tablet bezel - an even border, no deck. */
+       console; `pad` is the plain tablet bezel, an even border with no deck. */
     mac.classList.toggle('pad', narrow);
-
-    /* FULL-BLEED ON A TOUCH DEVICE, and the arithmetic forces it. The screen
-       must be at least 761px wide or the console draws its phone page, and
-       with a correctly proportioned bezel the whole device is 1.094 times its
-       screen - so on an 834px iPad the device needs all 834 of them. Inside
-       the section's usual 24px gutters the screen came to 718 and the sidebar
-       vanished. Edge to edge it is 762, and the sidebar is there. */
     var sect = mac.closest('.stk');
-    if (sect) { sect.classList.toggle('bleed', narrow); }
+    if (sect) { sect.classList.toggle('bleed', narrow && FOLDED); }
 
-    /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this resizes
-       and the bezel hugs it, so reading the frame's own width feeds the
-       output back into the input. clientWidth, not a rect: the stacked cards
-       carry a transform, and a rect already has it multiplied in. */
+    /* MEASURE THE CONTAINER, NOT THE FRAME: the frame is what this resizes,
+       and the bezel hugs it, so reading it back feeds the output into the
+       input. clientWidth, not a rect - the rect already has any ancestor
+       scale multiplied in. */
     var lidCS = getComputedStyle(lid);
     var capPct = parseFloat(lidCS.getPropertyValue('--lid-cap'));
     if (!(capPct > 0 && capPct <= 1)) { capPct = 1; }
-    var pad = (parseFloat(lidCS.paddingLeft) || 0) + (parseFloat(lidCS.paddingRight) || 0);
-    var box = Math.max(0, Math.round(mac.clientWidth * capPct - pad));
+    var box = Math.max(0, Math.round(mac.clientWidth * capPct));
     if (!box) { return; }
 
+    /* A phone takes the whole column: 70% of 375 is a porthole. */
+    var share = (!narrow || phone) ? 1 : SHARE;
+    var device = Math.round(box * share);
+    var shown = Math.round(device / 1.0938);   /* the screen, less the bezel */
+    var k = shown / want.w;
 
-    /* ON A TOUCH DEVICE NOTHING IS SCALED AT ALL. WebKit hands the inner
-       document the iframe's PAINTED width, so any scale here makes the
-       console lay itself out at a width other than the one it was given -
-       which is the whole history of this section. Unscaled, painted and
-       styled are the same number in every engine, the console fills the
-       frame exactly, and the layout it picks is the one the frame's own
-       width earns: measured, 320 gives the mobile page, 770 and 1018 give
-       the sidebar.
-
-       A desktop keeps its scaled 1280 picture. The quirk is WebKit on iOS;
-       the MacBook shot renders the desktop console correctly, so there is
-       nothing there to fix and the frame would otherwise be a tablet
-       layout in a laptop. */
-    var k = narrow ? 1 : Math.min(box / want.w, 1);
-    if (narrow) {
-      /* THE SCREEN KEEPS THE REAL iPAD'S SHAPE. An 11-inch iPad is 834 x 1194
-         CSS points, so the frame's height is its width times that ratio, the
-         right way up for how the reader is holding the device. The height was
-         a share of the window before, which is why the thing in the picture
-         was not the shape of an iPad. */
-      /* A PHONE IS A DIFFERENT SHAPE, and forcing the iPad's on it is why
-         the console looked zoomed in on an iPhone. At 1.43 the frame was 455
-         tall around a 318-wide screen: the content was at life size, but the
-         window onto it was half a phone, so all you saw was four big tiles.
-         A modern iPhone is 844 by 390, so 2.16, and at that ratio the same
-         screen is 687 tall and shows what a phone shows. */
-      var PORTRAIT = phone ? (844 / 390) : (1194 / 834);
-      /* The bezel is part of the device, so it comes out of the column
-         before the screen is measured: total = screen * (1 + 2 * 0.0469). */
-      /* SEVENTY PER CENT WHERE IT FITS, FULL WIDTH WHERE IT MUST.
-
-         The device takes 70% of the column and the console is given exactly
-         that width. It is NOT a picture of a wider screen shrunk down: a
-         shrunk iframe is what this section spent a day getting wrong,
-         because WebKit lays the inner document out at the width it is
-         PAINTED, so zooming the picture out zooms the layout out with it and
-         the console falls to its phone page.
-
-         That is also the one case where 70% cannot be honoured. The console
-         needs about 775 painted pixels for its sidebar, and 70% of an iPad
-         held upright is 584 - so there the device goes back to full width,
-         where it reaches 776. In landscape 70% is 775 on the nose and the
-         sidebar survives, so landscape stays at 70%. A phone keeps the full
-         column as well: 70% of 375 is a porthole. */
-      var FLOOR = 775;
-      var at70 = Math.round(box * 0.7 / 1.0938);
-      var floorW = Math.ceil(FLOOR / z);
-      var widest = box - 12;              /* leaves a 6px bezel each side */
-      var screenW = phone
-        ? Math.round(box / 1.0938)
-        : Math.min(Math.max(at70, at70 * z < FLOOR ? floorW : at70), widest);
-
-      want = { w: screenW,
-               h: Math.round(screenW * (H >= W ? PORTRAIT : 1 / PORTRAIT)) };
+    if (narrow && FOLDED) {
+      /* No scale at all, so the console lays out at whatever the frame is.
+         It loses the exact device width, but never the wrong layout. */
+      shown = Math.min(Math.round(box / 1.0938), box - 12);
+      want = { w: shown, h: Math.round(shown * (want.h / want.w)) };
+      k = 1;
     }
-    var shown = Math.round(want.w * k);
 
-    var sig = [narrow, want.w, want.h, shown, k.toFixed(4), box].join('|');
+    var sig = [narrow, phone, portrait, FOLDED, want.w, want.h, shown, box].join('|');
     if (sig === last) { return; }
     last = sig;
 
@@ -1722,32 +1660,22 @@
     f.setAttribute('height', want.h);
     f.style.width = want.w + 'px';
     f.style.height = want.h + 'px';
+    f.style.transform = 'none';
     scaler.style.width = want.w + 'px';
     scaler.style.height = want.h + 'px';
     scaler.style.transform = 'scale(' + k + ')';
     frame.style.width = shown + 'px';
     frame.style.height = Math.round(want.h * k) + 'px';
 
-    /* THE BEZEL IN PIXELS, FROM THE SCREEN IT SURROUNDS, AT THIS SITE'S OWN
-       MEASURED iPAD PROPORTIONS. `.gpad` - the frame the guide gallery and
-       the hero already use - is a 192px screen in a 210px body: bezel 9,
-       screen corner 13. So the bezel is 4.69% of the screen's width and the
-       corner 6.77%, and the body's corner is the two added together.
-       In cqw these were a share of the CONTAINER, while the lid is only as
-       wide as the frame inside it, so the proportions drifted with the
-       layout instead of holding. */
     if (narrow) {
-      /* Whatever is left of the column after the screen becomes the border,
-         so the device still fits exactly; at the ideal proportion that is
-         4.69% of the screen and it only thins where the floor above bit. */
+      /* The bezel and the corners in pixels, from the screen they surround,
+         at this site's own measured iPad: `.gpad` is a 192px screen in a
+         210px body, so the border is 4.69% of the screen's width. The corner
+         is the real device's 2.2%, not .gpad's 6.77% - that reads correctly
+         at 192px wide and becomes a 52px sweep at 762. The body's corner is
+         the screen's plus the border, so the two are concentric. */
       var bez = Math.max(6, Math.min(Math.round(shown * 0.0469),
                                      Math.floor((box - shown) / 2)));
-      /* THE CORNER IS THE REAL DEVICE'S, NOT THE THUMBNAIL'S. `.gpad`'s
-         13-on-192 is 6.77%, which reads correctly at 192px wide and turns
-         into a 52px sweep at 762 - a rounded rectangle, not an iPad. An
-         11-inch iPad's display corner is about 18 of its 834 points: 2.2%.
-         The body's corner is that plus the bezel, so the two are concentric
-         and the border keeps an even width around the turn. */
       var inner = Math.round(shown * 0.022);
       lid.style.padding = bez + 'px';
       lid.style.borderRadius = (inner + bez) + 'px';
@@ -1759,19 +1687,32 @@
     }
   }
 
+  /* THE CHECK. Ask the console what width it thinks it has; if it is not the
+     one it was given, this engine folds the scale into the inner layout and
+     the embed goes unscaled. Runs once, after the frame has laid out. */
+  function verify() {
+    if (FOLDED) { return; }
+    var asked = parseInt(f.style.width, 10);
+    var got;
+    try { got = f.contentWindow.innerWidth; } catch (e) { return; }
+    if (asked && got && Math.abs(got - asked) > 2) {
+      FOLDED = true;
+      last = '';
+      fit();
+    }
+  }
+
   addEventListener('resize', fit);
   addEventListener('orientationchange', fit);
-  f.addEventListener('load', fit);
+  f.addEventListener('load', function () { fit(); setTimeout(verify, 120); });
   if (window.ResizeObserver) { new ResizeObserver(fit).observe(mac); }
   fit();
+  setTimeout(verify, 600);
 
-  /* THE CONSOLE GOES BACK TO ITS TOP WHEN NOBODY IS LOOKING. The frame is a
-     window onto a page taller than itself, and on a touch device a flick
-     aimed at the section scrolls the console rather than the page. Left
-     alone, the next reader to arrive at the section finds it opened
-     half-way down a licence table, which reads as a broken embed rather
-     than as somewhere a finger has been. Reset only once it is fully out of
-     view, so it never moves under anyone. */
+  /* The console goes back to its top once it is fully out of view: the frame
+     is a window onto a taller page, and on a touch device a flick aimed at
+     the section scrolls the console instead. Left alone, the next reader
+     finds it opened half-way down a table. */
   if (window.IntersectionObserver) {
     new IntersectionObserver(function (entries) {
       if (entries[0].isIntersecting) { return; }
