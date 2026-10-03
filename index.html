@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=97">
+<link rel="stylesheet" href="style.css?v=98">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1613,7 +1613,13 @@
     } catch (e) { return false; }
   }
 
-  var lastBox = 0, settling = false;
+  /* THE OBSERVER MUST NOT WATCH WHAT THIS FUNCTION WRITES. It watched the
+     frame, which fit() resizes, so every pass fed the next one: on a device
+     where a value lands between two pixels the two answers alternate and the
+     device shakes at frame rate. It now watches the CONTAINER, whose width
+     fit() never touches, and `last` makes the whole function a no-op when
+     nothing has actually changed - so even a stray call writes nothing. */
+  var last = '';
 
   function fit() {
     var lid = frame.parentElement;
@@ -1650,14 +1656,6 @@
     var box = Math.max(0, Math.round(mac.clientWidth * capPct - pad));
     if (!box) { return; }
 
-    /* The lid's padding is a container-query unit, so the first measurement
-       can be taken before it resolves. Look again next frame if the box
-       moved; `settling` stops the two chasing each other. */
-    if (box !== lastBox && !settling) {
-      settling = true;
-      requestAnimationFrame(function () { settling = false; fit(); });
-    }
-    lastBox = box;
 
     /* ON A TOUCH DEVICE NOTHING IS SCALED AT ALL. WebKit hands the inner
        document the iframe's PAINTED width, so any scale here makes the
@@ -1679,7 +1677,13 @@
          right way up for how the reader is holding the device. The height was
          a share of the window before, which is why the thing in the picture
          was not the shape of an iPad. */
-      var PORTRAIT = 1194 / 834;
+      /* A PHONE IS A DIFFERENT SHAPE, and forcing the iPad's on it is why
+         the console looked zoomed in on an iPhone. At 1.43 the frame was 455
+         tall around a 318-wide screen: the content was at life size, but the
+         window onto it was half a phone, so all you saw was four big tiles.
+         A modern iPhone is 844 by 390, so 2.16, and at that ratio the same
+         screen is 687 tall and shows what a phone shows. */
+      var PORTRAIT = phone ? (844 / 390) : (1194 / 834);
       /* The bezel is part of the device, so it comes out of the column
          before the screen is measured: total = screen * (1 + 2 * 0.0469). */
       var screenW = Math.round(box / 1.0938);
@@ -1709,6 +1713,10 @@
                h: Math.round(screenW * (H >= W ? PORTRAIT : 1 / PORTRAIT)) };
     }
     var shown = Math.round(want.w * k);
+
+    var sig = [narrow, want.w, want.h, shown, k.toFixed(4), box].join('|');
+    if (sig === last) { return; }
+    last = sig;
 
     f.setAttribute('width', want.w);
     f.setAttribute('height', want.h);
@@ -1754,7 +1762,7 @@
   addEventListener('resize', fit);
   addEventListener('orientationchange', fit);
   f.addEventListener('load', fit);
-  if (window.ResizeObserver) { new ResizeObserver(fit).observe(frame); }
+  if (window.ResizeObserver) { new ResizeObserver(fit).observe(mac); }
   fit();
 
   /* THE CONSOLE GOES BACK TO ITS TOP WHEN NOBODY IS LOOKING. The frame is a
