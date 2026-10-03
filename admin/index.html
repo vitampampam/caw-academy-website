@@ -1691,7 +1691,14 @@
   #printReport{display:none}
   @media print{
     body > *{display:none !important}
-    #dashView{display:block !important; padding:0; margin:0; max-width:none}
+    /* #dashView IS THE SHELL, and the shell is sized to the viewport —
+       `min-height:100dvh`, with no media qualifier, so it applies on paper too.
+       Resetting html and body was not enough: the full-height box that claimed
+       the second sheet was this one. The uploaded PDF names it exactly — a
+       white rectangle 951pt tall on page 2, against an A4 content area of ~700.
+       On paper it is as tall as the report inside it. */
+    #dashView{display:block !important; padding:0; margin:0; max-width:none;
+      min-height:0 !important; height:auto !important; overflow:visible !important}
     #dashView > *{display:none !important}
     #printReport{display:block !important}
     @page{size:A4; margin:13mm 13mm 16mm}
@@ -2405,6 +2412,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=94" defer></script>
+<script src="admin.js?v=95" defer></script>
 </body>
 </html>
