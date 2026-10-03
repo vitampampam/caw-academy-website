@@ -1694,7 +1694,7 @@
     #dashView{display:block !important; padding:0; margin:0; max-width:none}
     #dashView > *{display:none !important}
     #printReport{display:block !important}
-    @page{size:A4; margin:13mm}
+    @page{size:A4; margin:13mm 13mm 16mm}
     /* A PAGE BOX AS TALL AS A SCREEN IS A SECOND SHEET. The console sizes its
        shell to the viewport — `body{min-height:100dvh}` — and that min-height
        does not stop applying when the medium is paper: a one-page report sat
@@ -1779,15 +1779,13 @@
 
     .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
       border-top:.5pt solid #E2E3E6; padding-top:7pt}
-    /* THE FOOTER IS PART OF THE REPORT, NOT A FIXED LAYER. `position:fixed` is
-       the nearest thing CSS has to a per-page footer, and in Chrome it behaves:
-       it repeats on every sheet. In Safari — which is what an iPad prints with
-       — it is laid out at the END of the document instead, and a one-page
-       report came out as two, the second holding nothing but this strip.
-       A footer that prints once at the end of a report is a small loss; a blank
-       second page on every export is not. It also needs no reserved band at the
-       bottom of each page, so the page margin comes back as content space. */
-    .prep-foot{margin-top:10pt; font-size:7pt; color:#6B7390;
+    /* THE FOOTER IS PINNED TO THE FOOT OF THE SHEET. `position:fixed` is the
+       nearest thing CSS has to a per-page footer, and the page box is what it
+       is measured against — which is why it looked misplaced while that box was
+       a screen tall rather than a page tall. With the box corrected it sits on
+       the bottom margin, where a report's footer belongs; the reserved 16mm
+       below the content is its band. */
+    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
       border-top:.5pt solid #E2E3E6; padding-top:3pt;
       display:flex; justify-content:space-between}
     /* Nothing trailing may push past the last line — a few points of margin
@@ -2407,6 +2405,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=93" defer></script>
+<script src="admin.js?v=94" defer></script>
 </body>
 </html>
