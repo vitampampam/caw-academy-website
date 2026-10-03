@@ -1271,7 +1271,7 @@ body{background:var(--bg)}
      screen. `fit-content` makes the bezel follow its contents, which is what a
      bezel is. */
   .console-mac .lid{--lid-cap:1; width:fit-content; max-width:100%; margin:0 auto;
-    border-radius:3.1cqw; padding:1.7cqw}
+    border-radius:2.4cqw; padding:1cqw}
   .console-frame{border-radius:1.6cqw}
 }
 
@@ -1281,8 +1281,11 @@ body{background:var(--bg)}
    are repeated rather than shared because a class and a media query cannot sit
    in one selector; if one set changes, change both. */
 .console-mac.pad .base{display:none}
+/* A SLIMMER BEZEL. At 1.7cqw the border was a slab of navy around the
+   screen - a real tablet's is a fraction of its width, and the screen is
+   what the section is for. */
 .console-mac.pad .lid{--lid-cap:1; width:fit-content; max-width:100%; margin:0 auto;
-  border-radius:3.1cqw; padding:1.7cqw}
+  border-radius:2.4cqw; padding:1cqw}
 .console-mac.pad .console-frame{border-radius:1.6cqw}
 
 /* A qualifier inside an answer, set a size down and in the muted ink: it is a

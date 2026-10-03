@@ -2382,9 +2382,22 @@
     stack.forEach(function(el){
       var top=el.getBoundingClientRect().top;
       var enter=clamp((vh-top)/(vh*0.4));
-      el.style.transform = enter<1
-        ? 'translate3d(0,'+((1-enter)*46).toFixed(1)+'px,0) scale('+(0.975+0.025*enter).toFixed(4)+')'
-        : '';
+      if(enter>=1){ el.style.transform=''; return; }
+      var lift='translate3d(0,'+((1-enter)*46).toFixed(1)+'px,0)';
+      /* THE CONSOLE SECTION LIFTS BUT NEVER SCALES, and this was the bug
+         that survived five fixes. WebKit gives an iframe's inner document
+         its FINAL PAINTED width - every ancestor transform multiplied in -
+         so while this animation held the section at 0.975 the embedded
+         console was laying itself out 2.5% narrower than the width it had
+         been given. On an iPad in portrait that crossed the console's own
+         761px line and it rendered its PHONE page inside a tablet frame; in
+         landscape it stayed wide enough but the document ended before its
+         box did, which is the white strip down the right and along the
+         bottom. One ancestor, both symptoms. A translate costs nothing
+         here: it is the scale that changes a width. */
+      el.style.transform = el.id==='console'
+        ? lift
+        : lift+' scale('+(0.975+0.025*enter).toFixed(4)+')';
     });
   }
   function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(frame); } }

@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=92">
+<link rel="stylesheet" href="style.css?v=93">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1471,7 +1471,7 @@
 </script>
 <script src="caw-content.js?v=26" defer></script>
 <script src="caw-demo-content.js?v=24" defer></script>
-<script src="caw-interactive.js?v=29" defer></script>
+<script src="caw-interactive.js?v=30" defer></script>
 <script>
   /* ---- Features carousel -------------------------------------------------
      Arrows only, matching the gallery carousel below. A click steps by a PAGE
@@ -1650,10 +1650,24 @@
     }
     lastBox = box;
 
-    /* Fit the column, and never enlarge past life size. Each viewport above
-       is a real device, so at 1:1 the picture is that device; blown up it is
-       the oversized console we already had once. */
-    var k = Math.min(box / want.w, 1);
+    /* ON A TOUCH DEVICE NOTHING IS SCALED AT ALL. WebKit hands the inner
+       document the iframe's PAINTED width, so any scale here makes the
+       console lay itself out at a width other than the one it was given -
+       which is the whole history of this section. Unscaled, painted and
+       styled are the same number in every engine, the console fills the
+       frame exactly, and the layout it picks is the one the frame's own
+       width earns: measured, 320 gives the mobile page, 770 and 1018 give
+       the sidebar.
+
+       A desktop keeps its scaled 1280 picture. The quirk is WebKit on iOS;
+       the MacBook shot renders the desktop console correctly, so there is
+       nothing there to fix and the frame would otherwise be a tablet
+       layout in a laptop. */
+    var k = narrow ? 1 : Math.min(box / want.w, 1);
+    if (narrow) {
+      want = { w: box,
+               h: Math.max(520, Math.min(Math.round(H * 0.82), 1000)) };
+    }
     var shown = Math.round(want.w * k);
 
     f.setAttribute('width', want.w);
