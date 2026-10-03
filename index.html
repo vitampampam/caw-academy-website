@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=85">
+<link rel="stylesheet" href="style.css?v=86">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1634,13 +1634,24 @@
       requestAnimationFrame(function () { settling = false; fit(); });
     }
     lastBox = box;
-    /* The device's own viewport. Clamped: below 820 the console is in its phone
-       layout anyway and a narrower render only makes the type smaller, and
-       above 1440 a desktop visitor would be scaling a very wide console into a
-       laptop lid and reading half-size text. */
-    var vw = Math.min(Math.max(window.innerWidth || 1180, 820), 1440);
+    /* THE DEVICE'S OWN VIEWPORT, WITH NO FLOOR — and the floor is what broke
+       the phone (3 Oct). Raising a 390px iPhone to 820 asks the console for
+       its TABLET layout and then squeezes the sidebar into 350px of glass:
+       on a phone the right answer is the phone layout, which is what the
+       reader would get if they opened the console itself.
+
+       Keeping vw at the real width also makes the two scaling paths agree.
+       k is then close to 1, so whether the engine honours `zoom` (layout at
+       vw) or falls back to a transform (layout at vw*k), both land on the
+       same breakpoint. The old floor is what made those two disagree by a
+       whole layout, and it is why the phone looked right only while the
+       transform bug was cancelling the floor out.
+
+       The ceiling stays: above 1440 a desktop visitor would be scaling a very
+       wide console into a laptop lid and reading half-size text. */
+    var vw = Math.min(Math.max(window.innerWidth || 1180, 320), 1440);
     var vh = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
-    vh = Math.min(Math.max(vh, 560), 1180);
+    vh = Math.min(Math.max(vh, 480), 1400);
     var k = Math.min(box / vw, maxShownH() / vh);
     /* ZOOM, NOT TRANSFORM — and this is the whole iPad bug (3 Oct).
        A transform scales the PAINTED result and leaves the element box at its
