@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=94">
+<link rel="stylesheet" href="style.css?v=95">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1630,6 +1630,15 @@
        console. `pad` is the plain tablet bezel - an even border, no deck. */
     mac.classList.toggle('pad', narrow);
 
+    /* FULL-BLEED ON A TOUCH DEVICE, and the arithmetic forces it. The screen
+       must be at least 761px wide or the console draws its phone page, and
+       with a correctly proportioned bezel the whole device is 1.094 times its
+       screen - so on an 834px iPad the device needs all 834 of them. Inside
+       the section's usual 24px gutters the screen came to 718 and the sidebar
+       vanished. Edge to edge it is 762, and the sidebar is there. */
+    var sect = mac.closest('.stk');
+    if (sect) { sect.classList.toggle('bleed', narrow); }
+
     /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this resizes
        and the bezel hugs it, so reading the frame's own width feeds the
        output back into the input. clientWidth, not a rect: the stacked cards
@@ -1665,8 +1674,23 @@
        layout in a laptop. */
     var k = narrow ? 1 : Math.min(box / want.w, 1);
     if (narrow) {
-      want = { w: box,
-               h: Math.max(520, Math.min(Math.round(H * 0.82), 1000)) };
+      /* THE SCREEN KEEPS THE REAL iPAD'S SHAPE. An 11-inch iPad is 834 x 1194
+         CSS points, so the frame's height is its width times that ratio, the
+         right way up for how the reader is holding the device. The height was
+         a share of the window before, which is why the thing in the picture
+         was not the shape of an iPad. */
+      var PORTRAIT = 1194 / 834;
+      /* The bezel is part of the device, so it comes out of the column
+         before the screen is measured: total = screen * (1 + 2 * 0.0469). */
+      var screenW = Math.round(box / 1.0938);
+      /* AND THE SCREEN DOES NOT GO BELOW THE CONSOLE'S OWN LINE. At 761 it
+         switches to the phone page, and a tablet drawn around a phone layout
+         is the thing this section kept getting wrong. Where a few pixels
+         decide it, the bezel gives them up - a slightly thinner border is a
+         smaller error than the wrong layout. */
+      if (!phone && screenW < 761 && box >= 761 + 12) { screenW = 761; }
+      want = { w: screenW,
+               h: Math.round(screenW * (H >= W ? PORTRAIT : 1 / PORTRAIT)) };
     }
     var shown = Math.round(want.w * k);
 
@@ -1680,17 +1704,24 @@
     frame.style.width = shown + 'px';
     frame.style.height = Math.round(want.h * k) + 'px';
 
-    /* THE BEZEL IN PIXELS, FROM THE SCREEN IT SURROUNDS. In cqw it was a
-       share of the CONTAINER, while the lid is only as wide as the frame
-       inside it - so the border kept its absolute thickness while the screen
-       changed size, and the proportions drifted with every layout. A real
-       tablet's border is about 1.8% of its width whatever size it is, and
-       its corner is a little over 5%, measured outside. */
+    /* THE BEZEL IN PIXELS, FROM THE SCREEN IT SURROUNDS, AT THIS SITE'S OWN
+       MEASURED iPAD PROPORTIONS. `.gpad` - the frame the guide gallery and
+       the hero already use - is a 192px screen in a 210px body: bezel 9,
+       screen corner 13. So the bezel is 4.69% of the screen's width and the
+       corner 6.77%, and the body's corner is the two added together.
+       In cqw these were a share of the CONTAINER, while the lid is only as
+       wide as the frame inside it, so the proportions drifted with the
+       layout instead of holding. */
     if (narrow) {
-      var bez = Math.max(8, Math.round(shown * 0.018));
+      /* Whatever is left of the column after the screen becomes the border,
+         so the device still fits exactly; at the ideal proportion that is
+         4.69% of the screen and it only thins where the floor above bit. */
+      var bez = Math.max(6, Math.min(Math.round(shown * 0.0469),
+                                     Math.floor((box - shown) / 2)));
+      var inner = Math.round(shown * 0.0677);
       lid.style.padding = bez + 'px';
-      lid.style.borderRadius = Math.round(shown * 0.055) + bez + 'px';
-      frame.style.borderRadius = Math.round(shown * 0.055) + 'px';
+      lid.style.borderRadius = (inner + bez) + 'px';
+      frame.style.borderRadius = inner + 'px';
     } else {
       lid.style.padding = '';
       lid.style.borderRadius = '';

@@ -1251,6 +1251,14 @@ body{background:var(--bg)}
    bezel reads as a broken embed. In the console's own grey it reads as the
    page continuing. */
 .console-frame{background:#E7E9ED}
+/* EDGE TO EDGE ON A TOUCH DEVICE. The class is set by the console script,
+   which is also what computes the width that needs it - see the comment on
+   `bleed` there. The heading above keeps the section's normal gutters; it is
+   only the device that runs to the edges. */
+#console.bleed .secw{padding:0}
+#console.bleed .section-head{padding:0 24px}
+#console.bleed .sec-cta{padding:0 24px}
+#console.bleed .console-mac{max-width:none}
 .console-frame iframe{display:block; border:0; background:#E7E9ED;
   width:1180px; height:820px}
 /* BELOW THE DESKTOP BREAKPOINT THE CONSOLE SHOWS ITS OWN TABLET LAYOUT.
