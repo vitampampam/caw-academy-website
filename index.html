@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=88">
+<link rel="stylesheet" href="style.css?v=90">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -533,11 +533,10 @@
     <div class="console-demo reveal">
       <!-- The laptop from the hero lineup, at full size: the console is a
            desktop tool, and the frame says so before a word is read. -->
-      <!-- An iPad bezel on every device, because what is inside it is always
-           the iPad console. The MacBook body was right while the embed showed
-           a desktop layout; drawing one around a tablet screen is a picture of
-           two different machines. -->
-      <div class="macbook console-mac pad">
+      <!-- The frame is chosen in script, because it has to match what is
+           inside it: a MacBook around the desktop console, a tablet bezel
+           around the mobile one. See the console script at the foot. -->
+      <div class="macbook console-mac">
         <div class="lid"><div class="console-frame">
           <!-- THE SCALE LIVES ON THIS WRAPPER, NEVER ON THE IFRAME. An iframe
                that carries its own transform or zoom has an ambiguous used
@@ -547,8 +546,13 @@
                iframe inside a scaled div has exactly one width in every
                engine - the one in its own style attribute. -->
           <div class="console-scale">
+            <!-- The console SCROLLS inside the frame. Measured: at 430px the
+                 mobile console is 1857px tall in a 932px window, so with
+                 scrolling off a reader on a phone sees the top of the
+                 Overview and can reach nothing else - on a section whose
+                 heading invites them to drive it. -->
             <iframe src="admin/demo.html" title="The CAW Academy admin console, running on sample data"
-                    loading="lazy" scrolling="no"></iframe>
+                    loading="lazy"></iframe>
           </div>
         </div></div>
         <div class="base"></div>
@@ -1560,78 +1564,106 @@
 </script>
 
 <script>
-/* THE CONSOLE IS SHOWN AT ONE FIXED SIZE, THE SAME ON EVERY DEVICE.
+/* TWO FIXED PICTURES, AND THE READER'S DEVICE PICKS WHICH.
 
-   Every earlier version worked the console's width out from the reader's own
-   viewport, and every one of them got a device wrong, because the result then
-   depends on three things at once: the reader's width, the scale, and which
-   of those two the engine hands to the iframe's inner document. WebKit and
-   Blink do not agree on the third, so a fix measured in one was a regression
-   in the other.
+   Every version that worked the console's width out FROM the reader's
+   viewport got some device wrong, because the result then depended on the
+   reader's width, the scale, and which of those two the engine hands to the
+   iframe's inner document - and WebKit and Blink disagree about the last one.
+   So each fix measured in one engine was a regression in the other. Both
+   sizes below are constants, which is what ends that.
 
-   There is nothing to disagree about now. The embed is a PICTURE OF AN iPAD:
-   the console is always given 834 x 1194, the iPad's own portrait viewport,
-   which is measured to produce the 200px sidebar. The only thing that varies
-   is how large that picture is drawn, and that is a plain multiplication
-   against the column it sits in - 70% of it, which on an iPad works out as
-   70% scale, since the column there IS roughly the device.
+   DESKTOP: the desktop console, 1280 x 820, in the MacBook. This is the one
+   that was right all along and it is restored unchanged.
 
-   The scale is on the WRAPPER, never on the iframe. An iframe carrying its
+   PHONE AND TABLET: the console's MOBILE layout, 430 x 932, in a tablet
+   bezel. A reader on a touch device is being shown what the console does on
+   a touch device.
+
+   The scale never goes above 1: a mobile layout blown up past its own size is
+   the oversized console we already had once. On an iPad the picture is
+   therefore 430 wide inside a wider column, which is correct - it is a small
+   screen, drawn at its real size.
+
+   THE SCALE IS ON THE WRAPPER, NEVER ON THE IFRAME. An iframe carrying its
    own transform has two defensible widths, styled and painted, and that
-   ambiguity is what showed a phone console inside a tablet.
-
-   A phone gets the full column rather than 70%: at 70% of 350px the picture
-   is too small to read anything in, and the frame has nothing to spare. */
+   ambiguity is exactly what showed a phone console inside a tablet frame. */
 (function () {
   var frame = document.querySelector('.console-frame');
   if (!frame) { return; }
   var f = frame.querySelector('iframe');
   var scaler = f.parentElement;
+  var mac = frame.closest('.console-mac');
+  if (!mac) { return; }
 
-  /* The iPad's own portrait viewport. Fixed, deliberately: see above. */
-  var VW = 834, VH = 1194;
-  /* Below this the column cannot spare 30% to margins. */
-  var FULL_WIDTH_BELOW = 560;
+  var DESKTOP = { w: 1280, h: 820 };
+  var MOBILE  = { w: 430,  h: 932 };
+
+  function isTouch() {
+    try {
+      return !!(window.matchMedia &&
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+    } catch (e) { return false; }
+  }
 
   var lastBox = 0, settling = false;
 
   function fit() {
-    var mac = frame.closest('.console-mac');
     var lid = frame.parentElement;
-    if (!mac || !lid) { return; }
+    var narrow = isTouch() || (window.innerWidth || 1180) < 1025;
+    var want = narrow ? MOBILE : DESKTOP;
 
-    /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this resizes,
+    /* The bezel follows the content: a MacBook body only around the desktop
+       console. `pad` is the plain tablet bezel - an even border, no deck. */
+    mac.classList.toggle('pad', narrow);
+
+    /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this resizes
        and the bezel hugs it, so reading the frame's own width feeds the
-       output back into the input and each pass comes out smaller than the
-       last. clientWidth, not a rect: the stacked cards carry a transform, and
-       a rect is the laid-out width already multiplied by it. */
-    var pad = (parseFloat(getComputedStyle(lid).paddingLeft) || 0)
-            + (parseFloat(getComputedStyle(lid).paddingRight) || 0);
-    var box = Math.max(0, Math.round(mac.clientWidth - pad));
+       output back into the input. clientWidth, not a rect: the stacked cards
+       carry a transform, and a rect already has it multiplied in. */
+    var lidCS = getComputedStyle(lid);
+    var capPct = parseFloat(lidCS.getPropertyValue('--lid-cap'));
+    if (!(capPct > 0 && capPct <= 1)) { capPct = 1; }
+    var pad = (parseFloat(lidCS.paddingLeft) || 0) + (parseFloat(lidCS.paddingRight) || 0);
+    var box = Math.max(0, Math.round(mac.clientWidth * capPct - pad));
     if (!box) { return; }
 
     /* The lid's padding is a container-query unit, so the first measurement
-       can be taken before it resolves. Look again on the next frame if the
-       box moved; `settling` stops the two chasing each other. */
+       can be taken before it resolves. Look again next frame if the box
+       moved; `settling` stops the two chasing each other. */
     if (box !== lastBox && !settling) {
       settling = true;
       requestAnimationFrame(function () { settling = false; fit(); });
     }
     lastBox = box;
 
-    var share = box < FULL_WIDTH_BELOW ? 1 : 0.7;
-    var shown = Math.round(box * share);
-    var k = shown / VW;
+    /* How much of the column the picture takes, and how far the mobile
+       layout may be enlarged.
 
-    f.setAttribute('width', VW);
-    f.setAttribute('height', VH);
-    f.style.width = VW + 'px';
-    f.style.height = VH + 'px';
-    scaler.style.width = VW + 'px';
-    scaler.style.height = VH + 'px';
+       On a PHONE the column is barely wider than the device, so it takes all
+       of it and is never blown up past life size - at 1:1 it reads exactly as
+       the console does in the hand.
+
+       On a TABLET a 430px screen alone in a 760px column reads as a mistake
+       rather than as a small device, so the picture takes 70% of the column
+       and the layout is enlarged to suit, within a quarter of life size. Past
+       that it stops looking like a screen and starts looking like a mistake
+       of a different kind - the oversized console we already had once. */
+    var phone = box < 560;
+    var share = (!narrow || phone) ? 1 : 0.7;
+    var maxK  = (!narrow || phone) ? 1 : 1.25;
+    var k = Math.min(box * share / want.w, maxK);
+    var shown = Math.round(want.w * k);
+
+    f.setAttribute('width', want.w);
+    f.setAttribute('height', want.h);
+    f.style.width = want.w + 'px';
+    f.style.height = want.h + 'px';
+    scaler.style.width = want.w + 'px';
+    scaler.style.height = want.h + 'px';
     scaler.style.transform = 'scale(' + k + ')';
     frame.style.width = shown + 'px';
-    frame.style.height = Math.round(VH * k) + 'px';
+    frame.style.height = Math.round(want.h * k) + 'px';
   }
 
   addEventListener('resize', fit);

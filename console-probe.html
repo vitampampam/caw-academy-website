@@ -56,25 +56,33 @@
   var lid    = frame.parentElement;
   var rows   = document.getElementById('out');
 
-  var VW = 834, VH = 1194, FULL_WIDTH_BELOW = 560;
+  var DESKTOP = { w: 1280, h: 820 }, MOBILE = { w: 430, h: 932 };
 
   function fit() {
+    var narrow = (function () {
+      try { return !!(window.matchMedia &&
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches); }
+      catch (e) { return false; }
+    })() || (window.innerWidth || 1180) < 1025;
+    var want = narrow ? MOBILE : DESKTOP;
+
     var pad = (parseFloat(getComputedStyle(lid).paddingLeft) || 0) * 2;
     var box = Math.max(0, Math.round(lid.parentElement.clientWidth - pad));
-    var share = box < FULL_WIDTH_BELOW ? 1 : 0.7;
-    var shown = Math.round(box * share);
-    var k = shown / VW;
+    var phone = box < 560;
+    var share = (!narrow || phone) ? 1 : 0.7;
+    var maxK  = (!narrow || phone) ? 1 : 1.25;
+    var k = Math.min(box * share / want.w, maxK);
 
-    f.setAttribute('width', VW);
-    f.setAttribute('height', VH);
-    f.style.width  = VW + 'px';
-    f.style.height = VH + 'px';
-    scaler.style.width  = VW + 'px';
-    scaler.style.height = VH + 'px';
+    f.setAttribute('width', want.w);
+    f.setAttribute('height', want.h);
+    f.style.width  = want.w + 'px';
+    f.style.height = want.h + 'px';
+    scaler.style.width  = want.w + 'px';
+    scaler.style.height = want.h + 'px';
     scaler.style.transform = 'scale(' + k + ')';
-    frame.style.width  = shown + 'px';
-    frame.style.height = Math.round(VH * k) + 'px';
-    return { box: box, vw: VW, vh: VH, k: k };
+    frame.style.width  = Math.round(want.w * k) + 'px';
+    frame.style.height = Math.round(want.h * k) + 'px';
+    return { box: box, vw: want.w, vh: want.h, k: k, narrow: narrow };
   }
 
   function report() {
@@ -86,7 +94,7 @@
       rail = r ? Math.round(r.getBoundingClientRect().width) : 0;
     } catch (e) { err = String(e.message || e); }
 
-    var expectRail = m.vw >= 761;
+    var expectRail = m.vw >= 761;   // the console's own sidebar breakpoint
     var ok = inner === m.vw;
     var html = '';
     function row(label, value, cls) {
