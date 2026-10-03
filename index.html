@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=93">
+<link rel="stylesheet" href="style.css?v=94">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1679,6 +1679,23 @@
     scaler.style.transform = 'scale(' + k + ')';
     frame.style.width = shown + 'px';
     frame.style.height = Math.round(want.h * k) + 'px';
+
+    /* THE BEZEL IN PIXELS, FROM THE SCREEN IT SURROUNDS. In cqw it was a
+       share of the CONTAINER, while the lid is only as wide as the frame
+       inside it - so the border kept its absolute thickness while the screen
+       changed size, and the proportions drifted with every layout. A real
+       tablet's border is about 1.8% of its width whatever size it is, and
+       its corner is a little over 5%, measured outside. */
+    if (narrow) {
+      var bez = Math.max(8, Math.round(shown * 0.018));
+      lid.style.padding = bez + 'px';
+      lid.style.borderRadius = Math.round(shown * 0.055) + bez + 'px';
+      frame.style.borderRadius = Math.round(shown * 0.055) + 'px';
+    } else {
+      lid.style.padding = '';
+      lid.style.borderRadius = '';
+      frame.style.borderRadius = '';
+    }
   }
 
   addEventListener('resize', fit);

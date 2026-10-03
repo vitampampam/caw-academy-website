@@ -1240,12 +1240,18 @@ body{background:var(--bg)}
   height:2cqw; border-radius:0 0 1.5cqw 1.5cqw;
   box-shadow:0 2cqw 3.4cqw rgba(16,22,68,.22)}
 .console-mac .base::after{width:13cqw; height:1cqw; border-radius:0 0 1.2cqw 1.2cqw}
-.console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff; margin:0 auto}
+.console-frame{overflow:hidden; border-radius:0.87cqw; margin:0 auto}
 /* The scaling layer. The iframe inside it is never transformed and never
    zoomed, so its used width is the one number in its style attribute - which
    is what the console lays itself out against, in every engine. */
 .console-scale{transform-origin:top left; will-change:transform}
-.console-frame iframe{display:block; border:0; background:#fff;
+/* THE FRAME'S OWN BACKGROUND IS THE CONSOLE'S CANVAS, not white. If the
+   embedded document ever comes up a few pixels short of its box - and on iOS
+   it has, for reasons that took a day to find - a white band inside a navy
+   bezel reads as a broken embed. In the console's own grey it reads as the
+   page continuing. */
+.console-frame{background:#E7E9ED}
+.console-frame iframe{display:block; border:0; background:#E7E9ED;
   width:1180px; height:820px}
 /* BELOW THE DESKTOP BREAKPOINT THE CONSOLE SHOWS ITS OWN TABLET LAYOUT.
    Forcing the 1180px desktop console into a narrow column and scaling it down
