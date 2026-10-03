@@ -56,24 +56,25 @@
   var lid    = frame.parentElement;
   var rows   = document.getElementById('out');
 
+  var VW = 834, VH = 1194, FULL_WIDTH_BELOW = 560;
+
   function fit() {
     var pad = (parseFloat(getComputedStyle(lid).paddingLeft) || 0) * 2;
     var box = Math.max(0, Math.round(lid.parentElement.clientWidth - pad));
-    var vw  = Math.min(Math.max(window.innerWidth || 1180, 320), 1440);
-    var vh  = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
-    var cap = Math.max(1000, Math.round((window.innerHeight || 820) * 1.02));
-    var k   = Math.min(box / vw, cap / vh);
+    var share = box < FULL_WIDTH_BELOW ? 1 : 0.7;
+    var shown = Math.round(box * share);
+    var k = shown / VW;
 
-    f.setAttribute('width', vw);
-    f.setAttribute('height', vh);
-    f.style.width  = vw + 'px';
-    f.style.height = vh + 'px';
-    scaler.style.width  = vw + 'px';
-    scaler.style.height = vh + 'px';
+    f.setAttribute('width', VW);
+    f.setAttribute('height', VH);
+    f.style.width  = VW + 'px';
+    f.style.height = VH + 'px';
+    scaler.style.width  = VW + 'px';
+    scaler.style.height = VH + 'px';
     scaler.style.transform = 'scale(' + k + ')';
-    frame.style.width  = Math.round(vw * k) + 'px';
-    frame.style.height = Math.round(vh * k) + 'px';
-    return { box: box, vw: vw, vh: vh, k: k };
+    frame.style.width  = shown + 'px';
+    frame.style.height = Math.round(VH * k) + 'px';
+    return { box: box, vw: VW, vh: VH, k: k };
   }
 
   function report() {
