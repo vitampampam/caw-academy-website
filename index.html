@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=100">
+<link rel="stylesheet" href="style.css?v=101">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1610,10 +1610,34 @@
     } catch (e) { return false; }
   }
 
+  /* THE SECTION IS DESKTOP-ONLY (SME, 3 Oct). A console built for a
+     training manager at a desk does not survive being shrunk into a phone,
+     and every version that tried - the tablet layout, the mobile page, the
+     scaled picture - was a worse answer than not showing it. On a touch
+     device or a narrow window the section is hidden and the iframe is never
+     fetched; the organisations section above still makes the case, and the
+     trial button is on every section. */
+  function desktopOnly() {
+    var narrow = isTouch() || (window.innerWidth || 1180) < 1025;
+    var sect = mac.closest('.stk');
+    if (sect) { sect.hidden = narrow; }
+    if (narrow) {
+      /* Not merely hidden: an iframe in a hidden subtree still loads. */
+      if (f.getAttribute('src')) {
+        f.setAttribute('data-src', f.getAttribute('src'));
+        f.removeAttribute('src');
+      }
+    } else if (!f.getAttribute('src') && f.getAttribute('data-src')) {
+      f.setAttribute('src', f.getAttribute('data-src'));
+    }
+    return narrow;
+  }
+
   function fit() {
+    if (desktopOnly()) { return; }
     var lid = frame.parentElement;
     var W = window.innerWidth || 1180, H = window.innerHeight || 820;
-    var narrow = isTouch() || W < 1025;
+    var narrow = false;
     /* A phone is the SHORT side, not the width: an iPhone held sideways is
        844 wide and still a phone. */
     var phone = Math.min(W, H) < 600;

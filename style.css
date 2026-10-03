@@ -1250,6 +1250,14 @@ body{background:var(--bg)}
    it has, for reasons that took a day to find - a white band inside a navy
    bezel reads as a broken embed. In the console's own grey it reads as the
    page continuing. */
+/* THE CONSOLE SECTION IS DESKTOP-ONLY (SME, 3 Oct). In CSS as well as in
+   script, so it never flashes in before the script decides. A console built
+   for a training manager at a desk does not survive being shrunk into a
+   phone; the organisations section still makes the case there, and the
+   trial button is on every section. */
+@media (max-width:1024px){ #console{display:none} }
+@media (hover:none) and (pointer:coarse){ #console{display:none} }
+
 .console-frame{background:#E7E9ED}
 /* EDGE TO EDGE ON A TOUCH DEVICE. The class is set by the console script,
    which is also what computes the width that needs it - see the comment on
