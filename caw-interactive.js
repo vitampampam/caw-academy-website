@@ -532,6 +532,9 @@
     var h = '<p class="cawx-lead">' + esc(b.intro) + '</p>';
     h += '<h3 class="cawx-h">How the Operating Framework course helps</h3><p class="cawx-p">' + esc(b.aof) + '</p>';
     if (b.extra) { h += '<h3 class="cawx-h">' + esc(b.extra.heading) + '</h3>' + bulletList(b.extra.items); }
+    /* A second optional block, for a benefit that carries two distinct
+       answers — verification, and what can actually be handed over. */
+    if (b.extra2) { h += '<h3 class="cawx-h">' + esc(b.extra2.heading) + '</h3>' + bulletList(b.extra2.items); }
     h += '<h3 class="cawx-h">' + esc(st.heading) + '</h3><p class="cawx-p">' + esc(st.lead) + '</p><ol class="cawx-steps">';
     for (i = 0; i < st.items.length; i++) { h += '<li>' + st.items[i] + '</li>'; }
     h += '</ol><p class="cawx-p">' + esc(st.close) + '</p>';
@@ -1658,7 +1661,7 @@
         var card = qs('[data-sync]', host);
         if (!card) { return; }
         var rd = qs('.rd', card), bar = qs('.bar i', card);
-        if (rd) { rd.textContent = n + '/' + total + ' done'; }
+        if (rd) { rd.textContent = n + '/' + total; }
         if (bar) { bar.style.width = Math.round(n / total * 100) + '%'; }
         var dev = host.closest ? host.closest('.dev') : null;
         if (!dev) { return; }
@@ -1725,14 +1728,22 @@
          the phone and tablet frames: the anchor (Part-M) is the fifth card and
          sits below the fold there, so animating it moved a bar nobody saw. */
       var mark = i === 1 ? ' data-sync="1"' : '';
+      /* THE CARD AS THE APP DRAWS IT (re-measured against the build of
+         3 Oct 2026). The count moved UNDER the icon tile and lost the word
+         "done" — the slash already says it is a proportion, and "done" was the
+         widest thing on the line for no meaning — and the two pills sit
+         together under the title: lessons, then the reading time. */
+      var hrs = c.hours ? (Math.floor(c.hours) + 'H ' +
+                Math.round((c.hours - Math.floor(c.hours)) * 60) + 'M') : '';
       cards += (open
           ? '<button type="button" class="cawx-dcard"' + mark + ' data-caw-demo="lesson">'
           : '<div class="cawx-dcard' + (live ? ' dim' : '') + '"' + mark + '>') +
-        '<div class="top"><span class="ic">' + ICON.lesson + '</span>' +
-        '<span class="nm"><b>' + esc(c.long) + '</b><small>' + esc(c.blurb) + '</small></span>' +
+        '<div class="top"><span class="icw"><span class="ic">' + ICON.lesson + '</span>' +
+          '<span class="rd">' + done + '/' + c.lessons + '</span></span>' +
+        '<span class="nm"><b>' + esc(c.long) + '</b><small>' + esc(c.blurb) + '</small>' +
+          '<span class="meta"><span class="pill">' + c.lessons + ' LESSONS</span>' +
+          (hrs ? '<span class="pill">' + hrs + '</span>' : '') + '</span></span>' +
         (pc === 100 ? '<span class="seal">' + ICON.doneTick + '</span>' : '') + '</div>' +
-        '<div class="meta"><span class="pill">' + c.lessons + ' LESSONS</span>' +
-          '<span class="rd">' + done + '/' + c.lessons + ' done</span></div>' +
         '<div class="bar"><i style="width:' + pc + '%"></i></div>' +
         (open ? '</button>' : '</div>');
     });
@@ -1761,10 +1772,18 @@
       (live && anchor.id === cat.openable
         ? '<button type="button" class="cawx-dcont" data-caw-demo="lesson">'
         : '<div class="cawx-dcont' + (live ? ' dim' : '') + '">') +
-        '<span class="k">CONTINUE</span>' +
-        '<b>' + esc(cat.key === 0 ? 'Responsibilities' : anchor.name) + '</b>' +
-        '<span class="r"><span>' + esc(anchor.name) + (cat.key === 0 ? ' · M.A.201' : '') +
-          '</span><span class="res">Resume' + ICON.chevron + '</span></span>' +
+        /* A WHITE CARD WITH AN INDIGO PILL, not an orange slab. The app changed
+           this in Sep 2026 and the reason is on the screen: the dashboard
+           already leads with a large coloured banner, and a second full-bleed
+           block of colour under it left two things shouting while the
+           catalogue below read as an afterthought. */
+        '<span class="k">CONTINUE LEARNING</span>' +
+        '<span class="r"><span class="tx">' +
+          '<b>' + esc(cat.key === 0 ? 'Responsibilities' : anchor.name) + '</b>' +
+          '<span class="sub">' + esc(anchor.name) +
+            (cat.key === 0 ? ' · M.A.201' : '') + ' · Lesson 1 of ' + anchor.lessons + '</span>' +
+          '<span class="pr"><i><em style="width:0%"></em></i><span class="pct">0%</span></span>' +
+        '</span><span class="go">' + ICON.chevron + 'Continue</span></span>' +
         (live && anchor.id === cat.openable ? '</button>' : '</div>') +
       '<div class="cawx-drow dim"><span class="ic red">' + ICON.due + '</span>' +
         '<span class="tx"><b>Courses due</b><small>1 due within 2 weeks</small></span>' +

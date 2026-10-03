@@ -568,6 +568,29 @@
           'Anyone can check a number and holder name on the verification page. The check returns valid or invalid, the course and the date.',
           'Scanning the QR code on a certificate shows the full details, because the person scanning is already holding the document.'
         ]
+      },
+      extra2: {
+        heading: 'What you can hand over',
+        items: [
+          'The learner exports their own progress report from the app, and their highlights and notes as a separate file.',
+          'The administrator exports the team\u2019s record from the console \u2014 everyone, one person, or a report filtered to the courses, documents and dates in question \u2014 as PDF or CSV.',
+          'The certificate register exports the same way, with every number, holder, course and date on it.'
+        ]
+      }
+    },
+    {
+      id: 'documents',
+      card: 'Your own manuals, read and logged',
+      title: 'Your own manuals, read and logged',
+      intro: 'A revised exposition or procedure is the same kind of obligation as a course, and it is usually the harder one to evidence. The console issues a company document at its current revision, to named people, with the date they must be familiar by — and records when each of them read it.',
+      aof: 'The Operating Framework course sets out why an organisation holds its own procedures at all, and where they sit against the regulation they implement. Somebody who has read it understands what the document in front of them is for before they are asked to be familiar with it.',
+      extra: {
+        heading: 'How a revision is handled',
+        items: [
+          'The requirement is tied to the revision in force when it was issued, so a later revision does not quietly satisfy an older obligation.',
+          'Overdue readings are listed beside overdue courses, so one screen answers who still owes you something.',
+          'The record exports with the rest, which is what an auditor asks to see.'
+        ]
       }
     },
     {

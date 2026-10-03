@@ -1032,7 +1032,27 @@ body{background:var(--bg)}
   .hero-stack{display:grid; grid-template-columns:1.18fr 1fr; align-items:stretch; gap:0}
 
   .stk.banner-card{margin:0; display:block; background:var(--card);
-    border-radius:var(--stack-radius) 0 0 var(--stack-radius)}
+    border-radius:var(--stack-radius) 0 0 var(--stack-radius); position:relative}
+  /* THE PHOTOGRAPH ENDS IN THE CARD, NOT ON A SEAM. Side by side with the copy
+     card the picture stopped dead against white, a hard vertical edge down the
+     middle of the hero.
+
+     IT IS A MASK, NOT A WHITE VEIL. Painting a white gradient OVER the photo
+     lightens it — the first attempt read as a bright wash across the tail.
+     Masking removes the photo instead and lets the card's own white show
+     through, so nothing is brightened: the picture simply stops being there.
+
+     The ramp is long (38%) and shallow at the start — flat black to 44%, then
+     an eased curve — because a short fade reads as a band and a linear one
+     reads as a ruler. Desktop only: below 1025 the photo is a full-width banner
+     ABOVE the copy, where there is no vertical seam to hide. */
+  .banner-card picture{
+    -webkit-mask-image:linear-gradient(90deg, #000 0%, #000 62%,
+      rgba(0,0,0,.92) 72%, rgba(0,0,0,.72) 81%, rgba(0,0,0,.42) 89%,
+      rgba(0,0,0,.18) 95%, rgba(0,0,0,0) 100%);
+            mask-image:linear-gradient(90deg, #000 0%, #000 62%,
+      rgba(0,0,0,.92) 72%, rgba(0,0,0,.72) 81%, rgba(0,0,0,.42) 89%,
+      rgba(0,0,0,.18) 95%, rgba(0,0,0,0) 100%)}
   .banner-card picture{width:100%; height:100%}
   /* The photo FILLS the card. At its natural ratio it came out 432px against a
      525px column, leaving a band of card beneath it that CANNOT be padded away:
@@ -1150,3 +1170,61 @@ body{background:var(--bg)}
   .hero h1 em{font-weight:700}
   .hero .lede{line-height:1.58; text-wrap:pretty}
 }
+
+
+/* ---------- the admin console demo ---------------------------------------
+   The console is built for a 1180px window, so it is rendered at that width
+   and SCALED to whatever the column gives — a responsive console squeezed
+   into 600px would be showing the tablet layout, which is not the thing being
+   advertised. The frame keeps the laptop's dark bezel from the hero lineup so
+   the two read as the same family. */
+.console-demo{display:flex; flex-direction:column; align-items:center; gap:18px}
+/* THE HERO'S LAPTOP, TO SCALE. .macbook is drawn for 308px — a 9px bezel, a
+   15px lid radius, a 14px base — and simply widening it to 1040 kept those
+   figures, so the bezel came out three times too thin for the body and the
+   base a sliver. The frame is not a set of pixel values, it is a set of
+   PROPORTIONS, so each one is re-expressed as a share of the frame's own
+   width (9/308 = 2.9%, 15/308 = 4.9%, and so on) in container units. At 308px
+   these resolve to the hero's exact numbers. */
+.console-mac{container-type:inline-size; width:100%; max-width:1040px}
+/* THE BEZEL IS NOT THE BODY, AND THE TWO DO NOT SCALE TOGETHER. Taking the
+   hero's 9px-on-308 bezel as a proportion gave 30px at this width, which reads
+   as a slab: a real laptop's bezel is about 1.5% of the display, and it stays
+   about 1.5% whatever size the machine is. So the BEZEL follows the real
+   article (1.5%) while the BODY below the screen — the wedge, its corners and
+   the notch — keeps the hero's proportions, because that part genuinely does
+   grow with the machine. */
+/* NOTHING STICKS OUT OF THE CARD. The hero's base is `width:120%` with a -10%
+   margin, so the deck overhangs the lid on both sides — right on a 308px
+   laptop floating in a hero, wrong here, where it broke out of the section
+   card's own margins. The overhang is kept but turned inside out: the LID is
+   inset and the deck fills the column, so the widest part of the machine is
+   the column itself and the proportion between the two is unchanged.
+   The bezel figures are divided by that inset, because they are a share of the
+   LID's width and cqw measures the container. */
+.console-mac .lid{width:87%; margin:0 auto; border-radius:1.65cqw;
+  padding:1.3cqw 1.3cqw 1.5cqw}
+/* THE BASE IS THE SAME KIND OF THING AS THE BEZEL. It is the lip of the body
+   seen edge-on, so it is a DEPTH — a centimetre or so of aluminium, much the
+   same on a 13" machine as on a 16" — not a share of the screen. At the hero's
+   4.55% it came to 47px here and read as a plinth. 2% is the lip; the notch
+   above it and the shadow under it come down with it. */
+/* THE DECK STANDS IN FRONT OF THE LID. Seen from the front, a MacBook's base
+   is nearer the eye than the screen, so it covers the bottom edge of the lid —
+   the chin is partly hidden, which is why the bottom bezel of a real machine
+   looks thinner than its sides. The deck is lifted over the lid by rather more
+   than the bezel it hides, and raised above it so it paints on top. */
+.console-mac .lid{position:relative; z-index:1}
+.console-mac .base{position:relative; z-index:2; margin-top:-1.1cqw;
+  width:100%; margin-left:0;
+  height:2cqw; border-radius:0 0 1.5cqw 1.5cqw;
+  box-shadow:0 2cqw 3.4cqw rgba(16,22,68,.22)}
+.console-mac .base::after{width:13cqw; height:1cqw; border-radius:0 0 1.2cqw 1.2cqw}
+.console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff}
+.console-frame iframe{display:block; border:0; background:#fff;
+  width:1180px; height:820px; transform-origin:top left}
+@media (max-width:760px){ .console-frame{padding:7px; border-radius:12px} }
+
+/* A qualifier inside an answer, set a size down and in the muted ink: it is a
+   condition on the sentence above it, not another sentence. */
+.ans .fine{display:block; margin-top:8px; font-size:13px; color:var(--muted)}

@@ -65,7 +65,7 @@
     {
       "@type": "Question",
       "name": "How do we get CAW Academy for our team?",
-      "acceptedAnswer": { "@type": "Answer", "text": "CAW Academy is licensed for organisations — teams get all 75+ courses for their people under a single agreement, with a free trial to evaluate it first. Individual in-app purchases are planned for a later stage. Contact us for a demonstration or a free trial." }
+      "acceptedAnswer": { "@type": "Answer", "text": "CAW Academy is licensed for organisations — teams get the courses in their framework under a single agreement, with a free trial to evaluate it first. What a licence covers depends on the agreement: a single framework (EASA, UK CAA, UAE GCAA or FAA) or all four. Individual in-app purchases are planned for a later stage. Contact us for a demonstration or a free trial." }
     },
     {
       "@type": "Question",
@@ -94,11 +94,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
-<link rel="preload" as="image" href="screens/hero-jet-1100.webp"
-      imagesrcset="screens/hero-jet-768.webp 768w, screens/hero-jet-1100.webp 1100w, screens/hero-jet-1448.webp 1448w"
+<link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
+      imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
 <link rel="stylesheet" href="style.css?v=81">
-<link rel="stylesheet" href="caw-interactive.css?v=26">
+<link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
 
@@ -118,10 +118,10 @@
 <div class="stk stk-first banner-card">
   <picture>
     <source type="image/webp"
-            srcset="screens/hero-jet-768.webp 768w, screens/hero-jet-1100.webp 1100w, screens/hero-jet-1448.webp 1448w"
+            srcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
             sizes="(min-width:1025px) 1064px, 100vw">
-    <img src="screens/hero-jet-1100.jpg"
-         srcset="screens/hero-jet-768.jpg 768w, screens/hero-jet-1100.jpg 1100w, screens/hero-jet-1448.jpg 1448w"
+    <img src="screens/hero-jet-1100.jpg?v=3"
+         srcset="screens/hero-jet-768.jpg?v=3 768w, screens/hero-jet-1100.jpg?v=3 1100w, screens/hero-jet-1448.jpg?v=3 1448w"
          sizes="(min-width:1025px) 1064px, 100vw"
          width="1448" height="1086"
          alt="A long-range business jet parked on the apron at sunset with its airstair door open"
@@ -152,7 +152,7 @@
       <div class="dev iphone" tabindex="0" aria-label="CAW Academy on iPhone">
         <div class="pscale" style="--s:.28">
         <div class="phone" aria-hidden="true">
-          <img class="shot" src="screens/hero-iphone.png" alt="CAW Academy home screen on iPhone"
+          <img class="shot" src="screens/hero-iphone.png?v=2" alt="CAW Academy home screen on iPhone"
                onload="this.closest('.phone').classList.add('shot-on')" onerror="this.remove()">
           <div class="scr">
             <div class="island"></div>
@@ -218,11 +218,11 @@
         <span class="dlabel">iPhone</span>
       </div>
       <div class="dev ipad" aria-hidden="true" tabindex="0" aria-label="CAW Academy on iPad">
-        <div class="ipad-bz"><img src="screens/hero-ipad.png" alt="CAW Academy on iPad" loading="lazy"></div>
+        <div class="ipad-bz"><img src="screens/hero-ipad.png?v=3" alt="CAW Academy on iPad" loading="lazy"></div>
         <span class="dlabel">iPad</span>
       </div>
       <div class="dev mac" aria-hidden="true" tabindex="0" aria-label="CAW Academy on Mac">
-        <div class="macbook"><div class="lid"><img src="screens/hero-mac.png" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
+        <div class="macbook"><div class="lid"><img src="screens/hero-mac.png?v=2" alt="CAW Academy on Mac" loading="lazy"></div><div class="base"></div></div>
         <span class="dlabel">MacBook</span>
       </div>
       </div>
@@ -301,7 +301,8 @@
       <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <h3>Audit-ready evidence</h3>
-        <p>Verifiable certificates — tamper-evident proof of completed study.</p>
+        <p>Verifiable certificates — tamper-evident proof of completed study — and progress and
+           training reports exported as PDF or CSV, from the app or the console.</p>
         <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
                 data-caw-open="benefit" data-caw-id="audit-evidence">
           What the evidence is
@@ -330,8 +331,19 @@
       </div>
       <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
-        <h3>Manage licences &amp; track progress</h3>
-        <p>Assign licences, set completion deadlines and monitor each learner's progress — restrict by email domain.</p>
+        <h3>Your own manuals, read and logged</h3>
+        <p>Issue company documents at their current revision, set the date they must be familiar by, and hold the evidence that each person read it.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="benefit" data-caw-id="documents">
+          How a revision is handled
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="card cawx-trigger">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
+        <h3>Assign training and track it</h3>
+        <p>Assign courses and company documents with deadlines, see who is overdue and
+           export the record &mdash; from the admin console at caw-academy.com, in any browser.</p>
         <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
                 data-caw-open="benefit" data-caw-id="seats">
           What admins can do
@@ -402,8 +414,8 @@
       <div class="prop reveal cawx-trigger">
         <div class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
         <h3>Synced &amp; yours to keep</h3>
-        <p>Progress, highlights, notes and bookmarks follow you across iPhone, iPad and Mac — and you
-           can export your notes to a file to share or keep.</p>
+        <p>Progress, highlights, notes and bookmarks follow you across iPhone, iPad and Mac — notes
+           encrypted on your own device, and exportable to a file to share or keep.</p>
         <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
                 data-caw-open="clarity" data-caw-id="synced">
           What syncs, and where
@@ -411,7 +423,11 @@
         </button>
       </div>
     </div>
-    </div>
+      <div class="reveal sec-cta">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div>
   </section>
 
   <!-- ============================ CURRICULUM ============================ -->
@@ -491,11 +507,45 @@
       <p class="fw-note-sub">Every track above is grounded in each authority's own references.</p>
       </div>
     </div>
+      <div class="reveal sec-cta">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div>
+  </section>
+
+  <!-- ====================== THE ADMIN CONSOLE ======================
+       Not a screenshot and not a video: the REAL console from website/admin/,
+       running against a stub that answers every request from sample data.
+       Generated by tools/build_admin_demo.py so it cannot drift from the
+       console it is advertising. Nothing is sent and nothing is stored. -->
+  <section class="stk tone-a lap" id="console">
+    <div class="secw">
+    <div class="section-head center reveal">
+      <span class="eyebrow">For training managers</span>
+      <h2>Drive the admin console yourself</h2>
     </div>
+
+    <div class="console-demo reveal">
+      <!-- The laptop from the hero lineup, at full size: the console is a
+           desktop tool, and the frame says so before a word is read. -->
+      <div class="macbook console-mac">
+        <div class="lid"><div class="console-frame">
+          <iframe src="admin/demo.html" title="The CAW Academy admin console, running on sample data"
+                  loading="lazy" scrolling="no"></iframe>
+        </div></div>
+        <div class="base"></div>
+      </div>
+    </div>
+      <div class="reveal sec-cta">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div>
   </section>
 
   <!-- ============================ FEATURES ============================ -->
-  <section class="stk tone-a lap" id="features">
+  <section class="stk tone-b lap" id="features">
     <div class="secw">
     <div class="section-head reveal">
       <span class="eyebrow">Features</span>
@@ -511,6 +561,16 @@
         <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
                 data-caw-open="demo" data-caw-id="lesson">
           See a lesson
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="card reveal cawx-trigger">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg></div>
+        <h3>Lessons read aloud</h3>
+        <p>A natural voice reads any lesson, on the drive or on the shop floor — built into the app, so it works with no signal.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="voice">
+          Hear a lesson
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
@@ -555,6 +615,16 @@
         </button>
       </div>
       <div class="card reveal cawx-trigger">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <h3>Highlights &amp; notes, private</h3>
+        <p>Mark up any lesson and write against it. Notes are encrypted on your device before they sync — we cannot read them.</p>
+        <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
+                data-caw-open="demo" data-caw-id="notes">
+          See the notes
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="card reveal cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.2 13.5L7 22l5-3 5 3-1.2-8.5"/></svg></div>
         <h3>Verifiable certificates</h3>
         <p>Earn a certificate with a unique number and QR — confirmable in our <a href="verify.html">public registry</a>.</p>
@@ -577,7 +647,7 @@
   <!-- Mid-page CTA between Features and the gallery -->
 
   <!-- ============================ INSIDE (gallery) ============================ -->
-  <section class="stk tone-b lap" id="inside">
+  <section class="stk tone-a lap" id="inside">
     <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">A look inside</span>
@@ -588,27 +658,27 @@
       <div class="gallery">
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.jpg?v=4" alt="CAW Academy dashboard on iPad with the framework picker open — EASA, UK CAA, UAE GCAA and FAA — showing the full course list, a Continue card and course-progress bars"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-1.jpg?v=6" alt="CAW Academy on iPad switching edition from the dashboard banner — EASA, UK CAA, UAE GCAA and FAA"></div>
         <div class="gcap"><b>Pick your framework</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.jpg?v=5" alt="CAW Academy lesson on iPad with sentences highlighted in yellow and green, an orange bookmark marker on a paragraph, and the text-selection menu open — Highlight, Note, Bookmark and Copy"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-2.jpg?v=6" alt="A CAW Academy lesson on iPad with a passage selected and the menu open — Highlight, Note, Bookmark, Read and Copy"></div>
         <div class="gcap"><b>Highlight, note &amp; bookmark</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-13.jpg?v=1" alt="CAW Academy lesson on iPad being read aloud — the paragraph being spoken is highlighted and a transport bar sits at the foot of the lesson with play, skip and position controls"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-13.jpg?v=6" alt="A CAW Academy lesson being read aloud on iPad, with the transport controls and the position and time left beneath them"></div>
         <div class="gcap"><b>Listen to any lesson</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.jpg?v=4" alt="CAW Academy full-text search on iPad finding TCAS 7.1 across lessons, with the matching lesson and a context snippet"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-3.jpg?v=6" alt="CAW Academy search on iPad finding a term across every lesson, with the matching lesson and a snippet of its text"></div>
         <div class="gcap"><b>Search inside every lesson</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.jpg?v=4" alt="CAW Academy built-in glossary on iPad defining an acronym — CDCCL, Critical Design Configuration Control Limitations"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-4.jpg?v=6" alt="The CAW Academy glossary on iPad defining an acronym without leaving the lesson"></div>
         <div class="gcap"><b>Glossary for every acronym</b></div>
       </div>
 
@@ -633,38 +703,42 @@
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-14.jpg?v=1" alt="CAW Academy My notes screen on iPad listing every highlight by course and lesson, each showing the highlighted sentence and the note written against it"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-14.jpg?v=6" alt="My notes on iPad — every highlight and the note written against it, grouped by course and lesson"></div>
         <div class="gcap"><b>All your highlights in one place</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-7.jpg?v=4" alt="CAW Academy export screen on iPad sharing your highlights and notes as a PDF or Markdown file, selectable by course"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-7.jpg?v=6" alt="Exporting a lesson's highlights and notes from CAW Academy on iPad"></div>
         <div class="gcap"><b>Export your notes</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-10.jpg?v=4" alt="CAW Academy Courses due on iPad listing training assigned by the company admin, each with a due date and Upcoming status"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-10.jpg?v=6" alt="Courses due on iPad — what the company administrator assigned, when it is due and where it stands"></div>
         <div class="gcap"><b>Deadlines set by your admin</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-11.jpg?v=4" alt="CAW Academy What's new feed on iPad showing regulatory and content updates, filterable by type and framework"></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-11.jpg?v=6" alt="What's new on iPad, at the top of Course content, carrying its NEW badge"></div>
         <div class="gcap"><b>Always current with the regulations</b></div>
       </div>
 
       <div class="gcol">
-        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-12.jpg?v=5" alt="CAW Academy dashboard on iPad refreshing its course content over-the-air — an 'Updating content' progress bar at 52% — so regulatory and lesson updates arrive without an app-store update"></div>
-        <div class="gcap"><b>Updates delivered over-the-air</b></div>
+        <div class="gpad"><img loading="lazy" src="screens/how-to-learn-12.jpg?v=6" alt="Course-content updates on iPad, automatic or checked by hand, so regulatory changes arrive without an app-store release"></div>
+        <div class="gcap"><b>Updates without an app-store release</b></div>
       </div>
 
       </div>
       <button class="gnav gnext" type="button" aria-label="Show more screens">&#8250;</button>
     </div>
-    </div>
+      <div class="reveal sec-cta">
+    <a class="btn btn-light open-trial" href="#">Request a free trial
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div>
   </section>
 
   <!-- ============================ FAQ ============================ -->
-  <section class="stk tone-a lap" id="faq">
+  <section class="stk tone-b lap" id="faq">
     <div class="secw">
     <div class="section-head center reveal">
       <span class="eyebrow">Questions</span>
@@ -693,10 +767,12 @@
       <details class="reveal">
         <summary>How do we get CAW Academy for our team?
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>
-        <div class="ans">CAW Academy is <strong>licensed for organisations</strong> — your team gets all
-          75+ courses under a single agreement, with a <strong>free trial</strong> to evaluate it first.
-          Individual in-app purchases for private learners are planned for a later stage. There are no
-          ads, on any plan. <a class="open-trial" href="#">Request a free trial.</a></div>
+        <div class="ans">CAW Academy is <strong>licensed for organisations</strong> — your team gets the
+          courses in your framework under a single agreement, with a <strong>free trial</strong> to
+          evaluate it first. Individual in-app purchases for private learners are planned for a later
+          stage. There are no ads, on any plan. <a class="open-trial" href="#">Request a free trial.</a>
+          <span class="fine">What a licence covers depends on the agreement: a single framework —
+          EASA, UK CAA, UAE GCAA or FAA — or all four.</span></div>
       </details>
       <details class="reveal">
         <summary>Do learners get a certificate?
@@ -938,7 +1014,7 @@
   </style>
 
   <!-- ============================ CTA ============================ -->
-<div class="stk tone-b lap stk-last outro-card">
+<div class="stk tone-a lap stk-last outro-card">
   <section class="reveal reveal outro-part" id="get">
     <div class="secw">
     <div class="cta-band">
@@ -1346,9 +1422,9 @@
     });
   })();
 </script>
-<script src="caw-content.js?v=24" defer></script>
+<script src="caw-content.js?v=26" defer></script>
 <script src="caw-demo-content.js?v=24" defer></script>
-<script src="caw-interactive.js?v=26" defer></script>
+<script src="caw-interactive.js?v=29" defer></script>
 <script>
   /* ---- Features carousel -------------------------------------------------
      Arrows only, matching the gallery carousel below. A click steps by a PAGE
@@ -1431,5 +1507,26 @@
   })();
 </script>
 
+<script>
+/* THE CONSOLE IS RENDERED AT ITS OWN WIDTH AND SCALED. It is designed for a
+   1180px window; letting it reflow into a 600px column would advertise the
+   tablet layout instead of the console. So the iframe keeps 1180x820 and the
+   frame scales it to whatever the column gives, taking its own height from the
+   result so no gap is left underneath. */
+(function () {
+  var frame = document.querySelector('.console-frame');
+  if (!frame) { return; }
+  var f = frame.querySelector('iframe');
+  function fit() {
+    /* The screen is the frame's own box — the laptop lid supplies the bezel
+       around it, so no padding has to be guessed here. */
+    var k = Math.min(1, frame.clientWidth / 1180);
+    f.style.transform = 'scale(' + k + ')';
+    frame.style.height = Math.round(820 * k) + 'px';
+  }
+  addEventListener('resize', fit);
+  fit();
+})();
+</script>
 </body>
 </html>
