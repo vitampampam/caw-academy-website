@@ -1066,7 +1066,13 @@
 
   function statTile(label, value, tone, sub) {
     var t = document.createElement("div");
-    t.className = "rstat" + (tone ? " " + tone : "") + (value === 0 && tone ? " zero" : "");
+    /* A TILE KEEPS ITS COLOUR AT ZERO (SME, Oct 2026). It used to fall back to
+       plain white, on the reasoning that red should mean a problem — but the
+       four tiles are a fixed set read as a row, and one of them turning white
+       made the row look like it had lost a tile rather than like the number was
+       nought. The colour is the tile's IDENTITY here, not its alarm: the figure
+       says whether there is anything to do. */
+    t.className = "rstat" + (tone ? " " + tone : "");
     var b = document.createElement("b"); b.textContent = String(value);
     var lab = document.createElement("span"); lab.textContent = label;
     t.appendChild(b); t.appendChild(lab);
@@ -4104,7 +4110,7 @@
         peopleOverdue ? "across " + peopleOverdue + " " + (peopleOverdue === 1 ? "person" : "people") : "nothing late"],
       ["Due soon", t.dueSoon, "warn",
         soonest ? "earliest " + fmtDate(soonest.deadline) : "nothing in the next three days"],
-      ["In progress", open - t.overdue - t.dueSoon, "",
+      ["In progress", open - t.overdue - t.dueSoon, "info",
         t.assigned ? "of " + t.assigned + " assigned" : "nothing assigned yet"],
       ["Completed", t.done, "good",
         t.assigned ? pct + "% of all assigned" : "—"]

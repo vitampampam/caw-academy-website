@@ -55,7 +55,12 @@
        DARKER so the type carries the contrast the colour used to fake. Washed
        out and cold are different faults and they need opposite fixes. */
     --ink:#111318; --ink-soft:#3F444D; --muted:#656A74;
-    --bg:#EFF0F2; --card:#FFFFFF; --line:#E3E5E8; --line-2:#EDEEF0;
+    /* THREE GREYS, NOT TWO. The page sits behind the cards, a card header sits
+       on the card, and the card body is white — so the page has to be darker
+       than the header or the header reads as another piece of page. #E7E9ED
+       and #F1F2F6 keep roughly the same step between each level. */
+    --bg:#E7E9ED; --card:#FFFFFF; --card-head:#F1F2F6;
+    --line:#E3E5E8; --line-2:#EDEEF0;
     --rail-bg:#FFFFFF; --rail-sel:#F0F1F3;
 
     --success:#2E7D32; --success-soft:#E8F4E9;
@@ -252,8 +257,14 @@
         panels all look like they are floating off the page. ────────────────── */
   .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-card)}
   .card + .card{margin-top:16px}
+  /* A CARD HEADER IS TINTED, like the member card's summary band — the same
+     idea in the same place, so the two do not look like different components.
+     The radius is inherited from the card, which clips it. */
   .card-h{display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:12px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+    padding:12px 16px; background:var(--card-head);
+    border-bottom:1px solid var(--line); flex-wrap:wrap}
+  /* The card does not clip, so the tint has to carry the top corners itself. */
+  .card > .card-h:first-child{border-radius:var(--r-card) var(--r-card) 0 0}
   .card-h h2{margin:0; font-size:14.5px; font-weight:700; letter-spacing:-.01em}
   .card-b{padding:14px 16px}
   .card-b.flush{padding:0}
@@ -266,7 +277,7 @@
      ancestor, which on a tall console is the card itself, and the background is
      opaque because a transparent header shows the rows passing under it. */
   .card-fold > .card-h{width:100%; cursor:pointer; user-select:none; border:0;
-    border-bottom:1px solid var(--line); background:var(--card); text-align:left; font:inherit;
+    border-bottom:1px solid var(--line); background:var(--card-head); text-align:left; font:inherit;
     position:sticky; top:0; z-index:3;
     /* THE RADIUS GOES WITH THE BACKGROUND. Making this header sticky meant
        giving it an opaque fill — a transparent one shows the rows passing
@@ -274,7 +285,7 @@
        corners back on. Open, it owns the top two; collapsed, it IS the card
        and owns all four. */
     border-radius:var(--r-card) var(--r-card) 0 0}
-  .card-fold > .card-h:hover{background:#FAFAFB}
+  .card-fold > .card-h:hover{background:#E9EAEF}
   .card-fold > .card-h[aria-expanded="false"]{border-bottom:0;
     border-radius:var(--r-card)}
   .fold-chev{width:0; height:0; flex:none; border-left:5px solid transparent;
@@ -310,9 +321,17 @@
   .rstat.alert b, .rstat.alert span{color:var(--err)} .rstat.alert .rstat-sub{color:var(--err-ink)}
   .rstat.warn{background:var(--warn-soft); border-color:#F6E3C8}
   .rstat.warn b, .rstat.warn span, .rstat.warn .rstat-sub{color:var(--warn)}
-  .rstat.good b{color:var(--success)}
-  .rstat.zero{background:#fff; border-color:var(--line)}
-  .rstat.zero b{color:#B9BDD4} .rstat.zero span, .rstat.zero .rstat-sub{color:var(--muted)}
+  /* ALL FOUR TILES ARE TINTED, so the row reads as one set of four facts
+     rather than two coloured ones and two blank. In progress takes the brand
+     indigo (it is the neutral, in-hand state) and Completed the success green.
+     There is no zero variant: a tile that went white at nought made the row
+     look short of a tile. */
+  .rstat.good{background:var(--success-soft); border-color:#CDE4CF}
+  .rstat.good b, .rstat.good span{color:var(--success)}
+  .rstat.good .rstat-sub{color:#2A6B2E}
+  .rstat.info{background:var(--indigo-soft); border-color:#D6D9F1}
+  .rstat.info b, .rstat.info span{color:var(--indigo-ink)}
+  .rstat.info .rstat-sub{color:var(--indigo-ink)}
 
   /* Overview's two columns: what needs doing, and the standing facts beside it. */
   .ovgrid{display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:16px; align-items:start}
@@ -456,7 +475,7 @@
   .mcard.open::before{content:""; position:absolute; left:0; top:0; bottom:0;
     width:3px; background:var(--indigo); z-index:2; pointer-events:none}
   .mcard-sum{display:flex; align-items:center; gap:12px;
-    background:#F6F7F9; padding:12px 14px; border-bottom:1px solid var(--line-2)}
+    background:var(--card-head); padding:12px 14px; border-bottom:1px solid var(--line-2)}
   .mcard-right{display:flex; align-items:center; gap:10px; margin-left:auto}
   .mcard-right .chev{font-size:16px; font-weight:700; line-height:1; width:18px;
     text-align:center; color:var(--muted)}
@@ -1428,7 +1447,13 @@
        not scroll and every section was fighting for the same slot. */
 
     /* The footer keeps its place at the bottom of the column. */
-    footer.foot-center{flex:none; padding:14px 0 16px; margin-top:12px}
+    /* THE FOOTER SITS AT THE FOOT. The canvas is a flex column here, so any
+       height the section does not use piles up BELOW the footer unless the
+       footer claims it above itself — which is what `margin-top:auto` does. A
+       short page then ends with Privacy/Terms/Support on the bottom edge
+       instead of floating halfway up with dead canvas beneath. A tall page is
+       unaffected: there is no spare height for auto to take. */
+    footer.foot-center{flex:none; padding:14px 0 16px; margin-top:auto}
   }
 
   /* ── Narrow.  The rail loses its labels at 1180 and becomes a top bar on a
@@ -2360,6 +2385,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=86" defer></script>
+<script src="admin.js?v=90" defer></script>
 </body>
 </html>
