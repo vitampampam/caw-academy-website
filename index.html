@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=81">
+<link rel="stylesheet" href="style.css?v=83">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -287,7 +287,9 @@
       <span class="eyebrow">For organisations</span>
       <h2>Train your whole airworthiness team to one standard</h2>
     </div>
-    <div class="grid reveal">
+    <div class="feat-carousel" id="orgCarousel">
+      <button class="gnav gprev" type="button" aria-label="Previous cards">&#8249;</button>
+    <div class="grid reveal" id="orgTrack">
       <div class="card cawx-trigger">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <h3>One standard, whole team</h3>
@@ -360,6 +362,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       </div>
+      <button class="gnav gnext" type="button" aria-label="More cards">&#8250;</button>
+    </div>
     </div>
   <div class="reveal sec-cta">
     <a class="btn btn-light open-trial" href="#">Request a free trial
@@ -898,9 +902,9 @@
       .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
       /* Card sections: even 2-up grid that fills the full width, like the curriculum
          tracks (no narrow max-width cap). */
-      #organisations .grid, #why .props{
+      #why .props{
         display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
-      #organisations .grid .card, #why .props .card{max-width:none}
+      #why .props .card{max-width:none}
       /* FEATURES is the exception: a swipe carousel, as phones already get. Two-up
          and stacked it runs to about three screens, which puts the miniatures —
          the reason the section is worth opening — below the fold. As a snap row the
@@ -911,11 +915,18 @@
          loads last and beat an identical rule in the stylesheet — leaving the cards
          as grid items while the child width:46% measured against a 388px column and
          squeezed them to 178px. Keep the carousel and the grid it replaces together. */
+      /* FOR ORGANISATIONS JOINS IT (Oct 2026). Seven cards two-up is three
+         screens of white blocks with the last one alone beside a hole. The
+         rule meant to do this was written in style.css, where — exactly as
+         the note above warns — this inline block beat it. */
+      #organisations .grid,
       #features .grid{
         display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
         overflow-x:auto; gap:14px; margin:0 -24px; padding:4px 24px 12px;
         scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+      #organisations .grid::-webkit-scrollbar,
       #features .grid::-webkit-scrollbar{display:none}
+      #organisations .grid > .card,
       #features .grid > .card{
         flex:0 0 46%; width:46%; max-width:46%; scroll-snap-align:center;
         opacity:1; transform:none}
@@ -977,7 +988,27 @@
        beside another without them reads as a bug rather than a choice. */
     /* The gallery puts its arrows at 45% because its cards carry a caption
        below; a feature card has nothing under it, so centre them properly. */
-    #features .gnav{top:50%}
+    #features .gnav, #organisations .gnav{top:50%}
+    /* For organisations is a grid on a desktop and a swipe row on a tablet, so
+       its arrows only exist in the band where the row actually moves. Features
+       is a row at every width, which is why its arrows carry no such rule. */
+    #organisations .gnav{display:none}
+    @media (min-width:561px) and (max-width:1024px){
+      #organisations .gnav{display:flex}
+      /* THE ROW OPENS ON CARD 1, WHOLE. Two things were hiding it: the shared
+         rule snaps cards to CENTRE, which leaves the first one half out of
+         frame at rest, and the arrows were pulled over the row's edge, which
+         put the back arrow on top of what was left. Snap to the start and keep
+         the wrapper's gutter, so the arrows sit BESIDE the cards as they do in
+         Features. */
+      #organisations .grid > .card{scroll-snap-align:start}
+      /* The shared row rule bleeds the track 24px past the wrapper on each side
+         (margin:0 -24px), which is right for Features, where the row runs to
+         the card's edge. Here it put the first card UNDER the back arrow. The
+         bleed is dropped so the row stays inside the wrapper's gutter and the
+         arrows sit beside the cards rather than on them. */
+      #organisations .grid{margin:0; padding:4px 2px 12px; scroll-padding-left:0}
+    }
 
     .trial-modal{position:fixed; inset:0; z-index:200; display:none}
     .trial-modal.open{display:block}
@@ -1435,9 +1466,14 @@
      script that carries a src — the markup was all present and the arrows
      simply did nothing. */
   (function () {
-    function init() {
-      var box = document.getElementById('featCarousel');
-      var track = document.getElementById('featTrack');
+    /* TWO CAROUSELS, ONE INITIALISER. For organisations gained the same swipe
+       row on a tablet, and a swipe row with no arrows is discoverable only by
+       trying it — on a desktop with no touch there is nothing to try. The
+       function was written around two fixed ids; it takes them now, so the next
+       row costs a line rather than a copy. */
+    function init(boxId, trackId) {
+      var box = document.getElementById(boxId);
+      var track = document.getElementById(trackId);
       if (!box || !track) { return; }
       var cards = Array.prototype.slice.call(track.children);
       if (cards.length < 2) { return; }
@@ -1501,9 +1537,13 @@
       window.addEventListener('resize', sync);
       sync();
     }
+    function initAll() {
+      init('featCarousel', 'featTrack');
+      init('orgCarousel', 'orgTrack');
+    }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else { init(); }
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else { initAll(); }
   })();
 </script>
 
@@ -1534,16 +1574,38 @@
      the one doing the clipping. So: apply, then look again on the next frame,
      and apply once more if the box moved. `settling` stops the two from
      chasing each other. */
+  /* THE HEIGHT IS A LIMIT TOO, NOT JUST THE WIDTH. An iPad in portrait gives
+     the console a 1180px-tall virtual screen; scaled only to the column that is
+     a thousand-pixel band in the middle of the page, and the section stops
+     being one glance. Capping the DISPLAYED height at 820 brings the portrait
+     console to about 70% scale — the figure the SME asked for — and leaves
+     landscape and desktop where the width already put them. The frame then
+     takes the scaled size and centres, rather than leaving white to the right
+     of a narrower render. */
+  var MAX_SHOWN_H = 820;
   var lastBox = 0, settling = false;
   function fit() {
-    /* clientWidth, NOT getBoundingClientRect. They disagree here — 818 against
-       718 on an iPad-width page — and the rect is the one to distrust: the
-       stacked cards carry a transform, so a rect is the LAID-OUT width already
-       multiplied by an ancestor's scale. Scaling the console by a figure that
-       has that in it applies the page's scale twice, and the console came out
-       88px short of its own frame. Layout coordinates are what this arithmetic
-       is in. */
-    var box = frame.clientWidth;
+    /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this function
+       RESIZES, and the bezel hugs it — so reading the frame's width fed the
+       output back into the input and each pass came out smaller than the last
+       (546px of console in a 756px column before it settled). The column and
+       the bezel's own padding are fixed, so the space available is worked out
+       from those and nothing here moves it.
+
+       clientWidth, not getBoundingClientRect: the stacked cards carry a
+       transform, so a rect is the laid-out width already multiplied by an
+       ancestor's scale, and scaling by a figure with that in it applies the
+       page's scale twice. */
+    var mac = frame.closest('.console-mac');
+    var lid = frame.parentElement;
+    if (!mac || !lid) { return; }
+    var lidCS = getComputedStyle(lid);
+    var macW = mac.clientWidth;
+    var cap = lidCS.maxWidth && lidCS.maxWidth.indexOf('%') > -1
+      ? macW * parseFloat(lidCS.maxWidth) / 100
+      : macW;
+    var pad = (parseFloat(lidCS.paddingLeft) || 0) + (parseFloat(lidCS.paddingRight) || 0);
+    var box = Math.max(0, Math.round(cap - pad));
     if (!box) { return; }
     if (box !== lastBox && !settling) {
       settling = true;
@@ -1557,10 +1619,11 @@
     var vw = Math.min(Math.max(window.innerWidth || 1180, 820), 1440);
     var vh = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
     vh = Math.min(Math.max(vh, 560), 1180);
-    var k = box / vw;
+    var k = Math.min(box / vw, MAX_SHOWN_H / vh);
     f.style.width = vw + 'px';
     f.style.height = vh + 'px';
     f.style.transform = 'scale(' + k + ')';
+    frame.style.width = Math.round(vw * k) + 'px';
     frame.style.height = Math.round(vh * k) + 'px';
   }
 

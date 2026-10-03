@@ -1212,8 +1212,8 @@ body{background:var(--bg)}
    the column itself and the proportion between the two is unchanged.
    The bezel figures are divided by that inset, because they are a share of the
    LID's width and cqw measures the container. */
-.console-mac .lid{width:87%; margin:0 auto; border-radius:1.65cqw;
-  padding:1.3cqw 1.3cqw 1.5cqw}
+.console-mac .lid{width:fit-content; max-width:87%; margin:0 auto;
+  border-radius:1.65cqw; padding:1.3cqw 1.3cqw 1.5cqw}
 /* THE BASE IS THE SAME KIND OF THING AS THE BEZEL. It is the lip of the body
    seen edge-on, so it is a DEPTH — a centimetre or so of aluminium, much the
    same on a 13" machine as on a 16" — not a share of the screen. At the hero's
@@ -1230,7 +1230,7 @@ body{background:var(--bg)}
   height:2cqw; border-radius:0 0 1.5cqw 1.5cqw;
   box-shadow:0 2cqw 3.4cqw rgba(16,22,68,.22)}
 .console-mac .base::after{width:13cqw; height:1cqw; border-radius:0 0 1.2cqw 1.2cqw}
-.console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff}
+.console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff; margin:0 auto}
 .console-frame iframe{display:block; border:0; background:#fff;
   width:1180px; height:820px; transform-origin:top left}
 /* BELOW THE DESKTOP BREAKPOINT THE CONSOLE SHOWS ITS OWN TABLET LAYOUT.
@@ -1251,7 +1251,13 @@ body{background:var(--bg)}
      uses (8/150 padding, 22/150 radius), expressed against this frame's own
      width so they hold at any size. */
   .console-mac .base{display:none}
-  .console-mac .lid{width:100%; border-radius:3.1cqw; padding:1.7cqw}
+  /* THE BEZEL HUGS THE SCREEN. The console is scaled to a size the script
+     works out, and the frame is given that size in pixels — so a lid at
+     width:100% stayed the full column and drew a slab of navy around a smaller
+     screen. `fit-content` makes the bezel follow its contents, which is what a
+     bezel is. */
+  .console-mac .lid{width:fit-content; max-width:100%; margin:0 auto;
+    border-radius:3.1cqw; padding:1.7cqw}
   .console-frame{border-radius:1.6cqw}
 }
 
@@ -1287,18 +1293,8 @@ body{background:var(--bg)}
 #organisations .card:nth-child(7) .ico{background:linear-gradient(135deg,#3F5570,#55708F);
   box-shadow:0 8px 18px rgba(63,85,112,.26)}
 
-/* ---------- iPad: the card rows swipe, as they already do on a phone -------
-   Seven cards two-across on a tablet is a column of white blocks three screens
-   long, and the last one sits alone beside a hole. The same carousel the phone
-   already uses is better here: one gesture, the next card peeking, and the
-   section stays one screen tall. 58% shows the card being read and the edge of
-   the next, which is what makes it obvious the row moves. */
-@media (min-width:761px) and (max-width:1024px){
-  #organisations .grid, #features .grid{
-    display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
-    overflow-x:auto; gap:14px; padding:4px 2px 12px;
-    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none}
-  #organisations .grid::-webkit-scrollbar, #features .grid::-webkit-scrollbar{display:none}
-  #organisations .grid > *, #features .grid > *{
-    flex:0 0 58%; width:58%; max-width:58%; scroll-snap-align:center}
-}
+/* The tablet carousel for these rows is NOT here. index.html carries an inline
+   <style> for the 561-1024 band, and an inline block loads last — a rule for
+   #organisations .grid written in this file is overridden by it, which is
+   exactly what happened on the first attempt. It lives beside the rules it
+   replaces, in that block. */
