@@ -1,0 +1,2822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin console demo — CAW Academy</title>
+<meta name="theme-color" content="#3E44B5">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico">
+<style>
+  /* ════════════════════════════════════════════════════════════════════════
+     CAW Academy — team admin console.
+
+     This page is a TOOL, not a page about a tool. The marketing site's
+     vocabulary (gradient washes, a translucent sticky nav, 18px cards each
+     under a 34px shadow) was borrowed wholesale and made eight panels of
+     different subjects all look like the same announcement. The console
+     keeps the brand's colours and faces and drops its gestures:
+
+       · one rail carries ALL the chrome — identity, licence, navigation —
+         so the canvas never spends a band saying where you are;
+       · surfaces are flat and separated by a hairline, shadows belong to
+         things that genuinely float (menus, dialogs);
+       · records are ROWS and objects are CARDS, because a roster is read by
+         comparing down a column;
+       · one colour, one meaning. Indigo is identity and the primary action;
+         red is overdue, amber is due soon, green is done. Amber stopped
+         being the CTA — an amber Assign button beside an amber "due soon"
+         chip was one colour saying two things.
+
+     Self-contained on purpose: it mirrors website/style.css's tokens rather
+     than linking it, so the portal runs from an admin subdomain OR an
+     /admin/ subfolder with no external dependency.
+     ════════════════════════════════════════════════════════════════════════ */
+  @font-face{ font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Inter-Variable.woff2") format("woff2"); }
+  @font-face{ font-family:"Fraunces"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Fraunces-Variable.woff2") format("woff2"); }
+
+  :root{
+    --indigo:#3E44B5; --indigo-2:#575ECF; --indigo-3:#8A8FE6;
+    --indigo-soft:#ECEDFB; --indigo-ink:#2A2F86;
+    --amber:#FB8C00; --amber-soft:#FFF4E3;
+
+    /* THE NEUTRALS ARE NEUTRAL. Every grey here used to carry a blue tint
+       borrowed from the brand indigo — the page background, both hairlines, the
+       muted text and even the shadows. On a wide-gamut display (Safari renders
+       it honestly) the whole console read as faintly cold and slightly purple,
+       which is not a brand colour, just a cast. The indigo, amber, green and
+       red below are untouched: the brand belongs on the things that mean
+       something, not on the paper they sit on.
+
+       AND GREYER PAPER IS NOT DULLER PAPER — the first pass at this made both
+       mistakes at once. The page sits a step DEEPER in grey so the white cards
+       lift off it instead of floating on near-white, and the text sits a step
+       DARKER so the type carries the contrast the colour used to fake. Washed
+       out and cold are different faults and they need opposite fixes. */
+    --ink:#111318; --ink-soft:#3F444D; --muted:#656A74;
+    /* THREE GREYS, NOT TWO. The page sits behind the cards, a card header sits
+       on the card, and the card body is white — so the page has to be darker
+       than the header or the header reads as another piece of page. #E7E9ED
+       and #F1F2F6 keep roughly the same step between each level. */
+    --bg:#E7E9ED; --card:#FFFFFF; --card-head:#F1F2F6;
+    --line:#E3E5E8; --line-2:#EDEEF0;
+    --rail-bg:#FFFFFF; --rail-sel:#F0F1F3;
+
+    --success:#2E7D32; --success-soft:#E8F4E9;
+    --err:#C62828; --err-soft:#FDECEC; --err-ink:#8E1C1C;
+    --warn:#B25E00; --warn-soft:#FFF4E3;
+
+    --r-card:12px; --r-ctl:9px;
+    --shadow-sm:0 1px 2px rgba(20,22,28,.05);
+    --shadow-pop:0 18px 44px rgba(20,22,28,.16), 0 2px 8px rgba(20,22,28,.08);
+    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
+  /* FIRM, NOT LOOSE. Two separate things made a page that has nothing to
+     scroll still move under your finger on iPad:
+     (1) `vh` is measured against the viewport with the browser chrome
+         RETRACTED, so a 100vh shell is TALLER than what you can see — the
+         page had a real scroll range of about a toolbar's height, holding
+         nothing. Every full-height figure here is `dvh`, with the `vh` line
+         first as the fallback.
+     (2) the elastic overscroll bounce, which happens whether or not there is
+         anywhere to go. `overscroll-behavior:none` stops it at the page edge.
+     So a scrollbar now means there is genuinely something below. */
+  html,body{overscroll-behavior:none}
+  body{margin:0; min-height:100vh; min-height:100dvh; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:14px; line-height:1.5; letter-spacing:-.005em;
+    -webkit-font-smoothing:antialiased}
+  /* Every figure here is compared with the figure above it, so digits must sit
+     in the same column whatever they are. */
+  b,strong,table,.num,.rstat b,.tile .v{font-variant-numeric:tabular-nums}
+  a{color:var(--indigo); text-decoration:none}
+  button{font:inherit}
+
+  /* ── Shell ──────────────────────────────────────────────────────────────
+     The rail is its own scroll context and never moves; the canvas scrolls. */
+  .shell{display:grid; grid-template-columns:244px minmax(0,1fr);
+    min-height:100vh; min-height:100dvh}
+
+  .rail{background:var(--rail-bg); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:16px 12px 12px; position:sticky; top:0;
+    /* 100dvh, not 100vh. On iOS `vh` is measured against the viewport with the
+       browser chrome RETRACTED, so a 100vh rail is taller than what you can
+       see and anything pinned to its bottom — the name and Sign out — sits
+       under Safari's toolbar. `dvh` follows the visible height. The vh line
+       stays first as the fallback for anything that does not know dvh. */
+    /* FIXED, NOT SCROLLING. The rail holds a brand, an organisation card,
+       seven items and a foot — it fits, and a navigation that scrolls away
+       from under your finger is a navigation you have to find twice. If it
+       ever cannot fit, the nav list is what gives. */
+    height:100vh; height:100dvh; overflow:hidden}
+  .rail-brand{display:flex; align-items:center; gap:10px; padding:2px 8px 14px}
+  .rail-brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm); flex:none}
+  .rail-name{font-family:var(--serif); font-size:18px; font-weight:600; line-height:1.1; color:var(--ink)}
+  .rail-name span{color:var(--indigo)}
+  .rail-kick{font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+
+  /* The organisation and what its licence covers: the two facts an admin needs
+     on every screen, which is exactly why they must not cost the canvas a band. */
+  .org{background:#FAFAFB; border:1px solid var(--line); border-radius:var(--r-card);
+    padding:10px 12px; margin-bottom:12px}
+  #orgName{font-weight:700; font-size:13.5px; letter-spacing:-.01em; margin:0}
+  #orgDomains{font-size:11.5px; color:var(--muted); margin-top:1px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .org-meter{height:5px; border-radius:99px; background:#E8E9EC; margin:9px 0 6px; overflow:hidden}
+  .org-meter i{display:block; height:100%; border-radius:99px;
+    background:linear-gradient(90deg,var(--indigo),var(--indigo-3))}
+  .org-meter.full i{background:linear-gradient(90deg,#C25B00,var(--amber))}
+  #orgStrap{font-size:11px; color:var(--muted); line-height:1.45}
+  #orgStrap b{color:var(--ink)}
+  #orgStrap .warn{color:var(--warn); font-weight:700}
+  #orgStrap .alert{color:var(--err); font-weight:700}
+
+  /* Section navigation. `renderTabs` fills this; the buttons keep their old
+     class names so the one place that writes them did not have to learn a new
+     vocabulary to move from a tab strip into a rail. */
+  .tabsnav{display:flex; flex-direction:column; gap:2px; min-height:0; overflow-y:auto;
+    scrollbar-width:none}
+  .tabsnav::-webkit-scrollbar{display:none}
+  .navhead{font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); padding:10px 10px 5px}
+  .tabbtn{display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    padding:8px 10px; border:0; border-radius:var(--r-ctl); background:none;
+    color:var(--ink-soft); font-size:13.5px; font-weight:600; cursor:pointer}
+  .tabbtn:hover{background:var(--rail-sel); color:var(--ink)}
+  .tabbtn.on{background:var(--indigo); color:#fff}
+  .tabbtn svg{width:16px; height:16px; flex:none; stroke:currentColor; fill:none;
+    stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.8}
+  .tabbtn.on svg{opacity:1}
+  .tabbtn .tcount{margin-left:auto; font-size:11px; font-weight:700; color:var(--muted);
+    font-variant-numeric:tabular-nums}
+  .tabbtn.on .tcount{color:rgba(255,255,255,.75)}
+  /* The overdue count is the one number that must be legible BEFORE its section
+     is opened — it is the reason somebody signs in at all. */
+  .tabbtn.alert .tcount{background:var(--err); color:#fff; padding:1px 7px; border-radius:99px}
+  /* A PARENT is a heading with an icon; its children are indented and drop the
+     icon, because the indent is the relationship and two icons in a column
+     read as two unrelated items. */
+  .tabbtn.parent{cursor:default; color:var(--muted)}
+  .tabbtn.parent:hover{background:none; color:var(--muted)}
+  .tabbtn.parent.open{color:var(--ink)}
+  .tabbtn.child{padding-left:38px; font-size:13px}
+  /* A CHILD CARRIED A BULLET AND IT HAD ESCAPED. The dot was absolutely
+     positioned with no positioned ancestor to resolve against, so instead of
+     sitting beside its own row it landed against the rail — both children's
+     dots in the same wrong place, reading as one stray mark under Team
+     progress. Anchoring it would have been one line, but the comment above
+     already says why it is not wanted: THE INDENT IS THE RELATIONSHIP. A
+     bullet beside an indented item states it a second time. */
+  .tabbtn.alert.on{background:var(--err)}
+  .tabbtn.alert.on .tcount{background:rgba(255,255,255,.22); color:#fff}
+
+  .rail-foot{margin-top:auto; border-top:1px solid var(--line); padding-top:11px;
+    display:flex; align-items:center; gap:9px}
+  .rail-av{width:28px; height:28px; border-radius:50%; background:var(--indigo-soft);
+    color:var(--indigo-ink); display:grid; place-items:center; font-size:11px; font-weight:800; flex:none}
+  #who{min-width:0; font-size:12px; line-height:1.3; color:var(--muted)}
+  #who b{display:block; font-weight:650; color:var(--ink); font-size:12.5px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  /* Pushed right in CSS rather than inline, so the narrow layout can stack it
+     without fighting a style attribute it cannot see. */
+  .rail-foot .btn-ghost{margin-left:auto}
+
+  /* ── Canvas ─────────────────────────────────────────────────────────────── */
+  .wrap{padding:24px 28px 56px; max-width:1280px; width:100%}
+  /* FROZEN, like the table header below it. The section title and its actions
+     are how you know which screen you are on and how you reload it; scrolled
+     away they take Reload and Export with them, and a long roster put them
+     several screens behind. The band paints the page background over whatever
+     passes under it — a transparent sticky header shows rows through itself. */
+  .phead{position:sticky; top:0; z-index:20; background:var(--bg);
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    padding:18px 0 12px; margin:-24px 0 14px}
+  /* The table header stops BELOW it, not under it. */
+  thead th{top:var(--head-h,70px)}
+  .phead h1{margin:0; font-size:20px; font-weight:700; letter-spacing:-.02em}
+  .phead .sub{margin:3px 0 0; color:var(--muted); font-size:13px}
+  .pacts{display:flex; gap:8px; flex:none; flex-wrap:wrap; justify-content:flex-end}
+  /* A button may carry a long label and a short one; the width decides which
+     is shown, and the full phrase is always in the tooltip. */
+  .btn-s{display:none}
+
+  /* ── Controls ───────────────────────────────────────────────────────────── */
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    border:1px solid transparent; border-radius:var(--r-ctl); cursor:pointer;
+    font-weight:650; font-size:13px; padding:8px 14px; background:var(--indigo); color:#fff;
+    white-space:nowrap}
+  .btn:hover:not(:disabled){background:var(--indigo-ink)}
+  .btn:disabled{opacity:.45; cursor:not-allowed}
+  /* The CTA is the brand colour, NOT amber. Amber means "due soon" on this page
+     and a button cannot borrow a status colour without claiming to be one. */
+  .btn-cta{background:var(--indigo)}
+  .btn-cta:hover:not(:disabled){background:var(--indigo-ink)}
+  .btn-ghost{background:#fff; color:var(--ink-soft); border-color:var(--line);
+    padding:6px 11px; font-size:12.5px; font-weight:650}
+  .btn-danger{background:#fff; color:var(--err); border-color:var(--line);
+    padding:6px 11px; font-size:12.5px; font-weight:650}
+  .btn-danger:hover:not(:disabled){border-color:var(--err); background:var(--err-soft)}
+  /* A DISABLED SECONDARY BUTTON MUST LOOK DISABLED. "Remove selected" has always
+     been disabled until something is ticked, but only `.btn` carried a disabled
+     style — these two are their own classes, so the control was inert and looked
+     live, which is worse than either. */
+  .btn-ghost:disabled,.btn-danger:disabled{opacity:.4; cursor:not-allowed;
+    background:#fff; border-color:var(--line); color:var(--muted)}
+  /* BACKGROUND IS LOAD-BEARING HERE. These buttons are `btn btn-ghost`, and
+     `.btn:hover` fills with --indigo-ink at the same specificity — so until
+     this rule declared a background of its own, hovering a ghost button
+     painted it near-black indigo and then wrote mid-indigo text on top of it.
+     A hover state must name every property the state it overrides sets. */
+  .btn-ghost:hover:not(:disabled){background:#F6F7F8; border-color:#C9CDEA;
+    color:var(--indigo-ink)}
+  .btn-ghost:active:not(:disabled){background:var(--indigo-soft)}
+  .btn svg,.btn-ghost svg{width:15px; height:15px; stroke:currentColor; fill:none;
+    stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .linkbtn{background:none; border:0; color:var(--indigo); font:inherit; font-weight:700;
+    font-size:12px; cursor:pointer; padding:0; white-space:nowrap}
+
+  .field{display:block; width:100%; margin:0 0 12px; padding:8px 11px; border:1px solid var(--line);
+    border-radius:var(--r-ctl); font:inherit; font-size:13.5px; color:var(--ink); background:#fff}
+  .field:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .field::placeholder{color:var(--muted)}
+  label.lbl{display:block; font-size:11.5px; font-weight:700; color:var(--ink-soft); margin:0 0 4px}
+  .field:-webkit-autofill,.field:-webkit-autofill:hover,.field:-webkit-autofill:focus{
+    -webkit-box-shadow:0 0 0 100px #fff inset; -webkit-text-fill-color:var(--ink)}
+  input[type="date"].field{-webkit-appearance:none; appearance:none; text-align:left; min-height:36px; line-height:1.2}
+  input[type="date"]::-webkit-date-and-time-value{text-align:left; margin:0}
+  input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
+  select.field{appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+    background-position:calc(100% - 17px) 16px, calc(100% - 12px) 16px;
+    background-size:5px 5px,5px 5px; background-repeat:no-repeat; padding-right:32px}
+
+  /* ── Cards.  A hairline separates as well as a shadow and does not make eight
+        panels all look like they are floating off the page. ────────────────── */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-card)}
+  .card + .card{margin-top:16px}
+  /* A CARD HEADER IS TINTED, like the member card's summary band — the same
+     idea in the same place, so the two do not look like different components.
+     The radius is inherited from the card, which clips it. */
+  .card-h{display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 16px; background:var(--card-head);
+    border-bottom:1px solid var(--line); flex-wrap:wrap}
+  /* The card does not clip, so the tint has to carry the top corners itself. */
+  .card > .card-h:first-child{border-radius:var(--r-card) var(--r-card) 0 0}
+  .card-h h2{margin:0; font-size:14.5px; font-weight:700; letter-spacing:-.01em}
+  .card-b{padding:14px 16px}
+  .card-b.flush{padding:0}
+
+  /* A card that folds. The header IS the control, so a closed card is a single
+     bar with nothing to explain. */
+  /* A FOLD HEADER IS THE CONTROL THAT CLOSES THE THING BELOW IT, so it stays put
+     while that thing scrolls — otherwise the only way back out of a long panel is
+     to scroll up through all of it. Sticky resolves against the nearest scrolling
+     ancestor, which on a tall console is the card itself, and the background is
+     opaque because a transparent header shows the rows passing under it. */
+  .card-fold > .card-h{width:100%; cursor:pointer; user-select:none; border:0;
+    border-bottom:1px solid var(--line); background:var(--card-head); text-align:left; font:inherit;
+    position:sticky; top:0; z-index:3;
+    /* THE RADIUS GOES WITH THE BACKGROUND. Making this header sticky meant
+       giving it an opaque fill — a transparent one shows the rows passing
+       under it — and an opaque square laid over a rounded card paints its
+       corners back on. Open, it owns the top two; collapsed, it IS the card
+       and owns all four. */
+    border-radius:var(--r-card) var(--r-card) 0 0}
+  .card-fold > .card-h:hover{background:#E9EAEF}
+  .card-fold > .card-h[aria-expanded="false"]{border-bottom:0;
+    border-radius:var(--r-card)}
+  .fold-chev{width:0; height:0; flex:none; border-left:5px solid transparent;
+    border-right:5px solid transparent; border-top:6px solid var(--muted);
+    transition:transform .14s ease}
+  .card-fold > .card-h[aria-expanded="false"] .fold-chev{transform:rotate(-90deg)}
+  h1{font-family:var(--serif); font-weight:600; font-size:26px; margin:0 0 6px}
+  h2{font-size:14.5px; font-weight:700; margin:0 0 12px; letter-spacing:-.01em}
+  .sub{color:var(--muted); margin:0 0 16px; font-size:13px}
+  .hint{font-size:12px; color:var(--muted); line-height:1.45}
+  .note{font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.5}
+  .empty{color:var(--muted); font-size:13px; padding:14px 16px}
+  .hidden{display:none}
+  .sect{display:none}
+  .sect.on{display:block}
+
+  /* A group heading inside a card — quieter than the card's own h2. */
+  .grouphead{margin:4px 0 8px; font-size:10.5px; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted)}
+  .steps{margin:0 0 14px; padding-left:18px; color:var(--ink-soft); font-size:13px; line-height:1.55}
+  .steps li{margin:2px 0}
+  .steps li b{color:var(--ink)}
+
+  /* ── Exposure tiles.  Zero is good news: it keeps the tile's shape and loses
+        the colour, so only a real figure draws the eye. ────────────────────── */
+  .rsum{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 0 16px}
+  .rstat{border:1px solid var(--line); border-radius:var(--r-card); padding:12px 14px; background:#fff}
+  .rstat b{display:block; font-size:28px; line-height:1.1; font-weight:750; letter-spacing:-.03em; color:var(--ink)}
+  .rstat span{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+  .rstat .rstat-sub{display:block; margin-top:2px; font-size:11.5px; font-weight:500;
+    letter-spacing:0; text-transform:none; color:var(--muted); line-height:1.35}
+  .rstat.alert{background:var(--err-soft); border-color:#F6D6D6}
+  .rstat.alert b, .rstat.alert span{color:var(--err)} .rstat.alert .rstat-sub{color:var(--err-ink)}
+  .rstat.warn{background:var(--warn-soft); border-color:#F6E3C8}
+  .rstat.warn b, .rstat.warn span, .rstat.warn .rstat-sub{color:var(--warn)}
+  /* ALL FOUR TILES ARE TINTED, so the row reads as one set of four facts
+     rather than two coloured ones and two blank. In progress takes the brand
+     indigo (it is the neutral, in-hand state) and Completed the success green.
+     There is no zero variant: a tile that went white at nought made the row
+     look short of a tile. */
+  .rstat.good{background:var(--success-soft); border-color:#CDE4CF}
+  .rstat.good b, .rstat.good span{color:var(--success)}
+  .rstat.good .rstat-sub{color:#2A6B2E}
+  .rstat.info{background:var(--indigo-soft); border-color:#D6D9F1}
+  .rstat.info b, .rstat.info span{color:var(--indigo-ink)}
+  .rstat.info .rstat-sub{color:var(--indigo-ink)}
+
+  /* Overview's two columns: what needs doing, and the standing facts beside it. */
+  .ovgrid{display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:16px; align-items:start}
+
+  /* EACH CARD SCROLLS INSIDE ITSELF. The two columns hold unrelated lists of
+     unrelated lengths — a team with two contracts and nothing overdue made the
+     Licence card three times the height of "Needs attention", so reading to the
+     bottom of one scrolled the page past the other and left half the width
+     empty. Capped, each column is read without moving the other, and the
+     exposure tiles and the section heading stay on screen throughout.
+
+     The cap is viewport-relative so a tall display shows more rather than
+     reserving the same box; the card simply stops growing when it would push
+     its neighbour off the page. */
+  .card-scroll{max-height:min(58vh,620px); overflow-y:auto; overscroll-behavior:contain}
+
+  /* A TABLE SCROLLS INSIDE ITS CARD, so the card's own controls stay put. The
+     search box, the filter chips and any message sit ABOVE this box and the
+     pager below it, which means none of them scroll away: a roster of fifty
+     could be filtered only by scrolling back to the top to reach the control
+     that filters it.
+
+     The column headings stick to the top of THIS box rather than to the page,
+     because sticky resolves against the nearest scrolling ancestor — which is
+     also why they need `top:0` here and not the page-header offset. */
+  .table-scroll{max-height:min(62vh,680px); overflow:auto; overscroll-behavior:contain}
+  .table-scroll thead th{top:0}
+  /* A scrolling body needs its own inner padding — the padding that was on the
+     card would scroll away with the content. */
+  .card-b.card-scroll{padding-top:12px}
+  @media (max-width:1023px){
+    /* One column now, so nothing is competing for height: let them run. */
+    .card-scroll{max-height:none; overflow:visible}
+  }
+
+  /* ── Tables ─────────────────────────────────────────────────────────────── */
+  table{width:100%; border-collapse:collapse}
+  /* FROZEN. Twenty rows in, a column of dates and pills with no heading above it
+     is a column of unlabelled values — you scroll back up to remember which one
+     is "Last active". The rule is drawn with an inset shadow rather than a
+     border, because a sticky cell leaves its collapsed border behind. */
+  thead th{font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); text-align:left; padding:9px 16px;
+    white-space:nowrap; background:#FAFAFB;
+    position:sticky; z-index:3; box-shadow:inset 0 -1px 0 var(--line)}
+  thead th.sortable{cursor:pointer; user-select:none}
+  thead th.sortable:hover{color:var(--indigo)}
+  thead th .car{opacity:.55; font-size:9px; margin-left:3px}
+  tbody td{padding:9px 16px; border-bottom:1px solid var(--line-2); vertical-align:middle}
+  /* CENTRED COLUMNS. A one-character value left-aligned under a nine-character
+     heading ("3" under ASSIGNED) does not read as a column at all — the eye has
+     nothing to run down. Text columns stay left, where a name or a sentence is
+     found by its first letter; the short ones are centred under their heading,
+     header and cell together, so the pair reads as one column. */
+  th.col-c, td.col-c{text-align:center}
+  td.col-c .mcell{justify-content:center}
+  tbody tr:last-child td{border-bottom:0}
+  tr.rowlink{cursor:pointer}
+  tr.rowlink:hover{background:#FAFAFB}
+  tr.rowlink.open{background:#F6F7F8}
+  td.r{text-align:right; white-space:nowrap}
+  .person{display:flex; align-items:center; gap:10px; min-width:0}
+  .av{width:30px; height:30px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo-ink);
+    display:grid; place-items:center; font-size:11px; font-weight:800; flex:none}
+  .pn{min-width:0}
+  .member-name{display:block; font-weight:650; font-size:13.5px; letter-spacing:-.01em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .member-email{display:block; color:var(--muted); font-size:11.5px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .member-active{font-size:12.5px; color:var(--ink-soft); white-space:nowrap}
+  /* THE DISCLOSURE MARK IS THE ONLY SIGN A ROW OPENS, so it was the one thing
+     on the row that must not be the faintest. At 11px in #AFB4D0 it was two
+     steps lighter than the text beside it and smaller than everything else —
+     an affordance you have to hunt for is not an affordance. Same weight as
+     the muted text now, half again the size, and it goes indigo with the row
+     under the cursor so the whole row reads as one target. */
+  .chev{color:var(--muted); font-size:16px; font-weight:700; line-height:1;
+    width:18px; text-align:center}
+  tr.rowlink:hover .chev{color:var(--indigo)}
+  tr.rowlink.open .chev{color:var(--indigo)}
+  .csub{display:block; color:var(--muted); font-size:11.5px; font-weight:400}
+
+  /* THE EXPANDED MEMBER. The detail that used to print on all twenty-five cards,
+     drawn for the one person being looked at.
+
+     It needs a VISIBLE EDGE. A tinted cell alone melted into the page — the
+     panel and the rows below it were the same two greys, so where one person's
+     detail stopped and the next person's row began was a guess. So: the open
+     summary row takes the tint and loses its bottom rule (the two are one
+     object), an indigo bar runs down the left of both, and the detail itself is
+     a bordered white panel inside the tinted cell. */
+  tr.rowlink.open td{background:#F4F5F6; border-bottom:0; box-shadow:none}
+  tr.rowlink.open td:first-child{box-shadow:inset 3px 0 0 var(--indigo)}
+  tr.member td{background:#F4F5F6; padding:0 16px 14px;
+    border-bottom:1px solid var(--line); box-shadow:inset 3px 0 0 var(--indigo)}
+  .member-body{background:#fff; border:1px solid #DFE2F2; border-radius:var(--r-card);
+    padding:4px 14px 14px; margin-left:42px}
+  @media (max-width:760px){ tr.member td{padding:0 10px 12px} .member-body{margin-left:0} }
+
+  .pill{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:750;
+    padding:3px 9px; border-radius:99px; white-space:nowrap}
+  .pill.done{background:var(--success-soft); color:var(--success)}
+  .pill.overdue{background:var(--err-soft); color:var(--err)}
+  .pill.due_soon{background:var(--warn-soft); color:var(--warn)}
+  .pill.upcoming{background:var(--indigo-soft); color:var(--indigo-ink)}
+  .pill.idle{background:#F0F1F3; color:var(--muted)}
+  .pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
+  .role-pill{font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--indigo); background:var(--indigo-soft); padding:2px 7px; border-radius:99px}
+
+  /* ── The roster as cards ──────────────────────────────────────────────────
+     ONE PERSON, ONE CARD. The roster was a table, on the argument that a record
+     is read by comparing down a column — true on a wide screen, and the reason
+     the table is still what the PDF and the CSV produce. On screen it had two
+     costs the columns could not pay: at tablet width the row ran 312px past the
+     pane, so an open member showed its left third, and a row of bare figures
+     needs its heading three screens up to mean anything.
+
+     A card carries its own labels and cannot overflow sideways, and the detail
+     opens INSIDE it — so an open member is a card that grew, rather than two
+     table rows styled into looking joined. */
+  .mlist{display:flex; flex-direction:column; gap:10px; padding:10px 16px 16px}
+  /* TWO BANDS: who, on a grey header; what they have done, on white beneath.
+     A card of uniform white made the name and the four figures one undivided
+     block of text — the tint does the separating that a heading would. */
+  .mcard{background:#fff; border:1px solid var(--line); border-radius:var(--r-card);
+    cursor:pointer; box-shadow:var(--shadow-sm); overflow:hidden;
+    transition:border-color .12s ease, box-shadow .12s ease}
+  .mcard:hover{border-color:#C9CDEA}
+  .mcard:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+  /* Open: the indigo bar the table row used to carry, so "this is the one I
+     opened" survives the change of container. The card stops being a button. */
+  /* THE BAR RUNS THE WHOLE CARD. As an inset shadow on the card it was painted
+     UNDER the children, so the grey summary band and the white figures band
+     covered it and it only appeared beside the detail panel, which has no
+     background of its own — it looked like a bar on the panel rather than a
+     mark on the card. A positioned strip paints above them, and the card's
+     overflow:hidden keeps it inside the corner radius. */
+  .mcard{position:relative}
+  .mcard.open{border-color:#C9CDEA; cursor:default; box-shadow:var(--shadow-sm)}
+  .mcard.open::before{content:""; position:absolute; left:0; top:0; bottom:0;
+    width:3px; background:var(--indigo); z-index:2; pointer-events:none}
+  .mcard-sum{display:flex; align-items:center; gap:12px;
+    background:var(--card-head); padding:12px 14px; border-bottom:1px solid var(--line-2)}
+  .mcard-right{display:flex; align-items:center; gap:10px; margin-left:auto}
+  .mcard-right .chev{font-size:16px; font-weight:700; line-height:1; width:18px;
+    text-align:center; color:var(--muted)}
+  .mcard:hover .chev, .mcard.open .chev{color:var(--indigo)}
+  /* THE FIGURES CARRY THEIR OWN LABELS. A column heading says "Courses" once for
+     twenty-five rows; a card has to say it itself or the numbers are a row of
+     digits whose meaning is somewhere else on the page. */
+  /* The four fit one line at 820 with these numbers — measured; they wrapped
+     at a 26px gap and a 168px bar, and "Last active" alone on a second row
+     reads as a different kind of thing from the three above it. */
+  .mcard-meta{display:flex; flex-wrap:wrap; gap:10px 20px;
+    background:#fff; padding:11px 14px}
+  .mstat{min-width:86px}
+  .mstat-l{display:block; font-size:9.5px; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted)}
+  .mstat-v{margin-top:4px; font-size:13px; font-weight:650; color:var(--ink);
+    font-variant-numeric:tabular-nums}
+  /* THE BAR AND ITS COUNT STAY UNDER THEIR OWN HEADING. At 140px the pair ran
+     wider than "COURSE PROGRESS" above it, so the count drifted along until it
+     sat under "DOCUMENTS" and looked like that column's figure. Measured: the
+     heading's text is 106px, so that is the pair's width and the count now ends
+     where the heading ends. */
+  .mcard-meta .mcell{width:106px; gap:7px}
+  .mcard-meta .mbar{flex:1 1 auto}
+  .mcard > .member-body{margin:0 14px 14px; width:auto; cursor:default}
+  @media (max-width:760px){ .mlist{padding:10px 10px 14px} .mcard-meta{gap:10px 16px} }
+
+
+  /* ── Certificates as records ───────────────────────────────────────────────
+     Holder, course, number, date and score each had a narrow column, so below a
+     wide desktop every one of them wrapped — a course title over three lines
+     beside a number broken across two, in a row 114px tall. The row now reads
+     the way the record reads: what was earned, by whom, and the number and date
+     that prove it. */
+  .certlist{display:flex; flex-direction:column}
+  .certrow{display:flex; align-items:center; gap:12px; padding:11px 16px;
+    border-top:1px solid var(--line-2)}
+  .certrow:first-child{border-top:0}
+  .certrow:hover{background:#FAFAFB}
+  .certmark{flex:none; width:30px; height:30px; border-radius:9px;
+    background:var(--indigo-soft); display:flex; align-items:center; justify-content:center}
+  .certmark svg{width:16px; height:16px; stroke:var(--indigo); fill:none;
+    stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+  .certmain{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px}
+  .certcourse{font-size:13px; font-weight:650; color:var(--ink); line-height:1.3}
+  /* The holder is the SECOND fact here — the list is of certificates — so the
+     name sits under the course rather than in a column of its own, with the
+     address after it where it can be truncated without losing the name. */
+  .certwho{font-size:11.5px; color:var(--muted); display:flex; gap:6px; min-width:0}
+  .certwho .member-email{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .certmeta{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:1px}
+  .certmeta .num{font-size:11.5px; font-weight:700; color:var(--ink-soft);
+    font-variant-numeric:tabular-nums; white-space:nowrap}
+  .certdate{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;
+    white-space:nowrap}
+  .certscore{flex:none; width:52px; display:flex; justify-content:flex-end}
+  @media (max-width:760px){ .certrow{padding:11px 10px; gap:9px} .certscore{display:none} }
+
+  /* The order is one control, because a card has no column heading to click. */
+  .rsortbar{display:flex; align-items:center; gap:6px}
+  .rsort-l{font-size:9.5px; font-weight:800; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted)}
+  .rsort-sel{font:inherit; font-size:12.5px; font-weight:600; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:99px; padding:6px 10px}
+  .rsort-dir{font-size:10px; line-height:1; color:var(--muted); background:#fff;
+    border:1px solid var(--line); border-radius:99px; padding:8px 9px; cursor:pointer}
+  .rsort-dir:hover{color:var(--indigo); border-color:#C9CDEA}
+
+  /* Per-member chips, kept for the expanded body. */
+  .mchips{display:flex; flex-wrap:wrap; gap:6px}
+  .mchip{font-size:11px; font-weight:750; padding:2px 9px; border-radius:99px; white-space:nowrap;
+    background:var(--indigo-soft); color:var(--indigo-ink)}
+  .mchip.overdue{background:var(--err-soft); color:var(--err)}
+  .mchip.due_soon{background:var(--warn-soft); color:var(--warn)}
+  .mchip.done{background:var(--success-soft); color:var(--success)}
+  .mchip.needs{background:var(--err-soft); color:var(--err)}
+  .mchip.none{background:#F0F1F3; color:var(--muted)}
+
+  /* Counts, not an average of percentages: an average of four half-read courses
+     and one finished says "60%" and means nothing anybody can act on. */
+  .mbar{position:relative; height:5px; border-radius:99px; background:#EBECEE; overflow:hidden;
+    min-width:74px; flex:1}
+  .mbar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px; background:var(--success)}
+  .mcell{display:flex; align-items:center; gap:9px}
+  .mcell small{color:var(--muted); font-size:11.5px; white-space:nowrap; font-variant-numeric:tabular-nums}
+
+  /* ONE WRAPPING GROUP, FLOWING LIKE TEXT. `display:contents` on the filters
+     puts the chips and the sort control in the SAME flex line rather than in
+     two boxes, so the sort follows "Unassigned" directly and, when the width
+     runs out, drops to the next line LEFT-ALIGNED under the chips instead of
+     being pushed to the far right on a line of its own. A group that wraps is
+     fine; a group that wraps and changes alignment is the staircase.
+
+     The sort cannot share the line at 820 — four chips and the control come to
+     ~750px in a ~520px row — so on a tablet it sits under them, which is the
+     best available and still reads as one cluster. */
+  .rctrls{display:flex; flex-wrap:wrap; align-items:center; gap:8px; width:100%}
+  .rfilters{display:contents}
+  /* The count rides inside the chip as its own quiet badge rather than as part
+     of the label, so the words line up and the numbers do too. */
+  .rchip-n{margin-left:6px; padding:1px 6px; border-radius:99px; font-size:10.5px;
+    font-weight:800; background:#EDEEF2; color:var(--muted);
+    font-variant-numeric:tabular-nums}
+  .rchip.on .rchip-n{background:rgba(255,255,255,.22); color:#fff}
+  .rchip:disabled .rchip-n{background:#F0F1F3}
+  .rchip{font:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft); padding:5px 11px; border-radius:99px}
+  .rchip:hover{background:var(--indigo-soft)}
+  .rchip.on{background:var(--indigo); border-color:var(--indigo); color:#fff}
+  .rchip:disabled{opacity:.45; cursor:default; background:#fff}
+
+  /* ── Assignment rows (inside an expanded member) ────────────────────────── */
+  .alist{margin:10px 0 0; padding:0; list-style:none}
+  /* ONE TOOLBAR ROW: select-all and Remove on the left, the two exports on the
+     right. They only fit if the exports are compact — at the page's normal
+     button size the row ran ~10px over the panel and the exports dropped to a
+     line of their own, right-aligned under left-aligned controls, which is the
+     staircase this replaces. They keep the word "Export": bare "PDF" next to
+     Edit and Remove reads as something to open, not something that produces a
+     file. */
+  .abulk{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap}
+  .abulk > div:last-child{margin-left:auto; display:flex; gap:7px}
+  .abulk .btn-ghost{font-size:11.5px; padding:6px 9px; gap:5px}
+  .abulk .btn-ghost svg{width:13px; height:13px}
+  .abulk-count{margin-left:0}
+  .abulk-all{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--ink-soft); cursor:pointer}
+  .abulk-all input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
+  .abulk-count{font-size:11.5px; font-weight:700; color:var(--muted); white-space:nowrap}
+  .aitem{display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--line-2); flex-wrap:wrap}
+  /* margin:0 is load-bearing: the checkbox sits in an `auto` grid track, and the
+     browser's own default margin made that track 21px rather than the 15px the
+     rows beneath it reserve — so every course title started 6px right of every
+     document and certificate title. */
+  .aitem input.apick{width:15px; height:15px; accent-color:var(--indigo); flex:none; margin:0}
+  .aitem .course{font-weight:600; flex:1 1 220px; min-width:0; font-size:13px}
+  .aitem .course small{display:block; color:var(--muted); font-weight:400; font-size:11.5px}
+  .aitem .meta{color:var(--muted); font-size:12.5px; white-space:nowrap}
+  .aitem .actions{display:flex; gap:7px; margin-left:auto}
+
+  /* AN ASSIGNMENT ROW IS A GRID, for the same reason "Needs attention" is: these
+     are read by scanning down the status column. On flex the pill sat wherever
+     the actions beside it happened to end, and a completed course (Remove only)
+     pushed its pill 60px right of the row above it (Edit + Remove) — three
+     pills, three different columns, in a list of three.
+
+     The actions track is a FIXED width, wide enough for Edit + Remove, so the
+     pill does not move when one row loses its Edit button. */
+  .aitem-asg{display:grid; align-items:center; flex-wrap:nowrap;
+    grid-template-columns:auto minmax(0,1fr) 92px 152px}
+  .aitem-asg .course{flex:none}
+  .aitem-asg > .pill{justify-self:start}
+  .aitem-asg .actions{margin-left:0; justify-content:flex-end}
+  @media (max-width:760px){
+    .aitem-asg{grid-template-columns:auto minmax(0,1fr) 92px; row-gap:7px}
+    .aitem-asg .actions{grid-column:2/-1; justify-content:flex-start}
+  }
+  .nextup{font-size:10px; font-weight:800; color:var(--amber); text-transform:uppercase;
+    letter-spacing:.06em; margin-left:4px}
+  .prog{display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap}
+  .prog .bar{position:relative; flex:1 1 110px; max-width:170px; height:5px; border-radius:99px;
+    background:#EBECEE; overflow:hidden}
+  /* PROGRESS IS GREEN AT EVERY LEVEL (SME). It was indigo until complete and
+     green after, which made the bar carry the done/not-done signal — a signal
+     already stated twice beside it, by the status pill and by the percentage.
+     Spending a colour on a third copy of it left the common case, a course
+     part-finished, looking like brand furniture rather than like progress.
+
+     RED STAYS, because at-risk is the one thing the bar says that nothing next
+     to it does. A colour earns its place by being the only carrier of
+     something. */
+  .prog .bar i{position:absolute; inset:0 auto 0 0; display:block; border-radius:99px;
+    background:var(--success)}
+  .prog .bar.risk i{background:var(--err)}
+  .prog small{color:var(--muted); font-size:11.5px}
+  .prog .flag{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--err)}
+  .prog .flag.idle{color:var(--muted)}
+  .editor{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; padding:9px;
+    background:#fff; border:1px solid var(--line); border-radius:var(--r-ctl)}
+  .editor .field{margin:0; width:auto}
+
+  /* ── Needs attention + Certificates: flat record rows. ─────────────────────
+     GRID, NOT FLEX. These are lists read by scanning DOWN a column — "who is
+     overdue", "how late" — and with flex every cell started wherever the name
+     before it happened to end, so the pills and the dates zig-zagged down the
+     list and the eye had to find each one. Fixed tracks put them in columns.
+     The widths are the widest real content: "Due soon" for the pill, and
+     "11 days late · 28-Sep-2026" for the date. */
+  .frow{display:grid; align-items:center; gap:12px; padding:9px 16px; border-top:1px solid var(--line-2)}
+  .frow:first-child{border-top:0}
+  .frow .who{font-weight:600; min-width:0; font-size:13px}
+  .frow .who small{display:block; color:var(--muted); font-weight:400; font-size:11.5px}
+  .frow .when{color:var(--ink-soft); font-size:12.5px; white-space:nowrap}
+  .frow .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--ink-soft); white-space:nowrap}
+  .frow .actions{display:flex; gap:7px; justify-content:flex-end}
+  /* who | pill | when | actions.
+     EVERY TRACK AFTER THE FIRST IS A FIXED WIDTH, and that is the whole trick:
+     each row is its own grid container, so an `auto` track sizes to THAT row's
+     text — "1 day late · 01-Oct-2026" and "due in 3 days · 05-Oct-2026" are
+     different widths, and the 1fr before them absorbed the difference, which
+     put the three pills at three different x positions. Measured, not guessed:
+     84px fits "Due soon", 185px fits "11 days late · 28-Sep-2026", 152px fits
+     Extend + Remind. */
+  .frow-att{grid-template-columns:minmax(0,1fr) 84px 185px 152px}
+  /* A grid item stretches by default, which would pull the pill's background
+     across the whole 84px track and make a short word look like a long one. */
+  .frow > .pill{justify-self:start}
+  /* course | number | issued — fixed for the same reason as above. */
+  .frow-cert{grid-template-columns:minmax(0,1fr) 190px 120px}
+  /* THE CARD'S WIDTH DECIDES, NOT THE WINDOW'S — and that distinction is the
+     whole bug. These four tracks need 457px before the name gets anything, and
+     on an iPad in landscape the window is 1180 (so a `max-width:980px` rule
+     never fires) while the card, sharing the row with the licence panel, is
+     about 490. The name track was left FIVE PIXELS, so "Airworthiness Review
+     (ARC)" came out as three stacked fragments.
+
+     A container query asks the question that matters. Below 640px of card the
+     row becomes two lines: who and the status above, the date and the buttons
+     below, each still in a column that lines up down the list. */
+  #attentionCard{container-type:inline-size; container-name:att}
+  @container att (max-width:640px){
+    .frow-att{grid-template-columns:minmax(0,1fr) auto; row-gap:7px}
+    .frow-att .when{grid-column:1; white-space:nowrap}
+    .frow-att .actions{grid-column:2; justify-content:flex-end}
+  }
+  /* Fallback for a browser without container queries: the viewport rule that
+     was here before, which is right whenever the window itself is narrow. */
+  @supports not (container-type:inline-size){
+    @media (max-width:980px){
+      .frow-att{grid-template-columns:minmax(0,1fr) 84px auto; row-gap:6px}
+      .frow-att .actions{grid-column:1/-1; justify-content:flex-start}
+    }
+  }
+
+  /* A standing fact in the Licence panel: label left, value right, nothing to
+     act on. Deliberately not a .frow — it has two cells, not four, and feeding
+     it the attention grid would leave two empty tracks holding the value out in
+     the middle of the card. */
+  /* ONE LINE, NOT TWO, AND THE RULE BELONGS BETWEEN THE ROWS. A row drawing its
+     own top border needed an exception wherever something else already ended in
+     a line — under the licence meter, under a contract heading — and the
+     exception was written `:first-of-type`, which selects the first DIV among
+     its siblings, not the first `.kv`. The meter's own div came first, so no
+     row ever matched and the double line stayed. A separator between adjacent
+     rows needs no exception anywhere: the first row of any run simply has
+     nothing above it to separate from. */
+  .kv{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:7px 0}
+  .kv + .kv{border-top:1px solid var(--line-2)}
+  .kv span{color:var(--muted); font-size:12.5px; min-width:0}
+  .kv b{font-size:13px; white-space:nowrap; display:inline-flex; align-items:center}
+
+  /* THE LICENCE HEADLINE. One figure answers the question this panel is opened
+     for — how many licences are left — and the rest stays reference beneath it.
+     Six rows of equal weight made the admin read all six to find that one. */
+  .lic-head{padding:2px 0 12px; border-bottom:1px solid var(--line-2); margin-bottom:2px}
+  .lic-fig{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .lic-fig b{font-size:30px; font-weight:750; letter-spacing:-.03em; color:var(--ink);
+    margin-right:3px; line-height:1.1}
+  .lic-fig.full b{color:var(--warn)}
+  .lic-cap{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--muted); margin-top:1px}
+  .lic-meter{height:6px; border-radius:99px; background:#EBECEE; overflow:hidden; margin:10px 0 0}
+  .lic-meter i{display:block; height:100%; border-radius:99px;
+    background:linear-gradient(90deg,var(--indigo),var(--indigo-3))}
+  /* Amber at the cap, because that is the moment a new colleague cannot be
+     added and nothing else on the page says so. */
+  .lic-meter.full i{background:linear-gradient(90deg,#C25B00,var(--amber))}
+
+  /* ONE CONTRACT, READ TOP TO BOTTOM. An organisation that renews or tops up
+     holds several at once with different end dates and different course scopes,
+     so each gets its own bordered block with its reference as the heading —
+     that reference is what an admin quotes when they email us, and what they
+     match against an invoice. */
+  .contract{border:1px solid var(--line); border-radius:var(--r-ctl);
+    padding:9px 11px 4px; margin-bottom:9px; background:#FAFAFB}
+  .contract-h{display:flex; align-items:center; justify-content:space-between;
+    gap:8px; padding-bottom:7px; border-bottom:1px solid var(--line-2)}
+  .contract-h b{font-size:12.5px; font-weight:750; letter-spacing:-.01em; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .contract .kv{padding:5px 0}
+  .contract .kv span{font-size:12px}
+  .contract .kv b{font-size:12.5px; white-space:normal; text-align:right}
+
+  /* WHAT THE CONTRACT INCLUDES, on its own full-width line. The rows above it
+     are label-and-figure pairs; this one is a sentence, and a sentence
+     right-aligned into a narrow column wraps ragged and strands its disclosure
+     arrow at the far edge from the words it opens. */
+  .lic-incl{padding:7px 0 2px; border-top:1px solid var(--line-2)}
+  .lic-incl-k{display:block; font-size:11px; font-weight:800; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:3px}
+  .lic-incl-v{font-size:12.5px; color:var(--ink-soft); line-height:1.45}
+
+  /* "7 courses · EASA, UK CAA" says how much and roughly what. An admin
+     checking whether a colleague can be given Part-145 needs to know WHICH
+     seven, so the summary opens to the list — eighty titles cannot be the
+     default state of a sidebar, but they must be reachable without asking us. */
+  /* A BUTTON CENTRES ITS TEXT BY DEFAULT, and that is the whole of this bug:
+     "75 courses · EASA, UK CAA, UAE GCAA, FAA" wraps on a narrow panel, and
+     the orphaned "FAA" sat in the middle of the line under a left-aligned
+     first line. Inline-flex made it worse — the chevron is a sibling item, so
+     it parked at the far right of the whole two-line block instead of
+     following the last word.
+
+     Inline display, left-aligned, with the arrow as an inline-block that flows
+     after the text it opens. */
+  .lic-more{border:0; background:none; font:inherit; font-size:12.5px; font-weight:700;
+    color:var(--indigo); cursor:pointer; padding:0; display:inline; text-align:left}
+  .lic-more .fold-chev{display:inline-block; margin-left:6px; vertical-align:middle}
+  .lic-more:hover{color:var(--indigo-ink)}
+  .lic-more[aria-expanded="false"] .fold-chev{transform:rotate(-90deg)}
+  .lic-more .fold-chev{border-top-color:currentColor}
+  .lic-courses{padding:2px 0 6px}
+  .lic-fw{font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--muted); margin:8px 0 3px}
+  .lic-course{font-size:12.5px; color:var(--ink-soft); padding:2px 0 2px 10px;
+    display:flex; align-items:baseline; gap:7px}
+  /* A free anchor rides on every licence whether it was bought or not, so
+     listing it as "included" without saying so overstates the contract. */
+  .lic-free{font-size:9.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--success); background:var(--success-soft); padding:1px 6px; border-radius:99px}
+
+  /* THE SEAT CODES on a contract. They were returned once, at issue, to
+     whoever received our email — so onboarding depended on that person still
+     having it. Monospace, one per line, each copyable, and the spent ones
+     struck through so the list reads as inventory. */
+  .codes{margin:8px 0 2px; border:1px solid var(--line); border-radius:var(--r-ctl); background:#fff}
+  .codes-h{display:flex; align-items:center; gap:8px; padding:7px 9px; border-bottom:1px solid var(--line-2)}
+  .codes-h .n{font-size:11.5px; font-weight:700; color:var(--muted); flex:1}
+  .code-row{display:flex; align-items:center; gap:8px; padding:4px 9px; border-top:1px solid var(--line-2)}
+  .code-row:first-of-type{border-top:0}
+  .code-row code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px;
+    color:var(--ink); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis}
+  .code-row.used code{color:var(--muted); text-decoration:line-through}
+  .code-row .used-tag{font-size:9.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted)}
+  .code-copy{border:0; background:none; cursor:pointer; color:var(--indigo); font:inherit;
+    font-size:11px; font-weight:700; padding:3px 6px; border-radius:6px}
+  .code-copy:hover{background:var(--indigo-soft)}
+  /* A seat whose code cannot be read. Shown as dashes rather than left out:
+     the row is the only place the remedy can live, and a seat that is missing
+     from the list is a problem nobody can see. */
+  .code-lost{color:var(--muted); letter-spacing:.08em; user-select:none}
+  .codes-note{font-size:11.5px; line-height:1.45; color:var(--warn); padding:6px 9px 2px}
+
+  /* Recent activity: the latest movement per member, newest first. There is no
+     event log on the server, so this is built from what IS recorded —
+     `lastActiveAt` and completion dates — and says only what those can support. */
+  .act{display:flex; align-items:baseline; gap:8px; padding:7px 0; border-top:1px solid var(--line-2);
+    font-size:12.5px; color:var(--ink-soft); line-height:1.45}
+  .act:first-child{border-top:0}
+  .act b{font-weight:650; color:var(--ink)}
+  .act .ago{margin-left:auto; color:var(--muted); font-size:11.5px; white-space:nowrap; padding-left:8px}
+
+  /* ── Multi-select checklists (members, courses, document grants) ─────────── */
+  .ms-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch}
+  @media (max-width:900px){ .ms-grid{grid-template-columns:1fr} }
+  /* THE TWO PICKERS END LEVEL. One of them carries an extra "Select all shown"
+     row and the other a note underneath, so left to their natural heights they
+     finished at different places and the pair read as misaligned rather than
+     as a pair. The grid stretches both columns to the taller one; the box
+     fills its column, and the LIST absorbs the difference — which also means
+     the extra room goes where it is useful, to the names. */
+  .ms-grid > div{display:flex; flex-direction:column; min-height:0; max-height:440px}
+  .ms-grid .ms{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
+  /* A FLOOR BELONGS ON THE COLUMN, NEVER ON THE LIST. `.ms` clips (it has the
+     rounded border), so a list that cannot shrink below its floor overflows the
+     box it sits in and the overflowing part is clipped away — and because the
+     list's OWN scrollport is the full floor height, scrolling never brings
+     those rows into the visible part. The bottom of the member picker was
+     unreachable: not a scrolling bug, a row that was never on screen to scroll
+     to. The column carries the floor instead, so a short window makes the form
+     scroll — which works — and the list always fits its box exactly. */
+  .ms-grid > div{min-height:248px}
+  .ms-grid .ms-list{flex:1 1 auto; min-height:0; max-height:none}
+  .ms{border:1px solid var(--line); border-radius:var(--r-card); background:#fff; overflow:hidden}
+  .ms-tools{display:flex; align-items:center; gap:9px; padding:8px 11px; border-bottom:1px solid var(--line); background:#FAFAFB}
+  .ms-tools .grow{flex:1; min-width:0}
+  .ms-count{font-size:11.5px; font-weight:700; color:var(--muted); white-space:nowrap}
+  .ms-search{width:100%; border:1px solid var(--line); border-radius:7px; padding:6px 10px;
+    font:inherit; font-size:13px; background:#fff; color:var(--ink)}
+  .ms-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .ms-list{max-height:240px; overflow-y:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch; padding:3px 0}
+  .ms-row{display:flex; align-items:center; gap:10px; padding:6px 11px; font-size:13px; cursor:pointer}
+  .ms-row:hover{background:#FAFAFB}
+  .ms-row input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
+  .ms-row .sub{color:var(--muted); font-size:11.5px}
+  /* THE FRAMEWORK HEADER. It was 10px uppercase micro-caps with a text-glyph
+     chevron and "(3/24)" — the type of a field label on a control that is
+     clicked, tied with a count written as a notation to decode. It is a ROW
+     now: readable weight, a real chevron that turns, and the count as a
+     badge that goes indigo once something inside is picked, so a collapsed
+     group still says whether it holds any of the selection. */
+  .ms-group{font-size:13px; font-weight:700; letter-spacing:-.01em; color:var(--ink);
+    padding:9px 11px; display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none;
+    border-top:1px solid var(--line); background:#FAFAFB}
+  .ms-group:first-child{border-top:0}
+  .ms-group:hover{background:var(--indigo-soft)}
+  .ms-group.open{background:#fff}
+  .ms-group.open .ms-gname{color:var(--indigo-ink)}
+  .ms-group input{width:15px; height:15px; accent-color:var(--indigo); flex:none}
+  .ms-chev{width:9px; height:9px; flex:none; font-size:0; color:transparent;
+    border-left:4.5px solid transparent; border-right:4.5px solid transparent;
+    border-top:5.5px solid var(--muted); transform:rotate(-90deg);
+    transition:transform .14s ease; margin-right:1px}
+  .ms-group.open .ms-chev{transform:none; border-top-color:var(--indigo)}
+  .ms-gname{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  /* The count, as a badge rather than a parenthesis. */
+  .ms-gcount{flex:none; font-size:11px; font-weight:750; color:var(--muted);
+    background:#EDEEF0; padding:2px 8px; border-radius:99px; font-variant-numeric:tabular-nums}
+  .ms-group.picked .ms-gcount{background:var(--indigo); color:#fff}
+  /* Courses sit UNDER their framework, so the hierarchy is visible without
+     reading the headers. */
+  .ms-list .ms-row[data-key]{padding-left:34px}
+  .ms-note{font-size:11.5px; color:var(--muted); line-height:1.45; padding:8px 11px;
+    border-top:1px solid var(--line); background:#FAFAFB}
+  .ms-note:empty{display:none}
+
+  /* ── Assign: Who → What → When, read left to right. ──────────────────────── */
+  .step-k{display:flex; align-items:center; gap:8px; margin-bottom:7px}
+  .step-n{width:19px; height:19px; border-radius:50%; background:var(--indigo); color:#fff;
+    font-size:11px; font-weight:800; display:grid; place-items:center; flex:none}
+  .step-k b{font-size:12.5px; font-weight:700; letter-spacing:-.01em}
+  .step-k .lbl{font-size:12px; color:var(--muted); font-weight:500; margin:0}
+  /* NOWRAP IS WHAT MAKES THE MIN-WIDTHS WORK. With `flex-wrap:wrap` a flex item
+     breaks to a new line INSTEAD of shrinking, so the fields never gave up the
+     50px that would have kept Reset on the row — it simply dropped below,
+     looking like a different control. Nowrap lets them shrink to their floors
+     first, which is the behaviour the floors were written for. Phones wrap,
+     where one row genuinely cannot hold four things. */
+  .assign-foot{display:flex; gap:12px; margin-top:10px; flex-wrap:nowrap; align-items:flex-end}
+  @media (max-width:760px){ .assign-foot{flex-wrap:wrap} }
+  /* The fields shrink before the row wraps: four fixed 190s plus two buttons
+     is wider than the panel, and a wrapped Reset ends up on a line of its own
+     looking like a different control. */
+  .assign-foot > div{flex:0 1 190px; min-width:140px}
+  /* Exports beside the dates; the reset pushed to the far right. */
+  .assign-foot > .rec-xp{flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-start}
+  .assign-foot > .rec-xp .pacts{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start}
+  .assign-foot > .rec-reset{flex:0 1 150px; min-width:108px; margin-left:auto}
+  .assign-foot .field{margin:0}
+  /* The consequence stated before the button is reachable: how many assignments
+     this makes, on what dates. The button then carries the count itself. */
+  /* THE LAST STEP NEEDS AIR ABOVE IT. `.formfoot` is given its spacing inside
+     the desktop block, where it is also pinned — so on a tablet it had none at
+     all and step 3 sat hard against the picker above it. The margin belongs
+     here, where every width gets it; the desktop block only adds the pinning. */
+  .formfoot{margin-top:20px}
+  .sumbar{display:flex; align-items:center; gap:14px; margin-top:16px; padding:12px 16px;
+    background:var(--indigo-soft); border:1px solid #D7D9F5; border-radius:var(--r-card); flex-wrap:wrap}
+  .sumbar .t{flex:1 1 320px; font-size:13px; color:var(--indigo-ink); line-height:1.5}
+  .sumbar .t b{font-weight:750}
+  .sumbar.idle{background:#FAFAFB; border-color:var(--line)}
+  .sumbar.idle .t{color:var(--muted)}
+
+  /* Who is picked, kept in sight while the dates are set. */
+  /* THE GUIDE DOWN TO THE SCHEDULE. Quiet — it is a signpost, not a second
+     call to action, and it sits beside the one button on this form that does
+     anything. The arrow is drawn rather than typed so it keeps its weight next
+     to the label at any text size. */
+  .seeplan{display:inline-flex; align-items:center; gap:7px; flex:none; cursor:pointer;
+    border:1px solid #C9CDEA; background:#fff; color:var(--indigo); border-radius:var(--r-ctl);
+    font:inherit; font-size:12.5px; font-weight:650; padding:6px 11px; white-space:nowrap}
+  .seeplan:hover{background:#F6F7F8; color:var(--indigo-ink); border-color:var(--indigo-3)}
+  .seeplan-chev{width:0; height:0; flex:none; border-left:4.5px solid transparent;
+    border-right:4.5px solid transparent; border-top:6px solid currentColor;
+    animation:seeplan-nudge 1.8s ease-in-out 3}
+  @keyframes seeplan-nudge{
+    0%,70%,100%{transform:translateY(0)} 80%{transform:translateY(3px)} 90%{transform:translateY(0)}
+  }
+  @media (prefers-reduced-motion:reduce){ .seeplan-chev{animation:none} }
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px}
+  .chips:empty{display:none}
+  .chip{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:650;
+    background:var(--indigo-soft); color:var(--indigo-ink); padding:3px 4px 3px 10px; border-radius:99px}
+  .chip button{border:0; background:none; cursor:pointer; color:var(--indigo);
+    font-size:13px; line-height:1; padding:2px 5px; border-radius:99px; opacity:.7}
+  .chip button:hover{background:#fff; opacity:1}
+  .chips .more{font-size:12px; font-weight:650; color:var(--muted); align-self:center; padding:3px 4px}
+
+  /* The computed schedule. Two columns, so the dates line up and a gap in the
+     run is visible as a gap rather than as a sentence to re-read. */
+  .plan{margin-top:12px; border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden}
+  .plan:empty{display:none}
+  .plan-h{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--muted); padding:8px 13px; background:#FAFAFB; border-bottom:1px solid var(--line)}
+  .plan-r{display:grid; grid-template-columns:22px minmax(0,1fr) 120px; align-items:center;
+    gap:10px; padding:7px 13px; border-top:1px solid var(--line-2); font-size:13px}
+  .plan-r:first-of-type{border-top:0}
+  .plan-r .n{font-size:11px; font-weight:800; color:var(--muted); font-variant-numeric:tabular-nums}
+  .plan-r .d{text-align:right; font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
+  .plan-r .c{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+  /* ── Company documents ───────────────────────────────────────────────────── */
+  /* THE DOCUMENT TABLE. A row per document; the detail opens on the one being
+     worked on. Every document used to be drawn fully expanded, so one card
+     stood taller than the box that held it and you could see exactly one.
+
+     NARROWING AND ORDERING ARE TWO JOBS IN TWO PLACES. The filters were in the
+     column headings for a while, which made the table look like it carried two
+     filter systems stacked on each other — a heading row and a control row
+     reading as one confused band. Filters live in the bar above; the headings
+     sort, and nothing else. */
+  /* TWO CONTROLS: a search, and the view. Four dropdowns in a tinted tray read
+     as a control panel for a list of six things; this reads as a toolbar. */
+  /* THE FILTER BAR IS ONE ROW: the search, then three views of equal width.
+     They were content-sized, so "All" was a third of "Overdue familiarisation"
+     and the three read as a ragged group rather than as one control with three
+     positions — and on a tablet the set wrapped under the search. Equal tracks
+     make the segmented control look like what it is: a switch, where the three
+     options are the same KIND of thing and so should be the same size. */
+  .tbar{display:flex; align-items:center; gap:12px; flex-wrap:nowrap; margin-bottom:12px}
+  /* THE SEARCH GIVES WAY, NOT THE BUTTONS. The views had flex-shrink, so when
+     the row ran short they compressed and their labels overlapped — a control
+     that is unreadable is worse than a search box that is narrow. */
+  .tbar .seg{flex:0 0 auto; display:flex; min-width:0}
+  .tbar .seg-btn{flex:1 1 auto; min-width:104px; justify-content:center; padding:6px 10px}
+  @media (max-width:560px){
+    /* Only where one row genuinely cannot hold both. */
+    .tbar{flex-wrap:wrap}
+    .tbar .seg{flex:1 1 100%}
+  }
+  .tbar-search{flex:1 1 140px; min-width:120px; height:32px;
+    border:1px solid var(--line); border-radius:8px; background:#fff;
+    color:var(--ink); font:inherit; font-size:13px; padding:0 11px}
+  .tbar-search:focus{outline:none; border-color:var(--indigo-2); box-shadow:0 0 0 3px var(--indigo-soft)}
+  .tbar-search.on{border-color:var(--indigo-3); background:var(--indigo-soft)}
+
+  /* The views are mutually exclusive, so they are a segmented control, not
+     three checkboxes pretending otherwise. */
+  .seg{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px}
+  .seg-btn{display:inline-flex; align-items:center; gap:7px; border:0; background:none;
+    border-radius:7px; padding:6px 13px; font:inherit; font-size:12.5px; font-weight:650;
+    color:var(--ink-soft); cursor:pointer; white-space:nowrap}
+  .seg-btn:hover:not(:disabled):not(.on){color:var(--ink)}
+  .seg-btn.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(20,22,28,.12)}
+  /* A view with nothing in it is offered, greyed, rather than hidden: a control
+     that comes and goes is harder to learn than one that is sometimes inert. */
+  .seg-btn:disabled{opacity:.45; cursor:default}
+  .seg-n{font-size:11px; font-weight:750; background:var(--indigo); color:#fff;
+    padding:1px 7px; border-radius:99px; font-variant-numeric:tabular-nums}
+  .seg-btn.on .seg-n{background:var(--indigo)}
+  .seg-btn:disabled .seg-n{background:#C9CDEA}
+
+  /* The heading is a sort button and reads as one: the arrow points the way the
+     list is ordered rather than appearing only once clicked. */
+  .doctable thead th{padding:9px 14px}
+  .th-sort{display:inline-flex; align-items:center; gap:5px; border:0; background:none; padding:0;
+    font:inherit; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); cursor:pointer; white-space:nowrap}
+  .th-sort:hover{color:var(--indigo)}
+  .th-sort .car{font-size:8px; opacity:0; transition:opacity .12s}
+  .th-sort:hover .car{opacity:.45}
+  .th-sort .car.on{opacity:1; color:var(--indigo)}
+  .col-c .th-sort{justify-content:center}
+
+  .doctable td .doc-name{display:block; font-weight:700; font-size:13.5px; letter-spacing:-.01em}
+  .doctable td .doc-meta{display:block}
+  /* THE COMPANY BAND. It spans every column, so anything inside it lands under
+     whichever heading it happens to reach — "1 document" sat under
+     FAMILIARISATION and read as a value in that column. Tinted, with its own
+     rule above, it reads as a divider between runs rather than as a row of
+     data that has drifted out of alignment. */
+  .docgroup td{padding:0; background:#F4F5F6; border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line)}
+  .docgroup:first-child td{border-top:0}
+  .doc-detail{padding:12px 14px}
+
+  .doc-tools{display:flex; gap:10px; align-items:center; margin-bottom:6px}
+  .doc-tools .field{margin:0}
+  .doc-tools .dd{flex:0 0 230px; max-width:40%}
+  .doc-tools #docSearch{flex:1 1 auto; min-width:120px}
+  .doc-tools #docSort{flex:0 0 160px}
+  .docfilter{display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:650;
+    color:var(--ink-soft); white-space:nowrap; cursor:pointer}
+  .docfilter input{width:15px; height:15px; accent-color:var(--indigo)}
+  @media (max-width:700px){
+    .doc-tools{flex-direction:column; align-items:stretch}
+    .doc-tools .dd{flex:none; max-width:none}
+  }
+  .dd{position:relative}
+  .dd-btn{display:flex; align-items:center; justify-content:space-between; gap:8px; text-align:left; cursor:pointer}
+  .dd-caret{width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--muted); flex:none}
+  .dd-menu{position:absolute; z-index:40; top:calc(100% + 5px); left:0; right:0;
+    background:#fff; border:1px solid var(--line); border-radius:var(--r-card);
+    box-shadow:var(--shadow-pop); overflow:hidden}
+  .dd-menu .ms-list{max-height:240px}
+
+  /* An MRO holds its customers' manuals, so the list is grouped by WHO the
+     document belongs to — "that airline's documents" is how it is looked for. */
+  /* A FOLDABLE HOLDER. An MRO with thirty customers cannot scroll past every
+     one of them to reach the third; folded, each company is one line, and the
+     header still says how many documents are inside and how many of those are
+     restricted — so it can be read without opening it. */
+  .doc-company{display:flex; align-items:center; gap:9px; margin:0; width:100%;
+    border:0; background:none; padding:9px 16px; cursor:pointer; text-align:left}
+  .doc-company:hover{background:#FAFAFB}
+  .doc-company .fold-chev{flex:none}
+  .doc-company > .co-name{font-weight:800; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-soft); min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .doc-company.open > .co-name{color:var(--indigo-ink)}
+  .doc-company-n{font-size:11px; color:var(--muted); font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .doc-company-r{font-size:10.5px; font-weight:750; color:var(--indigo);
+    background:var(--indigo-soft); padding:2px 8px; border-radius:99px; white-space:nowrap}
+  .doc{border:1px solid var(--line); border-radius:var(--r-card); padding:13px 15px; margin-bottom:10px; background:#fff}
+  .doc-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .doc-name{font-size:14px; font-weight:700; letter-spacing:-.01em}
+  .doc-meta{color:var(--muted); font-size:11.5px}
+  .doc-count{font-size:11.5px; font-weight:700; color:var(--muted)}
+  /* Stated as a CHOICE rather than a switch: both halves name what happens,
+     where a toggle labelled "Restricted" leaves the reader working out which
+     way is on. The selected half is a raised white chip on a sunken track. */
+  .doc-modes{display:inline-flex; background:#F0F1F3; border-radius:9px; padding:3px; gap:3px; margin:11px 0 0}
+  .doc-mode{font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; white-space:nowrap;
+    border:0; background:none; color:var(--muted); padding:5px 12px; border-radius:7px}
+  .doc-mode:hover{color:var(--ink-soft)}
+  .doc-mode.on{background:#fff; color:var(--indigo-ink); box-shadow:0 1px 2px rgba(20,22,28,.12)}
+  .doc-people{margin-top:11px}
+  .doc-save{display:flex; align-items:center; gap:12px; margin-top:11px; padding:10px 12px;
+    background:var(--indigo-soft); border:1px solid #D7D9F5; border-radius:var(--r-ctl); flex-wrap:wrap}
+  .doc-save-txt{flex:1 1 220px; font-size:12.5px; color:var(--indigo-ink)}
+  .doc-save-btns{display:flex; gap:8px; margin-left:auto}
+
+  /* FAMILIARISATION, under the access controls on each document. Access says
+     who MAY open it; this says who must have READ this revision, by when, and
+     whether they have — the question an auditor asks, which the portal could
+     not answer at all. */
+  /* The familiarisation cell. "2/4 · 1 late" was three facts compressed into
+     punctuation; it is a short sentence now, with the part anybody acts on as
+     its own chip. */
+  .famcell{font-size:12.5px; color:var(--ink-soft)}
+  .famcell.none{color:var(--muted)}
+  .famcell.ok{color:var(--success); font-weight:650}
+  .famcell.bad{color:var(--err); font-weight:650}
+
+  .fam{margin-top:12px; border-top:1px solid var(--line); padding-top:11px}
+  .fam-h{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .fam-h b{font-size:12.5px; font-weight:750}
+  .fam-sum{font-size:12px; color:var(--muted); flex:1 1 auto}
+  .fam-h .btn-ghost{flex:none}
+  .fam-row{display:grid; grid-template-columns:minmax(0,1fr) 104px 168px; align-items:center;
+    gap:10px; padding:7px 0; border-top:1px solid var(--line-2); margin-top:7px}
+  .fam-row:first-of-type{margin-top:9px}
+  .fam-row .who{font-size:12.5px; font-weight:600; min-width:0}
+  .fam-row .who small{display:block; color:var(--muted); font-weight:400; font-size:11.5px}
+  .fam-row > .pill{justify-self:start}
+  .fam-row .actions{display:flex; gap:7px; justify-content:flex-end}
+  @media (max-width:900px){
+    .fam-row{grid-template-columns:minmax(0,1fr) 104px; row-gap:6px}
+    .fam-row .actions{grid-column:1/-1; justify-content:flex-start}
+  }
+
+  /* A MEMBER'S READINGS SIT DIRECTLY UNDER THEIR COURSES, so they are scanned
+     down the same two columns — status, then action. On the Documents screen a
+     familiarisation row stands alone and has its own widths; here it must take
+     the COURSE row's tracks instead, including an empty cell the width of that
+     row's checkbox, or the Overdue pill starts 45px left of the Completed pill
+     above it and the column stops being a column. */
+  .fam-row-mem{grid-template-columns:15px minmax(0,1fr) 92px 152px; gap:12px}
+  @media (min-width:761px){
+    .fam-row-mem{grid-template-columns:15px minmax(0,1fr) 92px 152px}
+    .fam-row-mem .actions{grid-column:auto; justify-content:flex-end}
+  }
+  @media (max-width:760px){
+    .fam-row-mem{grid-template-columns:15px minmax(0,1fr) 92px; row-gap:7px}
+    .fam-row-mem .actions{grid-column:2/-1; justify-content:flex-start}
+  }
+
+  /* THE EXPIRY NOTICE. Amber at 60 days and red inside 30 — the same two tones
+     this page already uses for "due soon" and "overdue", because an admin has
+     learned them on the roster and a third palette for the same idea is a
+     third thing to learn. Not dismissible: it is true until the contract is
+     renewed, and a notice that can be clicked away is one that gets clicked
+     away in week one and never seen again in week eight. */
+  .xnote{display:flex; align-items:flex-start; gap:11px; padding:12px 14px; margin:0 0 16px;
+    border:1px solid var(--warn); border-left-width:3px; border-radius:var(--r-card);
+    background:var(--warn-soft)}
+  .xnote.soon{border-color:var(--err); background:var(--err-soft)}
+  .xnote svg{width:17px; height:17px; flex:none; margin-top:1px; stroke:var(--warn);
+    fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+  .xnote.soon svg{stroke:var(--err)}
+  .xnote b{display:block; font-size:13px; font-weight:750; color:var(--ink); letter-spacing:-.01em}
+  .xnote span{display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px; line-height:1.45}
+  .xnote .xlist{margin:5px 0 0; padding:0; list-style:none}
+  .xnote .xlist li{font-size:12.5px; color:var(--ink-soft); padding:1px 0}
+  .xnote .xlist b{display:inline; font-size:12.5px}
+
+  /* ── Certificates ────────────────────────────────────────────────────────── */
+  .cgroup{border-top:1px solid var(--line-2)}
+  .cgroup:first-child{border-top:0}
+  .cg-name{display:flex; align-items:center; gap:9px; padding:9px 16px; cursor:pointer; font-size:13px; font-weight:650}
+  .cg-name:hover{background:#FAFAFB}
+  .cg-count{margin-left:auto; font-size:11.5px; font-weight:700; color:var(--muted)}
+  .cg-sub{color:var(--muted); font-size:12px; font-weight:400; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  /* Indented under its course heading. Display is NOT set here: the row is a
+     .frow grid, and re-declaring display:flex in a later rule would silently
+     undo the column alignment it was given. */
+  .cert-row{padding-left:40px; font-size:12.5px}
+
+  /* ── Paging ──────────────────────────────────────────────────────────────── */
+  .pager{display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:11px; border-top:1px solid var(--line)}
+  .pager:empty{display:none}
+  .pager button{font:inherit; font-size:12.5px; font-weight:650; cursor:pointer;
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft); padding:6px 13px; border-radius:99px}
+  .pager button:hover:not(:disabled){background:var(--indigo-soft)}
+  .pager button:disabled{opacity:.4; cursor:default}
+  .pager .pinfo{font-size:12.5px; color:var(--muted); font-weight:600}
+
+  /* ── Messages ────────────────────────────────────────────────────────────── */
+  .msg{font-size:13px; font-weight:600; border-radius:var(--r-ctl); padding:9px 12px; margin:10px 0 0}
+  .msg.ok{background:var(--success-soft); color:var(--success)}
+  .msg.err{background:var(--err-soft); color:var(--err)}
+  .msg.warn{background:var(--warn-soft); color:var(--warn)}
+  .msg:empty{display:none}
+
+  /* ── Dialogs ──────────────────────────────────────────────────────────────
+     The portal's own, replacing window.confirm/alert. A browser dialog cannot
+     be styled, says "caw-academy.com says" above your words, and — the reason
+     this exists — CLIPS long text: the replace prompt's own button legend was
+     cut off, leaving OK and Cancel with nothing explaining which was which.
+     Here the body scrolls and the BUTTONS CARRY THE VERBS, so the choice is
+     readable even if nothing else is. */
+  .dlg-back{position:fixed; inset:0; background:rgba(11,18,56,.45); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px}
+  .dlg{background:#fff; border-radius:14px; box-shadow:var(--shadow-pop);
+    width:100%; max-width:520px; max-height:calc(100vh - 40px); max-height:calc(100dvh - 40px);
+    display:flex; flex-direction:column;
+    overflow:hidden; animation:dlgIn .13s ease-out}
+  @keyframes dlgIn{from{opacity:0; transform:translateY(6px) scale(.99)} to{opacity:1; transform:none}}
+  .dlg-head{padding:18px 24px 0}
+  .dlg-title{margin:0; font-size:17px; font-weight:700; letter-spacing:-.01em}
+  .dlg-body{padding:10px 24px 4px; overflow:auto; font-size:13.5px; line-height:1.55; color:var(--ink-soft)}
+  .dlg-body p{margin:0 0 8px}
+  .dlg-note{font-size:12.5px; color:var(--muted); margin-top:10px}
+  .dlg-foot{display:flex; gap:8px; justify-content:flex-end; padding:14px 24px 18px; flex-wrap:wrap}
+  .dlg-foot .btn{font-size:13.5px}
+
+  /* ── Sign in / confirm / denied.  These three ARE the front door, so they keep
+        the marketing page's centred card and serif heading. ────────────────── */
+  .signin-wrap{max-width:540px; margin:7vh auto 48px; padding:0 20px; width:100%}
+  .signin-wrap .card{padding:26px 26px 24px; box-shadow:0 12px 34px rgba(20,22,28,.07)}
+  .auth-brand{display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:18px}
+  .auth-brand img{width:32px; height:32px; border-radius:9px; box-shadow:var(--shadow-sm)}
+  .auth-brand .bn{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--ink)}
+  .auth-brand .bn span{color:var(--indigo)}
+  .admin-badge{display:inline-flex; align-items:center; font-size:10px; font-weight:800; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--indigo); background:var(--indigo-soft); padding:4px 9px; border-radius:99px}
+  #signinView .sub{margin-bottom:16px}
+  #signinView .field{margin-bottom:10px}
+  #signinView .tabs{margin-bottom:14px}
+  .tabs{display:flex; gap:8px; margin:0 0 18px}
+  .tab{flex:1; padding:9px 0; text-align:center; border-radius:var(--r-ctl); cursor:pointer;
+    font-weight:650; font-size:14px; border:1px solid var(--line); background:#fff; color:var(--ink-soft)}
+  .tab.active{background:var(--indigo); color:#fff; border-color:var(--indigo)}
+  .acct-consent{display:flex; align-items:flex-start; gap:10px; margin:4px 0 14px;
+    font-size:12.5px; color:var(--muted); line-height:1.5}
+  .acct-consent input{flex:0 0 auto; width:17px; height:17px; margin:1px 0 0; accent-color:var(--indigo)}
+  .acct-consent a{color:var(--indigo); font-weight:600}
+  .pw-hint{font-size:12.5px; line-height:1.45; margin:-4px 0 12px}
+  .pw-hint.muted{color:var(--muted)}
+  .pw-hint.err{color:var(--err)}
+  .pw-hint.ok{color:var(--success)}
+  .link-off{color:var(--muted); opacity:.6; cursor:default; pointer-events:none; user-select:none}
+
+  footer.foot-center{grid-column:1/-1; border-top:1px solid var(--line); padding:22px 0 30px;
+    color:var(--muted); text-align:center}
+  .foot-nav{display:flex; flex-wrap:wrap; justify-content:center; gap:22px; margin-bottom:5px}
+  .foot-nav a{font-size:13px; font-weight:600; color:var(--ink-soft)}
+  .foot-nav a:hover{color:var(--indigo)}
+  .foot-center .disclaim{margin:0 auto; font-size:11.5px}
+
+  /* ── ONE SCROLLBAR PER SCREEN ────────────────────────────────────────────
+     With a capped list inside a card inside a page that also scrolled, a
+     screen could offer three scrollbars for one list — and the outer one moved
+     the heading, the filters and the tiles out of view to show content the
+     inner one was already showing.
+
+     On a desktop the canvas is therefore a FIXED-HEIGHT COLUMN: the page does
+     not scroll at all, each section fills the viewport, and the one region
+     that holds the list absorbs whatever height is left. The chrome around it
+     — section heading, search, filter chips, pager, footer — simply stays put,
+     which is also why `.phead` no longer needs to be sticky here: nothing
+     passes underneath it any more.
+
+     `min-height:0` on every flex child is load-bearing. A flex item's default
+     minimum is its content, so without it the list refuses to shrink, the
+     column grows past the viewport, and the page scrollbar comes back.
+
+     SCREEN ONLY. The printed report is laid out by its own rules further down,
+     and a 100vh column with hidden overflow would clip it to one page. */
+  /* THE FULL CONSOLE STARTS AT 1024, NOT 1181. An iPad in landscape is 1180 CSS
+     pixels wide — one short — so the device this is most used on fell to the
+     compact layout by a single pixel, and the difference between "designed for
+     a tablet" and "a phone page on a big screen" was that pixel. 1024 leaves a
+     244px rail and 780 of canvas, which the two-column Overview and every table
+     fit inside. */
+  @media screen and (min-width:1024px){
+    .shell{height:100vh; height:100dvh; overflow:hidden}
+    /* No bottom padding: the column ends AT the viewport, so the footer sits on
+       the bottom edge instead of floating with dead space beneath it. */
+    .wrap{height:100vh; height:100dvh; overflow:hidden;
+      display:flex; flex-direction:column; padding-bottom:0}
+    .sect.on{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+    .phead{position:static; flex:none; margin:-24px 0 14px}
+
+    /* Team / Certificates / Records: the LAST card fills the section and the
+       table fills it; any card above it keeps its own height.
+
+       Flexing every card was wrong the moment a section had two of them: in
+       Records the filter card and the results card both claimed the space, so
+       the filter card was squeezed under the results and its header came out
+       clipped — which read as "messy filters" rather than as a layout fault.
+
+       But a card above with NO CEILING is the same fault pointing the other
+       way: Records' custom report, open, is taller than a short window, so it
+       took the whole column, left the results card nothing, and its view bar
+       spilled over the footer. A ceiling of 58% settles it in one number —
+       the filters keep their own height up to that and scroll inside
+       themselves beyond it, and the results card is guaranteed the rest.
+
+       A ceiling, not a shrink factor: shrinking distributes by size, so the
+       filters were squeezed to 114px while the results list kept 440 — the
+       card being worked in lost to the card being read.
+
+       AND NO FLOOR ON THE LAST CARD. A floor is a minimum the column must find
+       room for, so on a short window the ceiling plus the floor plus the page
+       heading came to more than the column had, and what gave way was the
+       footer — pushed out of a .wrap that is exactly 100vh and clips. The
+       ceiling alone already guarantees the results card the other 42%. */
+    .sect.on > .card{display:flex; flex-direction:column; flex:0 0 auto; min-height:0;
+      max-height:58%; overflow-y:auto; overscroll-behavior:contain}
+    .sect.on > .card:last-of-type{flex:1 1 auto; max-height:none; min-height:0;
+      overflow:visible}
+    /* A CARD BODY IS PART OF THE CHAIN. Height only reaches a scroller through
+       an unbroken run of flex columns, and `.card-b` is a plain block — so a
+       table wrapped in one (Documents) had no bounded ancestor at all and
+       rendered at its full height straight through the footer, while the same
+       table as a direct child of its card (Records, Team) behaved. One rule
+       rather than a per-section fix, because the next card body to wrap a
+       scroller would otherwise repeat it. */
+    /* :not(.hidden) is load-bearing — this selector is three classes deep and
+       beats `.hidden{display:none}`, so without it every FOLD card's body is
+       displayed whether the fold is open or not. The Records panel was guarded
+       at birth because it is addressed by id; these are not. */
+    .sect.on > .card > .card-b:not(.hidden){display:flex; flex-direction:column;
+      flex:1 1 auto; min-height:0}
+    .table-scroll{flex:1 1 auto; min-height:0; max-height:none}
+
+    /* THE ACTION BAR STAYS WITH THE FORM IT ACTS ON. "Require 0 readings" and
+       "Assign" sit at the foot of a form taller than the window, so the button
+       and the sentence explaining what it will do — including the warning that
+       a pairing is being skipped — scrolled away exactly when a long selection
+       made them worth reading. Pinned to the bottom of whichever card scrolls,
+       with the card's own background behind it so rows do not show through on
+       their way past, and a hairline above so it reads as floating rather than
+       as the end of the content.
+
+       Desktop only: below 1181px the page itself scrolls, and a bar pinned to
+       the viewport there would hover over the footer for the whole page. */
+    /* THE PINNED BAR SITS ON THE CARD'S PADDING, NOT ON ITS EDGE. It was stuck
+       to bottom:0 of a scrolling card whose body ends flush there, so the bar's
+       own bottom — its rounded corners and its border — was cut off by the
+       card's overflow. A masking strip was painted under it to hide the seam,
+       which hid the symptom and kept the cause.
+
+       The bar now stops 14px short of the bottom and the form reserves that
+       much below it, so the whole control is inside the card with air under
+       it, the way it looks when the card does not scroll. */
+    .sumbar{position:sticky; bottom:14px; z-index:4; margin-bottom:0;
+      box-shadow:0 -10px 14px -10px rgba(20,22,28,.14)}
+    #famForm, .sect[data-sect="assign"] form{padding-bottom:16px}
+
+    /* Where the LAST control belongs with the button, the two are pinned as one
+       block instead of the bar alone — otherwise the bar lands on top of the
+       field it is describing. The bar inside goes back to being an ordinary
+       element: the wrapper is what sticks, and two sticky boxes one inside the
+       other fight over the same edge. */
+    .formfoot{position:sticky; bottom:0; z-index:4; background:var(--card);
+      margin:18px -16px 0; padding:0 16px 14px;
+      box-shadow:0 -10px 14px -10px rgba(20,22,28,.14)}
+    .formfoot .sumbar{position:static; box-shadow:none; margin-top:14px}
+    .formfoot .sumbar::after{display:none}
+
+    /* WHILE THE FORM IS OPEN IT HAS THE SECTION. The 58% ceiling exists to stop
+       an upper card starving a lower one when both are being READ; these two
+       are not read together, and under the ceiling the form had two pickers and
+       a pinned footer sharing 400px, so the footer came to rest on top of the
+       lists. The library below steps aside until the form is closed — the form
+       picks its own documents, so nothing needed is hidden. */
+    .sect[data-sect="documents"].form-open > #docsCard{display:none}
+    .sect[data-sect="documents"].form-open > #famCard{max-height:none; flex:1 1 auto;
+      overflow:hidden}
+
+    /* AND IT DOES NOT SCROLL, so the pinned block is not sitting on top of the
+       lists it is pinned over. Sticky only stops the footer LEAVING; the rows
+       still run underneath it, which is fine over a table and wrong over a
+       picker whose last rows are then unreachable. The same shape as the custom
+       report: the footer holds its height, the pickers take what is left, and
+       each list scrolls inside itself as it always has. */
+    .form-open #famForm{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+    .form-open #famForm > .ms-grid{flex:1 1 auto; min-height:0}
+    /* THE FLOOR GOES ON THE GRID, NOT ON THE COLUMN. Inside this scrolling
+       body the grid is a flex ITEM with a height of its own, so a column taller
+       than it overflows the grid's box — and the grid does not clip, so the
+       column painted straight over step 3 and its date fields. Measured: a
+       274px floor on the column against a 232px grid put 42px of member list on
+       top of "When". On the grid the same floor makes the BODY scroll, which it
+       is built to do, and the column stretches to the row it is given. */
+    .form-open #famForm > .ms-grid > div{max-height:none; min-height:0}
+    .form-open #famForm > .ms-grid{min-height:140px}
+    .form-open #famForm .ms-list{min-height:0}
+
+    .form-open .formfoot{position:static; flex:none; box-shadow:none; margin:14px -16px 0}
+
+
+    /* Overview: the tiles are fixed, the two columns share what is left, and
+       each card scrolls inside its own column rather than against the page. */
+    .ovgrid{flex:1 1 auto; min-height:0; align-items:stretch}
+    .ovgrid > *{min-height:0}
+    .ovgrid > div:last-child{display:flex; flex-direction:column; gap:16px}
+    .ovgrid > div:last-child > .card{margin-top:0}
+    #attentionCard{display:flex; flex-direction:column; min-height:0}
+    #licenceCard{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+    .card-scroll{flex:1 1 auto; min-height:0; max-height:none}
+
+    /* STEP 3 MUST NEVER BE BELOW THE FOLD. A panel numbered 1, 2, 3 whose third
+       step can only be reached by scrolling is a panel with two steps — and the
+       one out of sight was the one that sets the date window and resets the
+       lot. So this card does not scroll at all: the header and the "When" step
+       hold their height, and the two pickers take whatever is left between
+       them, shrinking before anything else does.
+
+       It replaces the card-level scroll for this card only. The ceiling above
+       still applies — it is what guarantees the results card its share — but
+       within that ceiling nothing here is reached by scrolling the card. */
+    .card-fold > .card-h{flex:none}
+    #recFilterCard{overflow:hidden}
+    /* :not(.hidden) is load-bearing — an id beats .hidden's display:none, so
+       without it the panel would be open permanently. */
+    #recFilterBody:not(.hidden){display:flex; flex-direction:column; flex:1 1 auto;
+      min-height:0; overflow:hidden}
+    #recFilterBody > .ms-grid{flex:1 1 auto; min-height:0}
+    #recFilterBody > .ms-grid > div{max-height:none; min-height:0}
+    #recFilterBody > .ms-grid{min-height:140px}
+    #recFilterBody .ms-list{min-height:0}
+
+    /* ASSIGN SCROLLS AS ONE PIECE, and the attempt to make it not do so is why
+       it became unreadable. Squeezing five sections — two pickers, two chip
+       rows, the dates, the plan and the bar — into one viewport-height card
+       does not make them all visible; it makes five scroll boxes of three rows
+       each, and a form you read through a series of slots. That shape is right
+       for a TABLE, where the rows are the content and the chrome is fixed. A
+       form is read top to bottom once.
+
+       So the card scrolls, the lists get their full height back, and the ONLY
+       thing pinned is the summary bar — the sentence stating what will happen
+       and the button that does it, which is what has to be reachable from
+       anywhere in the form. Everything else is passed through on the way down. */
+    .sect[data-sect="assign"].on > .card{overflow-y:auto; overscroll-behavior:contain}
+
+    /* The plan and the chip rows run at full length here. They are read on the
+       way down a form that scrolls; the caps existed only while the card could
+       not scroll and every section was fighting for the same slot. */
+
+    /* The footer keeps its place at the bottom of the column. */
+    /* THE FOOTER SITS AT THE FOOT. The canvas is a flex column here, so any
+       height the section does not use piles up BELOW the footer unless the
+       footer claims it above itself — which is what `margin-top:auto` does. A
+       short page then ends with Privacy/Terms/Support on the bottom edge
+       instead of floating halfway up with dead canvas beneath. A tall page is
+       unaffected: there is no spare height for auto to take. */
+    footer.foot-center{flex:none; padding:14px 0 16px; margin-top:auto}
+  }
+
+  /* ── Narrow.  The rail loses its labels at 1180 and becomes a top bar on a
+        phone. Nothing is hidden, only re-shaped. ───────────────────────────── */
+  /* A SHORT SCREEN CANNOT HAVE BOTH. The no-scroll forms fit everything by
+     shrinking the pickers — right on a desktop, wrong on an iPad in landscape,
+     where 820px of height left the Records pickers 80px each. A list showing
+     one and a half rows is not a list. Under 900px of viewport the panels
+     scroll instead and the lists keep a floor you can read: something has to
+     give on a short screen, and it should be the thing that scrolls rather
+     than the thing you are reading.
+
+     WRITTEN FLAT, NOT NESTED inside the desktop block. As a nested @media it
+     parsed and simply never applied — both of its rules lost silently, which
+     is the worst way for CSS to fail. */
+  @media screen and (min-width:1024px) and (max-height:900px){
+    #recFilterBody:not(.hidden){overflow-y:auto; overscroll-behavior:contain}
+    #recFilterBody > .ms-grid{min-height:274px}
+    .form-open #famForm{overflow-y:auto; overscroll-behavior:contain}
+    .form-open #famForm > .ms-grid{min-height:274px}
+
+    /* ASSIGN'S PICKERS COME DOWN TOO. 440 apiece is right on a deep screen and
+       pushes step 3 under the fold on a short one — the dates were half-hidden
+       behind the pinned bar, which is the one step you cannot skip. 300 still
+       shows eight rows, and the card scrolls for the rest. */
+    #assignForm > .ms-grid > div{max-height:300px}
+  }
+
+  /* ── iPad, BOTH WAYS UP ─────────────────────────────────────────────────
+     1180 is an iPad in landscape and 820 in portrait, so these two are keyed
+     to the DEVICE rather than to the layout breakpoint at 1024 — landscape
+     gets the desktop layout, and would otherwise have kept both of these.
+
+     NO INITIALS. A two-letter disc beside a name that is already written out
+     is decoration standing where a column of names should start; the names are
+     what the eye runs down, and the discs make it do that twice.
+
+     AND THE RAIL FOOT STACKS, CENTRED. At 200px the avatar, the name and the
+     button could not share a line, so "Sign out" broke across two — a two-word
+     button on two lines is the clearest possible sign that a layout has run
+     out of room. */
+  @media (max-width:1180px){
+    .av{display:none}
+    /* THE FOOT IS AT THE BOTTOM AGAIN (SME), which is where it belongs — it
+       was only moved up because 100vh put it under Safari's toolbar, and the
+       rail is measured in dvh now, so the bottom IS the bottom. */
+    .rail-foot{flex-wrap:wrap; gap:8px; justify-content:center}
+    .rail-foot .rail-av{display:none}
+    .rail-foot #who{flex:1 1 100%; order:1; text-align:center}
+    .rail-foot .btn-ghost{order:2; flex:1 1 100%; justify-content:center; margin-left:0}
+  }
+
+  /* TABLET PORTRAIT KEEPS A SIDEBAR — just a narrower one, and it keeps its
+     WORDS. The first attempt at this shrank the rail to a 70px strip of bare
+     icons with every label, the organisation card and the section headings
+     hidden; the second threw the rail away entirely for a top bar. Both lost
+     something portrait has room for: at 820px a 200px rail still leaves 620 of
+     canvas, and the Overview is one column at this width anyway. A navigation
+     you can read is worth 200 pixels. */
+  @media (max-width:1023px){
+    .shell{grid-template-columns:200px minmax(0,1fr)}
+    .rail{padding:14px 10px 12px}
+    .rail-brand{padding:2px 2px 12px}
+    .org{padding:9px 10px; margin-bottom:12px}
+    .tabbtn{font-size:13px; padding:8px 9px; gap:9px}
+    .navhead{padding:9px 9px 4px}
+    .rail-foot{padding-top:10px}
+    .rsum{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .ovgrid{grid-template-columns:minmax(0,1fr)}
+    /* Less dead space under the last card before the footer. */
+    .wrap{padding:20px 18px 26px}
+
+    /* THE TWO THINGS THAT PUSHED THE PAGE SIDEWAYS, and neither was a table —
+       the tables scroll inside their own box and always did. It was the page
+       header's button group, which is `flex:none` so it refuses to give any
+       width back, and the segmented view bars, which are `inline-flex` with
+       four nowrap options. Both now wrap onto a second line instead of
+       standing on the page's right edge.
+
+       Measured at 820: the header group ran to 503px beside a title in a
+       805px page, and the Records view bar to 661. */
+    /* THE ACTIONS STAY ON THE TITLE'S LINE, as on every other page. Team has
+       four buttons where the others have two, and at full size they came to
+       ~670px in a ~580px row, so the whole group dropped under the heading and
+       this one page looked different from the rest. Measured: compact buttons,
+       "Invite" for "Invite a colleague", and Reload as its icon alone bring the
+       group to ~350px, which fits beside the heading with room to spare. Both
+       shortened buttons keep the full wording in their tooltip, and the two
+       exports keep their labels — "Export" is the word that says a file is
+       about to be produced. */
+    .phead{flex-wrap:nowrap; align-items:center}
+    .phead > div:first-child{flex:1 1 auto; min-width:0}
+    .pacts{flex-wrap:nowrap}
+    .pacts .btn{font-size:12px; padding:7px 10px; gap:6px}
+    .pacts .btn svg{width:14px; height:14px}
+    .pacts #inviteBtn .btn-t{display:none}
+    .pacts #inviteBtn .btn-s{display:inline}
+    .pacts #reloadBtn .btn-t{display:none}
+    .pacts{flex:0 0 auto; justify-content:flex-end}
+
+    /* THE PICKERS TAKE A SHARE OF THE HEIGHT, not a fixed 440. That number was
+       sized for a desktop where the two sit side by side; stacked in one column
+       on a tablet it was most of the screen before the dates were reached. A
+       flat 300 then left the page ending well short of the fold on a 1180-tall
+       portrait iPad. A third of the viewport is the honest answer to both: it
+       fills a tall screen and shrinks on a short one. */
+    .ms-grid > div{max-height:min(420px, 34vh)}
+
+    /* AND A PICKER IS AS TALL AS WHAT IS IN IT. The two columns are forced to
+       equal height on a desktop, where they sit side by side and a ragged pair
+       looks broken. Stacked one above the other that reason disappears, and the
+       cost shows: four folded frameworks were followed by a hand's width of
+       empty box, because the list was still stretching to a height set by the
+       column rather than by its rows. Capped above, content-sized below. */
+    .ms-grid > div{align-self:start}
+    .ms-grid .ms{flex:0 1 auto}
+    .ms-grid .ms-list{flex:0 1 auto; min-height:0}
+
+    /* THE RAIL FOOT STACKS. At 200px the avatar, the name and the button could
+       not share a line, so "Sign out" broke across two — a two-word button on
+       two lines is the clearest possible sign that a layout has run out of
+       room. The name sits above, the button spans the width below it. */
+  }
+
+  /* TABLET PORTRAIT IS FIRM TOO — the canvas scrolls, the page does not.
+     Between 761 and 1023 the page was an ordinary document: the rail is a
+     fixed 100dvh column, so scrolling the DOCUMENT dragged the whole layout
+     and took the navigation off the top with it. The shell is now exactly the
+     visible height and the canvas is the one scroller, so the rail stays put
+     and a scrollbar appears only when the section is genuinely taller than
+     the window.
+
+     `min-width:761px` keeps phones out: there the rail lies down as a bar and
+     the document is the right thing to scroll. */
+  @media screen and (min-width:761px) and (max-width:1023px){
+    .shell{height:100vh; height:100dvh; overflow:hidden}
+    .wrap{height:100%; min-height:0; overflow-y:auto; overscroll-behavior:none}
+
+    /* A STICKY HEADER STICKS TO ITS SCROLLER'S PADDING EDGE, NOT TO THE TOP OF
+       THE BOX. While the PAGE was the scroller this did not arise — the
+       document has no padding — but the canvas has 20px of it, so `top:0`
+       parked the page header 20px down and the cards scrolled through the
+       strip above it, arriving clipped. The canvas gives its top padding to
+       the header, which already carries 18px of its own; nothing moves, and
+       the header now stops the content at the very top edge. */
+    .wrap{padding-top:0}
+    .phead{margin-top:0}
+
+    /* THE SECTION FILLS THE CANVAS, AND THE TABLE TAKES THE SPARE HEIGHT.
+       Measured at 834x1194 with a member open: the card stopped at 838px with
+       228px of empty canvas beneath it, while the table inside it was held to
+       665px by its own cap and scrolled 1600px of rows through that slot. A
+       cramped scroller floating above a quarter-screen of nothing is exactly
+       the "loose" complaint — the viewport-relative cap was written for the
+       desktop two-column page, where something else wants the rest.
+
+       `min-height:100%`, not `height`: a section that fits is stretched to the
+       canvas so there is no dead space, and one that does not — the one-column
+       Overview at this width — still grows and lets the canvas scroll. The
+       cap is lifted only for the LAST card, the one holding the table; a
+       filter card above it keeps its own height.
+
+       A SECTION THAT ENDS IN A TABLE IS PINNED TO THE CANVAS (`height:100%`),
+       so the table scrolls inside its card and the search box and filter chips
+       above it stay put — the property the cap was there to protect. Every
+       other section keeps `min-height` and grows. Lifting the cap without
+       pinning was measured too: the table then grew to its full 1600px and
+       took the controls off the top of the screen with it. */
+    .wrap{display:flex; flex-direction:column}
+    .sect.on{display:flex; flex-direction:column}
+    .sect.on:has(> .card:last-of-type .table-scroll){flex:1 1 auto; min-height:0}
+    .sect.on > .card:last-of-type{flex:1 1 auto; min-height:0;
+      display:flex; flex-direction:column}
+    /* :not(.hidden) is load-bearing — this selector outweighs `.hidden`. */
+    .sect.on > .card:last-of-type > .card-b:not(.hidden){flex:1 1 auto; min-height:0;
+      display:flex; flex-direction:column}
+    /* A card ABOVE the table keeps its own height up to a ceiling, as on the
+       desktop page: Records' custom report, open, would otherwise take the
+       column and leave the results nothing. */
+    .sect.on > .card:not(:last-of-type){flex:0 0 auto; max-height:58%;
+      overflow-y:auto; overscroll-behavior:contain}
+    .table-scroll{max-height:none; flex:1 1 auto; min-height:0}
+
+  }
+
+  /* PHONES: a sidebar of any width is most of the screen, so here the rail does
+     lie down — and the labels survive, because the bar scrolls sideways rather
+     than shrinking to glyphs. */
+  @media (max-width:760px){
+    .shell{grid-template-columns:minmax(0,1fr)}
+    .rail{position:sticky; top:0; z-index:30; height:auto; flex-direction:row;
+      align-items:center; padding:9px 12px; gap:8px; border-right:0;
+      border-bottom:1px solid var(--line); overflow:visible}
+    .rail-brand{padding:0; flex:none}
+    .org,.navhead{display:none}
+    .tabsnav{flex-direction:row; width:auto; overflow-x:auto; gap:4px; flex:1;
+      scrollbar-width:none}
+    .tabsnav::-webkit-scrollbar{display:none}
+    .tabbtn{padding:9px 11px; white-space:nowrap; flex:none}
+    .tabbtn.child{padding-left:11px}
+    .rail-foot{margin:0 0 0 auto; border:0; padding:0; flex:none}
+    #who{display:none}
+    .phead{flex-direction:column; align-items:stretch; gap:10px}
+    .pacts{justify-content:flex-start}
+    /* Stacked, the band is taller, so the table header has further to fall. */
+    .wrap{--head-h:116px}
+  }
+  /* Phones: 16px inputs so iOS does not zoom the page on focus. */
+  @media (max-width:560px){
+    .wrap{padding:16px 12px 40px}
+    h1{font-size:21px} .phead h1{font-size:18px}
+    .rsum{grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px}
+    .rstat b{font-size:24px}
+    .field,select.field,.ms-search{font-size:16px; padding:10px 12px}
+    .btn{font-size:15px; padding:11px 15px}
+    .btn-ghost,.btn-danger{font-size:12.5px; padding:7px 10px}
+    .signin-wrap{margin:3vh auto 40px; padding:0 12px}
+    .signin-wrap .card{padding:18px 16px}
+    .ms-list{max-height:200px}
+    .ms-row{padding:8px 12px; font-size:14px}
+    thead th,tbody td{padding:9px 11px}
+    .member-body{padding:2px 10px 12px}
+  }
+
+  /* ── The printed report ───────────────────────────────────────────────────
+     A document, not a screen dump. It uses the BRAND FACES the page already
+     loads (Fraunces for the wordmark, Inter for everything else) and the app
+     mark itself, so a report from the portal and one from the app are plainly
+     the same product — and it follows the app's own export (ExportBranding.swift)
+     on the two structural decisions: the masthead is page 1 ONLY, and every page
+     carries the branded footer.
+
+     The palette is the app's fixed PRINT palette, not this page's tokens: a
+     report is dark ink on white paper whatever the screen was set to. */
+  #printReport{display:none}
+  @media print{
+    body > *{display:none !important}
+    /* #dashView IS THE SHELL, and the shell is sized to the viewport —
+       `min-height:100dvh`, with no media qualifier, so it applies on paper too.
+       Resetting html and body was not enough: the full-height box that claimed
+       the second sheet was this one. The uploaded PDF names it exactly — a
+       white rectangle 951pt tall on page 2, against an A4 content area of ~700.
+       On paper it is as tall as the report inside it. */
+    #dashView{display:block !important; padding:0; margin:0; max-width:none;
+      min-height:0 !important; height:auto !important; overflow:visible !important}
+    #dashView > *{display:none !important}
+    #printReport{display:block !important}
+    @page{size:A4; margin:13mm 13mm 16mm}
+    /* A PAGE BOX AS TALL AS A SCREEN IS A SECOND SHEET. The console sizes its
+       shell to the viewport — `body{min-height:100dvh}` — and that min-height
+       does not stop applying when the medium is paper: a one-page report sat
+       inside a body box the height of an iPad, which is taller than A4's
+       content area, so the overflow claimed a second sheet carrying nothing.
+       On paper the document is as tall as what is on it. */
+    html,body{background:#fff !important;
+      min-height:0 !important; height:auto !important; overflow:visible !important}
+    /* WITHOUT THIS CHROME DROPS EVERY BACKGROUND — the status pills, the summary
+       band and the table's banding all print as blank boxes. It is the single
+       line that decides whether this looks designed or broken. */
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
+
+    .prep{font-family:"Inter",Arial,Helvetica,sans-serif; color:#0C1843; font-size:9.5pt; line-height:1.45}
+
+    /* Masthead: mark + wordmark on the left, what this report IS on the right. */
+    .prep-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16pt}
+    .prep-brand{display:flex; align-items:center; gap:8pt}
+    .prep-logo{width:30pt; height:30pt; border-radius:7pt}
+    .prep-mark{font-family:"Fraunces",Georgia,serif; font-weight:700; font-size:19pt;
+      line-height:1.1; margin:0; letter-spacing:-.2pt}
+    .prep-mark span{color:#3E44B5}
+    .prep-tag{font-size:6.5pt; font-weight:700; letter-spacing:1pt; text-transform:uppercase;
+      color:#6B7390; margin:3pt 0 0}
+    .prep-id{text-align:right}
+    .prep-title{font-size:13pt; font-weight:800; margin:0; letter-spacing:-.1pt}
+    .prep-org{font-size:10pt; font-weight:600; color:#3E44B5; margin:2pt 0 0}
+    .prep-when{font-size:8pt; color:#6B7390; margin:2pt 0 0; line-height:1.5}
+    .prep-rule{height:2pt; background:#FB8C00; margin:9pt 0 0; border-radius:1pt}
+
+    /* The report opens with the ANSWER — the same five figures as the dashboard,
+       so the person who ran it and the person who reads it see one thing. */
+    .prep-summary{display:flex; gap:6pt; margin:12pt 0 16pt}
+    .ps{flex:1; border:.75pt solid #E2E3E6; border-radius:5pt; padding:6pt 8pt; background:#FAFAFB}
+    .ps b{display:block; font-size:16pt; font-weight:800; line-height:1.1}
+    .ps span{display:block; font-size:6.5pt; font-weight:700; letter-spacing:.6pt;
+      text-transform:uppercase; color:#6B7390; margin-top:2pt}
+    .ps.alert{background:#FDECEC; border-color:#F6D5D3} .ps.alert b{color:#BA1A1A}
+    .ps.warn{background:#FFF3E0; border-color:#F6E2C2} .ps.warn b{color:#B25E00}
+    .ps.good{background:#E7F4E8; border-color:#CFE6D1} .ps.good b{color:#2E7D32}
+    .ps.zero{background:#FAFAFB; border-color:#E2E3E6} .ps.zero b{color:#6B7390}
+
+    /* A member is one unit of reading: never split the heading from the table. */
+    .prep-member{break-inside:avoid; page-break-inside:avoid; margin:0 0 11pt;
+      border:.75pt solid #E2E3E6; border-radius:6pt; overflow:hidden}
+    .pm-head{display:flex; align-items:center; justify-content:space-between; gap:12pt;
+      background:#F4F5F6; border-bottom:.75pt solid #E2E3E6; padding:6pt 9pt}
+    .pm-name{font-size:11pt; font-weight:700; margin:0; color:#0C1843}
+    .pm-mail{font-size:8pt; color:#6B7390; margin:1pt 0 0}
+    .pm-chips{display:flex; gap:4pt; flex-wrap:wrap; justify-content:flex-end}
+    .pm-chip{font-size:7pt; font-weight:800; letter-spacing:.2pt; padding:1.5pt 6pt;
+      border-radius:99pt; background:#E6E7FB; color:#3E44B5; white-space:nowrap}
+    .pm-chip.overdue{background:#FDECEC; color:#BA1A1A}
+    .pm-chip.due_soon{background:#FFF3E0; color:#B25E00}
+    .pm-chip.done{background:#E7F4E8; color:#2E7D32}
+    .pm-chip.none{background:#EEEFF1; color:#6B7390}
+
+    .prep table{width:100%; border-collapse:collapse; font-size:8.5pt}
+    .prep th{text-align:left; font-size:6.5pt; font-weight:800; letter-spacing:.6pt;
+      text-transform:uppercase; color:#6B7390; padding:5pt 8pt 4pt;
+      border-bottom:1pt solid #3E44B5; background:#fff}
+    .prep td{padding:4.5pt 8pt; border-bottom:.5pt solid #ECEDEF; vertical-align:middle}
+    .prep tbody tr:nth-child(even) td{background:#FAFAFB}   /* banding: the eye keeps its row */
+    .prep tbody tr:last-child td{border-bottom:0}
+    .prep td.course{font-weight:600}
+    .prep td.num{font-family:ui-monospace,Menlo,monospace; font-size:7.5pt; white-space:nowrap; color:#3A3F63}
+    .prep td.right{text-align:right; white-space:nowrap}
+    .st{display:inline-block; font-size:7pt; font-weight:800; padding:1.5pt 6pt;
+      border-radius:99pt; background:#E6E7FB; color:#3E44B5; white-space:nowrap}
+    .st.overdue{background:#FDECEC; color:#BA1A1A}
+    .st.due_soon{background:#FFF3E0; color:#B25E00}
+    .st.done{background:#E7F4E8; color:#2E7D32}
+    /* A printed progress bar: the number is there too, because a bar alone cannot
+       be read off a photocopy. */
+    .pbar{display:inline-block; width:42pt; height:3.5pt; border-radius:99pt;
+      background:#E3E4E7; vertical-align:middle; margin-right:5pt; overflow:hidden}
+    /* The printed sheet follows the screen: green at every level. A report that
+       colours the same figure differently from the console it was run from is
+       a report somebody has to reconcile. */
+    .pbar i{display:block; height:100%; background:#2E7D32; border-radius:99pt}
+    .prep-none{font-size:8.5pt; color:#6B7390; font-style:italic; padding:7pt 9pt; margin:0}
+
+    .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
+      border-top:.5pt solid #E2E3E6; padding-top:7pt}
+    /* THE FOOTER IS PINNED TO THE FOOT OF THE SHEET. `position:fixed` is the
+       nearest thing CSS has to a per-page footer, and the page box is what it
+       is measured against — which is why it looked misplaced while that box was
+       a screen tall rather than a page tall. With the box corrected it sits on
+       the bottom margin, where a report's footer belongs; the reserved 16mm
+       below the content is its band. */
+    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
+      border-top:.5pt solid #E2E3E6; padding-top:3pt;
+      display:flex; justify-content:space-between}
+    /* Nothing trailing may push past the last line — a few points of margin
+       below the final block is enough to claim a whole further sheet. */
+    .prep > *:last-child{margin-bottom:0}
+    .prep-foot .site{color:#3E44B5; font-weight:600}
+
+    /* The records report is ONE TABLE — a history to be filed and re-sorted,
+       not a dashboard. Rows must not be split across a page break, or a date
+       lands on one sheet and its status on the next. */
+    .prep-rows{width:100%; border-collapse:collapse; margin-top:8pt}
+    .prep-rows th{font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+      color:#6B7390; text-align:left; padding:4pt 6pt 3pt 0; border-bottom:.75pt solid #B9BEDC}
+    .prep-rows td{font-size:8.5pt; padding:3.5pt 6pt 3.5pt 0; border-bottom:.5pt solid #E2E3E6;
+      vertical-align:top}
+    .prep-rows tr{break-inside:avoid; page-break-inside:avoid}
+    .prep-rows thead{display:table-header-group}
+    /* Earlier awards, under a member's table: a fact about the holder, set
+       quietly apart from the assignments it is NOT a statement about. */
+    /* It sits INSIDE the member's bordered block, where every other line is
+       inset by 9pt — with only a top margin it ran edge to edge against the
+       border while the table above it did not, so it read as something that had
+       escaped the card. Same inset as the cells, and a hairline above it,
+       because it is a different kind of fact from the assignments it follows. */
+    .prep-earlier{font-size:7.5pt; color:#6B7390; line-height:1.5;
+      margin:0; padding:5pt 9pt 7pt; border-top:.5pt solid #ECEDEF}
+    .prep-earlier b{color:#454952; font-weight:700}
+
+    /* STICKY IS A SCREEN IDEA, AND IT LEAKED ONTO PAPER. The global `thead th`
+       rule pins a header while its body scrolls — right for every table in the
+       console, meaningless on a page that cannot scroll, and actively wrong
+       here: the pinned header floated over the FIRST COURSE ROW of every
+       member's table, so the top line of each block printed half-hidden behind
+       the column names.
+
+       It is scoped to `.prep` rather than the one table class because every
+       printed sheet — team, records, certificates — builds its own table and
+       would meet this the same way. The inset shadow goes too: it was drawn as
+       a shadow precisely because a sticky cell leaves its collapsed border
+       behind, and the real border above is what prints. */
+    .prep thead th{position:static !important; box-shadow:none !important;
+      z-index:auto !important}
+
+    /* AND EVERY PRINTED TABLE GETS THE PAGE-BREAK RULES, not just the one with
+       a class. The team report builds a bare <table>, so it had neither — a
+       member with more courses than fit on a page split with no header on the
+       continuation, and a row could break across the fold. `.prep-member`
+       avoids breaking as a block, which hid this until a team grew. */
+    .prep table thead{display:table-header-group}
+    .prep table tr{break-inside:avoid; page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<!-- Sign in -->
+<main class="signin-wrap" id="signinView">
+  <div class="auth-brand">
+    <img src="logo-header.png" alt="" width="32" height="32">
+    <span class="bn">CAW <span>Academy</span></span>
+    <span class="admin-badge">Team admin</span>
+  </div>
+  <div class="card">
+    <h1 id="authTitle">Team admin</h1>
+    <p class="sub" id="authSub">Sign in with your CAW Academy administrator account to manage your team's course assignments and deadlines.</p>
+    <div class="tabs">
+      <div class="tab active" id="tabSignIn">Sign in</div>
+      <div class="tab" id="tabRegister">Request admin account</div>
+    </div>
+    <form id="authForm" autocomplete="on">
+      <div id="regNames" class="hidden">
+        <label class="lbl" for="firstName">First name</label>
+        <input class="field" id="firstName" type="text" autocomplete="given-name" placeholder="e.g. Alex">
+        <label class="lbl" for="lastName">Last name</label>
+        <input class="field" id="lastName" type="text" autocomplete="family-name" placeholder="e.g. Morgan">
+      </div>
+      <label class="lbl" for="email">Work email</label>
+      <input class="field" id="email" type="email" autocomplete="username" required placeholder="e.g. alex.morgan@yourairline.com">
+      <label class="lbl" for="password" id="passwordLbl">Password</label>
+      <input class="field" id="password" type="password" autocomplete="current-password" required placeholder="Your password">
+      <div id="confirmRow" class="hidden">
+        <label class="lbl" for="password2">Confirm password</label>
+        <input class="field" id="password2" type="password" autocomplete="new-password" placeholder="Repeat the password">
+      </div>
+      <p id="pwHint" class="pw-hint hidden"></p>
+      <label class="acct-consent hidden" id="consentRow" for="acceptTerms">
+        <input type="checkbox" id="acceptTerms">
+        <span>I agree to the <a href="../terms.html" target="_blank" rel="noopener">Terms of Use</a>
+          and <a href="../privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+      </label>
+      <p id="regNote" class="note hidden" style="margin-top:0;margin-bottom:14px">Admin access is for <strong>registered organisations only</strong>. Use your work email on your organisation's registered domain. This creates your CAW Academy account — the same one you use in the app. Our support team reviews each request. You will be notified by email once your account is activated. For anything else, contact <a href="mailto:support@caw-academy.com">support@caw-academy.com</a>.</p>
+      <div id="authMsg"></div>
+      <button class="btn" type="submit" id="authSubmit" style="width:100%;margin-top:4px">Sign in</button>
+      <p id="forgotRow" style="text-align:center;margin:12px 0 0"><a href="#" id="forgotLink" style="font-size:13.5px">Forgot password?</a></p>
+    </form>
+    <p class="note" id="portalNote">This portal is for organisation administrators. If you only study courses, use the app instead. Access is limited to your organisation.</p>
+  </div>
+</main>
+
+<!--
+  Confirm your email. A sign-up now returns no session until the six-digit code from the
+  email is entered, so the portal needs this step as much as the apps do: without it a
+  request for an admin account ends on a sign-in form that refuses the password that was
+  just chosen, with nothing on screen explaining why.
+-->
+<main class="signin-wrap hidden" id="confirmView">
+  <div class="auth-brand">
+    <img src="logo-header.png" alt="" width="32" height="32">
+    <span class="bn">CAW <span>Academy</span></span>
+  </div>
+  <div class="card">
+    <h1>Check your email</h1>
+    <p class="sub">We sent a six-digit code to <b id="confirmAddr"></b>. Enter it below to finish setting up your account.</p>
+    <form id="confirmForm" autocomplete="off">
+      <label class="lbl" for="confirmCode">Confirmation code</label>
+      <!-- inputmode numeric, and one-time-code so a password manager or the OS can
+           offer it straight from the notification. maxlength 6, but the server
+           normalises anyway: a pasted "123 456" must not be refused over a space. -->
+      <input class="field" id="confirmCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" placeholder="123456" style="letter-spacing:.22em;font-weight:700">
+      <p class="note" style="margin:0 0 10px">The code expires in 15 minutes.</p>
+      <div id="confirmMsg"></div>
+      <button class="btn" type="submit" id="confirmSubmit" style="width:100%;margin-top:4px">Confirm and sign in</button>
+    </form>
+    <p style="text-align:center;margin:12px 0 0">
+      <a href="#" id="resendLink" style="font-size:13.5px">Send a new code</a>
+      <span style="color:var(--muted)"> · </span>
+      <a href="#" id="confirmBackLink" style="font-size:13.5px">Use a different email</a>
+    </p>
+    <p class="note">Didn't get it? Check your spam folder, or send a new code. If the address above is wrong, go back and sign up again with the right one.</p>
+  </div>
+</main>
+
+<!-- Not an admin -->
+<main class="signin-wrap hidden" id="deniedView">
+  <div class="auth-brand">
+    <img src="logo-header.png" alt="" width="32" height="32">
+    <span class="bn">CAW <span>Academy</span></span>
+  </div>
+  <div class="card">
+    <h1>Not an administrator</h1>
+    <p class="sub" id="deniedMsg">This account is not set up as an organisation administrator yet. If you have just requested admin access, our support team is reviewing it and you will be notified by email once the account is activated.</p>
+    <button class="btn btn-ghost" id="deniedSignOut">Sign out</button>
+  </div>
+</main>
+
+<!-- ══════════════ Console ══════════════ -->
+<div class="shell hidden" id="dashView">
+
+  <!-- THE RAIL carries every piece of chrome: who you are, what the licence
+       covers, where you are, and the way out. The canvas then shows one job and
+       nothing else — it used to open with three stacked bands (brand nav, org
+       card, tab strip) before a single fact about the team. -->
+  <aside class="rail">
+    <div class="rail-brand">
+      <img src="logo-header.png" alt="" width="30" height="30">
+      <div class="rail-text">
+        <div class="rail-name">CAW <span>Academy</span></div>
+        <div class="rail-kick">Team admin</div>
+      </div>
+    </div>
+
+    <div class="org">
+      <h2 id="orgName">Your organisation</h2>
+      <div id="orgDomains"></div>
+      <div class="org-meter hidden" id="orgMeter"><i style="width:0"></i></div>
+      <div id="orgStrap"></div>
+    </div>
+
+    <nav class="tabsnav" id="tabs" role="tablist"></nav>
+
+    <div class="rail-foot">
+      <div class="rail-av" id="whoAv"></div>
+      <div id="who"></div>
+      <button class="btn-ghost" id="signOutBtn" title="Sign out">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="wrap">
+
+  <!-- ─────────────── OVERVIEW ───────────────
+       The two questions an admin opens this page with, answered before any
+       control is offered: how exposed are we, and who do I chase. -->
+  <section class="sect" data-sect="overview">
+    <div class="phead">
+      <div>
+        <h1>Overview</h1>
+      </div>
+      <div class="pacts">
+        <button class="btn btn-ghost" id="overviewReload">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>Reload</button>
+      </div>
+    </div>
+
+    <!-- A CONTRACT RUNNING OUT IS THE ONE EVENT THAT TURNS THE PRODUCT OFF FOR
+         THE WHOLE TEAM AT ONCE, and until now the only warning was a date
+         inside the licence panel on the right — a figure among figures, on a
+         card an admin reads when they are already thinking about licences.
+         This sits above everything, names the contract, and says how long is
+         left. Rendered only when something is actually expiring. -->
+    <div id="expiryNotice"></div>
+
+    <div id="overviewTraining" class="rsum"></div>
+
+    <div class="ovgrid">
+      <!-- NEEDS ATTENTION — everything late or nearly late, worst first, with the
+           action ON the row. Reading that somebody is eleven days overdue and
+           then having to go and find them in Team was the page's biggest gap. -->
+      <div class="card" id="attentionCard">
+        <div class="card-h">
+          <h2>Needs attention</h2>
+          <span class="ms-count" id="attentionCount"></span>
+        </div>
+        <div id="attention" class="card-scroll"></div>
+      </div>
+
+      <div>
+        <div class="card" id="licenceCard">
+          <div class="card-h"><h2>Licence</h2></div>
+          <div class="card-b card-scroll">
+            <div id="overviewLicence"></div>
+            <div id="licenceDetail"></div>
+            <div id="licenceMsg"></div>
+          </div>
+        </div>
+        <!-- COLLAPSED BY DEFAULT. It is the least urgent thing on the page —
+             nothing here needs doing — and open it took the height the licence
+             panel beside it actually wants. A <details> rather than a scripted
+             toggle: the open/closed state, the keyboard and the semantics come
+             with the element. -->
+        <!-- NOT a <details>. It was, and it would not collapse: a control
+             <details> created from scratch on this page, with none of our CSS
+             on it, kept its content visible while reporting closed, so the
+             browser's own disclosure behaviour is not dependable here. A class
+             toggle is five lines and cannot be surprised; `aria-expanded` and
+             the button keep the semantics the element was providing. -->
+        <div class="card card-fold" id="activityCard">
+          <button type="button" class="card-h" id="activityToggle" aria-expanded="false" aria-controls="activity">
+            <h2>Recent activity</h2>
+            <span class="fold-chev" aria-hidden="true"></span>
+          </button>
+          <div class="card-b hidden" id="activity"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── ASSIGN ─────────────── -->
+  <section class="sect" data-sect="assign">
+    <div class="phead">
+      <div>
+        <h1>Assign courses</h1>
+      </div>
+    </div>
+
+    <div class="card"><div class="card-b">
+      <form id="assignForm">
+        <div class="ms-grid">
+          <div>
+            <div class="step-k"><span class="step-n">1</span><b>Who</b><label class="lbl">the members to schedule</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="memSearch" placeholder="Filter members…" autocomplete="off">
+                <!-- Matches the Courses picker beside it. The two lists do the same job and
+                     had different controls: Courses could be cleared in one click, Members
+                     had to be unticked one at a time. -->
+                <button type="button" class="linkbtn" id="memClear">Clear</button>
+                <span class="ms-count" id="memCount">0 selected</span>
+              </div>
+              <div class="ms-tools" style="background:#fff">
+                <label class="ms-row" style="padding:0" for="memAll"><input type="checkbox" id="memAll"> <b>Select all shown</b></label>
+              </div>
+              <div class="ms-list" id="memList"></div>
+            </div>
+          </div>
+          <div>
+            <div class="step-k"><span class="step-n">2</span><b>What</b><label class="lbl">the courses they must complete</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="courseSearch" placeholder="Filter courses…" autocomplete="off">
+                <button type="button" class="linkbtn" id="courseClear">Clear</button>
+                <span class="ms-count" id="courseCount">0 selected</span>
+              </div>
+              <div class="ms-list" id="courseList"></div>
+              <div class="ms-note" id="licenceNote"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-k" style="margin-top:18px"><span class="step-n">3</span><b>When</b><label class="lbl">the first deadline, then the gap between courses</label></div>
+        <div class="assign-foot">
+          <div>
+            <label class="lbl" for="deadline">First course due</label>
+            <input class="field" id="deadline" type="date" required>
+          </div>
+          <div>
+            <label class="lbl" for="monthsApart">Months between courses</label>
+            <input class="field" id="monthsApart" type="number" min="0" max="24" value="1">
+          </div>
+        </div>
+
+        <!-- THE ACTUAL SCHEDULE, course by course. "Months between courses: 1"
+             is a rule, not a plan; this is the plan the rule produces, and it is
+             where an admin notices that course four lands in the holidays. -->
+        <div id="assignPlan" class="plan"></div>
+
+        <!-- The consequence, stated before the button is reachable. -->
+        <!-- The consequence and the action, pinned to the foot of the form so
+             they are reachable from anywhere in it. Only these two: the plan
+             above is read once, on the way down. -->
+        <div class="sumbar idle" id="assignSummary">
+          <div class="t" id="scheduleHint">Pick members and courses to see what will be scheduled.</div>
+          <!-- THE WAY DOWN TO THE SCHEDULE. The bar states a total — "17
+               assignments, first due 2 Nov" — and the schedule that total came
+               from is further down a form taller than the window, with no sign
+               from here that it exists. Shown only while there IS one and it is
+               off screen; an arrow pointing at something already in view is an
+               instruction to do what you have done. -->
+          <button class="seeplan hidden" type="button" id="seePlanBtn">
+            See the schedule<span class="seeplan-chev" aria-hidden="true"></span></button>
+          <button class="btn btn-cta" type="submit" id="assignBtn">Assign</button>
+        </div>
+        <div id="assignMsg"></div>
+      </form>
+    </div></div>
+  </section>
+
+  <!-- ─────────────── ASSIGN · DOCUMENTS ───────────────
+       The same verb as Assign courses, on a different object: pick people,
+       pick what they must read, set a date. It lived inside each document's
+       detail panel, which is where it could not be found. -->
+  <!-- ─────────────── TEAM ───────────────
+       A roster is a RECORD, so it is a table: the eye compares down a column.
+       As a stack of cards, two people meant reading two paragraphs. -->
+  <section class="sect" data-sect="team">
+    <div class="phead">
+      <div>
+        <h1>Team progress</h1>
+      </div>
+      <div class="pacts">
+        <!-- The first step of running a team's training is getting the team into
+             the app at all, and the roster can only ever list accounts that
+             already exist — so until now that step happened over chat, or not
+             at all. -->
+        <button class="btn" id="inviteBtn" title="Invite a colleague">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg><span class="btn-t">Invite a colleague</span><span class="btn-s">Invite</span></button>
+        <!-- The download mark, matched by the per-member buttons inside an open
+             row, so "this produces a file" looks the same wherever it is offered. -->
+        <button class="btn btn-ghost" id="exportPdfBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export PDF</button>
+        <button class="btn btn-ghost" id="exportBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
+        <button class="btn btn-ghost" id="reloadBtn" title="Reload">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg><span class="btn-t">Reload</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <input class="ms-search" id="rosterSearch" placeholder="Search name or email…" autocomplete="off" style="max-width:260px">
+        <!-- The filters and the sort are one group on one line: both narrow the
+             same list, and the sort sitting up beside the search made the row
+             above the chips look like a second, unrelated bar. -->
+        <div class="rctrls">
+          <div id="rosterFilters" class="rfilters"></div>
+        </div>
+      </div>
+      <div id="rosterMsg" style="padding:0 16px"></div>
+      <div id="roster" class="table-scroll"></div>
+      <div class="pager" id="rosterPager"></div>
+    </div>
+  </section>
+
+  <!-- ─────────────── DOCUMENTS ───────────────
+       Hidden entirely unless the licence holds one, so an organisation that has
+       never bought a document never sees a control for it. -->
+  <section class="sect" data-sect="documents">
+    <div class="phead">
+      <div>
+        <h1>Company documents</h1>
+      </div>
+      <div class="pacts"><button class="btn btn-ghost" id="docsReload">Reload</button></div>
+    </div>
+
+    <!-- REQUIRING FAMILIARISATION, in bulk. It is the ACTION on this screen,
+         so it sits above the library it acts on — and folded, because the
+         screen is opened far more often to look something up than to schedule
+         a reading round. -->
+    <div class="card card-fold" id="famCard">
+      <button type="button" class="card-h" id="famToggle" aria-expanded="false" aria-controls="famBody">
+        <h2>Require familiarisation</h2>
+        <span class="fold-chev" aria-hidden="true"></span>
+      </button>
+      <div class="card-b hidden" id="famBody">
+      <form id="famForm">
+        <div class="ms-grid">
+          <div>
+            <div class="step-k"><span class="step-n">1</span><b>Who</b><label class="lbl">the people who must read it</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="famMemSearch" placeholder="Filter members…" autocomplete="off">
+                <button type="button" class="linkbtn" id="famMemClear">Clear</button>
+                <span class="ms-count" id="famMemCount">0 selected</span>
+              </div>
+              <div class="ms-tools" style="background:#fff">
+                <label class="ms-row" style="padding:0" for="famMemAll"><input type="checkbox" id="famMemAll"> <b>Select all shown</b></label>
+              </div>
+              <div class="ms-list" id="famMemList"></div>
+            </div>
+            <div class="chips" id="famMemChips"></div>
+          </div>
+          <div>
+            <div class="step-k"><span class="step-n">2</span><b>What</b><label class="lbl">the documents, at their current revision</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="famDocSearch" placeholder="Filter documents…" autocomplete="off">
+                <button type="button" class="linkbtn" id="famDocClear">Clear</button>
+                <span class="ms-count" id="famDocCount">0 selected</span>
+              </div>
+              <div class="ms-list" id="famDocList"></div>
+              <div class="ms-note" id="famDocNote"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 AND THE BUTTON TRAVEL TOGETHER. The summary quotes the
+             deadline ("familiar by 2 Nov 2026"), so pinning the button without
+             the field that sets it left the sentence reporting a date the
+             reader could not reach — and the pinned bar sat directly on top of
+             the control, since the date is the last thing before it. One
+             sticky block: the date, the consequence, and the action. -->
+        <div class="formfoot">
+          <div class="step-k"><span class="step-n">3</span><b>When</b><label class="lbl">the date they must be familiar by</label></div>
+          <div class="assign-foot">
+            <div>
+              <label class="lbl" for="famDeadline">Familiar by</label>
+              <input class="field" id="famDeadline" type="date" required>
+            </div>
+          </div>
+
+          <div class="sumbar idle" id="famSummary">
+            <div class="t" id="famHint">Pick people and documents to see what will be required.</div>
+            <button class="btn btn-cta" type="submit" id="famAssignBtn">Require</button>
+          </div>
+        </div>
+        <div id="famMsg"></div>
+      </form>
+      </div>
+    </div>
+
+    <div class="card hidden" id="docsCard"><div class="card-b">
+      <p class="hint" style="margin:0 0 10px">Changes apply the next time that person's app asks for the document.</p>
+      <div id="docsMsg"></div>
+      <!-- A dropdown rather than a chip row, because an MRO with thirty customers
+           wraps a chip row into a block taller than the list it filters. It holds
+           CHECKBOXES rather than being a <select multiple>: picking several from a
+           native multi-select means ctrl-clicking, and letting go of ctrl wipes the
+           selection. This is the same ticked list the member and course pickers use. -->
+      <!-- THE FILTER BAR. One place that narrows the list, built by renderDocs.
+           It sits OUTSIDE #docs — the container renderDocs wipes — so it never
+           scrolls away with the rows, and the column headings are left to do
+           the one thing a column heading should: sort. Putting filters in the
+           headings as well made the table look like it had two filter systems
+           stacked on each other. -->
+      <div id="docFilters" class="tbar"></div>
+      <div id="docs" class="table-scroll"></div>
+    </div></div>
+  </section>
+
+  <!-- ─────────────── CERTIFICATES ───────────────
+       The team's durable completion record. It existed only as a comma-joined
+       line inside each member's card, which is unreadable and unsearchable. -->
+  <!-- ─────────────── RECORDS ───────────────
+       ONE HISTORY over three kinds of record — a course finished, a document
+       revision read, a certificate issued — because the question an auditor
+       asks is never about one of them in isolation: "show me what this person
+       completed last year" spans all three.
+
+       Everything is built from what the page already holds, like the roster
+       export, so a report works whatever the API is running. -->
+  <section class="sect" data-sect="records">
+    <div class="phead">
+      <div>
+        <h1>Records</h1>
+      </div>
+      <div class="pacts">
+        <button class="btn btn-ghost" id="recExportPdf">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export everything (PDF)</button>
+        <button class="btn btn-ghost" id="recExportCsv">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export everything (CSV)</button>
+      </div>
+    </div>
+
+    <!-- The filters fold. A complete export needs none of them, and that is the
+         common case; a custom one is opened for deliberately. -->
+    <div class="card card-fold" id="recFilterCard">
+      <button type="button" class="card-h" id="recFilterToggle" aria-expanded="false" aria-controls="recFilterBody">
+        <h2>Custom report</h2>
+        <span class="ms-count" id="recFilterSummary">Everything</span>
+        <span class="fold-chev" aria-hidden="true"></span>
+      </button>
+      <div class="card-b hidden" id="recFilterBody">
+        <div class="ms-grid">
+          <div>
+            <div class="step-k"><span class="step-n">1</span><b>Who</b><label class="lbl">leave empty for everyone</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="recWhoSearch" placeholder="Filter members…" autocomplete="off">
+                <button type="button" class="linkbtn" id="recWhoClear">Clear</button>
+                <span class="ms-count" id="recWhoCount">Everyone</span>
+              </div>
+              <div class="ms-list" id="recWhoList"></div>
+            </div>
+          </div>
+          <div>
+            <div class="step-k"><span class="step-n">2</span><b>What</b><label class="lbl">courses and documents; leave empty for all</label></div>
+            <div class="ms">
+              <div class="ms-tools">
+                <input class="ms-search grow" id="recWhatSearch" placeholder="Filter courses and documents…" autocomplete="off">
+                <button type="button" class="linkbtn" id="recWhatClear">Clear</button>
+                <span class="ms-count" id="recWhatCount">All</span>
+              </div>
+              <div class="ms-list" id="recWhatList"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-k" style="margin-top:18px"><span class="step-n">3</span><b>When</b><label class="lbl">leave empty for all time</label></div>
+        <div class="assign-foot">
+          <div>
+            <label class="lbl" for="recFrom">From</label>
+            <input class="field" id="recFrom" type="date">
+          </div>
+          <div>
+            <label class="lbl" for="recTo">To</label>
+            <input class="field" id="recTo" type="date">
+          </div>
+          <!-- THE REPORT'S OWN EXPORTS, inside the panel that defines it. The
+               page-header pair sits beside the page title and reads as the
+               page's, so with filters set it was unclear which of the two sets
+               of records would come out. Each pair now sits with what it
+               exports and says so. -->
+          <div class="rec-xp">
+            <label class="lbl" aria-hidden="true" style="visibility:hidden">Export</label>
+            <div class="pacts">
+              <button class="btn btn-ghost" type="button" id="recExportCustomPdf">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export PDF</button>
+              <button class="btn btn-ghost" type="button" id="recExportCustomCsv">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
+            </div>
+          </div>
+          <!-- RESET LAST, at the far right (SME). The two exports are what the
+               panel is FOR, so they sit with the filters that feed them; the
+               reset is the way out, and a way out belongs at the end of a row,
+               not between the dates and the thing they produce. -->
+          <div class="rec-reset">
+            <label class="lbl" aria-hidden="true" style="visibility:hidden">Reset</label>
+            <button class="btn btn-ghost" type="button" id="recReset" style="width:100%">Reset filters</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <div class="seg" id="recKinds"></div>
+        <span class="ms-count" id="recCount" style="margin-left:auto"></span>
+      </div>
+      <div id="recList" class="table-scroll"></div>
+    </div>
+  </section>
+
+  <section class="sect" data-sect="certificates">
+    <div class="phead">
+      <div>
+        <h1>Certificates</h1>
+      </div>
+      <!-- The export is WHAT IS ON SCREEN, filter and sort included, and the
+           file says so in its name. A register of certificates is the thing an
+           auditor asks for by name; having to copy it out of the table by hand
+           was the gap. -->
+      <div class="pacts">
+        <button class="btn btn-ghost" id="certExportPdf">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export PDF</button>
+        <button class="btn btn-ghost" id="certExportCsv">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <input class="ms-search" id="certSearch" placeholder="Filter by name or course…" autocomplete="off" style="max-width:280px">
+        <div id="certSortBar" class="rsortbar"></div>
+        <span class="ms-count" id="certCount" style="margin-left:auto"></span>
+      </div>
+      <div id="certs" class="table-scroll"></div>
+    </div>
+  </section>
+
+  <footer class="foot-center">
+    <nav class="foot-nav">
+      <a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a><a href="../support.html">Support</a>
+    </nav>
+    <div class="disclaim">&copy; <span id="yr">2026</span> CAW Academy.</div>
+  </footer>
+  </main>
+
+  <!-- THE PRINTED REPORT. Hidden on screen, the only thing printed on paper.
+       Built on demand from the roster already in the page and handed to the
+       browser's own print dialog, whose "Save as PDF" writes the file — no PDF
+       library, which this page's CSP (script-src 'self') would not load anyway,
+       and the text stays real text: selectable, searchable, and small.
+
+       It is a DIRECT child of #dashView because the print rules hide
+       `#dashView > *` and then re-show this one; nested inside the canvas it
+       would be hidden along with its parent and every report would print blank. -->
+  <div id="printReport" aria-hidden="true"></div>
+</div>
+
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+<script>
+/* ───────────────────────────────────────────────────────────────────────────
+   DEMO HARNESS for the CAW Academy admin console.
+
+   This is NOT a mockup of the portal — it IS the portal. The page and admin.js
+   in this file are byte-for-byte the ones that will deploy; only the server is
+   replaced, by the fake below. So anything that works here works there, and
+   anything broken here is broken there.
+
+   The fake answers every endpoint the portal calls and MUTATES its own data, so
+   assigning, editing a deadline, removing, granting a document and reminding all
+   behave as they will in production, including the round trip and the re-render.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+var reissued = {};   // seatId -> the code the stub last minted for it
+(function () {
+  var DAY = 86400000;
+  function iso(d) { return new Date(d).toISOString(); }
+  function inDays(n) { return iso(Date.now() + n * DAY); }
+  function days(deadline) { return Math.ceil((new Date(deadline) - Date.now()) / DAY); }
+
+  function display(a) {
+    if (a.status === "completed") return "done";
+    var d = days(a.deadline);
+    if (d < 0) return "overdue";
+    if (d <= 3) return "due_soon";
+    return "upcoming";
+  }
+
+  var nextId = 100;
+  function assignment(courseKey, deadline, status, score, completedAt, seq) {
+    return {
+      id: "a" + (nextId++), courseKey: courseKey, deadline: deadline,
+      sequence: seq || 0, status: status || "assigned",
+      completedAt: completedAt || null, score: score == null ? null : score
+    };
+  }
+  function progress(courseKey, pct, done, total, examBest, passed, last) {
+    return {
+      courseKey: courseKey, percent: pct, lessonsCompleted: done, lessonsTotal: total,
+      examBest: examBest == null ? null : examBest, examPassed: !!passed,
+      lastActiveAt: last || null
+    };
+  }
+
+  /* Twenty-five people, so the table, the paging and the filters all have
+     something real to do — and a spread of states, because a demo where
+     everybody is fine proves nothing about the screen that exists for the ones
+     who are not. Names are invented; nothing here is a real customer. */
+  var FIRST = ["Ann","Bogdan","Carla","Dmitri","Elena","Farid","Greta","Hassan","Irina","Jonas",
+               "Kamila","Lukas","Marta","Nadir","Olga","Pavel","Qasim","Rita","Sergei","Tomas",
+               "Ulvi","Vera","Wasim","Xenia","Yusuf"];
+  var LAST  = ["Abbas","Bakker","Costa","Dragan","Eriksen","Farooq","Gruber","Haddad","Ivanova","Jensen",
+               "Kaya","Lindqvist","Marin","Novak","Olsen","Petrov","Qureshi","Rossi","Sokolov","Tamm",
+               "Uzun","Varga","Weber","Xhafa","Yildiz"];
+  var COURSES = ["m","camo","p145","p21dp","cs","hf","sms","ewis35","fts1","amp","arc","m_uk","camo_uk"];
+
+  var members = FIRST.map(function (f, i) {
+    var id = "u" + (i + 1);
+    var email = (f + "." + LAST[i]).toLowerCase().replace(/[^a-z.]/g, "") + "@northline-tech.com";
+    var m = {
+      userId: id, email: email, firstName: f, lastName: LAST[i],
+      orgRole: i === 0 ? "admin" : "member",
+      assignments: [], certificates: [], progress: [],
+      lastActiveAt: null, entitledCourses: ["__all__"]
+    };
+
+    // Two people hold no licence at all — the state the "No licence" chip and the
+    // refusal on assign both exist for.
+    if (i === 7 || i === 18) { m.entitledCourses = []; return m; }
+    // Three have never been given anything.
+    if (i === 11 || i === 15 || i === 22) { m.lastActiveAt = inDays(-40); return m; }
+
+    var n = 2 + (i % 4);
+    for (var c = 0; c < n; c++) {
+      var key = COURSES[(i + c) % COURSES.length];
+      var finished = (i + c) % 3 === 0;
+      if (finished) {
+        var when = inDays(-(5 + ((i * 3 + c) % 60)));
+        m.assignments.push(assignment(key, when, "completed", 72 + ((i * 7 + c) % 27), when, c));
+        m.certificates.push({
+          courseKey: key, number: "CAW-" + key.toUpperCase() + "-" + (1200 + i * 4 + c),
+          examScore: 72 + ((i * 7 + c) % 27), issuedAt: when
+        });
+        m.progress.push(progress(key, 100, 18, 18, 72 + ((i * 7 + c) % 27), true, when));
+      } else {
+        // Three people overdue, two due in the next couple of days, the rest ahead.
+        var due = (i === 2 && c === 1) ? inDays(-11)
+                : (i === 5 && c === 0) ? inDays(-4)
+                : (i === 9 && c === 1) ? inDays(-1)
+                : (i === 3 && c === 0) ? inDays(2)
+                : (i === 13 && c === 1) ? inDays(3)
+                : inDays(10 + ((i * 5 + c * 11) % 70));
+        m.assignments.push(assignment(key, due, "assigned", null, null, c));
+        var pct = (i * 13 + c * 29) % 100;
+        if ((i + c) % 5 !== 0) {
+          m.progress.push(progress(key, pct, Math.round(pct / 6), 18,
+            pct > 60 ? 64 : null, false, inDays(-((i + c) % 9))));
+        }
+      }
+    }
+    /* ONE PERSON RE-ASSIGNED A COURSE THEY ALREADY HOLD A CERTIFICATE FOR —
+       the case that produced a printed row reading "Upcoming, 0%" alongside a
+       100% score and a certificate number. The certificate is OLD, the
+       assignment is NEW, and a stub that only ever has them agree cannot show
+       whether the rule separating them works. */
+    if (i === 0) {
+      m.certificates.push({
+        courseKey: "aof", number: "CAW-AOF-000002",
+        examScore: 100, issuedAt: inDays(-120)
+      });
+      m.assignments.push(assignment("aof", inDays(31), "assigned", null, null, 9));
+      m.assignments[m.assignments.length - 1].assignedAt = inDays(-2);
+      m.progress.push(progress("aof", 0, 0, 36, null, false, inDays(-1)));
+    }
+
+    m.lastActiveAt = inDays(-((i * 2) % 12));
+    return m;
+  });
+
+  var docs = [
+    { pkgId: "northline-moe",  name: "Northline Technics", title: "MOE",  rev: "Issue 01 Rev. 00", updatedAt: inDays(-52), mode: "selected", grantedUserIds: ["u2", "u5"] },
+    { pkgId: "northline-came", name: "Northline Technics", title: "CAME", rev: "Issue 04 Rev. 02", updatedAt: inDays(-29), mode: "all",      grantedUserIds: [] },
+    { pkgId: "northline-mel",  name: "Northline Technics", title: "MEL",  rev: "Issue 02 Rev. 00", updatedAt: inDays(-75), mode: "all",      grantedUserIds: [] },
+    { pkgId: "meridian-came",  name: "Meridian Air",       title: "CAME", rev: "Issue 03 Rev. 01", updatedAt: inDays(-26), mode: "selected", grantedUserIds: ["u1", "u3", "u4", "u9"] },
+    { pkgId: "meridian-mel",   name: "Meridian Air",       title: "MEL",  rev: "Issue 01 Rev. 03", updatedAt: inDays(-18), mode: "all",      grantedUserIds: [] },
+    { pkgId: "atlas-came",     name: "Atlas Cargo",        title: "CAME", rev: "Issue 02 Rev. 01", updatedAt: inDays(-63), mode: "selected", grantedUserIds: ["u6"] }
+  ];
+
+  var fam = [
+    { id: "f1", userId: "u1", email: "ann.abbas@northline-tech.com", name: "Ann Abbas",
+      pkgId: "northline-moe", revision: "Issue 01 Rev. 00", deadline: inDays(-6),
+      daysRemaining: -6, acknowledgedAt: null, acknowledgedBy: null, status: "overdue" },
+    { id: "f2", userId: "u2", email: "bogdan.bakker@northline-tech.com", name: "Bogdan Bakker",
+      pkgId: "northline-moe", revision: "Issue 01 Rev. 00", deadline: inDays(2),
+      daysRemaining: 2, acknowledgedAt: null, acknowledgedBy: null, status: "due_soon" },
+    { id: "f3", userId: "u3", email: "carla.costa@northline-tech.com", name: "Carla Costa",
+      pkgId: "northline-moe", revision: "Issue 01 Rev. 00", deadline: inDays(14),
+      daysRemaining: 14, acknowledgedAt: inDays(-3), acknowledgedBy: "learner", status: "done" },
+    { id: "f4", userId: "u4", email: "dmitri.dragan@northline-tech.com", name: "Dmitri Dragan",
+      pkgId: "northline-moe", revision: "Issue 01 Rev. 00", deadline: inDays(14),
+      daysRemaining: 14, acknowledgedAt: inDays(-1), acknowledgedBy: "admin", status: "done" }
+  ];
+
+  var licence = {
+    totals: { seatLimit: 25, issued: 20, claimed: 18, unredeemed: 2, spare: 5,
+              validUntil: inDays(163), daysRemaining: 163 },
+    licenses: [
+      { id: "l1", reference: "PO-2025-4471", scope: ["__all__"], validFrom: inDays(-202),
+        // Inside the 30-day window, so the test build actually SHOWS the
+        // expiry notice rather than describing it.
+        seatLimit: 15, issued: 15, claimed: 14, validUntil: inDays(23), daysRemaining: 23 },
+      { id: "l2", reference: "PO-2026-0118", scope: ["m","camo","p145","p21dp","cs","amp","arc","m_uk","camo_uk"],
+        validFrom: inDays(-37), seatLimit: 10, issued: 5, claimed: 4,
+        validUntil: inDays(402), daysRemaining: 402 }
+    ],
+    accountsWithoutSeat: 2
+  };
+
+  function dto(a) {
+    return {
+      id: a.id, courseKey: a.courseKey, deadline: a.deadline, sequence: a.sequence,
+      status: a.status, displayStatus: display(a), daysRemaining: days(a.deadline),
+      completedAt: a.completedAt, score: a.score,
+      // The server sends this; without it the stub cannot exercise the rule
+      // that separates an old certificate from a new assignment.
+      assignedAt: a.assignedAt || inDays(-30)
+    };
+  }
+  function rosterOut() {
+    return members.map(function (m) {
+      var copy = {}; for (var k in m) copy[k] = m[k];
+      copy.assignments = m.assignments.map(dto).sort(function (x, y) {
+        var dx = x.status === "completed" ? 1 : 0, dy = y.status === "completed" ? 1 : 0;
+        if (dx !== dy) return dx - dy;
+        return x.deadline.localeCompare(y.deadline);
+      });
+      return copy;
+    });
+  }
+  function findMember(id) { return members.filter(function (m) { return m.userId === id; })[0]; }
+
+  // ── The fake server ──────────────────────────────────────────────────────
+  function handle(method, path, body) {
+    /* SIGNING OUT MUST NOT BE A DEAD END. The console's Sign out is real — it
+       clears the token and shows the sign-in screen — so without a login here
+       the demo ended at a form that could never be satisfied. Any address and
+       any password are accepted: this is a demo, there is nothing to protect,
+       and sending somebody away to invent credentials would be the same dead
+       end wearing a politer face. */
+    if (path === "/v1/auth/refresh") return { accessToken: "demo" };
+    if (path === "/v1/auth/login")   return { accessToken: "demo" };
+    if (path === "/v1/auth/logout")  return {};
+    if (path === "/v1/auth/register") return { accessToken: "demo" };
+    if (path === "/v1/auth/confirm-email") return { accessToken: "demo" };
+    if (path === "/v1/auth/resend-confirmation") return {};
+    if (path === "/v1/auth/forgot-password") return {};
+
+    if (path === "/v1/org/context") {
+      return {
+        orgId: "o1", orgName: "Northline Technics", contactEmail: "training@northline-tech.com",
+        domains: ["northline-tech.com"], scope: ["__all__"],
+        /* An invented administrator. A demo on a public page must not carry a
+           real person's name — and the sample organisation around it is
+           invented too, so a real name sitting in it reads as a real account. */
+        you: { email: "a.whitfield@northline-tech.com", firstName: "Alex", lastName: "Whitfield" }
+      };
+    }
+    if (path === "/v1/org/members")   return { members: rosterOut() };
+    if (path === "/v1/org/license")   return licence;
+    if (path === "/v1/org/documents") return { documents: docs };
+
+    var mDocMode = path.match(/^\/v1\/org\/documents\/([^/]+)\/mode$/);
+    if (mDocMode) {
+      docs.forEach(function (d) { if (d.pkgId === decodeURIComponent(mDocMode[1])) d.mode = body.mode; });
+      return { documents: docs };
+    }
+    var mDocGrant = path.match(/^\/v1\/org\/documents\/([^/]+)\/grant$/);
+    if (mDocGrant) {
+      docs.forEach(function (d) {
+        if (d.pkgId !== decodeURIComponent(mDocGrant[1])) return;
+        var set = {}; d.grantedUserIds.forEach(function (u) { set[u] = true; });
+        if (body.granted) set[body.userId] = true; else delete set[body.userId];
+        d.grantedUserIds = Object.keys(set);
+      });
+      return { documents: docs };
+    }
+
+    if (path === "/v1/org/familiarisation") {
+      return { records: fam };
+    }
+    var mFamSet = path.match(/^\/v1\/org\/documents\/([^/]+)\/familiarisation$/);
+    if (mFamSet) {
+      var pkg = decodeURIComponent(mFamSet[1]);
+      var rev = (body.revision || "").trim() || "(unversioned)";
+      var n = 0;
+      (body.userIds || []).forEach(function (uid) {
+        var m = findMember(uid); if (!m) return;
+        var had = fam.filter(function (f) {
+          return f.userId === uid && f.pkgId === pkg && f.revision === rev; })[0];
+        if (had) { had.deadline = iso(body.deadline); }
+        else {
+          fam.push({
+            id: "f" + (nextId++), userId: uid, email: m.email,
+            name: (m.firstName + " " + m.lastName).trim(),
+            pkgId: pkg, revision: rev, deadline: iso(body.deadline),
+            daysRemaining: days(body.deadline),
+            acknowledgedAt: null, acknowledgedBy: null,
+            status: days(body.deadline) < 0 ? "overdue" : days(body.deadline) <= 3 ? "due_soon" : "upcoming"
+          });
+        }
+        n++;
+      });
+      return { assigned: n, skipped: (body.userIds || []).length - n };
+    }
+    var mFamPatch = path.match(/^\/v1\/org\/familiarisation\/([^/]+)$/);
+    if (mFamPatch && method === "PATCH") {
+      fam.forEach(function (f) {
+        if (f.id !== decodeURIComponent(mFamPatch[1])) return;
+        if (body.acknowledged) { f.acknowledgedAt = iso(Date.now()); f.acknowledgedBy = "admin"; f.status = "done"; }
+        else {
+          f.acknowledgedAt = null; f.acknowledgedBy = null;
+          f.status = f.daysRemaining < 0 ? "overdue" : f.daysRemaining <= 3 ? "due_soon" : "upcoming";
+        }
+      });
+      return { record: null };
+    }
+    if (mFamPatch && method === "DELETE") {
+      var gone = decodeURIComponent(mFamPatch[1]);
+      fam = fam.filter(function (f) { return f.id !== gone; });
+      return { deleted: true };
+    }
+
+    var mCodes = path.match(/^\/v1\/org\/licenses\/([^/]+)\/codes$/);
+    if (mCodes) {
+      var lid = decodeURIComponent(mCodes[1]);
+      var lic = licence.licenses.filter(function (l) { return l.id === lid; })[0];
+      if (!lic) throw { status: 404, message: "Licence not found" };
+      var seats = [];
+      for (var i = 0; i < lic.issued; i++) {
+        // The LAST TWO unclaimed seats are hash-only, standing in for codes
+        // minted before CODE_ENC_KEY existed — the case the portal has to
+        // handle, and the one that is invisible if the stub is all happy path.
+        var lost = i >= lic.issued - 2 && i >= lic.claimed;
+        var sid = lid + "-s" + i;
+        seats.push({
+          id: sid,
+          code: reissued[sid] || (lost ? null : "CAW-" + lid.toUpperCase() + "-" + String(1000 + i)),
+          claimedAt: i < lic.claimed ? inDays(-(20 + i)) : null
+        });
+      }
+      var readable = seats.filter(function (s) { return s.code; })
+        .map(function (s) { return { code: s.code, claimedAt: s.claimedAt }; });
+      return { available: readable.length > 0, total: seats.length,
+               codes: readable, seats: seats, encryptionEnabled: true };
+    }
+
+    var mReissue = path.match(/^\/v1\/org\/licenses\/([^/]+)\/seats\/([^/]+)\/reissue$/);
+    if (mReissue) {
+      reissued[decodeURIComponent(mReissue[2])] =
+        "CAW-NEW-" + String(Math.floor(Math.random() * 9000) + 1000);
+      return { code: reissued[decodeURIComponent(mReissue[2])] };
+    }
+
+    if (path === "/v1/org/invites") {
+      var addr = String((body && body.email) || "").trim().toLowerCase();
+      var dom = addr.split("@")[1] || "";
+      if (dom !== "northline-tech.com") {
+        throw { status: 400, message: "Invitations can only go to your organisation's domains (northline-tech.com). An address elsewhere could not create an account on your team anyway." };
+      }
+      var taken = members.some(function (m) { return m.email === addr; });
+      return { email: addr, alreadyMember: taken };
+    }
+
+    if (path === "/v1/org/assignments/remind") {
+      // Mirrors the real rule: one learner per email, and a cooldown that makes a
+      // second click report "Reminded recently" rather than sending twice.
+      var skipped = 0, sent = 0, seen = {};
+      (body.assignmentIds || []).forEach(function (id) {
+        members.forEach(function (m) {
+          m.assignments.forEach(function (a) {
+            if (a.id !== id) return;
+            if (a._reminded) { skipped++; return; }
+            a._reminded = true;
+            if (!seen[m.userId]) { seen[m.userId] = true; sent++; }
+          });
+        });
+      });
+      return { sent: sent, skipped: skipped };
+    }
+
+    if (path === "/v1/org/assignments/batch") {
+      var made = [], conflicts = [], refusals = [];
+      (body.items || []).forEach(function (it) {
+        var m = findMember(it.userId);
+        if (!m) return;
+        if (!m.entitledCourses.length && ["aof", "m", "aof_uk", "m_uk", "aof_gcaa", "m_gcaa", "aof_faa", "p43_faa"].indexOf(it.courseKey) === -1) {
+          refusals.push({ userId: m.userId, email: m.email, courseKey: it.courseKey, reason: "no_seat" });
+          return;
+        }
+        var existing = m.assignments.filter(function (a) { return a.courseKey === it.courseKey; })[0];
+        if (existing && !body.overwrite) {
+          conflicts.push({ userId: m.userId, courseKey: it.courseKey, deadline: iso(existing.deadline) });
+          return;
+        }
+        if (existing) { existing.deadline = iso(it.deadline); existing.status = "assigned"; existing.completedAt = null; }
+        else m.assignments.push(assignment(it.courseKey, iso(it.deadline), "assigned", null, null, it.sequence || 0));
+        made.push(dto(existing || m.assignments[m.assignments.length - 1]));
+      });
+      return { assignments: made, conflicts: conflicts, refusals: refusals };
+    }
+
+    var mPatch = path.match(/^\/v1\/org\/assignments\/([^/]+)$/);
+    if (mPatch && method === "PATCH") {
+      var id = decodeURIComponent(mPatch[1]), out = null;
+      members.forEach(function (m) {
+        m.assignments.forEach(function (a) {
+          if (a.id !== id) return;
+          if (body.deadline) a.deadline = iso(body.deadline);
+          if (body.courseKey) a.courseKey = body.courseKey;
+          if (body.sequence != null) a.sequence = body.sequence;
+          out = dto(a);
+        });
+      });
+      return { assignment: out };
+    }
+    if (mPatch && method === "DELETE") {
+      var del = decodeURIComponent(mPatch[1]);
+      members.forEach(function (m) {
+        m.assignments = m.assignments.filter(function (a) { return a.id !== del; });
+      });
+      return { deleted: true };
+    }
+
+    return {};
+  }
+
+  window.fetch = function (url, opts) {
+    var o = opts || {};
+    var path = String(url).replace(/^https?:\/\/[^/]+/, "").split("?")[0];
+    var body = null;
+    try { body = o.body ? JSON.parse(o.body) : null; } catch (e) {}
+    var out, failed = null;
+    try { out = handle(o.method || "GET", path, body); }
+    // The real server wraps a refusal as {error:{message,code}} and the portal
+    // reads exactly that, so the fake must too — otherwise every refusal in the
+    // test build reads "Something went wrong" and the real wording is never seen.
+    catch (e) { failed = e; out = { error: { message: e.message, code: e.code || null } }; }
+    // A touch of latency, so spinners, disabled states and the re-render after a
+    // write behave as they will against a real server rather than resolving
+    // inside the same tick.
+    return new Promise(function (res) {
+      setTimeout(function () {
+        res({
+          ok: !failed, status: failed ? (failed.status || 400) : 200,
+          headers: { get: function () { return "application/json"; } },
+          json: function () { return Promise.resolve(out); },
+          text: function () { return Promise.resolve(JSON.stringify(out)); }
+        });
+      }, 120);
+    });
+  };
+})();
+
+</script>
+<script src="admin.js?v=95" defer></script>
+<div style="position:fixed;right:12px;bottom:12px;z-index:200;background:#161A42;color:#fff;font:700 11px/1 Inter,sans-serif;letter-spacing:.04em;padding:8px 13px;border-radius:99px;opacity:.92">DEMO · sample data, nothing is sent</div>
+</body>
+</html>

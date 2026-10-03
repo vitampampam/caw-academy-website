@@ -27,6 +27,11 @@
 :root{
   --app-primary:#3E44B5;        /* Theme.primary       */
   --app-primary-2:#575ECF;      /* Theme.primaryLight  */
+  /* The dashboard banner is its OWN gradient, not the brand pair: measured off
+     Theme.swift's `headerGradient`, which was changed after this demo was
+     written and is a step lighter and bluer than Theme.primary. */
+  --app-head-1:#4753C9;         /* Theme.headerGradient start */
+  --app-head-2:#6076E2;         /* Theme.headerGradient end   */
   --app-primary-fixed:#E0E0FF;  /* Theme.primaryFixed  */
   --app-ink:#0C1843;            /* Theme.onSurface     */
   --app-ink-var:#464653;        /* Theme.onSurfaceVar  */
@@ -934,35 +939,52 @@ button.cawx-back:hover{background:var(--app-primary-fixed)}
 
 /* the dashboard, shared by all three frames */
 .cawx-dhero{border-radius:9px; padding:7px 8px; margin:0 0 6px; color:#fff;
-  background:linear-gradient(135deg,#3E44B5,#575ECF)}
+  background:linear-gradient(135deg,var(--app-head-1),var(--app-head-2))}
 .cawx-dhero b{display:block; font-size:9px; line-height:1.25; margin:0 0 2px}
 .cawx-dhero small{display:block; font-size:6.5px; line-height:1.35; opacity:.85}
-.cawx-dcont{border-radius:9px; padding:7px 8px; margin:0 0 6px; color:#fff;
-  background:linear-gradient(135deg,#F4511E,#FB8C00)}
-.cawx-dcont .k{display:block; font-size:5.5px; font-weight:800; letter-spacing:1px; opacity:.9}
-.cawx-dcont b{display:block; font-size:9px; margin:1px 0 2px}
-.cawx-dcont .r{display:flex; justify-content:space-between; align-items:center;
-  font-size:6.5px; opacity:.95}
-.cawx-dcont .res{display:inline-flex; align-items:center; gap:2px; font-weight:800}
-.cawx-dcont .res svg{width:7px; height:7px}
+/* The Continue card: white, with the action as an indigo pill. */
+.cawx-dcont{border-radius:9px; padding:7px 8px; margin:0 0 6px; color:var(--app-ink);
+  background:var(--app-surface); box-shadow:0 1px 3px rgba(16,22,68,.06)}
+.cawx-dcont .k{display:block; font-size:5px; font-weight:800; letter-spacing:.9px;
+  color:var(--app-ink-var)}
+.cawx-dcont .r{display:flex; justify-content:space-between; align-items:center; gap:6px}
+.cawx-dcont .tx{flex:1 1 auto; min-width:0}
+.cawx-dcont b{display:block; font-size:9px; margin:1px 0 1px; line-height:1.2}
+.cawx-dcont .sub{display:block; font-size:6px; color:var(--app-ink-var)}
+.cawx-dcont .pr{display:flex; align-items:center; gap:4px; margin-top:3px}
+.cawx-dcont .pr i{flex:1 1 auto; height:3px; border-radius:2px;
+  background:rgba(62,68,181,.15); display:block}
+.cawx-dcont .pr em{display:block; height:100%; border-radius:2px;
+  background:var(--app-primary)}
+.cawx-dcont .pct{font-size:5.5px; font-weight:700; color:var(--app-ink-var);
+  font-variant-numeric:tabular-nums}
+.cawx-dcont .go{flex:0 0 auto; display:inline-flex; align-items:center; gap:2px;
+  font-size:6.5px; font-weight:800; color:#fff; background:var(--app-primary);
+  border-radius:99px; padding:3px 7px}
+.cawx-dcont .go svg{width:7px; height:7px; transform:rotate(0deg)}
 .cawx-dsec{font-size:8px; font-weight:800; color:var(--app-ink); margin:0 0 5px}
 .cawx-dcard{background:#fff; border-radius:9px; padding:7px 8px; margin:0 0 6px;
   box-shadow:0 1px 3px rgba(16,22,68,.06)}
-.cawx-dcard .top{display:flex; align-items:flex-start; gap:6px}
-.cawx-dcard .ic{flex:0 0 auto; width:15px; height:15px; border-radius:5px; color:#fff;
+.cawx-dcard .top{display:flex; align-items:flex-start; gap:7px}
+/* THE ICON AND THE COUNT ARE ONE COLUMN. The app puts the proportion directly
+   under the tile rather than out on the right of a meta row, so the eye reads
+   "this course, this far through" in one place. */
+.cawx-dcard .icw{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px}
+.cawx-dcard .ic{width:15px; height:15px; border-radius:5px; color:#fff;
   display:inline-flex; align-items:center; justify-content:center;
   background:linear-gradient(135deg,#3E44B5,#575ECF)}
 .cawx-dcard .ic svg{width:9px; height:9px}
+.cawx-dcard .rd{font-size:5.5px; font-weight:700; color:var(--app-ink-var);
+  font-variant-numeric:tabular-nums; line-height:1}
 .cawx-dcard .nm{flex:1 1 auto; min-width:0}
 .cawx-dcard .nm b{display:block; font-size:8px; color:var(--app-ink); line-height:1.25}
 .cawx-dcard .nm small{display:block; font-size:6.5px; color:var(--app-ink-var); line-height:1.3}
 .cawx-dcard .seal{flex:0 0 auto; width:11px; height:11px; color:var(--app-success)}
 .cawx-dcard .seal svg{width:100%; height:100%}
-.cawx-dcard .meta{display:flex; align-items:center; justify-content:space-between;
-  margin:5px 0 4px; font-size:6px}
+/* Lessons and reading time, side by side under the title. */
+.cawx-dcard .meta{display:flex; align-items:center; gap:4px; margin:4px 0 0; font-size:6px}
 .cawx-dcard .pill{font-weight:800; letter-spacing:.4px; color:var(--app-primary);
   background:var(--app-primary-fixed); border-radius:4px; padding:2px 5px}
-.cawx-dcard .rd{color:var(--app-ink-var); font-weight:600}
 .cawx-dcard .bar{height:3px; border-radius:2px; background:rgba(62,68,181,.15)}
 .cawx-dcard .bar i{display:block; height:100%; border-radius:2px; background:var(--app-primary)}
 
