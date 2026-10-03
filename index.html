@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=98">
+<link rel="stylesheet" href="style.css?v=99">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1686,29 +1686,29 @@
       var PORTRAIT = phone ? (844 / 390) : (1194 / 834);
       /* The bezel is part of the device, so it comes out of the column
          before the screen is measured: total = screen * (1 + 2 * 0.0469). */
-      var screenW = Math.round(box / 1.0938);
+      /* SEVENTY PER CENT WHERE IT FITS, FULL WIDTH WHERE IT MUST.
 
-      /* THE FLOOR IS IN PAINTED PIXELS, NOT LAID-OUT ONES, AND THAT ONE WORD
-         IS THE BUG THAT OUTLIVED EVERY OTHER FIX.
+         The device takes 70% of the column and the console is given exactly
+         that width. It is NOT a picture of a wider screen shrunk down: a
+         shrunk iframe is what this section spent a day getting wrong,
+         because WebKit lays the inner document out at the width it is
+         PAINTED, so zooming the picture out zooms the layout out with it and
+         the console falls to its phone page.
 
-         This site sets body{zoom:0.9} between 561 and 1024px. Everything
-         under it is laid out at 910 and painted at 819, so a 762px iframe
-         arrives on screen 686 wide - and WebKit gives the inner document its
-         PAINTED width. The console measured 686, which is under its own
-         761px line, and drew its phone page. Chromium uses the laid-out 762
-         and showed the sidebar, which is why every measurement I could take
-         said the thing was fixed.
-
-         So the floor is applied after the zoom: the screen must PAINT at 775
-         or more (761 plus slack for rounding on a real device), and the
-         bezel gives up whatever that costs. A slightly thinner border is a
-         far smaller error than the wrong layout. */
-      var z = mac.getBoundingClientRect().width / (mac.clientWidth || 1);
-      if (!(z > 0.1 && z <= 1)) { z = 1; }
+         That is also the one case where 70% cannot be honoured. The console
+         needs about 775 painted pixels for its sidebar, and 70% of an iPad
+         held upright is 584 - so there the device goes back to full width,
+         where it reaches 776. In landscape 70% is 775 on the nose and the
+         sidebar survives, so landscape stays at 70%. A phone keeps the full
+         column as well: 70% of 375 is a porthole. */
       var FLOOR = 775;
-      if (!phone && screenW * z < FLOOR && box * z >= FLOOR * 1.02) {
-        screenW = Math.ceil(FLOOR / z);
-      }
+      var at70 = Math.round(box * 0.7 / 1.0938);
+      var floorW = Math.ceil(FLOOR / z);
+      var widest = box - 12;              /* leaves a 6px bezel each side */
+      var screenW = phone
+        ? Math.round(box / 1.0938)
+        : Math.min(Math.max(at70, at70 * z < FLOOR ? floorW : at70), widest);
+
       want = { w: screenW,
                h: Math.round(screenW * (H >= W ? PORTRAIT : 1 / PORTRAIT)) };
     }
