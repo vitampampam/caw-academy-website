@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=83">
+<link rel="stylesheet" href="style.css?v=84">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1584,6 +1584,19 @@
      of a narrower render. */
   var MAX_SHOWN_H = 820;
   var lastBox = 0, settling = false;
+
+  /* THE FRAME FOLLOWS THE DEVICE, NOT THE WINDOW WIDTH. The bezel was chosen
+     by a 1024px breakpoint, so an iPad held landscape — 1194 CSS px — was
+     handed a MacBook, which is a picture of a machine the reader is not
+     holding. A touch device gets the iPad bezel in BOTH orientations; the
+     width query stays as well, for a narrow window on a desktop. */
+  try {
+    var macEl = document.querySelector('#console .console-mac');
+    if (macEl && window.matchMedia &&
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      macEl.classList.add('pad');
+    }
+  } catch (e) { /* a frame is still drawn either way */ }
   function fit() {
     /* MEASURE THE CONTAINER, NOT THE FRAME. The frame is what this function
        RESIZES, and the bezel hugs it — so reading the frame's width fed the
@@ -1620,6 +1633,12 @@
     var vh = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
     vh = Math.min(Math.max(vh, 560), 1180);
     var k = Math.min(box / vw, MAX_SHOWN_H / vh);
+    /* The ATTRIBUTES as well as the CSS. iOS Safari sizes an iframe's layout
+       viewport from the attributes in some versions and from the box in
+       others; setting both leaves no version in which the console lays itself
+       out at a width nobody chose. */
+    f.setAttribute('width', vw);
+    f.setAttribute('height', vh);
     f.style.width = vw + 'px';
     f.style.height = vh + 'px';
     f.style.transform = 'scale(' + k + ')';

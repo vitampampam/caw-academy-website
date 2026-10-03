@@ -1196,6 +1196,15 @@ body{background:var(--bg)}
    PROPORTIONS, so each one is re-expressed as a share of the frame's own
    width (9/308 = 2.9%, 15/308 = 4.9%, and so on) in container units. At 308px
    these resolve to the hero's exact numbers. */
+/* THE CONSOLE SECTION IS A TINTED BAND, not a white one (3 Oct).
+   The console's own canvas is light and its cards are white, so on a white
+   section the laptop had nothing to sit against: screen, bezel surround and
+   page ran together as one sheet of glare, which is what reads as "too
+   bright" rather than any one element being wrong. The band is the site's own
+   --bg-2 deepened a step, so the device reads as an object on a surface and
+   the screen is the lightest thing in the frame — which is how a lit screen
+   actually looks. The shadow does the same job from below. */
+.stk#console{background:linear-gradient(180deg,#EDEFF8 0%,#E3E6F4 100%)}
 .console-mac{container-type:inline-size; width:100%; max-width:1040px}
 /* THE BEZEL IS NOT THE BODY, AND THE TWO DO NOT SCALE TOGETHER. Taking the
    hero's 9px-on-308 bezel as a proportion gave 30px at this width, which reads
@@ -1224,7 +1233,8 @@ body{background:var(--bg)}
    the chin is partly hidden, which is why the bottom bezel of a real machine
    looks thinner than its sides. The deck is lifted over the lid by rather more
    than the bezel it hides, and raised above it so it paints on top. */
-.console-mac .lid{position:relative; z-index:1}
+.console-mac .lid{position:relative; z-index:1;
+  box-shadow:0 26px 44px rgba(16,21,56,.20), 0 6px 14px rgba(16,21,56,.12)}
 .console-mac .base{position:relative; z-index:2; margin-top:-1.1cqw;
   width:100%; margin-left:0;
   height:2cqw; border-radius:0 0 1.5cqw 1.5cqw;
@@ -1260,6 +1270,16 @@ body{background:var(--bg)}
     border-radius:3.1cqw; padding:1.7cqw}
   .console-frame{border-radius:1.6cqw}
 }
+
+/* THE SAME FRAME, CHOSEN BY THE DEVICE INSTEAD OF THE WIDTH. `.pad` is added
+   by the script on a touch device, so an iPad in LANDSCAPE — wider than the
+   query above — still gets the bezel rather than a laptop it is not. The rules
+   are repeated rather than shared because a class and a media query cannot sit
+   in one selector; if one set changes, change both. */
+.console-mac.pad .base{display:none}
+.console-mac.pad .lid{width:fit-content; max-width:100%; margin:0 auto;
+  border-radius:3.1cqw; padding:1.7cqw}
+.console-mac.pad .console-frame{border-radius:1.6cqw}
 
 /* A qualifier inside an answer, set a size down and in the muted ink: it is a
    condition on the sentence above it, not another sentence. */
