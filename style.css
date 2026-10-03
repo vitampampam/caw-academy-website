@@ -1244,12 +1244,61 @@ body{background:var(--bg)}
    of two different machines; a plain bezel says "a screen" and makes no claim
    about which. */
 @media (max-width:1024px){
+  /* AN IPAD, NOT A LAPTOP. Below the desktop breakpoint the reader is on a
+     tablet or a phone and the console inside is laying itself out for one, so
+     the frame is the hero's iPad bezel rather than the MacBook: an even border
+     all round, no deck. The figures are the same proportions the hero's iPad
+     uses (8/150 padding, 22/150 radius), expressed against this frame's own
+     width so they hold at any size. */
   .console-mac .base{display:none}
-  .console-mac .lid{width:100%; border-radius:16px; padding:10px}
-  .console-frame{border-radius:8px}
+  .console-mac .lid{width:100%; border-radius:3.1cqw; padding:1.7cqw}
+  .console-frame{border-radius:1.6cqw}
 }
-@media (max-width:760px){ .console-mac .lid{padding:7px; border-radius:12px} }
 
 /* A qualifier inside an answer, set a size down and in the muted ink: it is a
    condition on the sentence above it, not another sentence. */
 .ans .fine{display:block; margin-top:8px; font-size:13px; color:var(--muted)}
+
+
+/* ---------- For organisations: seven cards, seven colours ------------------
+   Every tile was the same indigo, so the row read as one block of colour and
+   the icons stopped carrying any meaning — a reader scanning for "the evidence
+   one" had nothing to aim at. The palette is the app's own tile set, and no two
+   neighbours are near-neighbours in hue.
+
+   The cards are also taller and all the same height, with the link pushed to
+   the foot: they ran 120px apart in a four-across row because the body copy
+   differs, and a row of cards that ends on seven different lines reads as an
+   accident rather than as a set. */
+#organisations .card{min-height:292px; display:flex; flex-direction:column}
+#organisations .card .cawx-more{margin-top:auto}
+#organisations .card:nth-child(1) .ico{background:linear-gradient(135deg,#3E44B5,#575ECF);
+  box-shadow:0 8px 18px rgba(62,68,181,.26)}
+#organisations .card:nth-child(2) .ico{background:linear-gradient(135deg,#2E7D32,#49A04D);
+  box-shadow:0 8px 18px rgba(46,125,50,.26)}
+#organisations .card:nth-child(3) .ico{background:linear-gradient(135deg,#6A3BB5,#8A5CD6);
+  box-shadow:0 8px 18px rgba(106,59,181,.26)}
+#organisations .card:nth-child(4) .ico{background:linear-gradient(135deg,#D97706,#FB8C00);
+  box-shadow:0 8px 18px rgba(217,119,6,.26)}
+#organisations .card:nth-child(5) .ico{background:linear-gradient(135deg,#0E7490,#0EA5B7);
+  box-shadow:0 8px 18px rgba(14,116,144,.26)}
+#organisations .card:nth-child(6) .ico{background:linear-gradient(135deg,#1D4ED8,#3B82F6);
+  box-shadow:0 8px 18px rgba(29,78,216,.26)}
+#organisations .card:nth-child(7) .ico{background:linear-gradient(135deg,#3F5570,#55708F);
+  box-shadow:0 8px 18px rgba(63,85,112,.26)}
+
+/* ---------- iPad: the card rows swipe, as they already do on a phone -------
+   Seven cards two-across on a tablet is a column of white blocks three screens
+   long, and the last one sits alone beside a hole. The same carousel the phone
+   already uses is better here: one gesture, the next card peeking, and the
+   section stays one screen tall. 58% shows the card being read and the edge of
+   the next, which is what makes it obvious the row moves. */
+@media (min-width:761px) and (max-width:1024px){
+  #organisations .grid, #features .grid{
+    display:flex; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
+    overflow-x:auto; gap:14px; padding:4px 2px 12px;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+  #organisations .grid::-webkit-scrollbar, #features .grid::-webkit-scrollbar{display:none}
+  #organisations .grid > *, #features .grid > *{
+    flex:0 0 58%; width:58%; max-width:58%; scroll-snap-align:center}
+}

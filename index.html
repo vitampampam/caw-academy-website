@@ -330,7 +330,7 @@
         </button>
       </div>
       <div class="card cawx-trigger">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/></svg></div>
         <h3>Your own manuals, read and logged</h3>
         <p>Issue company documents at their current revision, set the date they must be familiar by, and hold the evidence that each person read it.</p>
         <button class="cawx-more cawx-stretch" type="button" aria-haspopup="dialog"
@@ -1508,44 +1508,62 @@
 </script>
 
 <script>
-/* THE CONSOLE IS SHOWN AT THE WIDTH THE READER WOULD SEE IT.
-   On a wide screen it is drawn at its desktop width (1180) and scaled into the
-   laptop, because that is the layout a desktop visitor will get. Below the
-   console's own breakpoint the iframe is instead SIZED to the column and not
-   transformed, so the console lays itself out as it would on that device — an
-   iPad visitor sees the tablet console, not a shrunken desktop one.
+/* THE CONSOLE IS RENDERED AT THE READER'S OWN SCREEN SIZE, THEN SCALED.
+   Sizing the iframe to the COLUMN was wrong in a way that is easy to miss: on
+   an iPad in portrait the column gives it about 739px, which is below the
+   console's own 761px breakpoint, so the demo showed the PHONE console —
+   a laid-down rail and stacked cards — inside a tablet. The reader was being
+   shown a layout they would never get on that device.
 
-   Re-fitted on load, on resize, and whenever the frame's own box changes: the
-   iframe is lazy, so the first fit can land before the element has a width,
-   and a scale computed from a width of zero is how it came out thumbnail-sized
-   on an iPad. */
+   So the iframe takes the device's own viewport, clamped to a sane range, and
+   is scaled to whatever the frame can give it. The console therefore lays
+   itself out exactly as it does when opened on that iPad, in that orientation;
+   only the picture is smaller.
+
+   Re-fitted on load, resize, orientation change, the iframe's own load and
+   through a ResizeObserver, and it refuses to act on a width of zero — a scale
+   computed from zero is how this came out thumbnail-sized the first time. */
 (function () {
   var frame = document.querySelector('.console-frame');
   if (!frame) { return; }
   var f = frame.querySelector('iframe');
-  var DESKTOP = 1180, DESK_H = 820;
+
+  /* The box is measured, then written to — and writing changes it. The lid's
+     padding is a container-query unit, so the first measurement can be taken
+     before that resolves and the scale comes out for a frame 100px wider than
+     the one doing the clipping. So: apply, then look again on the next frame,
+     and apply once more if the box moved. `settling` stops the two from
+     chasing each other. */
+  var lastBox = 0, settling = false;
   function fit() {
-    var w = frame.clientWidth;
-    if (!w) { return; }                       /* not laid out yet — wait */
-    if (window.matchMedia('(min-width:1025px)').matches) {
-      var k = Math.min(1, w / DESKTOP);
-      f.style.width = DESKTOP + 'px';
-      f.style.height = DESK_H + 'px';
-      f.style.transform = 'scale(' + k + ')';
-      frame.style.height = Math.round(DESK_H * k) + 'px';
-    } else {
-      /* The console's own layout, at this width. The WIDTH is left to CSS —
-         100% of the frame — rather than written in pixels: a measured width is
-         a race, and it lost. Setting the height resizes the frame, which fires
-         the observer, which measures again, and the iframe was left 103px wider
-         than the box that clips it. Only the height is computed here. */
-      var h = Math.round(Math.min(Math.max(w * 1.25, 560), 900));
-      f.style.transform = 'none';
-      f.style.width = '100%';
-      f.style.height = h + 'px';
-      frame.style.height = h + 'px';
+    /* clientWidth, NOT getBoundingClientRect. They disagree here — 818 against
+       718 on an iPad-width page — and the rect is the one to distrust: the
+       stacked cards carry a transform, so a rect is the LAID-OUT width already
+       multiplied by an ancestor's scale. Scaling the console by a figure that
+       has that in it applies the page's scale twice, and the console came out
+       88px short of its own frame. Layout coordinates are what this arithmetic
+       is in. */
+    var box = frame.clientWidth;
+    if (!box) { return; }
+    if (box !== lastBox && !settling) {
+      settling = true;
+      requestAnimationFrame(function () { settling = false; fit(); });
     }
+    lastBox = box;
+    /* The device's own viewport. Clamped: below 820 the console is in its phone
+       layout anyway and a narrower render only makes the type smaller, and
+       above 1440 a desktop visitor would be scaling a very wide console into a
+       laptop lid and reading half-size text. */
+    var vw = Math.min(Math.max(window.innerWidth || 1180, 820), 1440);
+    var vh = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
+    vh = Math.min(Math.max(vh, 560), 1180);
+    var k = box / vw;
+    f.style.width = vw + 'px';
+    f.style.height = vh + 'px';
+    f.style.transform = 'scale(' + k + ')';
+    frame.style.height = Math.round(vh * k) + 'px';
   }
+
   addEventListener('resize', fit);
   addEventListener('orientationchange', fit);
   f.addEventListener('load', fit);
