@@ -1241,8 +1241,12 @@ body{background:var(--bg)}
   box-shadow:0 2cqw 3.4cqw rgba(16,22,68,.22)}
 .console-mac .base::after{width:13cqw; height:1cqw; border-radius:0 0 1.2cqw 1.2cqw}
 .console-frame{overflow:hidden; border-radius:0.87cqw; background:#fff; margin:0 auto}
+/* The scaling layer. The iframe inside it is never transformed and never
+   zoomed, so its used width is the one number in its style attribute - which
+   is what the console lays itself out against, in every engine. */
+.console-scale{transform-origin:top left; will-change:transform}
 .console-frame iframe{display:block; border:0; background:#fff;
-  width:1180px; height:820px; transform-origin:top left}
+  width:1180px; height:820px}
 /* BELOW THE DESKTOP BREAKPOINT THE CONSOLE SHOWS ITS OWN TABLET LAYOUT.
    Forcing the 1180px desktop console into a narrow column and scaling it down
    advertises a layout the reader is not going to get: on an iPad they will see

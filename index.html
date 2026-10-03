@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=86">
+<link rel="stylesheet" href="style.css?v=87">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -535,8 +535,17 @@
            desktop tool, and the frame says so before a word is read. -->
       <div class="macbook console-mac">
         <div class="lid"><div class="console-frame">
-          <iframe src="admin/demo.html" title="The CAW Academy admin console, running on sample data"
-                  loading="lazy" scrolling="no"></iframe>
+          <!-- THE SCALE LIVES ON THIS WRAPPER, NEVER ON THE IFRAME. An iframe
+               that carries its own transform or zoom has an ambiguous used
+               width, and WebKit resolves it differently from Blink: the inner
+               document was laid out at the PAINTED width, so the console
+               picked a phone layout inside a tablet-sized frame. An untouched
+               iframe inside a scaled div has exactly one width in every
+               engine - the one in its own style attribute. -->
+          <div class="console-scale">
+            <iframe src="admin/demo.html" title="The CAW Academy admin console, running on sample data"
+                    loading="lazy" scrolling="no"></iframe>
+          </div>
         </div></div>
         <div class="base"></div>
       </div>
@@ -1587,7 +1596,6 @@
   function maxShownH() {
     return Math.max(1000, Math.round((window.innerHeight || 820) * 1.02));
   }
-  var CAN_ZOOM = !!(window.CSS && CSS.supports && CSS.supports('zoom', '0.5'));
   var lastBox = 0, settling = false;
 
   /* THE FRAME FOLLOWS THE DEVICE, NOT THE WINDOW WIDTH. The bezel was chosen
@@ -1653,29 +1661,16 @@
     var vh = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
     vh = Math.min(Math.max(vh, 480), 1400);
     var k = Math.min(box / vw, maxShownH() / vh);
-    /* ZOOM, NOT TRANSFORM — and this is the whole iPad bug (3 Oct).
-       A transform scales the PAINTED result and leaves the element box at its
-       CSS size. iOS Safari then lays the inner document out at the painted
-       size while the box stays vw wide: the console picked its layout from
-       570px inside an 820px frame, which is why portrait showed the phone bar,
-       and why both orientations left a band of white down the right where the
-       document ended before its own box did. Both screenshots measure the same
-       ratio as k, which is what identified it.
-
-       `zoom` scales layout as well as paint, so the document's viewport IS vw
-       and the element occupies vw*k. The console lays itself out at the width
-       it was given and fills the frame. Transform stays as the fallback for
-       anything without zoom; that is the behaviour we had. */
+    /* The iframe is given a size and nothing else; the wrapper carries the
+       scale. See the comment on .console-scale in the markup for why. */
     f.setAttribute('width', vw);
     f.setAttribute('height', vh);
     f.style.width = vw + 'px';
     f.style.height = vh + 'px';
-    if (CAN_ZOOM) {
-      f.style.transform = 'none';
-      f.style.zoom = k;
-    } else {
-      f.style.transform = 'scale(' + k + ')';
-    }
+    var scaler = f.parentElement;
+    scaler.style.width = vw + 'px';
+    scaler.style.height = vh + 'px';
+    scaler.style.transform = 'scale(' + k + ')';
     frame.style.width = Math.round(vw * k) + 'px';
     frame.style.height = Math.round(vh * k) + 'px';
   }

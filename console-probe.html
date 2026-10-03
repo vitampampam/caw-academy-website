@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console probe</title>
+<!--
+  A measuring page, not part of the site's navigation.
+
+  It builds the console embed exactly the way index.html does - an untouched
+  iframe inside a scaled wrapper - and prints what the browser actually did
+  with it. The numbers that matter are INNER WIDTH (the width the console laid
+  itself out against) and RAIL, which says whether that width produced the
+  sidebar. Everything else is there to show how the figure was arrived at.
+
+  Delete it, or leave it; it links to nothing and nothing links to it.
+-->
+<style>
+  :root{--ink:#0B1238;--muted:#6b7190;--line:#dfe2ef}
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       color:var(--ink);background:#EDEFF8}
+  h1{font-size:17px;margin:0 0 10px}
+  table{border-collapse:collapse;width:100%;max-width:520px;background:#fff;border-radius:10px;overflow:hidden}
+  td{padding:7px 10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+  tr:first-child td{border-top:0}
+  td:first-child{color:var(--muted);width:48%}
+  td:last-child{text-align:right;font-weight:600}
+  .bad{color:#BA1A1A}
+  .good{color:#1B7A3D}
+  .stage{margin-top:16px}
+  .lid{background:#141A3C;border-radius:18px;padding:10px;width:fit-content;max-width:100%;margin:0 auto}
+  .console-frame{overflow:hidden;border-radius:10px;background:#fff;margin:0 auto}
+  .console-scale{transform-origin:top left;will-change:transform}
+  .console-frame iframe{display:block;border:0;background:#fff;width:1180px;height:820px}
+</style>
+</head>
+<body>
+
+<h1>Admin console embed — measured</h1>
+<table id="out"><tr><td>measuring…</td><td></td></tr></table>
+
+<div class="stage">
+  <div class="lid"><div class="console-frame">
+    <div class="console-scale">
+      <iframe src="admin/demo.html" title="Admin console" scrolling="no"></iframe>
+    </div>
+  </div></div>
+</div>
+
+<script>
+(function () {
+  var frame  = document.querySelector('.console-frame');
+  var f      = frame.querySelector('iframe');
+  var scaler = f.parentElement;
+  var lid    = frame.parentElement;
+  var rows   = document.getElementById('out');
+
+  function fit() {
+    var pad = (parseFloat(getComputedStyle(lid).paddingLeft) || 0) * 2;
+    var box = Math.max(0, Math.round(lid.parentElement.clientWidth - pad));
+    var vw  = Math.min(Math.max(window.innerWidth || 1180, 320), 1440);
+    var vh  = Math.round(vw * ((window.innerHeight || 820) / (window.innerWidth || 1180)));
+    var cap = Math.max(1000, Math.round((window.innerHeight || 820) * 1.02));
+    var k   = Math.min(box / vw, cap / vh);
+
+    f.setAttribute('width', vw);
+    f.setAttribute('height', vh);
+    f.style.width  = vw + 'px';
+    f.style.height = vh + 'px';
+    scaler.style.width  = vw + 'px';
+    scaler.style.height = vh + 'px';
+    scaler.style.transform = 'scale(' + k + ')';
+    frame.style.width  = Math.round(vw * k) + 'px';
+    frame.style.height = Math.round(vh * k) + 'px';
+    return { box: box, vw: vw, vh: vh, k: k };
+  }
+
+  function report() {
+    var m = fit();
+    var inner = null, rail = null, err = '';
+    try {
+      inner = f.contentWindow.innerWidth;
+      var r = f.contentDocument.querySelector('.rail');
+      rail = r ? Math.round(r.getBoundingClientRect().width) : 0;
+    } catch (e) { err = String(e.message || e); }
+
+    var expectRail = m.vw >= 761;
+    var ok = inner === m.vw;
+    var html = '';
+    function row(label, value, cls) {
+      html += '<tr><td>' + label + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + value + '</td></tr>';
+    }
+    row('window.innerWidth', window.innerWidth);
+    row('window.innerHeight', window.innerHeight);
+    row('devicePixelRatio', window.devicePixelRatio);
+    row('column available (box)', m.box);
+    row('iframe width asked for', m.vw);
+    row('scale applied', m.k.toFixed(3) + '  (' + Math.round(m.k * 100) + '%)');
+    row('shown size', Math.round(m.vw * m.k) + ' x ' + Math.round(m.vh * m.k));
+    row('INNER WIDTH (measured)', inner === null ? 'blocked: ' + err : inner, ok ? 'good' : 'bad');
+    row('RAIL (sidebar) width', rail === null ? '?' : (rail || 'none'),
+        (rail > 0) === expectRail ? 'good' : 'bad');
+    row('verdict', ok && (rail > 0) === expectRail ? 'CORRECT' : 'WRONG',
+        ok && (rail > 0) === expectRail ? 'good' : 'bad');
+    rows.innerHTML = html;
+  }
+
+  f.addEventListener('load', function () { setTimeout(report, 150); });
+  addEventListener('resize', function () { setTimeout(report, 150); });
+  addEventListener('orientationchange', function () { setTimeout(report, 400); });
+  setTimeout(report, 400);
+})();
+</script>
+</body>
+</html>
