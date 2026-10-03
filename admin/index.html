@@ -1695,7 +1695,14 @@
     #dashView > *{display:none !important}
     #printReport{display:block !important}
     @page{size:A4; margin:13mm}
-    html,body{background:#fff !important}
+    /* A PAGE BOX AS TALL AS A SCREEN IS A SECOND SHEET. The console sizes its
+       shell to the viewport — `body{min-height:100dvh}` — and that min-height
+       does not stop applying when the medium is paper: a one-page report sat
+       inside a body box the height of an iPad, which is taller than A4's
+       content area, so the overflow claimed a second sheet carrying nothing.
+       On paper the document is as tall as what is on it. */
+    html,body{background:#fff !important;
+      min-height:0 !important; height:auto !important; overflow:visible !important}
     /* WITHOUT THIS CHROME DROPS EVERY BACKGROUND — the status pills, the summary
        band and the table's banding all print as blank boxes. It is the single
        line that decides whether this looks designed or broken. */
@@ -2400,6 +2407,6 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=92" defer></script>
+<script src="admin.js?v=93" defer></script>
 </body>
 </html>
