@@ -1221,7 +1221,7 @@ body{background:var(--bg)}
    the column itself and the proportion between the two is unchanged.
    The bezel figures are divided by that inset, because they are a share of the
    LID's width and cqw measures the container. */
-.console-mac .lid{width:fit-content; max-width:87%; margin:0 auto;
+.console-mac .lid{--lid-cap:.87; width:fit-content; max-width:87%; margin:0 auto;
   border-radius:1.65cqw; padding:1.3cqw 1.3cqw 1.5cqw}
 /* THE BASE IS THE SAME KIND OF THING AS THE BEZEL. It is the lip of the body
    seen edge-on, so it is a DEPTH — a centimetre or so of aluminium, much the
@@ -1266,7 +1266,7 @@ body{background:var(--bg)}
      width:100% stayed the full column and drew a slab of navy around a smaller
      screen. `fit-content` makes the bezel follow its contents, which is what a
      bezel is. */
-  .console-mac .lid{width:fit-content; max-width:100%; margin:0 auto;
+  .console-mac .lid{--lid-cap:1; width:fit-content; max-width:100%; margin:0 auto;
     border-radius:3.1cqw; padding:1.7cqw}
   .console-frame{border-radius:1.6cqw}
 }
@@ -1277,7 +1277,7 @@ body{background:var(--bg)}
    are repeated rather than shared because a class and a media query cannot sit
    in one selector; if one set changes, change both. */
 .console-mac.pad .base{display:none}
-.console-mac.pad .lid{width:fit-content; max-width:100%; margin:0 auto;
+.console-mac.pad .lid{--lid-cap:1; width:fit-content; max-width:100%; margin:0 auto;
   border-radius:3.1cqw; padding:1.7cqw}
 .console-mac.pad .console-frame{border-radius:1.6cqw}
 
