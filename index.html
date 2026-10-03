@@ -97,7 +97,7 @@
 <link rel="preload" as="image" href="screens/hero-jet-1100.webp?v=3"
       imagesrcset="screens/hero-jet-768.webp?v=3 768w, screens/hero-jet-1100.webp?v=3 1100w, screens/hero-jet-1448.webp?v=3 1448w"
       imagesizes="(min-width:1025px) 1120px, 100vw" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=90">
+<link rel="stylesheet" href="style.css?v=92">
 <link rel="stylesheet" href="caw-interactive.css?v=28">
 </head>
 <body>
@@ -1596,8 +1596,15 @@
   var mac = frame.closest('.console-mac');
   if (!mac) { return; }
 
-  var DESKTOP = { w: 1280, h: 820 };
-  var MOBILE  = { w: 430,  h: 932 };
+  /* Four fixed pictures. Each is a real device's own viewport, so the
+     console lays itself out exactly as it does on that device - measured:
+     834 gives the 200px sidebar, 430 gives the dedicated mobile page whose
+     rail is a horizontal bar. The bezel needs no orientation of its own: the
+     lid is width:fit-content, so it takes the shape of whatever it holds. */
+  var DESKTOP  = { w: 1280, h: 820 };   // the laptop console, in the MacBook
+  var TABLET_P = { w: 834,  h: 1194 };  // iPad upright: sidebar
+  var TABLET_L = { w: 1194, h: 834 };   // iPad on its side: sidebar, wider
+  var MOBILE   = { w: 430,  h: 932 };   // the dedicated mobile page
 
   function isTouch() {
     try {
@@ -1610,8 +1617,14 @@
 
   function fit() {
     var lid = frame.parentElement;
-    var narrow = isTouch() || (window.innerWidth || 1180) < 1025;
-    var want = narrow ? MOBILE : DESKTOP;
+    var W = window.innerWidth || 1180, H = window.innerHeight || 820;
+    var narrow = isTouch() || W < 1025;
+    /* A phone is the SHORT side, not the width: an iPhone held sideways is
+       390 tall and 844 wide, and it is still a phone. */
+    var phone = Math.min(W, H) < 600;
+    var want = !narrow ? DESKTOP
+             : phone   ? MOBILE
+             : (H >= W ? TABLET_P : TABLET_L);
 
     /* The bezel follows the content: a MacBook body only around the desktop
        console. `pad` is the plain tablet bezel - an even border, no deck. */
@@ -1637,22 +1650,10 @@
     }
     lastBox = box;
 
-    /* How much of the column the picture takes, and how far the mobile
-       layout may be enlarged.
-
-       On a PHONE the column is barely wider than the device, so it takes all
-       of it and is never blown up past life size - at 1:1 it reads exactly as
-       the console does in the hand.
-
-       On a TABLET a 430px screen alone in a 760px column reads as a mistake
-       rather than as a small device, so the picture takes 70% of the column
-       and the layout is enlarged to suit, within a quarter of life size. Past
-       that it stops looking like a screen and starts looking like a mistake
-       of a different kind - the oversized console we already had once. */
-    var phone = box < 560;
-    var share = (!narrow || phone) ? 1 : 0.7;
-    var maxK  = (!narrow || phone) ? 1 : 1.25;
-    var k = Math.min(box * share / want.w, maxK);
+    /* Fit the column, and never enlarge past life size. Each viewport above
+       is a real device, so at 1:1 the picture is that device; blown up it is
+       the oversized console we already had once. */
+    var k = Math.min(box / want.w, 1);
     var shown = Math.round(want.w * k);
 
     f.setAttribute('width', want.w);
@@ -1671,6 +1672,20 @@
   f.addEventListener('load', fit);
   if (window.ResizeObserver) { new ResizeObserver(fit).observe(frame); }
   fit();
+
+  /* THE CONSOLE GOES BACK TO ITS TOP WHEN NOBODY IS LOOKING. The frame is a
+     window onto a page taller than itself, and on a touch device a flick
+     aimed at the section scrolls the console rather than the page. Left
+     alone, the next reader to arrive at the section finds it opened
+     half-way down a licence table, which reads as a broken embed rather
+     than as somewhere a finger has been. Reset only once it is fully out of
+     view, so it never moves under anyone. */
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { return; }
+      try { f.contentWindow.scrollTo(0, 0); } catch (e) { /* not ours to touch */ }
+    }, { threshold: 0 }).observe(frame);
+  }
 })();
 </script>
 </body>
