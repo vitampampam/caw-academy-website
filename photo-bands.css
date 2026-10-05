@@ -1,0 +1,158 @@
+/* ---------------------------------------------------------------------------
+   PHOTO BANDS  —  the sections stop being paper and start being a place.
+
+   The brief: the cards read as artificial, so nobody opens them. A card on a
+   flat tone is a form; the same card over a photograph of a hangar is a thing
+   in the world. The photograph does not have to be looked at — it has to be
+   THERE.
+
+   TWO TREATMENTS, and the difference is not decoration:
+
+   * LIGHT - the photograph is texture. It sits at low opacity under a white
+     wash, desaturated and softened in the file itself, so the page's own ink
+     (#0B1238 on #F5F6FB) keeps every bit of its contrast. Used where the
+     section is doing work the reader must read.
+
+   * DARK - the photograph is the subject. Full strength under a navy scrim,
+     white type over it. Used sparingly: two bands on the page, at the two
+     moments worth slowing down for. More than that and they stop being
+     emphasis.
+
+   WHY THE IMAGE IS ON A ::before AND NOT background-image ON THE SECTION:
+   .stk sections carry the stacked-card radius and a scroll transform; a
+   background on the element itself is clipped by the radius on some engines
+   and re-rasterised by the transform on others. A child layer with its own
+   border-radius is clipped predictably everywhere, and it can carry the
+   scrim as a second background without a second element.
+
+   CONTRAST IS NOT NEGOTIABLE. Every value below was chosen so body text keeps
+   at least 7:1 against the band behind it - the type is the product here, and
+   a photograph that costs legibility has cost more than it brought.
+--------------------------------------------------------------------------- */
+
+.stk.photo{ position:relative; isolation:isolate }
+
+.stk.photo::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  border-radius:inherit;
+  background-image:var(--band-scrim), var(--band-img);
+  background-size:cover, cover;
+  background-position:center, center 42%;
+  background-repeat:no-repeat, no-repeat;
+}
+
+/* LIGHT: a wash, not a picture. The gradient is lighter at the top so the
+   section's first line - usually an eyebrow in small caps - never lands on
+   the busiest part of a frame. */
+.stk.photo{
+  --band-scrim:linear-gradient(180deg,
+      rgba(245,246,251,.90) 0%,
+      rgba(245,246,251,.82) 40%,
+      rgba(245,246,251,.88) 100%);
+}
+
+/* ONE TREATMENT, NOT TWO (SME, 5 Oct). There was a dark variant here - the
+   photograph at full strength under a navy scrim, white type over it, used on
+   two bands for emphasis. It is gone. Whatever it bought, it also turned the
+   section behind the cards dark, and on this site that reads as the cards
+   themselves having gone dark: a white .track on a navy band is a bright
+   rectangle floating on a photograph, which is a different design, not a
+   stronger version of this one.
+
+   So every band is the wash. The photograph is texture under the page's own
+   light surface, the ink never moves, and the cards are the same white cards
+   they are everywhere else. The liveliness comes from there being a real place
+   behind the page, not from the page changing colour. */
+
+/* The eight bands. Two files each: the wide one for a desktop column, the
+   narrow one for a phone, picked by the same breakpoint the layout uses. */
+#audience.photo      { --band-img:url("photos/band-audience-1600.jpg");
+                       --band-img:image-set(url("photos/band-audience-1600.webp") type("image/webp"), url("photos/band-audience-1600.jpg") type("image/jpeg")) }
+#organisations.photo { --band-img:url("photos/band-organisations-1600.jpg");
+                       --band-img:image-set(url("photos/band-organisations-1600.webp") type("image/webp"), url("photos/band-organisations-1600.jpg") type("image/jpeg")) }
+#why.photo           { --band-img:url("photos/band-why-1600.jpg");
+                       --band-img:image-set(url("photos/band-why-1600.webp") type("image/webp"), url("photos/band-why-1600.jpg") type("image/jpeg")) }
+#curriculum.photo    { --band-img:url("photos/band-curriculum-1600.jpg");
+                       --band-img:image-set(url("photos/band-curriculum-1600.webp") type("image/webp"), url("photos/band-curriculum-1600.jpg") type("image/jpeg")) }
+#console.photo       { --band-img:url("photos/band-console-1600.jpg");
+                       --band-img:image-set(url("photos/band-console-1600.webp") type("image/webp"), url("photos/band-console-1600.jpg") type("image/jpeg")) }
+#features.photo      { --band-img:url("photos/band-features-1600.jpg");
+                       --band-img:image-set(url("photos/band-features-1600.webp") type("image/webp"), url("photos/band-features-1600.jpg") type("image/jpeg")) }
+#inside.photo        { --band-img:url("photos/band-inside-1600.jpg");
+                       --band-img:image-set(url("photos/band-inside-1600.webp") type("image/webp"), url("photos/band-inside-1600.jpg") type("image/jpeg")) }
+#faq.photo           { --band-img:url("photos/band-faq-1600.jpg");
+                       --band-img:image-set(url("photos/band-faq-1600.webp") type("image/webp"), url("photos/band-faq-1600.jpg") type("image/jpeg")) }
+
+@media (max-width:760px){
+  #audience.photo      { --band-img:url("photos/band-audience-1000.jpg");
+                       --band-img:image-set(url("photos/band-audience-1000.webp") type("image/webp"), url("photos/band-audience-1000.jpg") type("image/jpeg")) }
+  #organisations.photo { --band-img:url("photos/band-organisations-1000.jpg");
+                       --band-img:image-set(url("photos/band-organisations-1000.webp") type("image/webp"), url("photos/band-organisations-1000.jpg") type("image/jpeg")) }
+  #why.photo           { --band-img:url("photos/band-why-1000.jpg");
+                       --band-img:image-set(url("photos/band-why-1000.webp") type("image/webp"), url("photos/band-why-1000.jpg") type("image/jpeg")) }
+  #curriculum.photo    { --band-img:url("photos/band-curriculum-1000.jpg");
+                       --band-img:image-set(url("photos/band-curriculum-1000.webp") type("image/webp"), url("photos/band-curriculum-1000.jpg") type("image/jpeg")) }
+  #console.photo       { --band-img:url("photos/band-console-1000.jpg");
+                       --band-img:image-set(url("photos/band-console-1000.webp") type("image/webp"), url("photos/band-console-1000.jpg") type("image/jpeg")) }
+  #features.photo      { --band-img:url("photos/band-features-1000.jpg");
+                       --band-img:image-set(url("photos/band-features-1000.webp") type("image/webp"), url("photos/band-features-1000.jpg") type("image/jpeg")) }
+  #inside.photo        { --band-img:url("photos/band-inside-1000.jpg");
+                       --band-img:image-set(url("photos/band-inside-1000.webp") type("image/webp"), url("photos/band-inside-1000.jpg") type("image/jpeg")) }
+  #faq.photo           { --band-img:url("photos/band-faq-1000.jpg");
+                       --band-img:image-set(url("photos/band-faq-1000.webp") type("image/webp"), url("photos/band-faq-1000.jpg") type("image/jpeg")) }
+}
+
+/* Someone who has asked for less motion has not asked for less contrast, so
+   this stays. Nothing here animates - the bands are static by design, because
+   a parallax on eight sections is the thing that makes a site feel cheap. */
+
+
+/* ---------------------------------------------------------------------------
+   THE TRIAL CTA AS A BAND OF ITS OWN (SME, 5 Oct)
+
+   NAMED trial-band, NOT cta-band: index.html already uses .cta-band for the
+   contact section, and one of its rules (.cta-band h2) is global rather than
+   scoped to #get. Two unrelated components under one class name is a bug
+   waiting for whoever next edits either of them.
+
+   It used to sit inside each section, under the cards. Now that every section
+   carries a photograph, two of them meeting edge to edge is two pictures
+   touching - and the stacked-card design has no gap to separate them with,
+   because the whole point of the stack is that the cards overlap.
+
+   So the CTA becomes the separator: a short band in the page's own grey, no
+   photograph, holding one button. It is breathing space that does a job -
+   the eye gets a rest between two images, and the rest is the thing we want
+   pressed. A plain spacer would have cost the same pixels and sold nothing.
+
+   Grey, not white: against the washed-out bands a white strip disappears and
+   separates nothing, while --bg-2 reads as a deliberate change of surface.
+--------------------------------------------------------------------------- */
+.stk.trial-band{
+  /* VERY LIGHT GREY. --bg-2 (#ECEEF8) carried too much blue against bands that
+     are themselves 85% white - it read as another coloured section rather than
+     as a pause. This is barely a tone at all, which is what a breath should be. */
+  background:#F3F4F9;
+  /* THE DEEP FOOT IS NOT PADDING, IT IS THE OVERLAP. Every .stk.lap pulls
+     itself up by --stack-lap (60px, 52 on a phone), and the stack would stop
+     looking like a stack if that were switched off - which is what the gap
+     under this band was. So the band keeps the overlap and simply carries
+     enough empty grey beneath the button for the next card to land in. */
+  padding:34px 0 96px;
+}
+
+/* FULL COLUMN WIDTH - THAT IS THE STANDARD HERE (SME, 5 Oct), and it is the
+   width the button had when it sat inside a section, matching the stats card
+   and the cards above it. Narrowing it to a natural button width made it a
+   lozenge adrift on a band; at column width it is the same object as
+   everything else on the page, which is what makes the band read as part of
+   the stack rather than as an interruption. */
+.stk.trial-band .btn.open-trial{
+  width:100%;
+  justify-content:center;
+}
+
+@media (max-width:560px){
+  .stk.trial-band{ padding:28px 0 84px }
+}
+}
