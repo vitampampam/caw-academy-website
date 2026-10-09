@@ -979,10 +979,16 @@
     @media (max-width:640px){
       .btn.open-trial svg{display:none}         /* no arrow on the trial buttons on phones */
       .cta-band h2{font-size:clamp(20px,5.6vw,24px)}  /* smaller "Equip your team…" heading */
-      /* keep only the top (hero) "Request a free trial" button; drop the mid-page repeats */
-      .btn.open-trial{display:none}
-      .hero-bottom .btn.open-trial{display:flex}
-      .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
+      /* EVERY "Request a free trial" BUTTON STAYS ON A PHONE (Oct 2026).
+         This block used to hide them all and re-show only the hero one, from
+         back when the mid-page ones were repeats sitting INSIDE each section.
+         Since the trial band became a band of its own (photo-bands.css, 5 Oct)
+         the button IS the band's only content, so hiding it left seven stretches
+         of empty grey — a card with no button in it, which is how this was
+         reported. Hiding the band instead is not the answer either: it is the
+         gap that keeps two photographs off each other.
+         The hero and #get CTA buttons were never affected (each is re-shown or
+         carries an id), so there is nothing left here to hide. */
     }
     /* Card sections fill the page column with even, full-width cells (so the
        "Why", "For organisations" and "Features" rows all align edge-to-edge). */
