@@ -1255,8 +1255,15 @@ body{background:var(--bg)}
    for a training manager at a desk does not survive being shrunk into a
    phone; the organisations section still makes the case there, and the
    trial button is on every section. */
-@media (max-width:1024px){ #console{display:none} }
-@media (hover:none) and (pointer:coarse){ #console{display:none} }
+/* ITS TRIAL BAND GOES WITH IT. Each trial band is the separator BETWEEN two
+   photo sections, so when the console disappears its band has nothing left to
+   separate: it lands directly under the curriculum section's own band and the
+   page shows the same button twice in a row (reported from an iPhone, 9 Oct).
+   The curriculum band still does the separating, so only this one is dropped.
+   Kept in the same rule as the section it belongs to - two conditions in two
+   places is how they drift apart. */
+@media (max-width:1024px){ #console, .trial-band.console-band{display:none} }
+@media (hover:none) and (pointer:coarse){ #console, .trial-band.console-band{display:none} }
 
 .console-frame{background:#E7E9ED}
 /* EDGE TO EDGE ON A TOUCH DEVICE. The class is set by the console script,
