@@ -4502,6 +4502,41 @@
       }
       row.appendChild(score);
 
+      /* EXPORT THE CERTIFICATE ITSELF, not a line about it.
+         Everything else this tab exports is a REGISTER — a list of what was
+         earned, for filing. What an auditor or an employer asks for is the
+         document, and until now the only copy of it was on the learner's own
+         phone. This prints the same certificate the app does (certificate.js),
+         off the registry's own record of it.
+
+         Disabled, with the reason on the button, when the row predates the
+         fields that make a certificate printable — see the title note below. */
+      var act = document.createElement("div"); act.className = "certact";
+      var dl = document.createElement("button");
+      dl.type = "button"; dl.className = "btn btn-s";
+      dl.textContent = "Certificate";
+      var printable = r.c.holderName && r.c.courseTitle;
+      if (!printable) {
+        dl.disabled = true;
+        /* The server sends these from the registry row, so a blank one means an
+           old server rather than an old certificate. Saying so on the control is
+           the difference between a bug report and a deploy. */
+        dl.title = "This console needs the updated server to print certificates.";
+      } else {
+        dl.title = "Open " + fullName(r.m) + "’s certificate to print or save as PDF";
+        dl.addEventListener("click", function () {
+          if (!window.CawCertificate) {
+            showMessage("rosterMsg", "The certificate renderer did not load.", "err");
+            return;
+          }
+          window.CawCertificate.print(r.c, function (m) {
+            showMessage("rosterMsg", m, "ok");
+          });
+        });
+      }
+      act.appendChild(dl);
+      row.appendChild(act);
+
       list.appendChild(row);
     });
     host.appendChild(list);

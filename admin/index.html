@@ -35,6 +35,13 @@
      ════════════════════════════════════════════════════════════════════════ */
   @font-face{ font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Inter-Variable.woff2") format("woff2"); }
   @font-face{ font-family:"Fraunces"; font-style:normal; font-weight:100 900; font-display:swap; src:url("fonts/Fraunces-Variable.woff2") format("woff2"); }
+  /* SOURCE SERIF 4 IS THE CERTIFICATE'S FACE, and only the certificate's.
+     The console's own reports are set in Fraunces, which is the brand's display
+     serif — but the certificate is one document with three renderers, and iOS
+     and Android both set it in Source Serif 4. A reprint in a different serif is
+     a visibly different document on the one artefact a learner sends to an
+     employer, so this face is loaded for it and used nowhere else. */
+  @font-face{ font-family:"Source Serif 4"; font-style:normal; font-weight:200 900; font-display:swap; src:url("fonts/SourceSerif4-Variable.woff2") format("woff2"); }
 
   :root{
     --indigo:#3E44B5; --indigo-2:#575ECF; --indigo-3:#8A8FE6;
@@ -532,6 +539,12 @@
   .certdate{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;
     white-space:nowrap}
   .certscore{flex:none; width:52px; display:flex; justify-content:flex-end}
+  /* The export sits last, after the facts of the record — it is an action on
+     the row, not another fact about it. It is the one control that survives the
+     narrow layout below, where the score column is dropped: a phone is exactly
+     where somebody is asked for a copy. */
+  .certact{flex:none; display:flex; justify-content:flex-end}
+  .certact .btn[disabled]{opacity:.45; cursor:default}
   @media (max-width:760px){ .certrow{padding:11px 10px; gap:9px} .certscore{display:none} }
 
   /* The order is one control, because a card has no column heading to click. */
@@ -1689,6 +1702,13 @@
      The palette is the app's fixed PRINT palette, not this page's tokens: a
      report is dark ink on white paper whatever the screen was set to. */
   #printReport{display:none}
+  /* The certificate prints from its own host, because it is a different page
+     box: the reports are A4 portrait and a certificate is 842x595pt landscape.
+     certificate.js swaps the `@page` rule for the duration of the dialog and
+     clears whichever host it is not using, so only one document is ever
+     handed to the printer. */
+  #printCert{display:none}
+  #printCert svg{display:block}
   @media print{
     body > *{display:none !important}
     /* #dashView IS THE SHELL, and the shell is sized to the viewport —
@@ -1701,6 +1721,7 @@
       min-height:0 !important; height:auto !important; overflow:visible !important}
     #dashView > *{display:none !important}
     #printReport{display:block !important}
+    #printCert{display:block !important}
     @page{size:A4; margin:13mm 13mm 16mm}
     /* A PAGE BOX AS TALL AS A SCREEN IS A SECOND SHEET. The console sizes its
        shell to the viewport — `body{min-height:100dvh}` — and that min-height
@@ -2409,9 +2430,12 @@
        `#dashView > *` and then re-show this one; nested inside the canvas it
        would be hidden along with its parent and every report would print blank. -->
   <div id="printReport" aria-hidden="true"></div>
+  <!-- The certificate's own print host; see the note beside #printCert above. -->
+  <div id="printCert" aria-hidden="true"></div>
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="admin.js?v=95" defer></script>
+<script src="certificate.js?v=1" defer></script>
+<script src="admin.js?v=96" defer></script>
 </body>
 </html>
