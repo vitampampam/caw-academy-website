@@ -5857,17 +5857,37 @@
       return;
     }
 
-    /* GROUPED BY WALKING THE LIST, not by sorting it. The server sends them in
-       catalogue order — EASA, UK CAA, UAE GCAA, FAA, each as the apps list them — so a
-       new group starts wherever the authority changes, and the console needs no course
-       order of its own. A fourth hardcoded order in the browser is exactly how its old
-       name table came to disagree with the apps for 75 of 81 courses. */
+    /* BUCKETED BY FRAMEWORK — four groups, however the server orders the list.
+       This WALKED the list and started a group wherever the authority changed, on the
+       stated assumption that the server sends EASA, then UK CAA, then UAE GCAA, then
+       FAA. It does not, and measuring `COURSE_KEYS` says so: the first four runs cover
+       63 of 83 keys and the rest were appended by FAMILY as courses were added, so
+       "UK CAA" occurs four separate times and walking produces TWELVE headings. Against
+       a server that has not yet got the catalogue sort it is worse still — the raw
+       order is alphabetical by key (aof, aof_faa, aof_gcaa, aof_uk, amp, ...), the
+       framework changes on nearly every row, and the page draws eighty-one headings of
+       one course each, which is what the tester saw.
+       Bucketing is immune to both: order WITHIN a framework is still the server's and
+       never the console's, which is the part that must not be re-invented here. */
+    var FRAMEWORKS = ["easa", "ukCaa", "uaeGcaa", "faa"];   // the apps' own order
+    var byKey = {};
     var groups = [];
     rows.forEach(function (c) {
-      var name = c.authority || "Other";
-      var g = groups.length ? groups[groups.length - 1] : null;
-      if (!g || g.name !== name) { g = { name: name, rows: [] }; groups.push(g); }
-      g.rows.push(c);
+      // Keyed on `framework`, not on the display label: the label is prose that may be
+      // retitled, while the key is the same token the apps and the course JSON use.
+      var k = c.framework || "other";
+      if (!byKey[k]) {
+        byKey[k] = { key: k, name: c.authority || "Other", rows: [] };
+        groups.push(byKey[k]);
+      }
+      byKey[k].rows.push(c);
+    });
+    // A framework the list above does not name keeps its arrival position rather than
+    // sorting to the front — a new edition should appear at the end, not silently
+    // displace EASA.
+    groups.sort(function (a, b) {
+      var ia = FRAMEWORKS.indexOf(a.key), ib = FRAMEWORKS.indexOf(b.key);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
 
     // WHILE FILTERING, EVERY MATCHING GROUP IS OPEN. Collapsed-by-default and a filter
@@ -5876,7 +5896,9 @@
     var filtering = !!sylFilter.trim();
 
     groups.forEach(function (g) {
-      var open = filtering || !!sylOpen[g.name]
+      // Remembered against the framework TOKEN, not its label, so a group does not
+      // spring open or shut if the authority is ever retitled.
+      var open = filtering || !!sylOpen[g.key]
         || (sylCurrent && g.rows.some(function (c) { return c.key === sylCurrent.key; }));
       var wrap = el("div", "sylgrp");
       if (open) wrap.setAttribute("open", "");
@@ -5912,7 +5934,7 @@
       head.addEventListener("click", function () {
         // A filtered group closes back to whatever it was before the filter, so
         // clearing the box does not leave every group hanging open.
-        sylOpen[g.name] = !open;
+        sylOpen[g.key] = !open;
         renderSylList();
       });
       wrap.appendChild(head);
