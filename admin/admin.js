@@ -37,98 +37,54 @@
     } catch (e) { return "web-admin-session"; }
   }
 
-  // Course catalogue for the assign picker. Mirrors server COURSE_KEYS
-  // (src/domain/courses.ts) — keep in sync when courses are added/renamed. The
-  // roster falls back to the raw key for anything not listed here.
-  var COURSES = [
-    // EASA
-    ["aof","Airline Operating Framework (AOF)","EASA"],
-    ["m","Part-M Continuing Airworthiness","EASA"],
-    ["camo","Part-CAMO","EASA"],
-    ["p145","Part-145","EASA"],
-    ["partis","Part-IS","EASA"],
-    ["p21dp","Part-21","EASA"],
-    ["cs","Certification Specifications (CS)","EASA"],
-    ["iawfam","Initial Airworthiness Familiarisation","EASA"],
-    ["amp","Aircraft Maintenance Programme (AMP)","EASA"],
-    ["arc","Airworthiness Review (ARC)","EASA"],
-    ["reliability","Fleet Reliability & Availability","EASA"],
-    ["mec","Maintenance Economics","EASA"],
-    ["eng","Engine & LLP Asset Management","EASA"],
-    ["lease","Aircraft & Engine Leasing","EASA"],
-    ["recycle","Aircraft Recycling & End-of-Life","EASA"],
-    ["offshore","Offshore Registries & Art. 83bis","EASA"],
-    ["hf","Human Factors","EASA"],
-    ["sms","Safety Management System (SMS)","EASA"],
-    ["ewis12","EWIS Groups 1-2","EASA"],
-    ["ewis35","EWIS Group 3","EASA"],
-    ["ewis45","EWIS Groups 4-5","EASA"],
-    ["ewis68","EWIS Groups 6-8","EASA"],
-    ["fts1","Fuel Tank Safety — Phase 1","EASA"],
-    ["fts2","Fuel Tank Safety — Phase 2","EASA"],
-    // UK CAA
-    ["aof_uk","UK Airline Operating Framework","UK CAA"],
-    ["m_uk","UK Part-M","UK CAA"],
-    ["camo_uk","UK Part-CAMO","UK CAA"],
-    ["p145_uk","UK Part-145","UK CAA"],
-    ["partis_uk","UK Part-IS","UK CAA"],
-    ["p21dp_uk","UK Part-21","UK CAA"],
-    ["cs_uk","UK Certification Specifications","UK CAA"],
-    ["iawfam_uk","UK Initial Airworthiness Familiarisation","UK CAA"],
-    ["amp_uk","UK Aircraft Maintenance Programme","UK CAA"],
-    ["arc_uk","UK Airworthiness Review","UK CAA"],
-    ["reliability_uk","UK Fleet Reliability","UK CAA"],
-    ["mec_uk","UK Maintenance Economics","UK CAA"],
-    ["eng_uk","UK Engine & LLP Asset Management","UK CAA"],
-    ["lease_uk","UK Aircraft & Engine Leasing","UK CAA"],
-    ["recycle_uk","UK Aircraft Recycling","UK CAA"],
-    ["offshore_uk","UK Offshore Registries","UK CAA"],
-    ["hf_uk","UK Human Factors","UK CAA"],
-    ["sms_uk","UK Safety Management System","UK CAA"],
-    ["ewis_uk","UK EWIS","UK CAA"],
-    ["fts_uk","UK Fuel Tank Safety","UK CAA"],
-    // UAE GCAA
-    ["aof_gcaa","UAE Airline Operating Framework","UAE GCAA"],
-    ["m_gcaa","CAR-M Continuing Airworthiness","UAE GCAA"],
-    ["p145_gcaa","CAR-145","UAE GCAA"],
-    ["partis_gcaa","UAE Part-IS","UAE GCAA"],
-    ["p21_gcaa","CAR-21","UAE GCAA"],
-    ["cs_gcaa","UAE Airworthiness Standards","UAE GCAA"],
-    ["iawfam_gcaa","UAE Initial Airworthiness Familiarisation","UAE GCAA"],
-    ["amp_gcaa","UAE Aircraft Maintenance Programme","UAE GCAA"],
-    ["arc_gcaa","UAE Airworthiness Review","UAE GCAA"],
-    ["reliability_gcaa","UAE Fleet Reliability","UAE GCAA"],
-    ["mec_gcaa","UAE Maintenance Economics","UAE GCAA"],
-    ["eng_gcaa","UAE Engine & LLP Asset Management","UAE GCAA"],
-    ["lease_gcaa","UAE Aircraft & Engine Leasing","UAE GCAA"],
-    ["recycle_gcaa","UAE Aircraft Recycling","UAE GCAA"],
-    ["hf_gcaa","UAE Human Factors","UAE GCAA"],
-    ["sms_gcaa","UAE Safety Management System","UAE GCAA"],
-    ["ewis_gcaa","UAE EWIS","UAE GCAA"],
-    ["fts_gcaa","UAE Fuel Tank Safety","UAE GCAA"],
-    // FAA
-    ["aof_faa","US Aviation Operating Framework","FAA"],
-    ["p43_faa","14 CFR Part 43 / 91","FAA"],
-    ["p145_faa","14 CFR Part 145","FAA"],
-    ["p65_faa","14 CFR Part 65","FAA"],
-    ["p39_faa","14 CFR Part 39 (ADs)","FAA"],
-    ["camp_faa","Air Carrier CAMP","FAA"],
-    ["p21_faa","14 CFR Part 21","FAA"],
-    ["cs_faa","US Airworthiness Standards","FAA"],
-    ["msg3_faa","MSG-3","FAA"],
-    ["reliability_faa","US Fleet Reliability","FAA"],
-    ["mec_faa","US Maintenance Economics","FAA"],
-    ["eng_faa","US Engine & LLP Asset Management","FAA"],
-    ["lease_faa","US Aircraft & Engine Leasing","FAA"],
-    ["recycle_faa","US Aircraft Recycling","FAA"],
-    ["hf_faa","US Human Factors","FAA"],
-    ["sms_faa","US Safety Management System","FAA"],
-    ["ewis_faa","US EWIS","FAA"],
-    ["fts_faa","US Fuel Tank Safety","FAA"]
-  ];
+  /* THE COURSE CATALOGUE COMES FROM THE SERVER (2026-10-12).
+     `[key, name, frameworkLabel]`, filled by `loadCatalogue()` below from the
+     public `GET /v1/catalog/courses` before the first render.
+
+     IT USED TO BE 80 ENTRIES HARDCODED HERE, with a comment asking whoever
+     edited it to keep them in sync with the apps. Measured the day this was
+     replaced, it had not been: `p26_faa` was absent entirely, so the roster,
+     the assign picker and the certificates tab printed the raw key — and
+     **75 of the 81 names differed from what the apps show** ("Aircraft
+     Maintenance Programme (AMP)" here against the app's "AMP Development").
+     An administrator and a learner were reading different names for nearly
+     every course, and nothing could have revealed that from inside this file.
+
+     Order is the server's, which is the catalogue order the apps use, so
+     CATALOGUE_INDEX below still means what it meant. */
+  var COURSES = [];
   var COURSE_LABEL = {};
-  COURSES.forEach(function (c) { COURSE_LABEL[c[0]] = c[1]; });
   function labelFor(key) { return COURSE_LABEL[key] || key; }
+
+  /* Fill the catalogue and every map derived from it.
+     The three maps are declared further down (next to the code that reads
+     them) and populated HERE, because all three answer the same question and
+     a catalogue that arrives after one of them was built is a map that
+     silently disagrees with the list beside it. */
+  function applyCatalogue(list) {
+    COURSES = list.map(function (c) { return [c.key, c.name, c.frameworkLabel]; });
+    COURSE_LABEL = {}; CATALOGUE_INDEX = {}; COURSE_FRAMEWORK = {};
+    COURSES.forEach(function (c, i) {
+      COURSE_LABEL[c[0]] = c[1];
+      CATALOGUE_INDEX[c[0]] = i;
+      COURSE_FRAMEWORK[c[0]] = c[2];
+    });
+  }
+
+  /* Public, so it works before anyone has signed in — the sign-in screen is the
+     first thing drawn and the roster is the next.
+
+     A FAILURE HERE DEGRADES TO RAW KEYS rather than to wrong names: `labelFor`
+     already falls back to the key, so an administrator sees `p26_faa` and can
+     say so, instead of being shown a name that quietly disagrees with the
+     learner's app. That is also why nothing is hardcoded as a safety net —
+     a fallback table is the thing that drifted. Deploy the server first. */
+  function loadCatalogue() {
+    return fetch(API_BASE + "/v1/catalog/courses", { headers: { "Accept": "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.courses && j.courses.length) applyCatalogue(j.courses); })
+      .catch(function () { /* raw keys; see above */ });
+  }
 
   // ── HTTP (identical pattern to account.js) ────────────────────────────────
   function request(method, path, body, useAuth) {
@@ -3198,8 +3154,7 @@
   // Selection state kept in Sets so members/courses can be toggled independently.
   var selectedUserIds = {};   // userId -> true
   var selectedCourses = {};   // courseKey -> true
-  var CATALOGUE_INDEX = {};   // courseKey -> catalogue position (for default sequencing)
-  COURSES.forEach(function (c, i) { CATALOGUE_INDEX[c[0]] = i; });
+  var CATALOGUE_INDEX = {};   // courseKey -> catalogue position (populated by applyCatalogue)
   var FRAMEWORKS = ["EASA", "UK CAA", "UAE GCAA", "FAA"];
 
   /* WHAT THIS ORGANISATION MAY ACTUALLY ASSIGN.
@@ -3214,7 +3169,7 @@
   // The eight courses that open with NO licence at all (mirrors CourseKey.free in
   // the apps and PUBLIC_CONTENT_COURSES on the server).
   var FREE_ANCHORS = { aof: 1, m: 1, aof_uk: 1, m_uk: 1, aof_gcaa: 1, m_gcaa: 1, aof_faa: 1, p43_faa: 1 };
-  var COURSE_FRAMEWORK = {}; COURSES.forEach(function (c) { COURSE_FRAMEWORK[c[0]] = c[2]; });
+  var COURSE_FRAMEWORK = {};  // courseKey -> framework label (populated by applyCatalogue)
 
   /* Frameworks the licence actually buys into — derived from the scope's NON-anchor
      keys, because the anchors are free everywhere and would otherwise make every
@@ -5765,7 +5720,15 @@
     });
   }
 
-  // Init: restore a session from the refresh cookie, else show sign-in.
+  /* Init: restore a session from the refresh cookie, else show sign-in.
+     The catalogue is fetched FIRST and the session restore waits on it, because
+     every list drawn by `enter()` names courses — a roster rendered before the
+     names arrive would print raw keys and only correct itself on the next
+     reload. It is public, so it does not need the session, and it cannot fail
+     the boot: `loadCatalogue` swallows its own errors. */
   show("signinView");
-  refresh().then(enter).catch(function () { show("signinView"); });
+  loadCatalogue()
+    .then(refresh)
+    .then(enter)
+    .catch(function () { show("signinView"); });
 })();
