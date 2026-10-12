@@ -5870,6 +5870,25 @@
        Bucketing is immune to both: order WITHIN a framework is still the server's and
        never the console's, which is the part that must not be re-invented here. */
     var FRAMEWORKS = ["easa", "ukCaa", "uaeGcaa", "faa"];   // the apps' own order
+
+    /* ORDERED BY THE CATALOGUE INDEX THE CONSOLE ALREADY HOLDS, not by whatever order
+       the syllabus route happens to send. `CATALOGUE_INDEX` is filled by
+       `applyCatalogue` from `GET /v1/catalog/courses`, and `listCourses()` maps over
+       `COURSE_KEYS` — so it IS the order the apps list courses in, already fetched at
+       sign-in and already used to sort two other lists on this page.
+       This is NOT the console inventing an order, which is the thing that must not
+       happen here: it is the SERVER's order, from a route that is already deployed.
+       Sorting on it rather than on the syllabus payload also means the list reads
+       correctly before the syllabus route's own catalogue sort is deployed — which is
+       exactly the state that put AMP above AOF, alphabetically by key.
+       An unknown key sorts LAST (not to 0, which `|| 0` would do for every one of
+       them and would silently stack them above AOF). */
+    var POS = function (k) {
+      var i = CATALOGUE_INDEX[k];
+      return typeof i === "number" ? i : Number.MAX_SAFE_INTEGER;
+    };
+    rows = rows.slice().sort(function (a, b) { return POS(a.key) - POS(b.key); });
+
     var byKey = {};
     var groups = [];
     rows.forEach(function (c) {
@@ -5896,10 +5915,18 @@
     var filtering = !!sylFilter.trim();
 
     groups.forEach(function (g) {
-      // Remembered against the framework TOKEN, not its label, so a group does not
-      // spring open or shut if the authority is ever retitled.
-      var open = filtering || !!sylOpen[g.key]
-        || (sylCurrent && g.rows.some(function (c) { return c.key === sylCurrent.key; }));
+      /* AN EXPLICIT CLICK ALWAYS WINS, which is why this is tri-state rather than a
+         boolean. It was `filtering || sylOpen[key] || holdsTheOpenCourse`, so the group
+         containing the open course was forced open on every render: clicking the
+         heading set the flag false and the next clause immediately re-opened it, and
+         the group could not be collapsed at all once a course in it had been read. The
+         same shape of bug applied while filtering.
+         So: if the admin has ever clicked this heading, that answer stands. Only when
+         they have not does the page guess — open while a filter is narrowing the list,
+         or when the group holds the course on screen. */
+      var said = Object.prototype.hasOwnProperty.call(sylOpen, g.key) ? sylOpen[g.key] : null;
+      var open = said !== null ? said : (filtering
+        || !!(sylCurrent && g.rows.some(function (c) { return c.key === sylCurrent.key; })));
       var wrap = el("div", "sylgrp");
       if (open) wrap.setAttribute("open", "");
 
@@ -5932,8 +5959,6 @@
         done === g.rows.length ? (g.rows.length + " courses")
                                : (done + " of " + g.rows.length + " complete")));
       head.addEventListener("click", function () {
-        // A filtered group closes back to whatever it was before the filter, so
-        // clearing the box does not leave every group hanging open.
         sylOpen[g.key] = !open;
         renderSylList();
       });
