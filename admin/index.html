@@ -1180,6 +1180,58 @@
   .xnote .xlist li{font-size:12.5px; color:var(--ink-soft); padding:1px 0}
   .xnote .xlist b{display:inline; font-size:12.5px}
 
+  /* ── Course syllabi ──────────────────────────────────────────────────────────
+     A list and the document it selects, side by side. The document column is the
+     one that scrolls: the list of 81 courses is short beside a syllabus that runs
+     to several pages, and a page where both scroll independently is hard to read.
+     Below 980px they stack, list first, because on a narrow screen choosing comes
+     before reading. */
+  .sylsplit{display:grid; grid-template-columns:minmax(220px,300px) 1fr; min-height:0}
+  .sylsplit > #sylList{border-right:1px solid var(--line-2)}
+  .syldoc{overflow:auto; overscroll-behavior:contain; max-height:min(62vh,680px);
+    padding:18px 22px; font-size:13px; line-height:1.55}
+  @media (max-width:980px){
+    .sylsplit{grid-template-columns:1fr}
+    .sylsplit > #sylList{border-right:0; border-bottom:1px solid var(--line-2);
+      max-height:240px}
+  }
+  /* The row carries the course, its authority and whether the syllabus is finished.
+     `syl-part` is the amber of an unfinished thing, not a red: an unauthored syllabus
+     still prints its derived half, so it is incomplete rather than broken. */
+  .sylrow{display:flex; flex-direction:column; gap:2px; padding:9px 14px; cursor:pointer;
+    border-bottom:1px solid var(--line-2); font-size:12.5px}
+  .sylrow:hover{background:#FAFAFB}
+  .sylrow.on{background:#F2F3FB; box-shadow:inset 3px 0 0 var(--indigo)}
+  .sylrow b{font-weight:650; font-size:13px}
+  .sylrow .syl-meta{color:var(--muted); font-size:11.5px;
+    display:flex; gap:7px; flex-wrap:wrap; align-items:center}
+  .syl-flag{font-size:10px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;
+    padding:1px 5px; border-radius:4px}
+  .syl-part{background:#FFF4E2; color:#8A5200}
+  .syl-done{background:#E8F5EA; color:#1F6B2B}
+  /* The document itself. Deliberately close to the printed page — one section label
+     style, one module block style — so the preview is read as the document rather than
+     as a web rendering of it. */
+  .syldoc h2{font-size:17px; margin:0 0 2px}
+  .syldoc .syl-sub{color:var(--muted); font-size:12px; margin:0 0 18px}
+  .syldoc .syl-lbl{font-size:10.5px; font-weight:700; letter-spacing:.6px;
+    text-transform:uppercase; color:var(--muted); margin:0 0 4px}
+  .syldoc .syl-sec{margin:0 0 16px}
+  .syldoc .syl-mod{margin:0 0 14px; padding:0 0 12px; border-bottom:1px solid var(--line-2)}
+  .syldoc .syl-mod:last-child{border-bottom:0}
+  .syldoc .syl-mod-h{font-size:13px; font-weight:650;
+    display:flex; gap:10px; align-items:baseline}
+  /* The duration is context for the module heading, not a second heading: it sits to
+     the right, quiet, and does not compete with the module's own name. */
+  .syldoc .syl-mod-dur{margin-left:auto; flex:0 0 auto; font-weight:400;
+    font-size:11.5px; color:var(--muted); white-space:nowrap}
+  .syldoc .syl-obj{margin:3px 0 7px}
+  .syldoc .syl-topic{display:flex; gap:9px; margin:2px 0; font-size:12px}
+  .syldoc .syl-topic > span:first-child{color:var(--muted); flex:0 0 24px; text-align:right}
+  .syldoc .syl-topic code{white-space:nowrap}
+  .syldoc .syl-none{color:var(--muted); font-style:italic}
+  .syldoc .syl-owed{color:#8A5200}
+
   /* ── Certificates ────────────────────────────────────────────────────────── */
   .cgroup{border-top:1px solid var(--line-2)}
   .cgroup:first-child{border-top:0}
@@ -2412,6 +2464,39 @@
     </div>
   </section>
 
+  <!-- COURSE SYLLABI. An authority sometimes asks an operator for the syllabus of a
+       course its staff took, and until now there was nothing to send. The shape is not
+       ours: it follows AMC 20-22 Appendix C, EASA's own "Curriculum and Lesson Plan"
+       template, and most of each document is derived from the course itself, so it
+       cannot drift from the material it describes.
+
+       It sits beside Certificates rather than under Workspace because the errand is the
+       same: retrieve a document and hand it to somebody outside the organisation. -->
+  <section class="sect" data-sect="syllabus">
+    <div class="phead">
+      <div>
+        <h1>Course syllabi</h1>
+        <p class="psub" id="sylGenerated"></p>
+      </div>
+      <div class="pacts">
+        <button class="btn btn-ghost" id="sylPrint" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>Print / save PDF</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <input class="ms-search" id="sylSearch" placeholder="Filter by course or authority…" autocomplete="off" style="max-width:280px">
+        <span class="ms-count" id="sylCount" style="margin-left:auto"></span>
+      </div>
+      <!-- The list and the document side by side: an admin picks the course and reads
+           what would print, which is the whole point of a preview. -->
+      <div class="sylsplit">
+        <div id="sylList" class="table-scroll"></div>
+        <div id="sylDoc" class="syldoc"></div>
+      </div>
+    </div>
+  </section>
+
   <footer class="foot-center">
     <nav class="foot-nav">
       <a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a><a href="../support.html">Support</a>
@@ -2435,7 +2520,7 @@
 </div>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-<script src="certificate.js?v=1" defer></script>
-<script src="admin.js?v=98" defer></script>
+<script src="certificate.js?v=2" defer></script>
+<script src="admin.js?v=100" defer></script>
 </body>
 </html>

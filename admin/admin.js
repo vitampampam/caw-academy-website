@@ -359,7 +359,14 @@
     ["records",      "Records",
       '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H18a1 1 0 0 1 1 1v15a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M8 7.5h7M8 11h7M8 14.5h4"/>'],
     ["certificates", "Certificates",
-      '<circle cx="12" cy="9" r="5.2"/><path d="M8.5 13.6 7 21l5-2.4L17 21l-1.5-7.4"/>']
+      '<circle cx="12" cy="9" r="5.2"/><path d="M8.5 13.6 7 21l5-2.4L17 21l-1.5-7.4"/>'],
+    /* COURSE SYLLABI sits last and beside Certificates, not under Workspace. It is
+       not a record of anything the org did — but the errand is the same one
+       Certificates serves: an outsider asked for a document, find it and print it.
+       An authority asking what a course covered is that errand exactly. */
+    ["syllabus",     "Course syllabi",
+      '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v18H6.5A2.5 2.5 0 0 1 4 18.5z"/>' +
+      '<path d="M8 7.5h7M8 11h7M8 14.5h4"/><path d="M4 5.5A2.5 2.5 0 0 0 6.5 8H19"/>']
   ];
 
   /* Two groups in the rail: what you DO, and what the org HOLDS. A flat list
@@ -5711,6 +5718,10 @@
       // Documents after the roster: the per-member tick list is drawn from it.
       // Familiarisation after the documents: the panel is drawn per document,
       // so there is nothing to put the records into until the list exists.
+      // The syllabus index is independent of the roster, so it is not sequenced
+      // behind it — and a failure there must not stop the roster loading, which is
+      // why it is a detached call with its own catch rather than a link in the chain.
+      loadSyllabi();
       return loadRoster().then(loadDocs).then(loadFamiliarisation).then(function () {
         // The Assign·Documents pickers read the roster and the document list,
         // so they are drawn once both have arrived.
@@ -5730,6 +5741,282 @@
         show("signinView");
         showMessage("authMsg", err.message || "Couldn't reach the server.", "err");
       }
+    });
+  }
+
+  // ── Course syllabi ────────────────────────────────────────────────────────
+  /* An authority sometimes asks an operator for the syllabus of a course its staff
+     took. The document's shape is AMC 20-22 Appendix C, EASA's own "Curriculum and
+     Lesson Plan" template, and MOST OF IT IS DERIVED FROM THE COURSE — the modules are
+     its subparts, the topics its lessons, and every topic's objective is that lesson's
+     own subtitle. Only the overview, the scope, the prerequisites and one objective per
+     module are authored, in the content editor.
+
+     THE SERVER ASSEMBLES IT, NOT THIS FILE. There is one assembler
+     (tools/syllabus_model.py) and the editor's preview calls the same one, so the
+     document an author approves is the document that prints. Re-deriving any of it here
+     would be a third copy — the mistake the `annex` line and the certificate title each
+     cost once.
+
+     THE LIST IS FETCHED, THE DOCUMENTS ARE NOT. All 81 run to roughly 800 KB together,
+     so the index comes down once and a document is fetched when its row is chosen, then
+     cached for the session. */
+  var sylIndex = [];        // the list, as the server summarised it
+  var sylCache = {};        // courseKey -> the fetched document
+  var sylCurrent = null;    // the document on screen
+  var sylFilter = "";
+
+  function loadSyllabi() {
+    return authed("GET", "/v1/org/syllabus", null).then(function (res) {
+      sylIndex = res.courses || [];
+      var gen = $("sylGenerated");
+      /* THE GENERATED DATE IS SHOWN, and it is not decoration. Content ships over the
+         air while the server ships on its own schedule, so between a content publish
+         and a server deploy this table is the older truth — and for a syllabus that
+         means it can understate a course that has since grown. An admin sending one to
+         an authority should be able to see how current it is. */
+      if (gen) {
+        gen.textContent = res.generated
+          ? ("What each course covers · assembled " + longStamp(new Date(res.generated + "T00:00:00Z")))
+          : "What each course covers";
+      }
+      renderSylList();
+    }).catch(function (err) {
+      /* A server older than this feature has no such route. The section stays, says so,
+         and nothing else on the page is affected — the same way Documents hides itself
+         for an org that holds none. */
+      sylIndex = [];
+      var list = $("sylList");
+      if (list) {
+        list.textContent = "";
+        list.appendChild(el("p", "empty-note",
+          err && err.status === 404
+            ? "This server does not publish course syllabi yet."
+            : (err && err.message) || "Couldn't load the course list."));
+      }
+    });
+  }
+
+  function shownSyllabi() {
+    var q = sylFilter.trim().toLowerCase();
+    if (!q) return sylIndex;
+    return sylIndex.filter(function (c) {
+      return (c.course + " " + c.key + " " + (c.authority || "")).toLowerCase()
+        .indexOf(q) >= 0;
+    });
+  }
+
+  function renderSylList() {
+    var host = $("sylList");
+    if (!host) return;
+    host.textContent = "";
+    var rows = shownSyllabi();
+    var count = $("sylCount");
+    if (count) {
+      count.textContent = rows.length === sylIndex.length
+        ? (sylIndex.length + " course" + (sylIndex.length === 1 ? "" : "s"))
+        : (rows.length + " of " + sylIndex.length);
+    }
+    if (!rows.length) {
+      host.appendChild(el("p", "empty-note", sylIndex.length
+        ? "No course matches that filter." : "No courses."));
+      return;
+    }
+    rows.forEach(function (c) {
+      var row = el("div", "sylrow" + (sylCurrent && sylCurrent.key === c.key ? " on" : ""));
+      row.appendChild(el("b", null, c.course));
+      var meta = el("div", "syl-meta");
+      meta.appendChild(el("span", null, c.authority || ""));
+      meta.appendChild(el("span", null, "·"));
+      meta.appendChild(el("span", null, c.moduleCount + " modules"));
+      meta.appendChild(el("span", null, "·"));
+      meta.appendChild(el("span", null, c.hours + "h"));
+      // The flag says whether the authored half is finished. Amber, never red: an
+      // unauthored syllabus still prints its derived half, so it is incomplete rather
+      // than wrong — and an admin needs to know before sending it to a regulator.
+      meta.appendChild(el("span", "syl-flag " + (c.complete ? "syl-done" : "syl-part"),
+        c.complete ? "complete" : "draft"));
+      row.appendChild(meta);
+      row.addEventListener("click", function () { openSyllabus(c.key); });
+      host.appendChild(row);
+    });
+  }
+
+  function openSyllabus(key) {
+    var doc = $("sylDoc");
+    if (sylCache[key]) {
+      sylCurrent = sylCache[key];
+      renderSylDoc();
+      renderSylList();
+      return Promise.resolve();
+    }
+    if (doc) { doc.textContent = ""; doc.appendChild(el("p", "empty-note", "Loading…")); }
+    return authed("GET", "/v1/org/syllabus/" + encodeURIComponent(key), null)
+      .then(function (res) {
+        sylCache[key] = res.syllabus;
+        sylCurrent = res.syllabus;
+        renderSylDoc();
+        renderSylList();
+      }).catch(function (err) {
+        if (doc) {
+          doc.textContent = "";
+          doc.appendChild(el("p", "empty-note",
+            (err && err.message) || "Couldn't load that syllabus."));
+        }
+      });
+  }
+
+  /* The document, built once and used for BOTH the preview and the printed page.
+     One builder, because a preview rendered by its own copy is worth nothing the day
+     the two disagree — the admin would approve one document and send another. */
+  function buildSyllabusDoc(s) {
+    var root = el("div", "syldoc-body");
+    root.appendChild(el("h2", null, s.certificateTitle || s.course));
+    var bits = [s.authority, s.hours + " taught hour" + (s.hours === 1 ? "" : "s"),
+      s.lessonCount + " topics in " + s.moduleCount + " module"
+        + (s.moduleCount === 1 ? "" : "s"),
+      s.questionCount + " assessment questions"];
+    if (s.reviewed) bits.push("reviewed " + s.reviewed);
+    root.appendChild(el("p", "syl-sub", bits.filter(Boolean).join("  ·  ")));
+
+    var section = function (label, text, owed) {
+      if (!text && !owed) return;
+      var wrap = el("div", "syl-sec");
+      if (label) wrap.appendChild(el("div", "syl-lbl", label));
+      wrap.appendChild(text ? el("div", null, text)
+                            : el("div", "syl-none", "Not yet written."));
+      root.appendChild(wrap);
+    };
+    section("Regulatory basis", s.annex || s.regulation || "");
+    section("Overview", s.overview, true);
+    section("Scope", s.scope, true);
+    section("Prerequisites", s.prerequisites);
+    section("Assessment", s.assessment ? s.assessment.method : "");
+
+    root.appendChild(el("div", "syl-lbl", "Modules and topics"));
+    (s.modules || []).forEach(function (m, i) {
+      var mod = el("div", "syl-mod");
+      var mh = el("div", "syl-mod-h");
+      mh.appendChild(document.createTextNode(
+        String.fromCharCode(65 + (i % 26)) + " — " + m.label));
+      /* DURATION PER MODULE, AND DELIBERATELY NOT PER TOPIC. Part-147 Appendix I is a
+         duration table and 147.A.200(g) requires "the syllabus content and schedule"
+         to justify a change of hours, so a duration belongs here — but its granularity
+         in EASA's own model is the COURSE (B1.1 = 2,400 hours), and the per-module
+         marker EASA uses is not time at all: Part-66 Appendix I grades each subject by
+         KNOWLEDGE LEVEL 1-3, and AMC 20-22's EWIS programme states no hours anywhere.
+         A module subtotal is an aggregate and shows the weighting across the course,
+         which is what a training manager compares. A per-lesson figure would be below
+         any of those granularities and would turn each of 1,762 authored reading
+         estimates into an individual claim a regulator could ask us to substantiate —
+         and `minutes` is rebumped during content passes, so they move. */
+      mh.appendChild(el("span", "syl-mod-dur", m.minutes + " min"));
+      mod.appendChild(mh);
+      mod.appendChild(m.objective
+        ? el("div", "syl-obj", m.objective)
+        : el("div", "syl-obj syl-owed", "No objective written for this module yet."));
+      (m.topics || []).forEach(function (t, j) {
+        var row = el("div", "syl-topic");
+        row.appendChild(el("span", null, (j + 1) + "."));
+        var body = el("span");
+        var code = el("code", null, t.id);
+        body.appendChild(code);
+        body.appendChild(document.createTextNode(" " + t.title));
+        if (t.objective) {
+          body.appendChild(document.createElement("br"));
+          body.appendChild(el("span", "syl-none", t.objective));
+        }
+        row.appendChild(body);
+        mod.appendChild(row);
+      });
+      root.appendChild(mod);
+    });
+
+    // The standing limit, last and always: the document is read by someone who does
+    // not have the product in front of them.
+    var limit = el("div", "syl-sec");
+    limit.appendChild(el("div", "syl-lbl", "Status of this course"));
+    limit.appendChild(el("div", "syl-none", s.limit || ""));
+    root.appendChild(limit);
+    if (s.sourceNote) {
+      var note = el("div", "syl-sec");
+      note.appendChild(el("div", "syl-none", s.sourceNote));
+      root.appendChild(note);
+    }
+    return root;
+  }
+
+  function renderSylDoc() {
+    var host = $("sylDoc");
+    if (!host) return;
+    host.textContent = "";
+    var btn = $("sylPrint");
+    if (!sylCurrent) {
+      host.appendChild(el("p", "empty-note",
+        "Choose a course to see the syllabus that would print."));
+      if (btn) btn.disabled = true;
+      return;
+    }
+    if (btn) btn.disabled = false;
+    host.appendChild(buildSyllabusDoc(sylCurrent));
+  }
+
+  if ($("sylSearch")) {
+    $("sylSearch").addEventListener("input", function () {
+      sylFilter = this.value || "";
+      renderSylList();
+    });
+  }
+
+  if ($("sylPrint")) {
+    $("sylPrint").addEventListener("click", function () {
+      if (!sylCurrent) return;
+      /* A4 PORTRAIT, so it goes through `#printReport` — the host every other report
+         uses — rather than the certificate's landscape host. The two must not both
+         hold something at once or the dialog is handed two documents. */
+      var host = $("printReport");
+      if (!host) return;
+      var cert = $("printCert");
+      if (cert) cert.textContent = "";
+      host.textContent = "";
+
+      var root = el("div", "prep");
+      var head = el("div", "prep-head");
+      var logo = document.createElement("img");
+      logo.className = "prep-logo";
+      logo.src = "logo-header.png";
+      logo.alt = "";
+      head.appendChild(logo);
+      var title = el("div", "prep-title");
+      title.appendChild(el("h2", null, "Course syllabus"));
+      title.appendChild(el("p", null,
+        (sylCurrent.certificateTitle || sylCurrent.course) + "  ·  "
+        + (sylCurrent.authority || "")));
+      head.appendChild(title);
+      root.appendChild(head);
+      root.appendChild(buildSyllabusDoc(sylCurrent));
+
+      var foot = el("div", "prep-foot");
+      foot.appendChild(el("span", null,
+        "Course syllabus  ·  shape per AMC 20-22 Appendix C  ·  "
+        + longStamp(new Date())));
+      foot.appendChild(el("span", "site", "caw-academy.com"));
+      root.appendChild(foot);
+      host.appendChild(root);
+
+      showMessage("rosterMsg",
+        "Choose “Save as PDF” as the destination in the print dialog.", "ok");
+      // The same masthead wait every other printed sheet uses: print() captures the
+      // page as it stands, so on a cold load the mark would be an empty box.
+      var ready = (!logo.complete)
+        ? new Promise(function (done) {
+            var go = function () { done(); };
+            logo.addEventListener("load", go, { once: true });
+            logo.addEventListener("error", go, { once: true });
+            setTimeout(go, 1500);
+          })
+        : Promise.resolve();
+      ready.then(function () { setTimeout(function () { window.print(); }, 60); });
     });
   }
 
