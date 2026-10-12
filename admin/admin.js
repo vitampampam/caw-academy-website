@@ -385,6 +385,19 @@
     return true;
   }
 
+  /* Report into the section the admin is LOOKING AT.
+     Printing a certificate is offered from three tabs now, and all three used to
+     call showMessage("rosterMsg", …) — an element that lives in the team section.
+     From Certificates or Records that line was written to a hidden div, so the
+     "choose Save as PDF" hint, and any failure, went nowhere. Routed by the
+     section actually on screen instead; the team tab keeps its own element. */
+  var SECT_MSG = { records: "recMsg", certificates: "certsMsg", syllabus: "sylMsg" };
+  function printMsg(text, kind) {
+    // Team keeps #rosterMsg, and so does any section without a line of its own —
+    // a message in the wrong place still beats one thrown away.
+    showMessage(SECT_MSG[currentSect] || "rosterMsg", text, kind);
+  }
+
   function showSection(id, fromHash) {
     if (!SECTIONS.some(function (x) { return x[0] === id; }) || !sectionVisible(id)) id = "overview";
     currentSect = id;
@@ -2507,6 +2520,11 @@
           who: who, email: email, userId: m.userId,
           itemKey: "course:" + c.courseKey, item: labelFor(c.courseKey),
           detail: c.number || "",
+          /* THE RECORD ITSELF, carried so the row can open the document. Records
+             used to hold only the text of a certificate's number, and a tester
+             reported trying to open the certificate from here — reasonably, since
+             this is the page that lists it. Everything needed was one scope away. */
+          cert: c,
           status: c.examScore != null ? "Issued \u00b7 " + c.examScore + "%" : "Issued",
           company: ""
         });
@@ -2818,7 +2836,46 @@
 
       var tdX = document.createElement("td"); tdX.className = "member-active";
       if (r.kind === "certificate") tdX.className = "num";
-      tdX.textContent = r.detail || "\u2014";
+      /* THE NUMBER OPENS THE CERTIFICATE. A tester went looking for the document
+         here and found text: this page lists the certificate, names it, and did
+         nothing when clicked, while the only way to open it was a tab away.
+         It prints through the same `CawCertificate.print` the Certificates tab
+         uses \u2014 off the registry's own record \u2014 rather than a second copy of that
+         call, so the two pages cannot drift into printing different documents.
+         THE NUMBER, not the whole row. Course and document rows have nothing to
+         open, so a row-wide click would be live on some rows and dead on others
+         with nothing to tell them apart; the number is the one thing on the line
+         that IS the document, and as the only control in the table it says which
+         rows have one behind them. */
+      var printable = r.kind === "certificate" && r.cert
+        && r.cert.holderName && r.cert.courseTitle;
+      if (printable) {
+        var open = document.createElement("button");
+        open.type = "button";
+        // `.linkbtn` sets `font:inherit`, so the number keeps the cell's monospace.
+        open.className = "linkbtn";
+        open.textContent = r.detail;
+        open.title = "Open " + r.who + "\u2019s certificate to print or save as PDF";
+        open.addEventListener("click", function () {
+          if (!window.CawCertificate) {
+            printMsg("The certificate renderer did not load.", "err");
+            return;
+          }
+          window.CawCertificate.print(r.cert, function (msg) {
+            printMsg(msg, "ok");
+          });
+        });
+        tdX.appendChild(open);
+      } else {
+        /* A certificate minted before the registry carried a holder name and
+           course title cannot be printed. It stays plain text with the reason on
+           hover \u2014 the same wording the Certificates tab puts on its disabled
+           button, because it means a server to deploy rather than a bad record. */
+        tdX.textContent = r.detail || "\u2014";
+        if (r.kind === "certificate" && r.cert) {
+          tdX.title = "This console needs the updated server to print certificates.";
+        }
+      }
       tr.appendChild(tdX);
 
       var tdS = document.createElement("td"); tdS.className = "member-active";
@@ -4520,11 +4577,11 @@
         dl.title = "Open " + fullName(r.m) + "’s certificate to print or save as PDF";
         dl.addEventListener("click", function () {
           if (!window.CawCertificate) {
-            showMessage("rosterMsg", "The certificate renderer did not load.", "err");
+            printMsg("The certificate renderer did not load.", "err");
             return;
           }
           window.CawCertificate.print(r.c, function (m) {
-            showMessage("rosterMsg", m, "ok");
+            printMsg(m, "ok");
           });
         });
       }
@@ -5217,12 +5274,12 @@
      The file still says in its NAME which it is, because six of these in a
      downloads folder are otherwise indistinguishable. */
   function exportRecordsCsv(rows, name) {
-    if (!rows.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    if (!rows.length) { printMsg("Nothing to export.", "err"); return; }
     downloadCsv("records-" + name, recordsCsv(rows));
   }
 
   function exportRecordsPdf(rows, custom) {
-    if (!rows.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    if (!rows.length) { printMsg("Nothing to export.", "err"); return; }
     buildRecordsPrint(rows, custom);
     /* WAIT FOR THE MASTHEAD MARK before opening the dialog — print() captures
        the page as it stands, so on a cold load the report goes to paper with an
@@ -5341,13 +5398,13 @@
 
   $("certExportCsv").addEventListener("click", function () {
     var rows = shownCertificates();
-    if (!rows.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    if (!rows.length) { printMsg("Nothing to export.", "err"); return; }
     downloadCsv("certificates-" + (certFilter.trim() ? "custom" : "complete"), certificatesCsv(rows));
   });
 
   $("certExportPdf").addEventListener("click", function () {
     var rows = shownCertificates();
-    if (!rows.length) { showMessage("rosterMsg", "Nothing to export.", "err"); return; }
+    if (!rows.length) { printMsg("Nothing to export.", "err"); return; }
     buildCertificatesPrint(rows, !!certFilter.trim());
     // Same masthead wait as every other printed sheet (see exportRecordsPdf).
     var logo = $("printReport").querySelector(".prep-logo");
@@ -6165,7 +6222,7 @@
       root.appendChild(foot);
       host.appendChild(root);
 
-      showMessage("rosterMsg",
+      printMsg(
         "Choose “Save as PDF” as the destination in the print dialog.", "ok");
       // The same masthead wait every other printed sheet uses: print() captures the
       // page as it stands, so on a cold load the mark would be an empty box. The mark

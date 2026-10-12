@@ -2545,6 +2545,10 @@
         <div class="seg" id="recKinds"></div>
         <span class="ms-count" id="recCount" style="margin-left:auto"></span>
       </div>
+      <!-- This tab's own message line. Printing a certificate used to report into
+           #rosterMsg, which lives in the TEAM section, so its "choose Save as PDF"
+           hint was written to a hidden element and nobody ever saw it. -->
+      <div id="recMsg" style="padding:0 16px"></div>
       <div id="recList" class="table-scroll"></div>
     </div>
   </section>
@@ -2571,6 +2575,8 @@
         <div id="certSortBar" class="rsortbar"></div>
         <span class="ms-count" id="certCount" style="margin-left:auto"></span>
       </div>
+      <!-- As above: this tab reported into the team section's message line. -->
+      <div id="certsMsg" style="padding:0 16px"></div>
       <div id="certs" class="table-scroll"></div>
     </div>
   </section>
@@ -2599,6 +2605,8 @@
         <input class="ms-search" id="sylSearch" placeholder="Filter by course or authority…" autocomplete="off" style="max-width:280px">
         <span class="ms-count" id="sylCount" style="margin-left:auto"></span>
       </div>
+      <!-- As the other two tabs: this one reported into the team section's line. -->
+      <div id="sylMsg" style="padding:0 16px"></div>
       <!-- The list and the document side by side: an admin picks the course and reads
            what would print, which is the whole point of a preview. -->
       <div class="sylsplit">
@@ -2634,6 +2642,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=107" defer></script>
+<script src="admin.js?v=108" defer></script>
 </body>
 </html>
