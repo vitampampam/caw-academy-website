@@ -1921,14 +1921,39 @@
     .prep .syldoc-body .syl-sec{margin:0 0 11pt}
     .prep .syldoc-body .syl-lbl{font-size:7pt; letter-spacing:.7pt; margin:0 0 3pt;
       color:#3E44B5}
-    /* A module is one unit of reading, exactly as a member is in the team report:
-       never split its heading, its objective and its topics across a page. */
-    .prep .syldoc-body .syl-mod{break-inside:avoid; page-break-inside:avoid;
+    /* A MODULE MAY BREAK ACROSS PAGES; ITS PARTS MAY NOT.
+       This was `break-inside:avoid`, copied from `.prep-member` in the team report —
+       sound there, where a member's block is a handful of rows, and wrong here. A
+       Part-M module runs to nineteen topics each with an objective beneath it, so the
+       block is taller than a page can hold after the module above it: the browser
+       obeyed and moved the whole of SUBPART F to the next sheet, leaving two thirds of
+       page 3 empty. An instruction a layout cannot satisfy is not honoured, it is
+       escaped, and the escape costs a page every time.
+       A section that does not fit MUST flow. What must not happen is the ugly part of
+       flowing, and those are separate rules: a heading stranded at the foot of a sheet
+       with its topics overleaf, and a topic torn between its code line and the
+       objective under it. Both are forbidden below, so a module now breaks only
+       between whole topics. */
+    .prep .syldoc-body .syl-mod{break-inside:auto; page-break-inside:auto;
       margin:0 0 10pt; padding:0 0 8pt; border-bottom:.5pt solid #E2E3E6}
-    .prep .syldoc-body .syl-mod-h{font-size:10pt}
+    /* The module heading and its objective stay with the first topic. `break-after`
+       on both, because the objective sits between them and a rule on the heading
+       alone would simply strand the pair one line lower. */
+    .prep .syldoc-body .syl-mod-h{font-size:10pt;
+      break-after:avoid; page-break-after:avoid}
     .prep .syldoc-body .syl-mod-dur{font-size:8pt; color:#6B7390}
-    .prep .syldoc-body .syl-obj{margin:2pt 0 5pt}
-    .prep .syldoc-body .syl-topic{font-size:8.5pt; gap:7pt; margin:1.5pt 0}
+    .prep .syldoc-body .syl-obj{margin:2pt 0 5pt;
+      break-after:avoid; page-break-after:avoid}
+    /* One topic is atomic: its id, its title and the objective beneath are one fact,
+       and a break between them reads as two different topics. */
+    .prep .syldoc-body .syl-topic{font-size:8.5pt; gap:7pt; margin:1.5pt 0;
+      break-inside:avoid; page-break-inside:avoid}
+    /* The two halves of a topic row — its number, and its code/title/objective —
+       must not land on different sheets either. Chrome honours the rule on the flex
+       container above; WeasyPrint, used to measure this change, splits between the
+       flex ITEMS regardless, so the intent is stated on them as well. Harmless where
+       the container rule already holds. */
+    .prep .syldoc-body .syl-topic > span{break-inside:avoid; page-break-inside:avoid}
     .prep .syldoc-body .syl-topic > span:first-child{flex:0 0 18pt}
     .prep .syldoc-body code{font-size:8pt}
     /* The heading of the modules list must not be the last thing on a sheet. */
@@ -2609,6 +2634,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=105" defer></script>
+<script src="admin.js?v=106" defer></script>
 </body>
 </html>
