@@ -5808,6 +5808,19 @@
         gen.textContent = res.generated
           ? ("What each course covers · assembled " + longStamp(new Date(res.generated + "T00:00:00Z")))
           : "What each course covers";
+        /* AND WHY SOME FRAMEWORKS ARE ABSENT. The server now sends only the syllabi
+           this licence covers, so a single-framework customer sees one heading where
+           the apps advertise four — correct, and silently confusing without a line
+           saying so. The Assign picker carries the same sentence for the same reason:
+           an admin who cannot find UK CAA should learn why here rather than guess at
+           a fault. Appended rather than given a line of its own, so the subtitle stays
+           one row. */
+        if (orgScope && orgScope.indexOf("__all__") === -1) {
+          var names = Object.keys(licencedFrameworks());
+          if (names.length) {
+            gen.textContent += " · your licence covers " + names.join(", ");
+          }
+        }
       }
       renderSylList();
     }).catch(function (err) {
