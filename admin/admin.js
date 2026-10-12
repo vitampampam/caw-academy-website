@@ -38,8 +38,9 @@
   }
 
   /* THE COURSE CATALOGUE COMES FROM THE SERVER (2026-10-12).
-     `[key, name, frameworkLabel]`, filled by `loadCatalogue()` below from the
-     public `GET /v1/catalog/courses` before the first render.
+     `[key, name, frameworkLabel]`, filled by `loadCatalogue()` below from
+     `GET /v1/catalog/courses` after the session is restored and before the
+     first render.
 
      IT USED TO BE 80 ENTRIES HARDCODED HERE, with a comment asking whoever
      edited it to keep them in sync with the apps. Measured the day this was
@@ -71,17 +72,19 @@
     });
   }
 
-  /* Public, so it works before anyone has signed in — the sign-in screen is the
-     first thing drawn and the roster is the next.
+  /* AUTHENTICATED, and called at the head of `enter()` — the sign-in screen names
+     no course, and every list that does is drawn after it.
 
      A FAILURE HERE DEGRADES TO RAW KEYS rather than to wrong names: `labelFor`
      already falls back to the key, so an administrator sees `p26_faa` and can
      say so, instead of being shown a name that quietly disagrees with the
      learner's app. That is also why nothing is hardcoded as a safety net —
-     a fallback table is the thing that drifted. Deploy the server first. */
+     a fallback table is the thing that drifted.
+
+     SO RAW KEYS IN THE LISTS MEAN THIS CALL FAILED, and the likeliest reason is
+     a server that predates the route. Deploy the server before this file. */
   function loadCatalogue() {
-    return fetch(API_BASE + "/v1/catalog/courses", { headers: { "Accept": "application/json" } })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    return authed("GET", "/v1/catalog/courses")
       .then(function (j) { if (j && j.courses && j.courses.length) applyCatalogue(j.courses); })
       .catch(function () { /* raw keys; see above */ });
   }
@@ -5663,8 +5666,18 @@
   $("signOutBtn").addEventListener("click", signOut);
   $("deniedSignOut").addEventListener("click", signOut);
 
-  // Load the org context (admin gate), then the dashboard.
+  /* Load the course names, then the org context (admin gate), then the dashboard.
+     THE CATALOGUE IS FETCHED HERE AND NOT IN THE BOOT CHAIN, because `enter()`
+     has THREE callers — the boot's session restore, the sign-in/sign-up form and
+     the email-confirmation step — and every one of them draws the same lists. In
+     the boot chain it would have covered only the first, so an administrator who
+     actually typed their password (the commonest path, and the only one on a new
+     machine) would have seen raw keys until the next reload. */
   function enter() {
+    return loadCatalogue().then(enterDashboard);
+  }
+
+  function enterDashboard() {
     return authed("GET", "/v1/org/context", null).then(function (ctx) {
       $("orgName").textContent = ctx.orgName || "Your organisation";
       lastDomains = ctx.domains || [];
@@ -5720,15 +5733,11 @@
     });
   }
 
-  /* Init: restore a session from the refresh cookie, else show sign-in.
-     The catalogue is fetched FIRST and the session restore waits on it, because
-     every list drawn by `enter()` names courses — a roster rendered before the
-     names arrive would print raw keys and only correct itself on the next
-     reload. It is public, so it does not need the session, and it cannot fail
-     the boot: `loadCatalogue` swallows its own errors. */
+  /* Init: restore a session from the refresh cookie, else show sign-in. The
+     course names are fetched inside `enter()`, which every entry path goes
+     through, so there is nothing to sequence here. */
   show("signinView");
-  loadCatalogue()
-    .then(refresh)
+  refresh()
     .then(enter)
     .catch(function () { show("signinView"); });
 })();
