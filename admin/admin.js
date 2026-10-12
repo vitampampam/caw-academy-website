@@ -6128,22 +6128,21 @@
       if (cert) cert.textContent = "";
       host.textContent = "";
 
+      /* THE SHARED MASTHEAD, as the records and certificates exports use. This sheet
+         had hand-rolled a third one: the mark with no wordmark or tagline, no
+         organisation, no export date and no rule — so the one document an operator
+         sends to an authority was the one that did not look like the others. It also
+         reused `.prep-title` as a CONTAINER where the other two use it as the title
+         TEXT, which is why its heading sized differently; dropping that resolves the
+         collision rather than adding a fourth class to work around it.
+         The scope line carries the edition, the slot that says "Assigned2 · 2 members"
+         on a team report: the course itself is named by the body's own heading below,
+         where a reader looks for it, rather than squeezed into grey 7pt type. */
       var root = el("div", "prep");
-      var head = el("div", "prep-head");
-      var logo = document.createElement("img");
-      logo.className = "prep-logo";
-      logo.src = "logo-header.png";
-      logo.alt = "";
-      head.appendChild(logo);
-      var title = el("div", "prep-title");
-      title.appendChild(el("h2", null, "Course syllabus"));
-      title.appendChild(el("p", null,
-        (sylCurrent.certificateTitle || sylCurrent.course) + "  ·  "
-        + (sylCurrent.authority || "")));
-      head.appendChild(title);
-      root.appendChild(head);
-      // The masthead above carries the course name, so the body omits its own title.
-      root.appendChild(buildSyllabusDoc(sylCurrent, false));
+      root.appendChild(printMasthead("Course syllabus",
+        (sylCurrent.authority || "") + " edition"));
+      root.appendChild(el("div", "prep-rule"));
+      root.appendChild(buildSyllabusDoc(sylCurrent, true));
 
       var foot = el("div", "prep-foot");
       foot.appendChild(el("span", null,
@@ -6156,8 +6155,12 @@
       showMessage("rosterMsg",
         "Choose “Save as PDF” as the destination in the print dialog.", "ok");
       // The same masthead wait every other printed sheet uses: print() captures the
-      // page as it stands, so on a cold load the mark would be an empty box.
-      var ready = (!logo.complete)
+      // page as it stands, so on a cold load the mark would be an empty box. The mark
+      // is now the shared masthead's, so it is read back out of the built tree rather
+      // than held in a local — a stale local here would have been a ReferenceError at
+      // the moment of printing, i.e. only ever seen by a user.
+      var logo = root.querySelector(".prep-logo");
+      var ready = (logo && !logo.complete)
         ? new Promise(function (done) {
             var go = function () { done(); };
             logo.addEventListener("load", go, { once: true });

@@ -119,7 +119,14 @@
        from under your finger is a navigation you have to find twice. If it
        ever cannot fit, the nav list is what gives. */
     height:100vh; height:100dvh; overflow:hidden}
-  .rail-brand{display:flex; align-items:center; gap:10px; padding:2px 8px 14px}
+  /* An <a> since it leads back to the site, so it must not take the global link
+     colour — the wordmark sets its own ink/indigo and the kicker its grey, and
+     `a{color:var(--indigo)}` would have tinted the kicker. The hover is on the mark
+     alone: a whole-block background would read as a selected nav item, which is the
+     one thing this is not. */
+  .rail-brand{display:flex; align-items:center; gap:10px; padding:2px 8px 14px; color:inherit}
+  .rail-brand:hover .rail-name{color:var(--indigo)}
+  .rail-brand:hover img{box-shadow:0 0 0 2px var(--indigo-soft), var(--shadow-sm)}
   .rail-brand img{width:30px; height:30px; border-radius:8px; box-shadow:var(--shadow-sm); flex:none}
   .rail-name{font-family:var(--serif); font-size:18px; font-weight:600; line-height:1.1; color:var(--ink)}
   .rail-name span{color:var(--indigo)}
@@ -2087,13 +2094,25 @@
        nothing else — it used to open with three stacked bands (brand nav, org
        card, tab strip) before a single fact about the team. -->
   <aside class="rail">
-    <div class="rail-brand">
+    <!-- THE WAY BACK TO THE SITE, and the only one the console had was the browser's
+         Back button — which does not exist for somebody who opened /admin from a
+         bookmark or a link in their welcome email.
+         It is the MARK rather than a new button because that is what a logo in a
+         top-left corner already means on every other page of this site, so it needs
+         no chrome and no explaining; "Team admin" sitting under it says the console
+         is a room inside CAW Academy rather than a separate product, which is the
+         same thing the link asserts. A second, labelled route sits in the footer for
+         anyone who does not try the logo. Deliberately NOT a route to the console's
+         own Overview, the other thing a logo sometimes means: the rail already has
+         Overview as its first item, so that would be a duplicate affordance and the
+         one genuinely missing exit would still be missing. -->
+    <a class="rail-brand" href="../index.html" title="Back to caw-academy.com">
       <img src="logo-header.png" alt="" width="30" height="30">
       <div class="rail-text">
         <div class="rail-name">CAW <span>Academy</span></div>
         <div class="rail-kick">Team admin</div>
       </div>
-    </div>
+    </a>
 
     <div class="org">
       <h2 id="orgName">Your organisation</h2>
@@ -2566,7 +2585,9 @@
 
   <footer class="foot-center">
     <nav class="foot-nav">
-      <a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a><a href="../support.html">Support</a>
+      <!-- First, not last: it is the only one of the four that is navigation rather
+           than reference, and the one an admin actually wants when they are finished. -->
+      <a href="../index.html">&larr; Back to caw-academy.com</a><a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a><a href="../support.html">Support</a>
     </nav>
     <div class="disclaim">&copy; <span id="yr">2026</span> CAW Academy.</div>
   </footer>
@@ -2588,6 +2609,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=104" defer></script>
+<script src="admin.js?v=105" defer></script>
 </body>
 </html>
