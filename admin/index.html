@@ -1209,28 +1209,60 @@
     padding:1px 5px; border-radius:4px}
   .syl-part{background:#FFF4E2; color:#8A5200}
   .syl-done{background:#E8F5EA; color:#1F6B2B}
-  /* The document itself. Deliberately close to the printed page — one section label
-     style, one module block style — so the preview is read as the document rather than
-     as a web rendering of it. */
-  .syldoc h2{font-size:17px; margin:0 0 2px}
-  .syldoc .syl-sub{color:var(--muted); font-size:12px; margin:0 0 18px}
-  .syldoc .syl-lbl{font-size:10.5px; font-weight:700; letter-spacing:.6px;
+  /* THE DOCUMENT ITSELF — scoped to `.syldoc-body`, the container the BUILDER creates,
+     NOT to `.syldoc`, the screen pane.
+     That distinction is the whole reason the printed page was broken. One builder draws
+     this document for both the preview and the printed sheet, but the printed copy goes
+     into `.prep` inside `#printReport`, which is nowhere near `.syldoc` — so every rule
+     written as `.syldoc .syl-*` matched on screen and NONE of them matched on paper. The
+     module heading lost `display:flex`, so its `margin-left:auto` duration collapsed
+     onto the title ("COURSE OVERVIEW AND SCOPE9 min"); the topic rows lost theirs, so
+     the number jammed against the lesson id; and the section labels lost their spacing
+     and their caps, leaving "Regulatory basis" and "Overview" as bare lines of body text.
+     One builder has to mean one stylesheet, or the preview is not a preview. */
+  .syldoc-body h2{font-size:17px; margin:0 0 2px}
+  .syldoc-body .syl-sub{color:var(--muted); font-size:12px; margin:0 0 18px}
+  .syldoc-body .syl-lbl{font-size:10.5px; font-weight:700; letter-spacing:.6px;
     text-transform:uppercase; color:var(--muted); margin:0 0 4px}
-  .syldoc .syl-sec{margin:0 0 16px}
-  .syldoc .syl-mod{margin:0 0 14px; padding:0 0 12px; border-bottom:1px solid var(--line-2)}
-  .syldoc .syl-mod:last-child{border-bottom:0}
-  .syldoc .syl-mod-h{font-size:13px; font-weight:650;
+  .syldoc-body .syl-sec{margin:0 0 16px}
+  .syldoc-body .syl-mod{margin:0 0 14px; padding:0 0 12px; border-bottom:1px solid var(--line-2)}
+  .syldoc-body .syl-mod:last-child{border-bottom:0}
+  .syldoc-body .syl-mod-h{font-size:13px; font-weight:650;
     display:flex; gap:10px; align-items:baseline}
   /* The duration is context for the module heading, not a second heading: it sits to
      the right, quiet, and does not compete with the module's own name. */
-  .syldoc .syl-mod-dur{margin-left:auto; flex:0 0 auto; font-weight:400;
+  .syldoc-body .syl-mod-dur{margin-left:auto; flex:0 0 auto; font-weight:400;
     font-size:11.5px; color:var(--muted); white-space:nowrap}
-  .syldoc .syl-obj{margin:3px 0 7px}
-  .syldoc .syl-topic{display:flex; gap:9px; margin:2px 0; font-size:12px}
-  .syldoc .syl-topic > span:first-child{color:var(--muted); flex:0 0 24px; text-align:right}
-  .syldoc .syl-topic code{white-space:nowrap}
-  .syldoc .syl-none{color:var(--muted); font-style:italic}
-  .syldoc .syl-owed{color:#8A5200}
+  .syldoc-body .syl-obj{margin:3px 0 7px}
+  .syldoc-body .syl-topic{display:flex; gap:9px; margin:2px 0; font-size:12px}
+  .syldoc-body .syl-topic > span:first-child{color:var(--muted); flex:0 0 24px; text-align:right}
+  .syldoc-body .syl-topic code{white-space:nowrap}
+  .syldoc-body .syl-none{color:var(--muted); font-style:italic}
+  .syldoc-body .syl-owed{color:#8A5200}
+
+  /* ── Course syllabi: the framework groups ────────────────────────────────────
+     81 courses in one flat list is not a list anyone reads — and they arrive from the
+     server in CATALOGUE order (EASA, UK CAA, UAE GCAA, FAA, each as the apps list
+     them), so the console groups on the framework changing and needs no order of its
+     own. Collapsed by default: an admin opens this page for ONE course, usually in one
+     framework, and four headings is a shorter path to it than eighty-one rows. */
+  .sylgrp{border-bottom:1px solid var(--line-2)}
+  .sylgrp-h{display:flex; align-items:center; gap:9px; padding:10px 14px; width:100%;
+    cursor:pointer; font:inherit; font-size:12.5px; font-weight:700; text-align:left;
+    background:#fff; border:0; color:var(--ink)}
+  .sylgrp-h:hover{background:#FAFAFB}
+  .sylgrp-h .chev{flex:0 0 auto; transition:transform .12s ease; color:var(--muted)}
+  .sylgrp[open] > .sylgrp-h .chev{transform:rotate(90deg)}
+  /* The count carries BOTH numbers when some are drafts, because "which of these are
+     finished" is the question an admin has before sending one to an authority. */
+  .sylgrp-n{margin-left:auto; font-size:11px; font-weight:700; color:var(--muted);
+    white-space:nowrap}
+  .sylgrp-b{display:none}
+  .sylgrp[open] > .sylgrp-b{display:block}
+  /* Indented under their heading, and the last row in a group drops its rule so the
+     group's own border is the only line between one framework and the next. */
+  .sylgrp-b .sylrow{padding-left:30px}
+  .sylgrp-b .sylrow:last-child{border-bottom:0}
 
   /* ── Certificates ────────────────────────────────────────────────────────── */
   .cgroup{border-top:1px solid var(--line-2)}
@@ -1847,6 +1879,13 @@
     .st.overdue{background:#FDECEC; color:#BA1A1A}
     .st.due_soon{background:#FFF3E0; color:#B25E00}
     .st.done{background:#E7F4E8; color:#2E7D32}
+    /* The date a completed assignment was finished, under its chip. Quiet and
+       unboxed on purpose: the chip is the status, and a second pill beside it
+       would read as a second status. It sits here rather than in a date column
+       of its own because only one of the four statuses ever has one, and an
+       eighth column standing empty on every open row would take the printed
+       width the Course name needs. */
+    .st-when{margin-top:2pt; font-size:7.5pt; color:#5B6480; white-space:nowrap}
     /* A printed progress bar: the number is there too, because a bar alone cannot
        be read off a photocopy. */
     .pbar{display:inline-block; width:42pt; height:3.5pt; border-radius:99pt;
@@ -1859,6 +1898,34 @@
 
     .prep-disclaim{font-size:7pt; color:#6B7390; line-height:1.55; margin:14pt 0 0;
       border-top:.5pt solid #E2E3E6; padding-top:7pt}
+
+    /* ── The course syllabus, on paper ───────────────────────────────────────
+       The screen rules above already apply here, because they are scoped to
+       `.syldoc-body` — the container the builder makes — rather than to the screen
+       pane. What is left is what only paper needs: point sizes, and the units that
+       must not be split across a page.
+
+       The document goes to an AUTHORITY, so the two things that matter most are that
+       a module never breaks away from its own objective, and that the section labels
+       read as labels rather than as sentences. */
+    .prep .syldoc-body{font-size:9pt; line-height:1.5}
+    .prep .syldoc-body h2{font-size:12.5pt; margin:0 0 2pt; letter-spacing:-.1pt}
+    .prep .syldoc-body .syl-sub{font-size:8pt; margin:0 0 13pt; color:#6B7390}
+    .prep .syldoc-body .syl-sec{margin:0 0 11pt}
+    .prep .syldoc-body .syl-lbl{font-size:7pt; letter-spacing:.7pt; margin:0 0 3pt;
+      color:#3E44B5}
+    /* A module is one unit of reading, exactly as a member is in the team report:
+       never split its heading, its objective and its topics across a page. */
+    .prep .syldoc-body .syl-mod{break-inside:avoid; page-break-inside:avoid;
+      margin:0 0 10pt; padding:0 0 8pt; border-bottom:.5pt solid #E2E3E6}
+    .prep .syldoc-body .syl-mod-h{font-size:10pt}
+    .prep .syldoc-body .syl-mod-dur{font-size:8pt; color:#6B7390}
+    .prep .syldoc-body .syl-obj{margin:2pt 0 5pt}
+    .prep .syldoc-body .syl-topic{font-size:8.5pt; gap:7pt; margin:1.5pt 0}
+    .prep .syldoc-body .syl-topic > span:first-child{flex:0 0 18pt}
+    .prep .syldoc-body code{font-size:8pt}
+    /* The heading of the modules list must not be the last thing on a sheet. */
+    .prep .syldoc-body .syl-modhead{break-after:avoid; page-break-after:avoid}
     /* THE FOOTER IS PINNED TO THE FOOT OF THE SHEET. `position:fixed` is the
        nearest thing CSS has to a per-page footer, and the page box is what it
        is measured against — which is why it looked misplaced while that box was
@@ -2521,6 +2588,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=100" defer></script>
+<script src="admin.js?v=102" defer></script>
 </body>
 </html>

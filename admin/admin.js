@@ -554,7 +554,8 @@
        "Kind" is the first column so the two can be told apart at a glance and
        filtered in whatever the reader opens this in. */
     var rows = [[
-      "Member", "Email", "Role", "Kind", "Item", "Company", "Status", "Due", "Days remaining",
+      "Member", "Email", "Role", "Kind", "Item", "Company", "Status",
+      "Assigned", "Due", "Days remaining",
       "Completed", "Assessment %", "Certificate number", "Certificate issued",
       "Lessons completed", "Lessons total", "Progress %", "Last active"
     ]];
@@ -582,7 +583,7 @@
       var list = (m.assignments || []);
       var docRows = famCsvRows(m);
       if (!list.length && !docRows.length) {
-        rows.push([fullName(m), m.email, m.orgRole, "", "", "", "Nothing assigned", "", "",
+        rows.push([fullName(m), m.email, m.orgRole, "", "", "", "Nothing assigned", "", "", "",
                    "", "", "", "", "", "", "", csvDate(m.lastActiveAt)]);
         return;
       }
@@ -591,7 +592,7 @@
         rows.push([
           fullName(m), m.email, m.orgRole,
           "Course", labelFor(a.courseKey), "", statusWord(a),
-          csvDate(a.deadline), a.daysRemaining,
+          csvDate(a.assignedAt), csvDate(a.deadline), a.daysRemaining,
           csvDate(a.completedAt), a.score != null ? a.score : (c && c.examScore != null ? c.examScore : ""),
           c ? c.number : "", c ? csvDate(c.issuedAt) : "",
           p ? p.lessonsCompleted : "", p ? p.lessonsTotal : "", p ? p.percent : "",
@@ -611,8 +612,11 @@
         if (claimed) return;
         rows.push([
           fullName(m), m.email, m.orgRole,
+          // No assigned date: an earlier certificate is a fact about the
+          // holder, not a row of the current plan — which is the same reason
+          // it is on its own row at all rather than attached to an assignment.
           "Certificate", labelFor(c.courseKey), "", "Issued",
-          "", "", csvDate(c.issuedAt), c.examScore != null ? c.examScore : "",
+          "", "", "", csvDate(c.issuedAt), c.examScore != null ? c.examScore : "",
           c.number, csvDate(c.issuedAt), "", "", "",
           csvDate(m.lastActiveAt)
         ]);
@@ -622,8 +626,10 @@
       docRows.forEach(function (d) {
         rows.push([
           fullName(m), m.email, m.orgRole,
+          // A document reading carries no assigned date in `famCsvRows`, so the
+          // cell is blank rather than borrowing the deadline.
           "Document", d.item, d.company, d.status,
-          csvDate(d.deadline), "",
+          "", csvDate(d.deadline), "",
           csvDate(d.doneAt), "", "", "",
           "", "", "",
           csvDate(m.lastActiveAt)
@@ -787,10 +793,22 @@
         var table = document.createElement("table");
         var thead = document.createElement("thead");
         var hrow = document.createElement("tr");
-        ["Course", "Status", "Due", "Progress", "Assessment", "Certificate"].forEach(function (h, i) {
-          var th = el("th", i >= 4 ? "right" : null, h);
-          hrow.appendChild(th);
-        });
+        /* SEVEN COLUMNS, and "Due" now means the deadline on EVERY row.
+           It did not: a completed row printed its COMPLETION date under the
+           "Due" heading. One date per row hid that, and the tester's ask —
+           show the assigned date — would have exposed it as a wrong reading
+           rather than a missing one: "Assigned 28-Jun, Due 11-Oct" invites an
+           auditor to take 11-Oct as the deadline and conclude the learner was
+           on time, when 11-Oct is the day they finished and the deadline was
+           02-Nov. A compliance report that cannot be read for on-time vs late,
+           on precisely the rows that are finished, is worse than one that omits
+           the date. The completion date moves under the Completed chip, where
+           it reads as part of that status rather than as an obligation. */
+        ["Course", "Status", "Assigned", "Due", "Progress", "Assessment", "Certificate"]
+          .forEach(function (h, i) {
+            var th = el("th", i >= 5 ? "right" : null, h);
+            hrow.appendChild(th);
+          });
         thead.appendChild(hrow); table.appendChild(thead);
 
         var tbody = document.createElement("tbody");
@@ -801,10 +819,21 @@
 
           var tdSt = document.createElement("td");
           tdSt.appendChild(el("span", "st " + a.displayStatus, statusWord(a)));
+          // The completion date belongs to the status, not to a date column of
+          // its own: it exists for exactly one of the four statuses, and an
+          // eighth column standing empty on every open row would cost the
+          // printed width that Course needs.
+          if (a.status === "completed" && a.completedAt) {
+            tdSt.appendChild(el("div", "st-when", fmtDate(a.completedAt)));
+          }
           tr.appendChild(tdSt);
 
-          tr.appendChild(el("td", null, a.status === "completed"
-            ? fmtDate(a.completedAt) : fmtDate(a.deadline)));
+          // Assigned, then due — the obligation's two ends, in the order they
+          // happen. `assignedAt` was already on the wire and already used above
+          // to decide which certificate belongs to this round; it had simply
+          // never been shown.
+          tr.appendChild(el("td", null, fmtDate(a.assignedAt)));
+          tr.appendChild(el("td", null, fmtDate(a.deadline)));
 
           // A bar AND the number: a bar alone cannot be read off a photocopy.
           var tdP = document.createElement("td");
@@ -5806,6 +5835,11 @@
     });
   }
 
+  /* Which framework groups are open. Empty = all collapsed, which is the default: an
+     admin comes here for ONE course, usually in one framework, and four headings is a
+     shorter path to it than eighty-one rows. */
+  var sylOpen = {};
+
   function renderSylList() {
     var host = $("sylList");
     if (!host) return;
@@ -5822,23 +5856,86 @@
         ? "No course matches that filter." : "No courses."));
       return;
     }
+
+    /* GROUPED BY WALKING THE LIST, not by sorting it. The server sends them in
+       catalogue order — EASA, UK CAA, UAE GCAA, FAA, each as the apps list them — so a
+       new group starts wherever the authority changes, and the console needs no course
+       order of its own. A fourth hardcoded order in the browser is exactly how its old
+       name table came to disagree with the apps for 75 of 81 courses. */
+    var groups = [];
     rows.forEach(function (c) {
-      var row = el("div", "sylrow" + (sylCurrent && sylCurrent.key === c.key ? " on" : ""));
-      row.appendChild(el("b", null, c.course));
-      var meta = el("div", "syl-meta");
-      meta.appendChild(el("span", null, c.authority || ""));
-      meta.appendChild(el("span", null, "·"));
-      meta.appendChild(el("span", null, c.moduleCount + " modules"));
-      meta.appendChild(el("span", null, "·"));
-      meta.appendChild(el("span", null, c.hours + "h"));
-      // The flag says whether the authored half is finished. Amber, never red: an
-      // unauthored syllabus still prints its derived half, so it is incomplete rather
-      // than wrong — and an admin needs to know before sending it to a regulator.
-      meta.appendChild(el("span", "syl-flag " + (c.complete ? "syl-done" : "syl-part"),
-        c.complete ? "complete" : "draft"));
-      row.appendChild(meta);
-      row.addEventListener("click", function () { openSyllabus(c.key); });
-      host.appendChild(row);
+      var name = c.authority || "Other";
+      var g = groups.length ? groups[groups.length - 1] : null;
+      if (!g || g.name !== name) { g = { name: name, rows: [] }; groups.push(g); }
+      g.rows.push(c);
+    });
+
+    // WHILE FILTERING, EVERY MATCHING GROUP IS OPEN. Collapsed-by-default and a filter
+    // are in direct conflict otherwise: the count would say "3 of 81" above a list of
+    // four closed headings, which reads as the filter being broken.
+    var filtering = !!sylFilter.trim();
+
+    groups.forEach(function (g) {
+      var open = filtering || !!sylOpen[g.name]
+        || (sylCurrent && g.rows.some(function (c) { return c.key === sylCurrent.key; }));
+      var wrap = el("div", "sylgrp");
+      if (open) wrap.setAttribute("open", "");
+
+      // A <button>, not a div: a heading that collapses a section is a control, and
+      // this gets keyboard focus and Enter/Space for free.
+      var head = document.createElement("button");
+      head.type = "button";
+      head.className = "sylgrp-h";
+      head.setAttribute("aria-expanded", open ? "true" : "false");
+      var chev = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      chev.setAttribute("class", "chev");
+      chev.setAttribute("viewBox", "0 0 24 24");
+      chev.setAttribute("width", "13");
+      chev.setAttribute("height", "13");
+      chev.setAttribute("fill", "none");
+      chev.setAttribute("stroke", "currentColor");
+      chev.setAttribute("stroke-width", "2.4");
+      chev.setAttribute("stroke-linecap", "round");
+      chev.setAttribute("stroke-linejoin", "round");
+      chev.setAttribute("aria-hidden", "true");
+      var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p.setAttribute("d", "m9 6 6 6-6 6");
+      chev.appendChild(p);
+      head.appendChild(chev);
+      head.appendChild(el("span", null, g.name));
+      // Both numbers when some are unwritten: "which of these can I actually send"
+      // is the question an admin has before opening any of them.
+      var done = g.rows.filter(function (c) { return c.complete; }).length;
+      head.appendChild(el("span", "sylgrp-n",
+        done === g.rows.length ? (g.rows.length + " courses")
+                               : (done + " of " + g.rows.length + " complete")));
+      head.addEventListener("click", function () {
+        // A filtered group closes back to whatever it was before the filter, so
+        // clearing the box does not leave every group hanging open.
+        sylOpen[g.name] = !open;
+        renderSylList();
+      });
+      wrap.appendChild(head);
+
+      var body = el("div", "sylgrp-b");
+      g.rows.forEach(function (c) {
+        var row = el("div", "sylrow" + (sylCurrent && sylCurrent.key === c.key ? " on" : ""));
+        row.appendChild(el("b", null, c.course));
+        var meta = el("div", "syl-meta");
+        meta.appendChild(el("span", null, c.moduleCount + " modules"));
+        meta.appendChild(el("span", null, "·"));
+        meta.appendChild(el("span", null, c.hours + "h"));
+        // The flag says whether the authored half is finished. Amber, never red: an
+        // unauthored syllabus still prints its derived half, so it is incomplete rather
+        // than wrong — and an admin needs to know before sending it to a regulator.
+        meta.appendChild(el("span", "syl-flag " + (c.complete ? "syl-done" : "syl-part"),
+          c.complete ? "complete" : "draft"));
+        row.appendChild(meta);
+        row.addEventListener("click", function () { openSyllabus(c.key); });
+        body.appendChild(row);
+      });
+      wrap.appendChild(body);
+      host.appendChild(wrap);
     });
   }
 
@@ -5869,9 +5966,13 @@
   /* The document, built once and used for BOTH the preview and the printed page.
      One builder, because a preview rendered by its own copy is worth nothing the day
      the two disagree — the admin would approve one document and send another. */
-  function buildSyllabusDoc(s) {
+  /* `withTitle` is false for the PRINTED sheet, whose masthead already carries the
+     course name — printing it again gave the paper copy the same long title twice in a
+     row, which on a document sent to an authority reads as a mistake in the document
+     rather than in the renderer. */
+  function buildSyllabusDoc(s, withTitle) {
     var root = el("div", "syldoc-body");
-    root.appendChild(el("h2", null, s.certificateTitle || s.course));
+    if (withTitle !== false) root.appendChild(el("h2", null, s.certificateTitle || s.course));
     var bits = [s.authority, s.hours + " taught hour" + (s.hours === 1 ? "" : "s"),
       s.lessonCount + " topics in " + s.moduleCount + " module"
         + (s.moduleCount === 1 ? "" : "s"),
@@ -5893,7 +5994,7 @@
     section("Prerequisites", s.prerequisites);
     section("Assessment", s.assessment ? s.assessment.method : "");
 
-    root.appendChild(el("div", "syl-lbl", "Modules and topics"));
+    root.appendChild(el("div", "syl-lbl syl-modhead", "Modules and topics"));
     (s.modules || []).forEach(function (m, i) {
       var mod = el("div", "syl-mod");
       var mh = el("div", "syl-mod-h");
@@ -5994,7 +6095,8 @@
         + (sylCurrent.authority || "")));
       head.appendChild(title);
       root.appendChild(head);
-      root.appendChild(buildSyllabusDoc(sylCurrent));
+      // The masthead above carries the course name, so the body omits its own title.
+      root.appendChild(buildSyllabusDoc(sylCurrent, false));
 
       var foot = el("div", "prep-foot");
       foot.appendChild(el("span", null,
