@@ -1961,12 +1961,29 @@
     /* THE FOOTER IS PINNED TO THE FOOT OF THE SHEET. `position:fixed` is the
        nearest thing CSS has to a per-page footer, and the page box is what it
        is measured against — which is why it looked misplaced while that box was
-       a screen tall rather than a page tall. With the box corrected it sits on
-       the bottom margin, where a report's footer belongs; the reserved 16mm
-       below the content is its band. */
-    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
+       a screen tall rather than a page tall.
+
+       IT SITS IN THE MARGIN, AND `bottom:0` DID NOT PUT IT THERE. This rule used
+       to end "the reserved 16mm below the content is its band", which is not what
+       `bottom:0` means: a fixed box is measured against the page AREA, so zero is
+       the bottom of the CONTENT box — the same strip the last line of text flows
+       into — and the 16mm margin lay unused beneath it. Nothing reserved a band,
+       so the two simply drew over each other. It never showed while the syllabus
+       jumped tall modules to the next sheet and pages ended early; the moment
+       those modules were allowed to flow, text reached the foot and landed on the
+       footer. Reported on a printed Part-M syllabus.
+       -9mm of the 16mm margin moves it clear: its baseline sits about 7mm above
+       the paper edge, outside the non-printable border of any desk printer, and
+       about 4mm below the last line the text can occupy. */
+    .prep-foot{position:fixed; bottom:-9mm; left:0; right:0; font-size:7pt; color:#6B7390;
       border-top:.5pt solid #E2E3E6; padding-top:3pt;
-      display:flex; justify-content:space-between}
+      /* Defensive only, and NOT the cause of anything reported: a gap so the two
+         ends cannot touch if the left string grows, and the domain kept on one
+         line. WeasyPrint wraps this footer because its flexbox caps each item
+         near half the width; Chrome, which is what prints this, does not. */
+      gap:12pt; display:flex; justify-content:space-between; align-items:baseline}
+    .prep-foot > span:first-child{min-width:0}
+    .prep-foot .site{flex:0 0 auto; white-space:nowrap}
     /* Nothing trailing may push past the last line — a few points of margin
        below the final block is enough to claim a whole further sheet. */
     .prep > *:last-child{margin-bottom:0}
