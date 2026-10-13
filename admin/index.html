@@ -1963,19 +1963,28 @@
        is measured against — which is why it looked misplaced while that box was
        a screen tall rather than a page tall.
 
-       IT SITS IN THE MARGIN, AND `bottom:0` DID NOT PUT IT THERE. This rule used
-       to end "the reserved 16mm below the content is its band", which is not what
-       `bottom:0` means: a fixed box is measured against the page AREA, so zero is
-       the bottom of the CONTENT box — the same strip the last line of text flows
-       into — and the 16mm margin lay unused beneath it. Nothing reserved a band,
-       so the two simply drew over each other. It never showed while the syllabus
-       jumped tall modules to the next sheet and pages ended early; the moment
-       those modules were allowed to flow, text reached the foot and landed on the
-       footer. Reported on a printed Part-M syllabus.
-       -9mm of the 16mm margin moves it clear: its baseline sits about 7mm above
-       the paper edge, outside the non-printable border of any desk printer, and
-       about 4mm below the last line the text can occupy. */
-    .prep-foot{position:fixed; bottom:-9mm; left:0; right:0; font-size:7pt; color:#6B7390;
+       `bottom:0` IS THE BOTTOM OF THE CONTENT BOX, NOT OF THE MARGIN. This rule
+       used to end "the reserved 16mm below the content is its band", which is
+       what it should be and not what it is: a fixed box is measured against the
+       page AREA, so zero is the strip the last line of text also flows into, and
+       the 16mm margin lies unused beneath it. Nothing reserves a band, so on a
+       page whose text reaches the foot the two draw over each other. That became
+       visible once tall modules were allowed to flow instead of jumping to the
+       next sheet — before, pages ended early and nothing reached the footer.
+
+       DO NOT "FIX" IT WITH A NEGATIVE `bottom`. Tried on 2026-10-13: `-9mm`
+       pushes the box outside the page area, and Chrome does not leave it in the
+       margin — it relocates it to the TOP of the next sheet, where it lands on
+       the first lines of body text. A header clash in place of a footer clash.
+       WeasyPrint accepts the same value happily, which is exactly why it is
+       written down here: the engine that prints this is Chrome, and the two do
+       not agree about what lies outside the page area.
+
+       The real remedy is a repeating table footer or a `running()` element, both
+       of which are a larger change than the symptom has so far justified; the
+       overlap needs a page whose text reaches the very foot. Left at 0 until
+       that is decided. */
+    .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
       border-top:.5pt solid #E2E3E6; padding-top:3pt;
       /* Defensive only, and NOT the cause of anything reported: a gap so the two
          ends cannot touch if the left string grows, and the domain kept on one
@@ -2659,6 +2668,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=108" defer></script>
+<script src="admin.js?v=109" defer></script>
 </body>
 </html>
