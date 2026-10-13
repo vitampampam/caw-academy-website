@@ -936,6 +936,61 @@
     return head;
   }
 
+  /** Wrap a printed sheet so its footer repeats at the foot of EVERY page AND
+   *  the browser reserves room for it in the flow.
+   *
+   *  A `position:fixed` footer does only the first half: it is measured against
+   *  the page AREA, so `bottom:0` sits in the same strip the last line of body
+   *  text flows into, and on a page that fills completely the two draw over each
+   *  other. Measured off a real Chrome PDF of a five-page syllabus: the footer
+   *  band ran y 785.8-792.7 on every sheet, page 1's text ended at 792.7, and
+   *  the two interleaved. Enlarging the page margin cannot help — `bottom:0` is
+   *  the content-box bottom, so the footer rises with the text limit and the
+   *  pair stay locked together. A negative `bottom` is worse (see the CSS note).
+   *
+   *  A table footer group is the one construct Chrome both repeats per page and
+   *  reserves space for, so text can no longer reach it. `running()` would be
+   *  the modern answer and Chrome does not support it.
+   *
+   *  THE TWO ENGINES DIFFER ON REPETITION, AND BOTH OUTCOMES ARE SAFE. Measured
+   *  in WeasyPrint over the real Part-M syllabus: the wrapper changes neither
+   *  the text nor the pagination — all five pages break at the identical point
+   *  — but the footer prints ONCE, on the last page, instead of on every one.
+   *  Bisected to `break-inside:avoid`: a cell holding avoid-break boxes stops
+   *  WeasyPrint repeating the group (remove those declarations and it repeats
+   *  on all five). Chrome is expected to repeat it. What matters is that the
+   *  space is reserved either way, so no page can print text through it; a
+   *  footer that appears only on the final sheet is the lesser outcome, not a
+   *  broken one. Do NOT relax the avoid-break rules to chase repetition — they
+   *  are what stops a module heading being stranded at the foot of a sheet.
+   *
+   *  ONLY THE SYLLABUS USES THIS SO FAR. The records, roster and certificate
+   *  sheets keep the fixed footer: they have never been reported overlapping
+   *  (their rows carry `break-inside:avoid`, so pages tend to end early), and
+   *  two of them are themselves wide tables — nesting one inside a cell is the
+   *  case Chrome handles least well, which is not a risk worth taking on sheets
+   *  that work. Extend it to them only with a printed PDF in hand.
+   *
+   *  @param bodyNodes elements of the sheet, in order; page 1 chrome included.
+   *  @param footNode  the `.prep-foot`, built exactly as for the fixed version. */
+  function printSheet(bodyNodes, footNode) {
+    var table = el("table", "prep-sheet");
+    var tbody = document.createElement("tbody");
+    var brow = document.createElement("tr");
+    var bcell = document.createElement("td");
+    bodyNodes.forEach(function (n) { if (n) bcell.appendChild(n); });
+    brow.appendChild(bcell); tbody.appendChild(brow); table.appendChild(tbody);
+
+    /* tfoot AFTER tbody is the HTML5 order; the group still renders at the foot
+       and still repeats. Do not "correct" it to the legacy tfoot-first form. */
+    var tfoot = document.createElement("tfoot");
+    var frow = document.createElement("tr");
+    var fcell = document.createElement("td");
+    fcell.appendChild(footNode);
+    frow.appendChild(fcell); tfoot.appendChild(frow); table.appendChild(tfoot);
+    return table;
+  }
+
   /* THE PRINTED RECORDS REPORT. One table, because that is what it is — a
      history to be filed, re-sorted and kept, not a dashboard. It states its
      own filters under the title, so a cut of the history cannot be mistaken
@@ -6209,17 +6264,22 @@
          on a team report: the course itself is named by the body's own heading below,
          where a reader looks for it, rather than squeezed into grey 7pt type. */
       var root = el("div", "prep");
-      root.appendChild(printMasthead("Course syllabus",
-        (sylCurrent.authority || "") + " edition"));
-      root.appendChild(el("div", "prep-rule"));
-      root.appendChild(buildSyllabusDoc(sylCurrent, true));
 
       var foot = el("div", "prep-foot");
       foot.appendChild(el("span", null,
         "Course syllabus  ·  shape per AMC 20-22 Appendix C  ·  "
         + longStamp(new Date())));
       foot.appendChild(el("span", "site", "caw-academy.com"));
-      root.appendChild(foot);
+
+      /* THE FOOTER REPEATS AS A TABLE FOOTER, NOT AS A FIXED BOX — see
+         `.prep-sheet` in index.html for why, measured off a real Chrome PDF.
+         The masthead stays inside the body cell because it is page-1 only; a
+         <thead> would repeat it on every sheet. */
+      root.appendChild(printSheet([
+        printMasthead("Course syllabus", (sylCurrent.authority || "") + " edition"),
+        el("div", "prep-rule"),
+        buildSyllabusDoc(sylCurrent, true),
+      ], foot));
       host.appendChild(root);
 
       printMsg(

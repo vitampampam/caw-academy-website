@@ -1980,10 +1980,12 @@
        written down here: the engine that prints this is Chrome, and the two do
        not agree about what lies outside the page area.
 
-       The real remedy is a repeating table footer or a `running()` element, both
-       of which are a larger change than the symptom has so far justified; the
-       overlap needs a page whose text reaches the very foot. Left at 0 until
-       that is decided. */
+       THE SYLLABUS NO LONGER USES THIS RULE — it is wrapped in `.prep-sheet`
+       below, whose table footer both repeats and reserves its own space. The
+       records, roster and certificate sheets still use it, and are still
+       exposed to the same overlap on a page that fills completely; none has
+       been reported, because their rows carry `break-inside:avoid` and pages
+       tend to end early. Move them too only with a printed PDF in hand. */
     .prep-foot{position:fixed; bottom:0; left:0; right:0; font-size:7pt; color:#6B7390;
       border-top:.5pt solid #E2E3E6; padding-top:3pt;
       /* Defensive only, and NOT the cause of anything reported: a gap so the two
@@ -1997,6 +1999,22 @@
        below the final block is enough to claim a whole further sheet. */
     .prep > *:last-child{margin-bottom:0}
     .prep-foot .site{color:#3E44B5; font-weight:600}
+
+    /* A SHEET WHOSE FOOTER REPEATS AND RESERVES ITS SPACE. `<tfoot>` is the one
+       construct Chrome both draws at the foot of every page and subtracts from
+       the room available to the body — which is exactly what `position:fixed`
+       does not do, and why a full page used to print its last line through the
+       footer. The whole sheet is one row in one cell; Chrome breaks a tall row
+       across pages, so the body flows as it did before.
+       The table is a LAYOUT wrapper, so everything that makes a table look like
+       one is removed — no borders, no cell padding, no collapsed spacing — and
+       `width:100%` keeps the cell the full text measure. */
+    .prep-sheet{width:100%; border-collapse:collapse; border:0}
+    .prep-sheet > tbody > tr > td,
+    .prep-sheet > tfoot > tr > td{padding:0; border:0; vertical-align:top}
+    /* Inside the group the footer is ordinary flow content — the fixed
+       positioning above would take it straight back out of the page. */
+    .prep-sheet .prep-foot{position:static; margin-top:10pt}
 
     /* The records report is ONE TABLE — a history to be filed and re-sorted,
        not a dashboard. Rows must not be split across a page break, or a date
@@ -2668,6 +2686,6 @@
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 <script src="certificate.js?v=2" defer></script>
-<script src="admin.js?v=109" defer></script>
+<script src="admin.js?v=110" defer></script>
 </body>
 </html>
