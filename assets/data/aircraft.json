@@ -1,0 +1,62 @@
+[
+ {
+  "id": "turboprop",
+  "name": "Turboprop",
+  "examples": "King Air 350i, PC-12 NGX",
+  "pax": "6–8",
+  "tas": 285,
+  "range": 1600,
+  "rate": 2300,
+  "cabin": "Short sectors, small strips, no stand-up cabin in most"
+ },
+ {
+  "id": "light",
+  "name": "Light jet",
+  "examples": "Phenom 300E, Citation CJ3+, Learjet 75",
+  "pax": "6–7",
+  "tas": 405,
+  "range": 1900,
+  "rate": 3400,
+  "cabin": "Stand-up in the 300E only; baggage is the usual constraint"
+ },
+ {
+  "id": "midsize",
+  "name": "Midsize jet",
+  "examples": "Citation XLS+, Hawker 900XP, Learjet 60XR",
+  "pax": "8–9",
+  "tas": 430,
+  "range": 2300,
+  "rate": 4800,
+  "cabin": "Stand-up cabin, enclosed lavatory, Europe-wide in one hop"
+ },
+ {
+  "id": "supermid",
+  "name": "Super-midsize",
+  "examples": "Challenger 350, Praetor 600, Citation Longitude",
+  "pax": "9–10",
+  "tas": 460,
+  "range": 3400,
+  "rate": 6800,
+  "cabin": "Europe to the Gulf non-stop, full galley"
+ },
+ {
+  "id": "heavy",
+  "name": "Heavy / large cabin",
+  "examples": "Challenger 650, Legacy 650, Falcon 2000LXS",
+  "pax": "12–14",
+  "tas": 470,
+  "range": 4000,
+  "rate": 9500,
+  "cabin": "Cabin attendant, separate seating areas"
+ },
+ {
+  "id": "ulr",
+  "name": "Ultra-long-range",
+  "examples": "Global 7500, G650ER, Falcon 8X, Falcon 7X",
+  "pax": "13–16",
+  "tas": 490,
+  "range": 6800,
+  "rate": 15000,
+  "cabin": "Intercontinental non-stop, crew rest, bedroom on some"
+ }
+]

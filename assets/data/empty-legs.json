@@ -1,0 +1,5 @@
+{
+ "updated": "",
+ "note": "Add real empty-leg listings here. Each entry: from/to ICAO, date (YYYY-MM-DD), category id, seats, optional price_eur and ref. Delete this note when the first listing is added.",
+ "legs": []
+}
