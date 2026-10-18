@@ -41,12 +41,35 @@ a{color:var(--indigo);text-decoration:none}
   outline-offset:3px;border-radius:8px}
 
 /* ---------- top bar ---------- */
+/* THE BLUR SITS ON A PSEUDO-ELEMENT, NOT ON THE BAR, and that is the whole of the
+   Android "Contents does not open" fault. `backdrop-filter` makes an element a
+   containing block for its positioned descendants and, in Chromium, CLIPS them to its
+   border box; WebKit does not. The Contents panel is absolutely positioned inside this
+   bar and hangs below it, so it drew in full in the iOS reader and in desktop Safari
+   and was sliced to the bar's own height in Android's WebView - tapping Contents looked
+   like it did nothing at all. Painting the blur BEHIND the bar's content leaves the bar
+   itself unfiltered, so the panel overflows normally on every engine while the bar looks
+   exactly as it did. Do not fold the filter back into `.bar`.
+
+   AND THE PANEL IS `position:fixed`, WHICH IS THE REST OF THAT FIX (Oct 2026: with the
+   blur moved, Android still showed nothing when Contents was tapped). Absolutely
+   positioned, the panel depends on nothing above it establishing a containing block or a
+   clip - and in a WebView the bar is a `position:sticky` element with a stacking context,
+   a pseudo-element behind it and a safe-area inset, any of which an engine may treat
+   differently. Fixed, it is positioned against the VIEWPORT and escapes all of them. The
+   bar is pinned to the top anyway, so the panel lands in the same place and stays there
+   while the page scrolls, which `absolute` did not do.
+
+   The 58px is the bar's own height: 10px padding, a 34px pill (14px text, 7px padding
+   each side), 10px padding, 1px border, plus a 3px gap. If the bar's metrics change, this
+   changes with them. */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
   display:flex;align-items:center;gap:12px;
   padding:10px max(16px,env(safe-area-inset-left,0px));
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);
   border-bottom:1px solid var(--line)}
+.bar::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px)}
 .bar .mark{display:inline-flex;align-items:center;gap:9px;font-family:var(--serif);
   font-weight:600;font-size:18px;color:var(--ink);min-width:0}
 .bar .mark img{width:26px;height:26px;border-radius:7px;box-shadow:var(--shadow)}
@@ -60,7 +83,8 @@ a{color:var(--indigo);text-decoration:none}
 .menu>summary::after{content:"";width:6px;height:6px;border-right:2px solid var(--muted);
   border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px)}
 .menu[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
-.menu .panel{position:absolute;right:0;top:calc(100% + 10px);width:min(86vw,320px);
+.menu .panel{position:fixed;right:max(16px,env(safe-area-inset-right,0px));
+  top:calc(env(safe-area-inset-top,0px) + 58px);width:min(86vw,320px);
   max-height:min(62vh,540px);overflow:auto;background:var(--card);border:1px solid var(--line);
   border-radius:16px;box-shadow:var(--shadow-lg);padding:8px}
 .menu .panel a{display:flex;gap:10px;align-items:baseline;padding:9px 12px;border-radius:10px;
