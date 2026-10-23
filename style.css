@@ -1354,3 +1354,20 @@ body{background:var(--bg)}
    #organisations .grid written in this file is overridden by it, which is
    exactly what happened on the first attempt. It lives beside the rules it
    replaces, in that block. */
+
+/* CAW Academy pre-launch: show trial CTAs as unavailable, without changing layout. */
+a.btn.open-trial[aria-disabled="true"],
+.cawx-trial-disabled {
+  background:#E9EDF5 !important;
+  border-color:#DAE0EA !important;
+  color:#53647A !important;
+  box-shadow:none !important;
+  cursor:default !important;
+  pointer-events:none !important;
+  opacity:1 !important;
+  transform:none !important;
+  text-decoration:none !important;
+}
+a.open-trial[aria-disabled="true"] { pointer-events:none !important; cursor:default !important; }
+a.open-trial[aria-disabled="true"]:not(.btn) {color:#66758A !important;text-decoration:none !important;}
+.cawx-trial-disabled {display:flex;align-items:center;justify-content:center;text-align:center;}
