@@ -908,8 +908,17 @@
 
   /** The report masthead, shared by both printed reports so a records export
    *  and a roster export are plainly the same document from the same product.
-   *  Page 1 only — the same decision the app's own export makes. */
-  function printMasthead(title, subtitle) {
+   *  Page 1 only — the same decision the app's own export makes.
+   *
+   *  `withOrg` is false for the COURSE SYLLABUS, and only for it (SME, Oct 2026).
+   *  A records or roster export is a statement ABOUT a customer's people, so it
+   *  is addressed to them and the name belongs on it. A syllabus is a statement
+   *  about the COURSE — the same document whoever prints it — and it is the one
+   *  export that leaves the company, usually to an authority asking what an
+   *  operator's staff were taught. Printing the reader's own name on it would
+   *  make it read as written for them, which is the opposite of what gives it
+   *  weight; it would also leak the customer the moment the file is forwarded. */
+  function printMasthead(title, subtitle, withOrg) {
     var head = el("div", "prep-head");
     var brand = el("div", "prep-brand");
     var logo = document.createElement("img");
@@ -926,7 +935,10 @@
 
     var id = el("div", "prep-id");
     id.appendChild(el("p", "prep-title", title));
-    id.appendChild(el("p", "prep-org", ($("orgName").textContent || "Your organisation").trim()));
+    if (withOrg !== false) {
+      id.appendChild(el("p", "prep-org",
+        ($("orgName").textContent || "Your organisation").trim()));
+    }
     var when = el("p", "prep-when");
     when.appendChild(document.createTextNode("Exported " + longStamp(new Date())));
     when.appendChild(document.createElement("br"));
@@ -6276,7 +6288,9 @@
          The masthead stays inside the body cell because it is page-1 only; a
          <thead> would repeat it on every sheet. */
       root.appendChild(printSheet([
-        printMasthead("Course syllabus", (sylCurrent.authority || "") + " edition"),
+        // No organisation line — see printMasthead: this is the one export that
+        // describes the course rather than a customer, and it leaves the company.
+        printMasthead("Course syllabus", (sylCurrent.authority || "") + " edition", false),
         el("div", "prep-rule"),
         buildSyllabusDoc(sylCurrent, true),
       ], foot));
