@@ -3720,7 +3720,9 @@
        to agree first. */
     var cycle = document.createElement("button");
     cycle.className = "btn-ghost"; cycle.type = "button";
-    cycle.textContent = "Grant attempts";
+    // "Add attempts", not "Grant attempts": two words that fit the actions track
+    // beside Edit and Remove, and the verb a reader expects next to them.
+    cycle.textContent = "Add attempts";
     cycle.title = "Give this person three fresh assessment attempts for this course";
     cycle.addEventListener("click", function () { grantCycle(a, memberEmail, cycle); });
     actions.appendChild(cycle);
