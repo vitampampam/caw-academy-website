@@ -3610,12 +3610,29 @@
     var bits = [p.percent + "%"];
     if (p.lessonsTotal) bits.push(p.lessonsCompleted + " of " + p.lessonsTotal + " lessons");
     if (p.examPassed) bits.push("assessment passed" + (p.examBest != null ? " (" + p.examBest + "%)" : ""));
-    else if (p.examBest != null) bits.push("best assessment " + p.examBest + "%");
+    else if (p.examBest != null) bits.push("assessment " + p.examBest + "%");
+    /* ATTEMPTS USED, so "Attempts" is an informed decision rather than a blind one.
+       Shown only while the assessment is NOT passed: once it is, how many sittings
+       it took is history, and the roster is read to find who still needs something.
+       Both numbers come from the device - the limit included, because it is the
+       app's rule and a copy here would disagree the first time it moved. */
+    if (!p.examPassed && p.attemptsUsed != null && p.attemptsAllowed != null) {
+      bits.push(p.attemptsUsed + " of " + p.attemptsAllowed + " attempts used");
+    }
     if (p.lastActiveAt) bits.push("last opened " + fmtDate(p.lastActiveAt));
     txt.textContent = bits.join("  ·  ");
     row.appendChild(txt);
 
-    if (p.percent === 0) {
+    /* NO ATTEMPTS LEFT is the one state that REQUIRES an admin, so it is a flag
+       rather than a phrase in the run of text above. It outranks "Behind" and
+       "Not started": those describe someone who can still act, this describes
+       someone who cannot until this portal does something. */
+    if (!p.examPassed && p.attemptsAllowed != null &&
+        p.attemptsUsed != null && p.attemptsUsed >= p.attemptsAllowed) {
+      var blocked = document.createElement("span");
+      blocked.className = "flag"; blocked.textContent = "No attempts left";
+      row.appendChild(blocked);
+    } else if (p.percent === 0) {
       var idle = document.createElement("span");
       idle.className = "flag idle"; idle.textContent = "Not started";
       row.appendChild(idle);
@@ -3637,10 +3654,15 @@
   function grantCycle(a, email, btn) {
     confirmDialog({
       title: "Grant another set of attempts?",
+      // IMPERSONAL, NOT "THEY" (SME, Oct 2026). The person is NAMED on the first
+      // line, so referring to them as "they" for the rest reads as talking about
+      // someone absent rather than about the record in front of the admin - and the
+      // portal has one named subject, never a group. Same impersonal voice the
+      // catalogue itself is written in.
       lines: [
         labelFor(a.courseKey) + " \u2014 " + (email || "this member") + ".",
-        "They get three fresh attempts at the assessment. Their lessons, certificates and exam history are not affected.",
-        "It reaches their device at the next sync."
+        "This grants three fresh attempts at the assessment. Lessons, certificates and exam history are not affected.",
+        "It takes effect at the next sync."
       ],
       confirmLabel: "Grant attempts",
       cancelLabel: "Cancel"
@@ -3651,7 +3673,8 @@
              { courseKey: a.courseKey })
         .then(function () {
           showMessage("rosterMsg",
-                      "Granted. " + (email || "The member") + " has three fresh attempts.", "ok");
+                      "Three fresh attempts granted for " + labelFor(a.courseKey) +
+                      (email ? " \u2014 " + email : "") + ".", "ok");
         })
         .catch(function (err) {
           btn.disabled = false;
@@ -3720,9 +3743,12 @@
        to agree first. */
     var cycle = document.createElement("button");
     cycle.className = "btn-ghost"; cycle.type = "button";
-    // "Add attempts", not "Grant attempts": two words that fit the actions track
-    // beside Edit and Remove, and the verb a reader expects next to them.
-    cycle.textContent = "Add attempts";
+    // ONE WORD, AND IT WAS MEASURED THIS TIME. The actions track is fixed at
+    // 236px (see index.html); "Grant attempts" needed ~280 and "Add attempts"
+    // ~246, so both overflowed it and the first wrapped onto two lines. "Attempts"
+    // brings the three buttons to ~216 and leaves room for the hover state. The
+    // tooltip carries the meaning the shorter word drops.
+    cycle.textContent = "Attempts";
     cycle.title = "Give this person three fresh assessment attempts for this course";
     cycle.addEventListener("click", function () { grantCycle(a, memberEmail, cycle); });
     actions.appendChild(cycle);
