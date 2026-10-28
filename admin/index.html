@@ -641,13 +641,24 @@
      pushed its pill 60px right of the row above it (Edit + Remove) — three
      pills, three different columns, in a list of three.
 
-     The actions track is a FIXED width, wide enough for Edit + Remove, so the
-     pill does not move when one row loses its Edit button. */
+     The actions track is a FIXED width, wide enough for every button a row can
+     carry, so the pill does not move when one row loses its Edit button.
+
+     WIDENED 152 -> 236 FOR THE THIRD BUTTON (Oct 2026). "Grant attempts" was
+     added and the track was still sized for Edit + Remove, so the buttons
+     overflowed it leftwards, covered the status pill and wrapped the label onto
+     two lines. A fixed track has to be re-measured when the set of buttons
+     changes - that is the cost of the alignment it buys. */
   .aitem-asg{display:grid; align-items:center; flex-wrap:nowrap;
-    grid-template-columns:auto minmax(0,1fr) 92px 152px}
+    grid-template-columns:auto minmax(0,1fr) 92px 236px}
   .aitem-asg .course{flex:none}
   .aitem-asg > .pill{justify-self:start}
   .aitem-asg .actions{margin-left:0; justify-content:flex-end}
+  /* A BUTTON LABEL NEVER WRAPS. These are two or three words on a control about
+     40px tall; wrapping one makes that row taller than its neighbours and the
+     list stops scanning. If a label cannot fit, the label is too long - shorten
+     it rather than letting the row grow. */
+  .aitem-asg .actions button{white-space:nowrap}
   @media (max-width:760px){
     .aitem-asg{grid-template-columns:auto minmax(0,1fr) 92px; row-gap:7px}
     .aitem-asg .actions{grid-column:2/-1; justify-content:flex-start}
