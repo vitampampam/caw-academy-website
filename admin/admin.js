@@ -4199,7 +4199,7 @@
       m.certificates.slice().sort(function (x, y) {
         return String(y.issuedAt).localeCompare(String(x.issuedAt));
       }).forEach(function (c) {
-        var row = document.createElement("div"); row.className = "fam-row fam-row-mem";
+        var row = document.createElement("div"); row.className = "fam-row fam-row-mem fam-row-cert";
         row.appendChild(document.createElement("span"));
 
         var who = document.createElement("div"); who.className = "who";
@@ -4214,9 +4214,10 @@
         var pill = document.createElement("span");
         pill.className = "pill done"; pill.textContent = "Issued";
         row.appendChild(pill);
-
-        // No action: a certificate is a record, not a thing to change from here.
-        row.appendChild(document.createElement("span"));
+        /* No action cell: a certificate is a record, not a thing to change from
+           here, and `.fam-row-cert` spans the pill across the status and action
+           columns to the right edge. An empty trailing span would push the pill
+           into an implicit fifth column instead. */
         card.appendChild(row);
       });
     }

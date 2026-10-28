@@ -1170,6 +1170,14 @@
      row's checkbox, or the Overdue pill starts 45px left of the Completed pill
      above it and the column stops being a column. */
   .fam-row-mem{grid-template-columns:15px minmax(0,1fr) 92px 152px; gap:12px}
+  /* A CERTIFICATE ROW HAS NO ACTIONS, so its pill spans the status and action
+     columns and sits at the RIGHT EDGE (SME, Oct 2026). Left-aligned in the 92px
+     status column it floated mid-row with 152px of empty space beside it, which
+     read as a column that had lost its contents rather than as a status.
+     The document and assignment rows keep `justify-self:start`: there the pill is
+     read down a column with buttons beside it, and moving it would break the scan
+     this grid exists to provide. */
+  .fam-row-cert > .pill{grid-column:3/-1; justify-self:end}
   @media (min-width:761px){
     .fam-row-mem{grid-template-columns:15px minmax(0,1fr) 92px 152px}
     .fam-row-mem .actions{grid-column:auto; justify-content:flex-end}
