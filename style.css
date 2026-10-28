@@ -991,19 +991,11 @@ body{background:var(--bg)}
 /* ---- the banner card ---- */
 .stk.banner-card{padding:0; overflow:hidden; background:none; border:0}
 .banner-card picture{display:block; line-height:0}
-/* 1.72:1, not the 2:1 this band used to carry. MEASURE the aeroplane before
-   changing either number: its highest point is the FUSELAGE CROWN at y 536
-   (x ~1300), not the fin tip at 756 — assuming the fin was the top is what
-   sliced the cockpit roof on the first attempt. With the chock under the nose
-   gear at y 2710, the aircraft occupies 2174px of a 2886px master, so the
-   window must be at least 3848/2174 = 1.77 wide-to-tall. A 2:1 window holds
-   1924 and could only ever choose which end to slice; 1.72:1 holds 2237 and
-   fits the whole aeroplane with ~30px at each end.
-   The cut is spent entirely on sky, because an aeroplane with its wheels or
-   its roof sliced off reads as broken in a way a shorter sunset never does.
-   The cost is a taller banner on tablets, which is the right trade. */
+/* The responsive image files are re-framed from the original jet photograph:
+   less sky, plus a natural apron buffer under the landing gear. That buffer
+   allows the next white card to overlap without hiding the wheels or chock. */
 .banner-card img{display:block; width:100%; height:auto;
-  aspect-ratio:1.68 / 1; object-fit:cover; object-position:center 78%}
+  aspect-ratio:1.50 / 1; object-fit:cover; object-position:center 32%}
 
 /* ---- the copy card ---- */
 .stk.copy-card{padding:44px 0 var(--stack-foot)}
@@ -1152,10 +1144,9 @@ body{background:var(--bg)}
   .hero-devices .lineup{zoom:.88}
 }
 @media (max-width:560px){
-  /* 1.5:1 costs only 11% of the height, so the phone keeps both the sky and
-     the gear. 75%, not 55%: this frame leaves just 68px of tarmac below the
-     chock, so the crop has to sit low or the wheels go. */
-  .banner-card img{aspect-ratio:1.5 / 1; object-position:center 75%}
+  /* Keep the nose roof and complete landing gear visible above the overlapping
+     copy card. Slightly taller on phones to protect the wheel chock. */
+  .banner-card img{aspect-ratio:1.48 / 1; object-position:center 32%}
   .stk.copy-card{margin-top:-26px}   /* >= the 22px radius at this width */
   .stk.copy-card{padding:30px 0 var(--stack-foot)}
   .copy-card .hero-grid{padding:0 18px; row-gap:24px}
@@ -1354,20 +1345,3 @@ body{background:var(--bg)}
    #organisations .grid written in this file is overridden by it, which is
    exactly what happened on the first attempt. It lives beside the rules it
    replaces, in that block. */
-
-/* CAW Academy pre-launch: show trial CTAs as unavailable, without changing layout. */
-a.btn.open-trial[aria-disabled="true"],
-.cawx-trial-disabled {
-  background:#E9EDF5 !important;
-  border-color:#DAE0EA !important;
-  color:#53647A !important;
-  box-shadow:none !important;
-  cursor:default !important;
-  pointer-events:none !important;
-  opacity:1 !important;
-  transform:none !important;
-  text-decoration:none !important;
-}
-a.open-trial[aria-disabled="true"] { pointer-events:none !important; cursor:default !important; }
-a.open-trial[aria-disabled="true"]:not(.btn) {color:#66758A !important;text-decoration:none !important;}
-.cawx-trial-disabled {display:flex;align-items:center;justify-content:center;text-align:center;}

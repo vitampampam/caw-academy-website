@@ -95,7 +95,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=4">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <link rel="preload" as="image" href="screens/hero-iphone.png" fetchpriority="high">
-<link rel="stylesheet" href="style.css?v=103">
+<link rel="stylesheet" href="style.css?v=64">
 <link rel="stylesheet" href="caw-interactive.css?v=24">
 </head>
 <body>
@@ -216,7 +216,7 @@
   </div>
   <!-- Full-width CTA + app badges below the hero -->
   <div class="hero-bottom">
-    <a class="btn btn-light open-trial" aria-disabled="true" tabindex="-1">Free trial — coming soon
+    <a class="btn btn-light open-trial" href="#">Request a free trial
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 </header>
@@ -331,7 +331,7 @@
 
   <!-- CTA centered in the gap between For-organisations and Why -->
   <div class="reveal" style="text-align:center; margin:6px 0 8px">
-    <a class="btn btn-light open-trial" aria-disabled="true" tabindex="-1">Free trial — coming soon
+    <a class="btn btn-light open-trial" href="#">Request a free trial
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 
@@ -543,7 +543,7 @@
 
   <!-- Mid-page CTA between Features and the gallery -->
   <div class="reveal" style="text-align:center; margin:6px 0 8px">
-    <a class="btn btn-light open-trial" aria-disabled="true" tabindex="-1">Free trial — coming soon
+    <a class="btn btn-light open-trial" href="#">Request a free trial
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 
@@ -664,7 +664,7 @@
         <div class="ans">CAW Academy is <strong>licensed for organisations</strong> — your team gets all
           75+ courses under a single agreement, with a <strong>free trial</strong> to evaluate it first.
           Individual in-app purchases for private learners are planned for a later stage. There are no
-          ads, on any plan. <a class="open-trial" aria-disabled="true" tabindex="-1">Free trial — coming soon.</a></div>
+          ads, on any plan. <a class="open-trial" href="#">Request a free trial.</a></div>
       </details>
       <details class="reveal">
         <summary>Do learners get a certificate?
@@ -774,7 +774,7 @@
     .section-head p{max-width:900px}
     .hero-bottom{max-width:var(--maxw); margin:-14px auto 0; padding:0 24px 10px}
     .hero-apps{grid-area:cta; align-self:start; display:flex; gap:12px; justify-content:flex-start; flex-wrap:wrap; margin-top:24px}
-    /* "Free trial — coming soon" buttons: full width of their container, everywhere */
+    /* "Request a free trial" buttons: full width of their container, everywhere */
     .btn.open-trial{display:flex; width:100%; justify-content:center; color:var(--ink)}
     .btn.open-trial:hover{color:var(--ink)}
     /* Closing CTA-band: the standard full-width trial card, shown on every breakpoint */
@@ -832,7 +832,7 @@
       .hero .lede{display:none}                 /* drop the "Plain-language EASA…" caption on phones */
       .btn.open-trial svg{display:none}         /* no arrow on the trial buttons on phones */
       .cta-band h2{font-size:clamp(20px,5.6vw,24px)}  /* smaller "Equip your team…" heading */
-      /* keep only the top (hero) "Free trial — coming soon" button; drop the mid-page repeats */
+      /* keep only the top (hero) "Request a free trial" button; drop the mid-page repeats */
       .btn.open-trial{display:none}
       .hero-bottom .btn.open-trial{display:flex}
       .reveal:has(> .btn.open-trial){display:none}   /* collapse the now-empty CTA wrappers */
@@ -929,20 +929,20 @@
   <section class="reveal" id="get">
     <div class="cta-band">
       <h2><img class="cta-icon" src="logo-header.png?v=4" alt="" width="48" height="48">Equip your team with airworthiness expertise</h2>
-      <a class="btn btn-light open-trial cta-trial" aria-disabled="true" tabindex="-1">Free trial — coming soon
+      <a class="btn btn-light open-trial cta-trial" href="#">Request a free trial
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
   </section>
 
 </div>
 
-<!-- Free-trial enquiry popup: opened by any "Free trial — coming soon" button -->
+<!-- Free-trial enquiry popup: opened by any "Request a free trial" button -->
 <div class="trial-modal" id="trialModal" aria-hidden="true">
   <div class="trial-backdrop" data-close></div>
   <div class="trial-dialog" role="dialog" aria-modal="true" aria-labelledby="trialTitle">
     <button class="trial-close" type="button" aria-label="Close" data-close>&times;</button>
     <div class="trial-head">
-      <h2 id="trialTitle">Free trial — coming soon</h2>
+      <h2 id="trialTitle">Request a free trial</h2>
       <p class="tsub">Tell us about your team and we'll set you up with a trial licence. We usually reply within one working day.</p>
     </div>
     <form class="contact-form" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
@@ -1263,7 +1263,6 @@
 
     function openModal(e) {
       if (e) e.preventDefault();
-      return; // Trial requests temporarily closed until app publication.
       if (!modal) return;
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
@@ -1286,7 +1285,6 @@
     if (!form) return;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      return; // Trial submissions temporarily disabled.
       var btn = form.querySelector('.cf-submit');
       var msg = document.getElementById('cfMsg');
       if (form.botcheck && form.botcheck.checked) return;   // honeypot
@@ -1327,7 +1325,7 @@
 </script>
 <script src="caw-content.js?v=24" defer></script>
 <script src="caw-demo-content.js?v=24" defer></script>
-<script src="caw-interactive.js?v=31" defer></script>
+<script src="caw-interactive.js?v=24" defer></script>
 <script>
   /* ---- Features carousel -------------------------------------------------
      Arrows only, matching the gallery carousel below. A click steps by a PAGE

@@ -366,7 +366,7 @@
 
     /* Every pop-up ends with the same call to action, so the footer is the same
        height in all of them and there is always somewhere to go next. */
-    var DEFAULT_CTA = { label: 'Free trial — coming soon', href: '#', trial: true };
+    var DEFAULT_CTA = { label: 'Request a free trial', href: '#', trial: true };
 
     /* A pop-up may carry no heading — the framework ones say the name in the
        eyebrow pill already, and repeating it directly underneath read as a
@@ -393,9 +393,8 @@
       foot.hidden = !cfg.footNote && !cta;
       foot.innerHTML =
         (cfg.footNote ? '<p class="cawx-foot-note">' + cfg.footNote + '</p>' : '<span></span>') +
-        (cta ? (cta.trial
-             ? '<span class="btn btn-light cawx-trial cawx-trial-disabled" aria-disabled="true">Free trial — coming soon</span>'
-             : '<a class="btn btn-light cawx-trial" href="' + esc(cta.href) + '">' + esc(cta.label) + ICON.arrow + '</a>')
+        (cta ? '<a class="btn btn-light cawx-trial" href="' + esc(cta.href) + '"' +
+               (cta.trial ? ' data-cawx-trial' : '') + '>' + esc(cta.label) + ICON.arrow + '</a>'
              : '');
     }
 
@@ -522,7 +521,7 @@
     Modal.show({
       eyebrow: 'For people', title: g.title, html: h, trackId: 'group:' + g.id,
       footNote: 'Course lists reflect the catalogue on ' + C.generated + '.',
-      cta: { label: 'Free trial — coming soon', href: '#', trial: true }
+      cta: { label: 'Request a free trial', href: '#', trial: true }
     }, trigger);
   }
 
@@ -547,7 +546,7 @@
     if (b.note) { h += '<p class="cawx-note">' + esc(b.note) + '</p>'; }
     Modal.show({
       eyebrow: 'For organisations', title: b.title, html: h, trackId: 'benefit:' + b.id,
-      cta: { label: 'Free trial — coming soon', href: '#', trial: true }
+      cta: { label: 'Request a free trial', href: '#', trial: true }
     }, trigger);
   }
 

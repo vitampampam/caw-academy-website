@@ -1,0 +1,17 @@
+CAW Academy website – hero image framing update (2026-10-28)
+
+Updated: index.html, style.css and screens/hero-jet-{768,1100,1448}.{jpg,webp}.
+
+The aircraft photograph has been reframed to use a little less sky and to
+retain extra natural-looking apron beneath the landing gear. The image
+now keeps the landing gear and wheel chock above the copy-card overlap
+on phones/tablets and on larger desktop layouts.
+
+Source/reference photos under screens/ were preserved. Other pages,
+assets and app/account/admin functions are unchanged.
+
+Upload all files in this archive together (the archive root is the site
+root), keeping screens/, photos/, images/, fonts/, admin/ and guide/.
+
+This package is based on the ZIP supplied in the chat, not on a new GitHub
+commit. No files were pushed to GitHub.
