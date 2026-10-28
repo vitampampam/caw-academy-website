@@ -3627,7 +3627,43 @@
     return row;
   }
 
-  function assignmentItem(a, isNextUp, selected, onToggle, progress) {
+  /* Hand a learner three fresh assessment sittings for one course.
+     THE GRANT IS A TIMESTAMP, not a count — the apps merge it into their own
+     `cycleStartedAt` max-wins, which is the rule that map already followed between
+     a learner's own devices, so an admin is simply one more writer. It reaches the
+     device on its next sync; nothing is pushed.
+     It does NOT clear their lessons: handing back a sitting is not asking someone
+     to re-read the course. Only the learner's own "Start again" does that. */
+  function grantCycle(a, email, btn) {
+    confirmDialog({
+      title: "Grant another set of attempts?",
+      lines: [
+        labelFor(a.courseKey) + " \u2014 " + (email || "this member") + ".",
+        "They get three fresh attempts at the assessment. Their lessons, certificates and exam history are not affected.",
+        "It reaches their device at the next sync."
+      ],
+      confirmLabel: "Grant attempts",
+      cancelLabel: "Cancel"
+    }).then(function (ok) {
+      if (!ok) return;
+      btn.disabled = true;
+      authed("POST", "/v1/admin/users/" + encodeURIComponent(email) + "/cycles",
+             { courseKey: a.courseKey })
+        .then(function () {
+          showMessage("rosterMsg",
+                      "Granted. " + (email || "The member") + " has three fresh attempts.", "ok");
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          showMessage("rosterMsg", err.message || "Couldn't grant that.", "err");
+        });
+    });
+  }
+
+  /* `memberEmail` is passed in rather than read off the assignment: an assignment
+     carries a userId and a courseKey, not an address, and the admin endpoints key on
+     email. Taking it from the member card that is drawing this row keeps one source. */
+  function assignmentItem(a, isNextUp, selected, onToggle, progress, memberEmail) {
     // `aitem-asg` grids the four cells (tick · course · pill · actions) so the
     // status pills line up down the list instead of each starting wherever the
     // course title before it happened to end. The plain `.aitem` used by the
@@ -3672,6 +3708,23 @@
       edit.addEventListener("click", function () { openEditor(li, a); });
       actions.appendChild(edit);
     }
+    /* GRANT ANOTHER ASSESSMENT CYCLE.
+       The assessment is capped at three sittings per cycle, so a learner who
+       spends them without passing is blocked, and the app tells them to speak to
+       their training manager. This is the training manager doing something about
+       it — without it the app's own instruction leads nowhere.
+       It is offered on every assigned course rather than only where the learner
+       is known to be stuck, because the portal CANNOT KNOW that: attempts live in
+       the learner's progress blob, which the server stores and does not read. An
+       admin asked for one by the person in front of them does not need the portal
+       to agree first. */
+    var cycle = document.createElement("button");
+    cycle.className = "btn-ghost"; cycle.type = "button";
+    cycle.textContent = "Grant attempts";
+    cycle.title = "Give this person three fresh assessment attempts for this course";
+    cycle.addEventListener("click", function () { grantCycle(a, memberEmail, cycle); });
+    actions.appendChild(cycle);
+
     var del = document.createElement("button");
     del.className = "btn-danger"; del.type = "button"; del.textContent = "Remove";
     del.addEventListener("click", function () { removeAssignment(a); });
@@ -4031,7 +4084,7 @@
       var byCourse = {};
       (m.progress || []).forEach(function (p) { byCourse[p.courseKey] = p; });
       m.assignments.forEach(function (a) {
-        ul.appendChild(assignmentItem(a, a.id === nextUpId, selected, refreshBulk, byCourse[a.courseKey]));
+        ul.appendChild(assignmentItem(a, a.id === nextUpId, selected, refreshBulk, byCourse[a.courseKey], m.email));
       });
       card.appendChild(bulk);
       card.appendChild(ul);
